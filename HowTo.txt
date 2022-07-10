@@ -1,0 +1,95 @@
+
+
+Define Area
+	Gets an ID
+	HotKey (F1-F12 1-12) to activate  (+12 Ctrl+Fx / +24 Alt+Fx)
+	Has 'vector' Left & Top - position
+	Has 'vector' Widht & Height - size
+	Has absolute Min's for Width 'n' Height (If too small - scroll-bars)
+	Has Amount of Tabs (if > 0)
+	Has IDs on Char Definitions for: Horizontal & Vertical Lines
+	Has IDs on Char Definitions for: each edge
+	Has IDs on Char Definitions for: Front/Back tab separations/spaces
+	Has IDs on Char Definitions for scroll-bars
+	Has ID on TextStyle for Background (and Tab separations)
+	Has ID on TextStyle for active / inactive Frame
+	Has ID on TextStyle for active / inactive scroll-bars
+	Has Option Scrollbar: Never/Always/Display on Frame
+	Auto calculate and saves to given screen
+		Left/Top/Width/Height - total used area
+		Left/Top/Width/Height - useable area for other elements
+		Front/Back length of tab separations/spaces
+		Too small Width/Height
+		Memory for written Lines (see fixed text definition)
+		Memory for written Tabs (see fixed text definition)
+	IF with FRAME
+		Draw FrameLines
+			Left == 1
+			Top == 2
+			Right == 4
+			Bottom == 8
+		Draw Edges
+			TopLeft == 1
+			TopRight == 2
+			BottomLeft == 4
+			BottomRight == 8
+
+
+	Define Fixed Text
+		Gets an ID
+		Has an ID on TextBufferType
+		Has an ID on Pos in TextBuffer
+		Has an ID on area
+		Has an ID on TextStyle
+		Vertical Align
+			On Frame == 0
+			1st Line == 1
+			2nd Line == 2
+			Pre Last Line == 3
+			Last Line == 4
+			Center == 5
+			Next == 6		(Area counts drawn Lines)
+			Next with Space (in front)
+		Horizontal Align
+			Left == 1
+			Left with Space == 2
+			Right == 3
+			Right with Space == 4
+			Center == 5
+			TabLeft == 6		(Area counts drawn Tabs)
+			TabRight == 7
+			TabCenter == 8
+
+
+	Define Menue
+		Gets an ID
+		Has IDs on TextBuffer
+			FrontText
+			Hotkey
+			BackText
+		Has an ID on area
+		Has an ID on Parent-Menue (if existant)
+		Has an ID on TextStyle (active / inactive)
+		Has an ID on TextStyle for Hotkeys (active / inactive / ALT pressed)
+		Has an ID on TextStyle for Brackets (active / inactive)
+		Has IDs on Chars for Front 'n' Back brackets (or NULL)
+		Vertical Align
+			On Frame == 0
+			1st Line == 1
+			2nd Line == 2
+			Pre Last Line == 3
+			Last Line == 4
+			Center == 5
+			Next == 6					(Area counts drawn Lines)
+			Next with Space == 7		(in front)
+			Next with Separator == 8	(in Front)
+		Horizontal Align
+			Left == 1
+			Left with Space == 2
+			Right == 3
+			Right with Space == 4
+			Center == 5
+			TabLeft == 6		(Area counts drawn Tabs)
+			TabRight == 7
+			TabCenter == 8
+

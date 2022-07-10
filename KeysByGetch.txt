@@ -1,0 +1,128 @@
+
+								-------------------------
+ID	shift/ctrl	key				0	1	2	3	4	5	6
+
+1				F1				27	79	(80)
+2				F2				27	79	(81)
+3				F3				27	79	(82)
+4				F4				27	79	(83)
+
+5				F5				27	91	49	(53)126
+
+7				F6				27	91	49	(55)126
+8				F7				27	91	49	(56)126
+9				F8				27	91	49	(57)126
+
+10				F9				27	91	50	(48)126
+11				F10				27	91	50	(49)126
+
+13				F11				27	91	50	(51)126
+14				F12				27	91	50	(52)126
+
+
+15		shift	F1				27	91	49	59	50	(80)
+16		shift	F2				27	91	49	59	50	(81)
+17		shift	F3				27	91	49	59	50	(82)
+18		shift	F4				27	91	49	59	50	(83)
+
+19		shift	F5				27	91	49	(53)59	50	126
+
+21		shift	F6				27	91	49	(55)59	50	126
+22		shift	F7				27	91	49	(56)59	50	126
+23		shift	F8				27	91	49	(57)59	50	126
+
+24		shift	F9				27	91	50	(48)59	50	126
+25		shift	F10				27	91	50	(49)59	50	126
+
+27		shift	F11				27	91	50	(51)59	50	126
+28		shift	F12				27	91	50	(52)59	50	126
+
+
+29		ctrl	F1				27	91	49	59	53	(80)
+30		ctrl	F2				27	91	49	59	53	(81)
+31		ctrl	F3				27	91	49	59	53	(82)
+32		ctrl	F4				27	91	49	59	53	(83)
+
+33		ctrl	F5				27	91	49	(53)59	53	126
+
+35		ctrl	F6				27	91	49	(55)59	53	126
+36		ctrl	F7				27	91	49	(56)59	53	126
+37		ctrl	F8				27	91	49	(57)59	53	126
+
+38		ctrl	F9				27	91	50	(48)59	53	126
+39		ctrl	F10				27	91	50	(49)59	53	126
+
+41		ctrl	F11				27	91	50	(51)59	53	126
+42		ctrl	F12				27	91	50	(52)59	53	126
+
+
+43				UP				27	91	(65)
+44				DOWN			27	91	(66)
+45				Right			27	91	(67)
+46				Left			27	91	(68)
+47				Center			27	91	(69)
+48				END				27	91	(70)
+
+50				Pos1			27	91	(72)
+
+51				Ins				27	91	(50)126
+52				Del				27	91	(51)126
+
+54				PgUp			27	91	(53)126
+55				PgDown			27	91	(54)126
+
+56		shift	UP				27	91	49	59	50	(65)
+57		shift	DOWN			27	91	49	59	50	(66)
+58		shift	RIGHT			27	91	49	59	50	(67)
+59		shift	LEFT			27	91	49	59	50	(68)
+
+61		shift	END				27	91	49	59	50	(70)
+63		shift	Pos1			27	91	49	59	50	(72)
+				
+64		ctrl	UP				27	91	49	59	53	(65)
+65		ctrl	DOWN			27	91	49	59	53	(66)
+66		ctrl	RIGHT			27	91	49	59	53	(67)
+67		ctrl	LEFT			27	91	49	59	53	(68)
+68		ctrl	Center			27	91	49	59	53	(69)
+69		ctrl	END				27	91	49	59	53	(70)
+
+71		ctrl	Pos1			27	91	49	59	53	(72)		
+
+72		alt		UP				27	91	49	59	50	(65)
+73		alt		DOWN			27	91	49	59	50	(66)
+74		alt		RIGHT			27	91	49	59	50	(67)
+75		alt		LEFT			27	91	49	59	50	(68)
+76		alt		Center			27	91	49	59	50	(69)
+77		alt		END				27	91	49	59	50	(70)
+
+79		alt		Pos1			27	91	49	59	50	(72)
+		
+80-105	alt		A-Z				27	97-122
+
+106				Back			127
+		
+107				Cursor			27	91	Yrow	59	Xcolumn	82
+
+108				UsrESC			27	(with an timeout)
+
+109				TermSize		27	91	Yrows	59	Xcolumns	116
+110				TermIconLabel	27	93	76	ABCtxt	27	92
+111				TermWinName		27	93	108	ABCtxt	27	92
+112				TermERR			27	91	unknown
+
+113				TAB				9
+114		shift	TAB				27	91	90
+
+115				ENTER			10(13)
+
+116				MouseDown		27	91	60	(id-0)	59	Yrow	59	Xcolumn	77
+117				MouseUp			27	91	60	(id-0)	59	Yrow	59	Xcolumn	109
+118				WheelDown		27	91	60	(id-1)	59	Yrow	59	Xcolumn	77
+119				WheelUp			27	91	60	(id-1)	59	Yrow	59	Xcolumn	109
+120				MouseMove		27	91	60	(id-35)	59	Yrow	59	Xcolumn	77
+121				MouseDownMove	27	91	60	(id-32)	59	Yrow	59	Xcolumn	77
+122				WheelDownMove	27	91	60	(id-33)	59	Yrow	59	Xcolumn	77
+123				ScrollUp		27	91	60	(id-64)	59	Yrow	59	Xcolumn	77
+124				ScrollDown		27	91	60	(id-65)	59	Yrow	59	Xcolumn	77
+125				UMO				27	91	60	Unknown Mouse Object	77 / 109
+
