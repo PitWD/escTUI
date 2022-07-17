@@ -64,7 +64,7 @@ typedef struct {
 	unsigned char framed			:1;
 	unsigned char encircled			:1;
 	unsigned char overline			:1;
-	unsigned char under_right		:1;		// CSI60m (Ideogram 'rareley supported')
+	unsigned char under_right		:1;		// CSI60m (Ideogram 'rarely supported')
 	unsigned char under_dbl			:1;		// CSI61m ( "    "    "   "   "     "  )
 	
 	unsigned char over_left			:1;		// CSI62m ( "    "    "   "   "     "  )
