@@ -274,8 +274,8 @@ int GetESC27 (int c){
 			// ESC came twice... probably not needed...
 			// BUT
 			// how to differ a single ESC from ESC - Sequences ??? 
-			// actually idea is to activate a Timer in Getch() calling loop after reveiving an ESC 
-			// if there's not a next char within a ~0.1s timout then it's a single ESC
+			// actually idea is to activate a Timer in Getch() calling loop after receiving an ESC 
+			// if there's not a next char within a ~0.1s timeout then it's a single ESC
 			
 			// THIS IS DEBUG/TESTING NONSENSE - first following ESC-Sequence get interpreted as UsrESC - and origin is lost to "regular" user input... 
 			
@@ -425,7 +425,7 @@ int GetESC27 (int c){
 			if (isByteMouse){
 				// Mouse in ByteMode...
 				// ByteMode is dangerous! XY-Positions > 223 may crash the Terminal ! 
-				// But ByteMode is ~ 1/3 of the data volume....
+				// But ByteMode has less than 40 of the data volume....
 				mousePosX = 0; mousePosY = 0;
 				if (streamInESC27[4]>32){
 					mousePosX = streamInESC27[4] - 32;
@@ -434,12 +434,10 @@ int GetESC27 (int c){
 					mousePosY = streamInESC27[5] - 32;
 				}
 				r = streamInESC27[3];
-				// Switch off Left&Right / Shift / Alt / Ctrl
-				//r &= ~((1 << 1 | (1 << 2) | (1 << 3) | (1 << 4));
+				// Switch off Shift / Alt / Ctrl
 				r &= ~((1 << 2) | (1 << 3) | (1 << 4));
 
-				switch (r)
-				{
+				switch (r){
 				case 32:
 					// LeftDown
 				case 34:
@@ -862,16 +860,28 @@ ID	shift/ctrl	key				0	1	2	3	4	5	6
 
 115				ENTER			10(13)
 
-116				MouseDown		27	91	60	(id-0)	59	Yrow	59	Xcolumn	77
-117				MouseUp			27	91	60	(id-0)	59	Yrow	59	Xcolumn	109
-118				WheelDown		27	91	60	(id-1)	59	Yrow	59	Xcolumn	77
-119				WheelUp			27	91	60	(id-1)	59	Yrow	59	Xcolumn	109
-120				MouseMove		27	91	60	(id-35)	59	Yrow	59	Xcolumn	77
-121				MouseDownMove	27	91	60	(id-32)	59	Yrow	59	Xcolumn	77
-122				WheelDownMove	27	91	60	(id-33)	59	Yrow	59	Xcolumn	77
-123				ScrollUp		27	91	60	(id-64)	59	Yrow	59	Xcolumn	77
-124				ScrollDown		27	91	60	(id-65)	59	Yrow	59	Xcolumn	77
+116				MouseDown		27	91	60	(id-0)	59	Xcolumn	59	Yrow	77
+117				MouseUp			27	91	60	(id-0)	59	Xcolumn	59	Yrow	109
+118				WheelDown		27	91	60	(id-1)	59	Xcolumn	59	Yrow	77
+119				WheelUp			27	91	60	(id-1)	59	Xcolumn	59	Yrow	109
+120				MouseMove		27	91	60	(id-35)	59	Xcolumn	59	Yrow	77
+121				MouseDownMove	27	91	60	(id-32)	59	Xcolumn	59	Yrow	77
+122				WheelDownMove	27	91	60	(id-33)	59	Xcolumn	59	Yrow	77
+123				ScrollUp		27	91	60	(id-64)	59	Xcolumn	59	Yrow	77
+124				ScrollDown		27	91	60	(id-65)	59	Xcolumn	59	Yrow	77
 125				UMO				27	91	60	Unknown Mouse Object	77 / 109
+
+Mouse in ByteMode (e.g. LX-Terminal)
+116				MouseDown		27	91	77	32/34	Xcolumn		Yrow
+117				MouseUp			27	91	77	35		Xcolumn		Yrow
+118				WheelDown		27	91	77	33		Xcolumn		Yrow
+119		NA 		Cause is same with MouseUp
+120				MouseMove		27	91	77	67		Xcolumn		Yrow
+121				MouseDownMove	27	91	77	64/66	Xcolumn		Yrow
+122				WheelDownMove	27	91	77	65		Xcolumn		Yrow
+123				ScrollUp		27	91	77	96		Xcolumn		Yrow
+124				ScrollDown		27	91	77	97		Xcolumn		Yrow
+125				UMO				27	91	77	UMO		Xcolumn		Yrow
 
 ++++++++Bytestream Structure to identify ESC27 sequences - see: int GetESC27(int)+++++++
 
