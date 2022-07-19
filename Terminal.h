@@ -359,6 +359,10 @@ int GetESC27 (int c){
 					// F1 - F4
 					r = c - 79;
 				}
+				else if (c == 49){
+					// Messed Up CSI in LX-Terminal for Shift/Ctrl F1-F4
+					isCSI = 1;
+				}
 			}
 			else if (streamInESC27[1] == 91){
 				if (c > 64 && c < 73 && c != 71){
@@ -377,7 +381,6 @@ int GetESC27 (int c){
 				else if (c == 77){
 					// Byte-Mouse Trapping Start
 					isByteMouse = 1;
-					// isCSI = 1;
 					return 0;
 				}
 				isCSI = 1;
