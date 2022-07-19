@@ -225,6 +225,7 @@ int GetESC27 (int c){
 	static _Bool isCSI = 0;
 	static _Bool isOSC = 0;
 	static _Bool isMouse = 0;
+	static _Bool isByteMouse = 0;
 	static _Bool allowTxt = 0;
 	static _Bool waitForEOT = 0;
 	static int numCnt = 0;
@@ -286,6 +287,7 @@ int GetESC27 (int c){
 		isCSI = 0;
 		isOSC = 0;
 	 	isMouse = 0;
+	 	isByteMouse = 0;
 		allowTxt = 0;
 		waitForEOT = 0;
 		streamPos = 0;
@@ -340,6 +342,7 @@ int GetESC27 (int c){
 	}
 	
 	if (!isMouse){
+		// Fixed Length 
 		switch (streamPos){
 		case 1:
 			if (c > 96 && c < 123){
@@ -369,6 +372,12 @@ int GetESC27 (int c){
 				else if (c == 60){
 					// Mouse Trapping Start
 					isMouse = 1;
+					return 0;
+				}
+				else if (c == 77){
+					// Byte-Mouse Trapping Start
+					isByteMouse = 1;
+					// isCSI = 1;
 					return 0;
 				}
 				isCSI = 1;
@@ -410,7 +419,68 @@ int GetESC27 (int c){
 			break;
 
 		case 5:
-			if (c > 79 && c < 84){
+			if (isByteMouse){
+				// Mouse in ByteMode...
+				// ByteMode is dangerous! XY-Positions > 223 may crash the Terminal ! 
+				// But ByteMode is ~ 1/3 of the data volume....
+				mousePosX = 0; mousePosY = 0;
+				if (streamInESC27[4]>32){
+					mousePosX = streamInESC27[4] - 32;
+				}
+				if (streamInESC27[5]>32){
+					mousePosY = streamInESC27[5] - 32;
+				}
+				r = streamInESC27[3];
+				// Switch off Left&Right / Shift / Alt / Ctrl
+				//r &= ~((1 << 1 | (1 << 2) | (1 << 3) | (1 << 4));
+				r &= ~((1 << 2) | (1 << 3) | (1 << 4));
+
+				switch (r)
+				{
+				case 32:
+					// LeftDown
+				case 34:
+					// RightDown
+					r = 116;
+					break;
+				case 35:
+					// Mouse Up (Wheel / Right / Left)
+					r = 117;
+					break;
+				case 33:
+					// WheelDown
+					r = 118;
+					break;
+				case 67:
+					// MouseMove - (All Keys Up)
+					r = 120;
+					break;
+				case 64:
+					// MouseMove LeftDown
+				case 66:
+					// MouseMove RightDown
+					r = 121;
+					break;
+				case 65:
+					// MouseMove WheelDown
+					r = 122;
+					break;
+				case 96:
+					// ScrollWheelUp
+					r = 123;
+					break;
+				case 97:
+					// ScrollWheelDown
+					r = 124;
+					break; 
+				default:
+					// Unknown Mouse
+					r = 125;
+					break;
+				}
+				isByteMouse = 0;
+			}
+			else if (c > 79 && c < 84){
 				// Shift OR Ctrl + F1 - F4
 				r = c - 65;
 				if (streamInESC27[4] == 53){
@@ -449,8 +519,11 @@ int GetESC27 (int c){
 		};
 	}
 	
-
-	if (r ){
+	if (isByteMouse){
+		return 0;
+	}
+	
+	if (r){
 		// Unknown OR valid OR flexible Sequence found
 		isValid = 0;
 		if (r == -1 && isCSI){
@@ -589,7 +662,7 @@ int GetESC27 (int c){
 	}
 	return r;
 
-	SaveGetESC27ErrReturn: isValid = 0; allowTxt = 0; isMouse = 0;	return r;
+	SaveGetESC27ErrReturn: isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; return r;
 
 }
 

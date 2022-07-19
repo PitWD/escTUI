@@ -102,17 +102,19 @@ void MonitorGetESC27(void){
 	// Loop Minimum
 		if (i > 0){
 	// Loop Minimum
+			/*
 			if(i == 32){
 				printf("\n");
 			}
+			
 			else{
-				
+			*/	
 				TxtItalic(1);
 				SetFg16(fgRed);
 				printf("%d", i);
 				TxtItalic(0);
 				SetFg16(0);
-				if (i > 32){// && i < 128){
+				if (i > 31){// && i < 128){
 					c = i;
 					printf(": %c",c);
 				}
@@ -134,7 +136,7 @@ void MonitorGetESC27(void){
 					printf("  : %s\t%s\n\n\n", KeyID2String[r], &streamInESC27[1]);
 					TxtBold(0);
 				}
-			}
+			// }
 	// Loop Minimum
 		}
 		usleep(100);
