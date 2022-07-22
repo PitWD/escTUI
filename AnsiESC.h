@@ -271,7 +271,10 @@ char *KeyID2String[] = {
 	"WheelDownMove",
 	"WheelScrollUp",
 	"WheelScrollDown",
-	"UnknownMouseObject"
+	"UnknownMouseObject",
+	"RMouseDown",
+	"RMouseDownMove",
+	"RMouseUp"
 };
 // Keys
 enum {

@@ -440,9 +440,11 @@ int GetESC27 (int c){
 				switch (r){
 				case 32:
 					// LeftDown
+					r = 116;
+					break;
 				case 34:
 					// RightDown
-					r = 116;
+					r = 126;
 					break;
 				case 35:
 					// Mouse Up (Wheel / Right / Left)
@@ -458,9 +460,11 @@ int GetESC27 (int c){
 					break;
 				case 64:
 					// MouseMove LeftDown
+					r = 121;
+					break;
 				case 66:
 					// MouseMove RightDown
-					r = 121;
+					r = 127;
 					break;
 				case 65:
 					// MouseMove WheelDown
@@ -584,6 +588,10 @@ int GetESC27 (int c){
 							// Move Button Pressed
 							r = 121;
 							break;
+						case 34:
+							// Move Right Button Pressed
+							r = 127;
+							break;
 						case 64:
 							// Wheel Scroll Up
 							r = 123;
@@ -595,6 +603,10 @@ int GetESC27 (int c){
 						case 0:
 							// Button Down
 							r = 116;
+							break;
+						case 2:
+							// Right Button Down
+							r = 126;
 							break;
 						case 1:
 							// Wheel Down
@@ -629,6 +641,10 @@ int GetESC27 (int c){
 						case 1:
 							// WheelUp
 							r = 119;
+							break;
+						case 2:
+							// Right Button Up
+							r = 128;
 							break;
 						default:
 							// UMO - Unknown Mouse Object
