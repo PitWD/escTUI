@@ -20,6 +20,13 @@
 
 <br>
 
+**004. ByteMouseBug X/Y greater 255*
+- The axis is deleted in terminal -> TUI communication
+- UsrESC - timeout can cover...
+- however add generic corrupt length (control by UsrESC-Timeout)
+
+<br>
+
 **00n. Numerate ESC Events an un-trashy way**  
 - *I'm reverse-engineering for... I don't know anymore*
 
