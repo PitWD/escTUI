@@ -20,9 +20,9 @@
 
 <br>
 
-**004. ByteMouseBug X/Y greater 255*
+**004. ByteMouseBug X/Y greater 255**
 - The axis is deleted in terminal -> TUI communication
-- UsrESC - timeout can cover...
+- UsrESC (but with StreamInESC-Len) -> SaveErrorReturn
 - however add generic corrupt length (control by UsrESC-Timeout)
 
 <br>

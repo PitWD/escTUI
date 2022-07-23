@@ -146,4 +146,6 @@ Added Right Mouse
 Added ShiftAlt A-Z
 129-155	ShiftAlt	a-z			27	65-90
 
-
+Error - Handling
+156				UsrEscLenErr
+157				LenErrTimeout
