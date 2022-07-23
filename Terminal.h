@@ -346,8 +346,12 @@ int GetESC27 (int c){
 		switch (streamPos){
 		case 1:
 			if (c > 96 && c < 123){
-				// Alt + A-Z
+				// Alt + a-z
 				r = c - 17;
+			}
+			if (c > 64 && c < 91){
+				// ShiftAlt + A-Z
+				r = c + 64;
 			}
 			else{
 				r = 0;
@@ -898,6 +902,15 @@ Mouse in ByteMode (e.g. LX-Terminal)
 123				ScrollUp		27	91	77	96		Xcolumn		Yrow
 124				ScrollDown		27	91	77	97		Xcolumn		Yrow
 125				UMO				27	91	77	UMO		Xcolumn		Yrow
+
+
+Added Right Mouse
+126				RMouseDown		27	91	77	34		Xcolumn		Yrow
+127				RMouseDownMove	27	91	77	66		Xcolumn		Yrow
+128				RMouseUp		27	91	77	66		Xcolumn		Yrow
+
+Added ShiftAlt A-Z
+129-155	ShiftAlt	a-z			27	65-90
 
 ++++++++Bytestream Structure to identify ESC27 sequences - see: int GetESC27(int)+++++++
 

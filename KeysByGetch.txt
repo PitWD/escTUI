@@ -97,7 +97,7 @@ ID	shift/ctrl	key				0	1	2	3	4	5	6
 
 79		alt		Pos1			27	91	49	59	50	(72)
 		
-80-105	alt		A-Z				27	97-122
+80-105	alt		a-z				27	97-122
 
 106				Back			127
 		
@@ -138,8 +138,12 @@ Mouse in ByteMode (e.g. LX-Terminal)
 124				ScrollDown		27	91	77	97		Xcolumn		Yrow
 125				UMO				27	91	77	UMO		Xcolumn		Yrow
 
+Added Right Mouse
 126				RMouseDown		27	91	77	34		Xcolumn		Yrow
 127				RMouseDownMove	27	91	77	66		Xcolumn		Yrow
 128				RMouseUp		27	91	77	66		Xcolumn		Yrow
+
+Added ShiftAlt A-Z
+129-155	ShiftAlt	a-z			27	65-90
 
 
