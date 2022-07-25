@@ -144,8 +144,8 @@ Added Right Mouse
 128				RMouseUp		27	91	77	66		Xcolumn		Yrow
 
 Added ShiftAlt A-Z
-129-155	ShiftAlt	a-z			27	65-90
+129-154	ShiftAlt	a-z			27	65-90
 
 Error - Handling
-156				UsrEscLenErr
-157				LenErrTimeout
+155				UsrEscLenErr
+156				ByteModePositionError

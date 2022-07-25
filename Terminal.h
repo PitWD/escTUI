@@ -279,8 +279,19 @@ int GetESC27 (int c){
 			
 			// THIS IS DEBUG/TESTING NONSENSE - first following ESC-Sequence get interpreted as UsrESC - and origin is lost to "regular" user input... 
 			
+			if (!streamPos)
+			{
+				// User ESC
 				isValid = 0;
 				return 108;
+			}
+			else
+			{
+				// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
+				r = 155;
+				goto SaveGetESC27ErrReturn;
+			}
+			
 		}
 		
 		isValid = 1;
@@ -434,9 +445,21 @@ int GetESC27 (int c){
 				if (streamInESC27[4]>32){
 					mousePosX = streamInESC27[4] - 32;
 				}
+				else{
+					// Mouse Out Of Range
+					r = 156;
+					goto SaveGetESC27ErrReturn;
+				}
+				
 				if (streamInESC27[5]>32){
 					mousePosY = streamInESC27[5] - 32;
 				}
+				else{
+					// Mouse Out Of Range
+					r = 156;
+					goto SaveGetESC27ErrReturn;
+				}
+				
 				r = streamInESC27[3];
 				// Switch off Shift / Alt / Ctrl
 				r &= ~((1 << 2) | (1 << 3) | (1 << 4));

@@ -300,7 +300,9 @@ char *KeyID2String[] = {
 	"ShiftAltW",
 	"ShiftAltX",
 	"ShiftAltY",
-	"ShiftAltZ"
+	"ShiftAltZ",
+	"UsrEscLenErr",
+	"ByteModePositionErr"
 };
 // Keys
 enum {

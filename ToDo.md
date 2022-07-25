@@ -21,9 +21,16 @@
 <br>
 
 **004. ByteMouseBug X/Y greater 255**
-- The axis is deleted in terminal -> TUI communication
-- UsrESC (but with StreamInESC-Len) -> SaveErrorReturn
-- however add generic corrupt length (control by UsrESC-Timeout)
+- ~~It starts, that the axis is deleted in terminal -> TUI communication~~  **fixed** (covered by UsrEscLenErr)  
+~~then it flips to ByteValues smaller 32  "01" & "02"~~ **fixed** (covered by ByteModePositionErr)  
+then after "some" of the following sequence it's a "???" what kills the app
+27: ESC  
+91: [  
+77: M  
+67: C  
+2  
+51: 3  
+  : ByteModePositionError	[MC3
 
 <br>
 
