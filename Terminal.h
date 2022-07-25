@@ -35,15 +35,17 @@ _Bool screenSizeInCursorPos = 0;
 // Keyboard
 int cursorPosX = 0;
 int cursorPosY = 0;
-int cursorSelX = 0;                     // 1st point (not TopLeft) of selection rectangle
+int cursorSelX = 0;                     // 1st point of selection rectangle
 int cursorSelY = 0;                     // or same as CursorPosX&Y = No selection
 _Bool cursorIsSelecting = 0;            // (Moving with Shift)
 
 // Mouse
 int mousePosX = 0;
 int mousePosY = 0;
-int mouseSelX = 0;                     // 1st point (not TopLeft) of selection rectangle
+int mouseSelX = 0;                     // 1st point of selection rectangle
 int mouseSelY = 0;                     // or same as MousePosX&Y = No selection
+int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
+
 _Bool mouseIsSelecting = 0;            // (Moving with MouseDown) 
 _Bool mouseClick = 0;
 _Bool mouseLngClick = 0;               // > 1sec between Down and Up on same Position (while not selecting)
@@ -468,18 +470,30 @@ int GetESC27 (int c){
 				case 32:
 					// LeftDown
 					r = 116;
+					mouseButton = 1;
+					mouseSelX = mousePosX; mouseSelY = mousePosY;
 					break;
 				case 34:
 					// RightDown
 					r = 126;
+					mouseButton = 4;
+					mouseSelX = mousePosX; mouseSelY = mousePosY;
 					break;
 				case 35:
 					// Mouse Up (Wheel / Right / Left)
+					if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+						// it's a click
+					}
+					else{
+						// it's an area
+					}
 					r = 117;
 					break;
 				case 33:
 					// WheelDown
 					r = 118;
+					mouseButton = 2;
+					mouseSelX = mousePosX; mouseSelY = mousePosY;
 					break;
 				case 67:
 					// MouseMove - (All Keys Up)
@@ -629,14 +643,20 @@ int GetESC27 (int c){
 							break;
 						case 0:
 							// Button Down
+							mouseButton = 1;
+							mouseSelX = mousePosX; mouseSelY = mousePosY;
 							r = 116;
 							break;
 						case 2:
 							// Right Button Down
+							mouseButton = 4;
+							mouseSelX = mousePosX; mouseSelY = mousePosY;
 							r = 126;
 							break;
 						case 1:
 							// Wheel Down
+							mouseButton = 2;
+							mouseSelX = mousePosX; mouseSelY = mousePosY;
 							r = 118;
 							break;
 						case 33:
@@ -660,6 +680,24 @@ int GetESC27 (int c){
 						// Switch off Shift / Alt / Ctrl
 						r &= ~((1 << 2) | (1 << 3) | (1 << 4));
 						
+						if (r < 3){
+							// Mouse Up (Wheel / Right / Left)
+							if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+								// it's a click
+							}
+							else{
+								// it's an area
+							}
+							r = 117;
+							break;
+						}
+						else{
+							// UMO - Unknown Mouse Object
+							r = 125;
+							break;
+						}
+						
+						/*
 						switch(r){
 						case 0:
 							// ButtonUp
@@ -678,6 +716,7 @@ int GetESC27 (int c){
 							r = 125;
 							break;
 						}
+						*/
 					}
 					break;
 				case 116:
