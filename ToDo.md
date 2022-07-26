@@ -2,21 +2,30 @@
 
 <br>
 
+**006. EVENT - HANDLER**
+- Mouse
+
+<br>
+
+**005. Constants for ESC & Mouse Timing**
+
+<br>
+
 **001. Separate BinaryMouse Up's OR equalize DecimalMouse Ups**
-- recognizer for active button
+- ~~recognizer for active button~~
 
 <br>
 
 **002. Click & DblClick**
-- recognizer/tracker for active down-button and position
-- 'use' UsrESC recognizer (follow 4 click) - *position*
-- 'use' UsrESC recognizer (timing 4 dblClick) - *position*
-- move from ESCsequence auto-disables click/dbClick
+- ~~recognizer/tracker for active down-button and position~~
+- ~~'use' UsrESC recognizer (follow 4 click) - *position*~~
+- ~~'use' UsrESC recognizer (timing 4 dblClick) - *position*~~
+- ~~move from ESCsequence auto-disables click/dbClick~~
 
 <br>
 
 **003. Mouse Selection**
-- Up isn't Down...
+- ~~Up isn't Down...~~
 
 <br>
 

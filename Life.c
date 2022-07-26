@@ -65,7 +65,12 @@ void MonitorGetESC27(void){
 
 	// Recognize manual ESC
 		_Bool isOnESC27 = 0;
-		clock_t timeExitOnESC27;
+		clock_t timeOnUsrEsc;
+	// Recognize Click & DblClick / Area-Selection
+		_Bool isOnClick = 0;
+		clock_t timeOnClick;
+		int posXonClick = 0;
+		int posYonClick = 0;
 
 
 	// Loop Minimum
@@ -75,18 +80,19 @@ void MonitorGetESC27(void){
 
 			// Recognize manual ESC
 			if (isOnESC27 && i < 1){
-				if (clock() > timeExitOnESC27){
+				if (clock() > timeOnUsrEsc){
 					// UsrESC
 					i = 27;
 				}
 			}
 			else if (i == 27){
 				isOnESC27 = 1;
-				timeExitOnESC27 = clock() + (0.005 * CLOCKS_PER_SEC);	// Timing interacts with Loop-Sleep...
+				timeOnUsrEsc = clock() + (0.005 * CLOCKS_PER_SEC);	// Timing interacts with Loop-Sleep...
 			}
 			else{
 				isOnESC27 = 0;
 			}
+
 			
 	// Loop Minimum
 
@@ -128,6 +134,32 @@ void MonitorGetESC27(void){
 				
 				// Loop Minimum
 					r = GetESC27(i);
+					switch (r){
+					case 117:
+						// Mouse UP (Left / Wheel / Right)
+						if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+							// it's a (dbl)click
+							if (isOnClick && clock() < timeOnClick){
+								// dblClick
+								isOnClick = 0;
+								printf("dblClick\n");
+							}
+							else{
+								// 1st Click
+								isOnClick = 1;
+								timeOnClick = clock() + (0.0125 * CLOCKS_PER_SEC);
+							}							
+						}
+						else{
+							// it's an area
+							isOnClick = 0;
+							printf("Area\n");
+						}
+						break;
+					default:
+						break;
+					}
+					
 				// Loop Minimum
 				
 				if (r > 0){
@@ -139,6 +171,14 @@ void MonitorGetESC27(void){
 			// }
 	// Loop Minimum
 		}
+
+		// Recognize Single Click
+		if (isOnClick && (clock() > timeOnClick)){
+			// click
+			isOnClick = 0;
+			printf("Click\n");
+		}
+
 		usleep(100);
 	}
 	// Loop Minimum
@@ -203,7 +243,7 @@ int main() {
 
 	// Recognize manual ESC
 	_Bool isOnESC27 = 0;
-	clock_t timeExitOnESC27;
+	clock_t timeOnUsrEsc;
 
 	do{
 		
@@ -211,14 +251,14 @@ int main() {
 
 		// Recognize manual ESC
 		if (isOnESC27 && i < 1){
-			if (clock() > timeExitOnESC27){
+			if (clock() > timeOnUsrEsc){
 				// UsrESC
 				i = 27;
 			}
 		}
 		else if (i == 27){
 			isOnESC27 = 1;
-			timeExitOnESC27 = clock() + (0.005 * CLOCKS_PER_SEC);	// Timing interacts with Loop-Sleep...
+			timeOnUsrEsc = clock() + (0.005 * CLOCKS_PER_SEC);	// Timing interacts with Loop-Sleep...
 		}
 		else{
 			isOnESC27 = 0;
