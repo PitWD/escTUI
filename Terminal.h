@@ -481,12 +481,6 @@ int GetESC27 (int c){
 					break;
 				case 35:
 					// Mouse Up (Wheel / Right / Left)
-					if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
-						// it's a click
-					}
-					else{
-						// it's an area
-					}
 					r = 117;
 					break;
 				case 33:
@@ -682,12 +676,6 @@ int GetESC27 (int c){
 						
 						if (r < 3){
 							// Mouse Up (Wheel / Right / Left)
-							if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
-								// it's a click
-							}
-							else{
-								// it's an area
-							}
 							r = 117;
 							break;
 						}
