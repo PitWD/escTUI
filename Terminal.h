@@ -38,6 +38,7 @@ int cursorPosY = 0;
 int cursorSelX = 0;                     // 1st point of selection rectangle
 int cursorSelY = 0;                     // or same as CursorPosX&Y = No selection
 _Bool cursorIsSelecting = 0;            // (Moving with Shift)
+clock_t userEscTimeout = 0.005 * CLOCKS_PER_SEC;
 
 // Mouse
 int mousePosX = 0;
@@ -45,11 +46,7 @@ int mousePosY = 0;
 int mouseSelX = 0;                     // 1st point of selection rectangle
 int mouseSelY = 0;                     // or same as MousePosX&Y = No selection
 int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
-
-_Bool mouseIsSelecting = 0;            // (Moving with MouseDown) 
-_Bool mouseClick = 0;
-_Bool mouseLngClick = 0;               // > 1sec between Down and Up on same Position (while not selecting)
-_Bool mouseDblClick = 0;
+clock_t mouseClickTimeout = 0.0125 * CLOCKS_PER_SEC;
 
 //ESC27 Reading
 _Bool isWaitingForESC27 = 0;

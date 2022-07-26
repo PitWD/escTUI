@@ -87,7 +87,7 @@ void MonitorGetESC27(void){
 			}
 			else if (i == 27){
 				isOnESC27 = 1;
-				timeOnUsrEsc = clock() + (0.005 * CLOCKS_PER_SEC);	// Timing interacts with Loop-Sleep...
+				timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
 			}
 			else{
 				isOnESC27 = 0;
@@ -147,7 +147,7 @@ void MonitorGetESC27(void){
 							else{
 								// 1st Click
 								isOnClick = 1;
-								timeOnClick = clock() + (0.0125 * CLOCKS_PER_SEC);
+								timeOnClick = clock() + mouseClickTimeout;
 							}							
 						}
 						else{
