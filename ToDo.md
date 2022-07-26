@@ -8,6 +8,7 @@
 <br>
 
 **005. Constants for ESC & Mouse Timing**
+- ~~done. but with Variables~~
 
 <br>
 
