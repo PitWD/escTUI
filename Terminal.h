@@ -270,22 +270,13 @@ int GetESC27 (int c){
 		}
 		
 		if (isValid){
-			// ESC came twice... probably not needed...
-			// BUT
-			// how to differ a single ESC from ESC - Sequences ??? 
-			// actually idea is to activate a Timer in Getch() calling loop after receiving an ESC 
-			// if there's not a next char within a ~0.1s timeout then it's a single ESC
-			
-			// THIS IS DEBUG/TESTING NONSENSE - first following ESC-Sequence get interpreted as UsrESC - and origin is lost to "regular" user input... 
-			
-			if (!streamPos)
-			{
+			// ESC came twice... p			
+			if (!streamPos){
 				// User ESC
 				isValid = 0;
 				return 108;
 			}
-			else
-			{
+			else{
 				// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
 				r = 155;
 				goto SaveGetESC27ErrReturn;
@@ -335,6 +326,7 @@ int GetESC27 (int c){
 					case 76:
 						// Window title
 						r = 110;
+						break;
 					case 108:
 						// Icon label
 						r = 111;
@@ -352,7 +344,7 @@ int GetESC27 (int c){
 	}
 	
 	if (!isMouse){
-		// Fixed Length 
+		// Fixed Length Sequences
 		switch (streamPos){
 		case 1:
 			if (c > 96 && c < 123){
@@ -439,13 +431,13 @@ int GetESC27 (int c){
 			if (isByteMouse){
 				// Mouse in ByteMode...
 				// ByteMode is dangerous! XY-Positions > 223 may crash the Terminal ! 
-				// But ByteMode has less than 40 of the data volume....
+				// But ByteMode has just ~40% of the data volume....
 				mousePosX = 0; mousePosY = 0;
 				if (streamInESC27[4]>32){
 					mousePosX = streamInESC27[4] - 32;
 				}
 				else{
-					// Mouse Out Of Range
+					// Mouse-X Out Of Range
 					r = 156;
 					goto SaveGetESC27ErrReturn;
 				}
@@ -454,7 +446,7 @@ int GetESC27 (int c){
 					mousePosY = streamInESC27[5] - 32;
 				}
 				else{
-					// Mouse Out Of Range
+					// Mouse-Y Out Of Range
 					r = 156;
 					goto SaveGetESC27ErrReturn;
 				}
@@ -513,7 +505,6 @@ int GetESC27 (int c){
 				default:
 					// Unknown Mouse
 					r = 125;
-					break;
 				}
 				isByteMouse = 0;
 			}
@@ -604,104 +595,77 @@ int GetESC27 (int c){
 					break;				
 				case 77:
 					// Mouse Move  /  Mouse Down / Wheel Down
-					if  (isMouse){
-						mousePosX = atoi(pNumPos[2]);
-						mousePosY = atoi(pNumPos[3]);
-						r = (atoi(pNumPos[1]));
-						// Switch off Shift / Alt / Ctrl
-						r &= ~((1 << 2) | (1 << 3) | (1 << 4));
-						
-						switch(r){
-						case 35:
-							// Move
-							r = 120;
-							break;
-						case 32:
-							// Move Button Pressed
-							r = 121;
-							break;
-						case 34:
-							// Move Right Button Pressed
-							r = 127;
-							break;
-						case 64:
-							// Wheel Scroll Up
-							r = 123;
-							break;
-						case 65:
-							// Wheel Scroll Down
-							r = 124;
-							break;
-						case 0:
-							// Button Down
-							mouseButton = 1;
-							mouseSelX = mousePosX; mouseSelY = mousePosY;
-							r = 116;
-							break;
-						case 2:
-							// Right Button Down
-							mouseButton = 4;
-							mouseSelX = mousePosX; mouseSelY = mousePosY;
-							r = 126;
-							break;
-						case 1:
-							// Wheel Down
-							mouseButton = 2;
-							mouseSelX = mousePosX; mouseSelY = mousePosY;
-							r = 118;
-							break;
-						case 33:
-							// Move Wheel Pressed
-							r = 122;
-							break;
-						default:
-							// UMO - Unknown Mouse Object
-							r = 125;
-							break;
-						}
-					}
-					break;
 				case 109:
 					// Mouse Up / Wheel Up
 					if  (isMouse){
 						mousePosX = atoi(pNumPos[2]);
 						mousePosY = atoi(pNumPos[3]);
 						r = (atoi(pNumPos[1]));
-
 						// Switch off Shift / Alt / Ctrl
 						r &= ~((1 << 2) | (1 << 3) | (1 << 4));
 						
-						if (r < 3){
-							// Mouse Up (Wheel / Right / Left)
-							r = 117;
-							break;
+						if (c == 77){
+							// Mouse Move  /  Mouse Down / Wheel Down
+							switch(r){
+							case 35:
+								// Move
+								r = 120;
+								break;
+							case 32:
+								// Move Button Pressed
+								r = 121;
+								break;
+							case 34:
+								// Move Right Button Pressed
+								r = 127;
+								break;
+							case 64:
+								// Wheel Scroll Up
+								r = 123;
+								break;
+							case 65:
+								// Wheel Scroll Down
+								r = 124;
+								break;
+							case 0:
+								// Button Down
+								mouseButton = 1;
+								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								r = 116;
+								break;
+							case 2:
+								// Right Button Down
+								mouseButton = 4;
+								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								r = 126;
+								break;
+							case 1:
+								// Wheel Down
+								mouseButton = 2;
+								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								r = 118;
+								break;
+							case 33:
+								// Move Wheel Pressed
+								r = 122;
+								break;
+							default:
+								// UMO - Unknown Mouse Object
+								r = 125;
+								break;
+							}
 						}
 						else{
-							// UMO - Unknown Mouse Object
-							r = 125;
-							break;
+							// Mouse Up / Wheel Up
+							if (r < 3){
+								// Mouse Up (Wheel / Right / Left)
+								r = 117;
+							}
+							else{
+								// UMO - Unknown Mouse Object
+								r = 125;
+							}
 						}
-						
-						/*
-						switch(r){
-						case 0:
-							// ButtonUp
-							r = 117;
-							break;
-						case 1:
-							// WheelUp
-							r = 119;
-							break;
-						case 2:
-							// Right Button Up
-							r = 128;
-							break;
-						default:
-							// UMO - Unknown Mouse Object
-							r = 125;
-							break;
-						}
-						*/
 					}
 					break;
 				case 116:
@@ -717,7 +681,6 @@ int GetESC27 (int c){
                     default:
                         // Unknown terminal sequence
 						r = 112;
-						break;
                     }
 					break;
 				default:
