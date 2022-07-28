@@ -748,6 +748,481 @@ int WaitForESC27(char *pStrExchange, float timeOut){
     }
 }
 
+int EventESC27 (int event){
+	
+	switch (event){
+	// F1 - F12
+	case 1:
+		// F1
+		break;
+	case 2:
+		// F2
+		break;
+	case 3:
+		// F3
+		break;
+	case 4:
+		// F4
+		break;
+	case 5:
+		// F5
+		break;
+	case 7:
+		// F6
+		break;
+	case 8:
+		// F7
+		break;
+	case 9:
+		// F8
+		break;
+	case 10:
+		// F9
+		break;
+	case 11:
+		// F10
+		break;
+	case 13:
+		// F11
+		break;
+	case 14:
+		// F11
+		break;
+
+	// Shift F1 - F12
+	case 15:
+		// F1
+		break;
+	case 16:
+		// F2
+		break;
+	case 17:
+		// F3
+		break;
+	case 18:
+		// F4
+		break;
+	case 19:
+		// F5
+		break;
+	case 21:
+		// F6
+		break;
+	case 22:
+		// F7
+		break;
+	case 23:
+		// F8
+		break;
+	case 24:
+		// F9
+		break;
+	case 25:
+		// F10
+		break;
+	case 27:
+		// F11
+		break;
+	case 28:
+		// F11
+		break;
+
+	// CTRL F1 - F12
+	case 29:
+		// F1
+		break;
+	case 30:
+		// F2
+		break;
+	case 31:
+		// F3
+		break;
+	case 32:
+		// F4
+		break;
+	case 33:
+		// F5
+		break;
+	case 35:
+		// F6
+		break;
+	case 36:
+		// F7
+		break;
+	case 37:
+		// F8
+		break;
+	case 38:
+		// F9
+		break;
+	case 39:
+		// F10
+		break;
+	case 41:
+		// F11
+		break;
+	case 42:
+		// F11
+		break;
+
+	// Navigation
+	case 43:
+		// Up
+		break;
+	case 44:
+		// Down
+		break;
+	case 45:
+		// Right
+		break;
+	case 46:
+		// Left
+		break;
+	case 47:
+		// Center
+		break;
+	case 48:
+		// End
+		break;
+	case 50:
+		// Pos1
+		break;
+	case 51:
+		// Ins
+		break;
+	case 52:
+		// Del
+		break;
+	case 54:
+		// PgUp
+		break;
+	case 55:
+		// PgDown
+		break;
+
+	// Shift Navigation
+	case 56:
+		// Up
+		break;
+	case 57:
+		// Down
+		break;
+	case 58:
+		// Right
+		break;
+	case 59:
+		// Left
+		break;
+	case 61:
+		// End
+		break;
+	case 63:
+		// Pos1
+		break;
+
+	// Ctrl Navigation
+	case 64:
+		// Up
+		break;
+	case 65:
+		// Down
+		break;
+	case 66:
+		// Right
+		break;
+	case 67:
+		// Left
+		break;
+	case 68:
+		// Center
+		break;
+	case 69:
+		// End
+		break;
+	case 71:
+		// Pos1
+		break;
+
+	// ALT Navigation
+	case 72:
+		// Up
+		break;
+	case 73:
+		// Down
+		break;
+	case 74:
+		// Right
+		break;
+	case 75:
+		// Left
+		break;
+	case 76:
+		// Center
+		break;
+	case 77:
+		// End
+		break;
+	case 79:
+		// Pos1
+		break;
+
+	// ALT-A - ALT-Z
+	case 80:
+		// A
+		break;
+	case 81:
+		// B
+		break;
+	case 82:
+		// C
+		break;
+	case 83:
+		// D
+		break;
+	case 84:
+		// E
+		break;
+	case 85:
+		// F
+		break;
+	case 86:
+		// G
+		break;
+	case 87:
+		// H
+		break;
+	case 88:
+		// I
+		break;
+	case 89:
+		// J
+		break;
+	case 90:
+		// K
+		break;
+	case 91:
+		// L
+		break;
+	case 92:
+		// M
+		break;
+	case 93:
+		// N
+		break;
+	case 94:
+		// O
+		break;
+	case 95:
+		// P
+		break;
+	case 96:
+		// Q
+		break;
+	case 97:
+		// R
+		break;
+	case 98:
+		// S
+		break;
+	case 99:
+		// T
+		break;
+	case 100:
+		// U
+		break;
+	case 101:
+		// V
+		break;
+	case 102:
+		// W
+		break;
+	case 103:
+		// X
+		break;
+	case 104:
+		// Y
+		break;
+	case 105:
+		// Z
+		break;
+
+	// ShiftALT-A - ShiftALT-Z
+	case 129:
+		// A
+		break;
+	case 130:
+		// B
+		break;
+	case 131:
+		// C
+		break;
+	case 132:
+		// D
+		break;
+	case 133:
+		// E
+		break;
+	case 134:
+		// F
+		break;
+	case 135:
+		// G
+		break;
+	case 136:
+		// H
+		break;
+	case 137:
+		// I
+		break;
+	case 138:
+		// J
+		break;
+	case 139:
+		// K
+		break;
+	case 140:
+		// L
+		break;
+	case 141:
+		// M
+		break;
+	case 142:
+		// N
+		break;
+	case 143:
+		// O
+		break;
+	case 144:
+		// P
+		break;
+	case 145:
+		// Q
+		break;
+	case 146:
+		// R
+		break;
+	case 147:
+		// S
+		break;
+	case 148:
+		// T
+		break;
+	case 149:
+		// U
+		break;
+	case 150:
+		// V
+		break;
+	case 151:
+		// W
+		break;
+	case 152:
+		// X
+		break;
+	case 153:
+		// Y
+		break;
+	case 154:
+		// Z
+		break;
+
+	// 'Single'-Keys
+	case 106:
+		// Back
+		break;
+	case 108:
+		// ESC
+		break;
+	case 113:
+		// TAB
+		break;
+	case 114:
+		// Shift-TAB
+		break;
+	case 115:
+		// ENTER
+		break;
+	
+	// Answers
+	case 107:
+		// Cursor Position
+		break;
+	case 109:
+		// Terminal Size
+		break;
+	case 110:
+		// Terminal Icon Label
+		break;
+	case 111:
+		// Terminal Name
+		break;
+
+	// Errors 
+	case 112:
+		// Terminal Error
+		break;
+	case 155:
+		// Len Err By Too Early Following ESC
+		break;
+	case 156:
+		// Position Overflow In Mouse Byte-Mode 
+		break;
+	case 125:
+		// Unknown Mouse Object
+		break;
+
+	// 1st Level (From GetESC27()) Mouse-Events
+	case 120:
+		// Mouse Move
+		break;
+	case 117:
+		// MouseUp
+		switch (mouseButton){
+		case 1:
+			// Left
+			break;
+		case 4:
+			// Right
+			break;
+		case 2:
+			// Wheel
+			break;
+		default:
+			// MultiKey (never seen in reality)
+			break;
+		}
+		break;
+	case 116:
+		// Left Mouse Down
+		break;
+	case 121:
+		// Left Down Mouse Move
+		break;
+	case 126:
+		// Right Mouse Down
+		break;
+	case 127:
+		// Right Down Mouse Move
+		break;
+	case 118:
+		// Wheel Mouse Down
+		break;
+	case 122:
+		// Wheel Down Mouse Move
+		break;
+	case 123:
+		// WheelScrollUp
+		break;
+	case 124:
+		// WheelScrollDown
+		break;
+
+	// 2nd Level (From Loop()) Mouse-Events
+	case 255:
+	default:
+		break;
+	}
+}
 
 /*
 										EOF - Detailed Description

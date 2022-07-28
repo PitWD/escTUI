@@ -118,7 +118,7 @@ ID	shift/ctrl	key				0	1	2	3	4	5	6
 116				MouseDown		27	91	60	(id-0)	59	Yrow	59	Xcolumn	77
 117				MouseUp			27	91	60	(id-0)	59	Yrow	59	Xcolumn	109
 118				WheelDown		27	91	60	(id-1)	59	Yrow	59	Xcolumn	77
-119				WheelUp			27	91	60	(id-1)	59	Yrow	59	Xcolumn	109
+119	(got 117)	WheelUp			27	91	60	(id-1)	59	Yrow	59	Xcolumn	109
 120				MouseMove		27	91	60	(id-35)	59	Yrow	59	Xcolumn	77
 121				MouseDownMove	27	91	60	(id-32)	59	Yrow	59	Xcolumn	77
 122				WheelDownMove	27	91	60	(id-33)	59	Yrow	59	Xcolumn	77
@@ -141,7 +141,7 @@ Mouse in ByteMode (e.g. LX-Terminal)
 Added Right Mouse
 126				RMouseDown		27	91	77	34		Xcolumn		Yrow
 127				RMouseDownMove	27	91	77	66		Xcolumn		Yrow
-128				RMouseUp		27	91	77	66		Xcolumn		Yrow
+128	(got 117)	RMouseUp		27	91	77	66		Xcolumn		Yrow
 
 Added ShiftAlt A-Z
 129-154	ShiftAlt	a-z			27	65-90
