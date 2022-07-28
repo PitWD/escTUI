@@ -1093,7 +1093,7 @@ int EventESC27 (int event){
 		// N
 		break;
 	case 143:
-		// O
+		// O - but is occupied by F1-F4
 		break;
 	case 144:
 		// P
@@ -1221,7 +1221,57 @@ int EventESC27 (int event){
 		break;
 
 	// 2nd Level (From Loop()) Mouse-Events
-	case 255:
+	case 192:
+		// Click
+		switch (mouseButton){
+		case 1:
+			// Left
+			break;
+		case 4:
+			// Right
+			break;
+		case 2:
+			// Wheel
+			break;
+		default:
+			// MultiKey (never seen in reality)
+			break;
+		}
+		break;
+	case 193:
+		// DblClick
+		switch (mouseButton){
+		case 1:
+			// Left
+			break;
+		case 4:
+			// Right
+			break;
+		case 2:
+			// Wheel
+			break;
+		default:
+			// MultiKey (never seen in reality)
+			break;
+		}
+		break;
+	case 194:
+		// Area
+		switch (mouseButton){
+		case 1:
+			// Left
+			break;
+		case 4:
+			// Right
+			break;
+		case 2:
+			// Wheel
+			break;
+		default:
+			// MultiKey (never seen in reality)
+			break;
+		}
+		break;
 	default:
 		break;
 	}

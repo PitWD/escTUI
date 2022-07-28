@@ -133,14 +133,22 @@ void MonitorGetESC27(void){
 				printf("\n");
 				
 				// Loop Minimum
+				
 					r = GetESC27(i);
 					switch (r){
+					case 0:
+						// Nothing
+						break;
+					case -1:
+						// Regular Key - No ESC-Sequence related stuff
+						break;
 					case 117:
 						// Mouse UP (Left / Wheel / Right)
 						if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
 							// it's a (dbl)click
 							if (isOnClick && clock() < timeOnClick){
 								// dblClick
+								EventESC27(193);
 								isOnClick = 0;
 								printf("dblClick\n");
 							}
@@ -152,14 +160,22 @@ void MonitorGetESC27(void){
 						}
 						else{
 							// it's an area
+							EventESC27(194);
 							isOnClick = 0;
 							printf("Area\n");
 						}
 						break;
+					case -2:
+						// Unknown Termination Char
+					case -4:
+						// Overflow, Too Long
+					case -5:
+						// Unexpected End Of Text
+						break;
 					default:
+						EventESC27(r);
 						break;
 					}
-					
 				// Loop Minimum
 				
 				if (r > 0){
@@ -175,6 +191,7 @@ void MonitorGetESC27(void){
 		// Recognize Single Click
 		if (isOnClick && (clock() > timeOnClick)){
 			// click
+			EventESC27(192);
 			isOnClick = 0;
 			printf("Click\n");
 		}

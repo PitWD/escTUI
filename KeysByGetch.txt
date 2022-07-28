@@ -151,3 +151,8 @@ Error - Handling
 156				ByteModePositionError
 
 157		Alt		Back			27	127
+
+2nd Level MouseEvents
+192				Click
+193				DblClick
+194				Area
