@@ -352,11 +352,13 @@ int GetESC27 (int c){
 				// Alt + a-z
 				r = c - 17;
 			}
-			if (c > 64 && c < 91){
+			else if (c > 64 && c < 79 || c > 79 && c < 91){
 				// ShiftAlt + A-Z
+				// Except ShiftAlt + O, cause it's occupied by F1-F4
 				r = c + 64;
 			}
 			else{
+				// Waiting for more...
 				r = 0;
 			}
 			

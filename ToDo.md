@@ -3,12 +3,13 @@
 <br>
 
 **007. Add "Alt-Back"**
+- ~~done~~ 
 
 <br>
 
 **006. EVENT - HANDLER**
-- Mouse
-- Keys
+- Mouse - almost done
+- Keys - almost done
 
 <br>
 
@@ -42,7 +43,7 @@ then after "some" of the following sequence it's a "???" what kills the app
 27: ESC  
 91: [  
 77: M  
-67: C  
+67: C   
 2  
 51: 3  
   : ByteModePositionError	[MC3

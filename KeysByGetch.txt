@@ -97,7 +97,7 @@ ID	shift/ctrl	key				0	1	2	3	4	5	6
 
 79		alt		Pos1			27	91	49	59	50	(72)
 		
-80-105	alt		a-z				27	97-122
+80-105	alt		a-z				27	97-122		
 
 106				Back			127
 		
@@ -143,8 +143,8 @@ Added Right Mouse
 127				RMouseDownMove	27	91	77	66		Xcolumn		Yrow
 128	(got 117)	RMouseUp		27	91	77	66		Xcolumn		Yrow
 
-Added ShiftAlt A-Z
-129-154	ShiftAlt	a-z			27	65-90
+Added ShiftAlt 		A-Z
+129-154	ShiftAlt	a-z			27	65-90		Except ShiftAlt + O, cause it's occupied by F1-F4
 
 Error - Handling
 155				UsrEscLenErr
