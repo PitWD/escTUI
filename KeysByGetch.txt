@@ -149,3 +149,5 @@ Added ShiftAlt A-Z
 Error - Handling
 155				UsrEscLenErr
 156				ByteModePositionError
+
+157		Alt		Back			27	127

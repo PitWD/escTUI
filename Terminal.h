@@ -242,21 +242,22 @@ int GetESC27 (int c){
 
 	if (c == 127){
 		// Back
-		isValid = 0;
-		streamInESC27[1] = 0;
 		r = 106;
+		if (isValid){
+			// Alt-Back
+			r += 51;
+		}
+		streamInESC27[1] = 0;
 		goto SaveGetESC27ErrReturn;
 	}
 	else if (c == 9){
 		// TAB
-		isValid = 0;
 		streamInESC27[1] = 0;
 		r = 113;
 		goto SaveGetESC27ErrReturn;
 	}
 	else if (c == 10 || c == 13){
 		// ENTER
-		isValid = 0;
 		streamInESC27[1] = 0;
 		r = 115;
 		goto SaveGetESC27ErrReturn;
