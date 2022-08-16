@@ -370,7 +370,6 @@ void GetCursorPos(void){
 	printf("%s6n", CSI);
 }
 
-
 // Partial CLS
 void ClrScrL(void) {
 	// Cls from cursor to Upper Left
@@ -399,7 +398,7 @@ void ClrLineR(void) {
 }
 
 
-// Mouse
+// Trap Mouse (On / Off)
 void TrapMouse(_Bool set){
 
 	char c = 'l';
@@ -411,7 +410,7 @@ void TrapMouse(_Bool set){
 }
 
 
-//24 bit Color
+// Set 24 bit Color
 void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
 
 	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
@@ -443,7 +442,7 @@ void SetFBUrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned
 	printf("%s38;2;%d;%d;%d;48;2;%d;%d;%d;58;2;%d;%d;%dm", CSI, fgR, fgG, fgB, bgR, bgG, bgB, ulR, ulG, ulB);
 }
 
-//256 Colors
+// Set 256 Colors
 void SetFg255(unsigned char c) {
 
 	ActTxtColor.fg.R = c; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
@@ -472,7 +471,7 @@ void SetFBU255(unsigned char fg, unsigned char bg, unsigned char ul) {
 	printf("%s38;5;%d;48;5;%d;58;5;%dm", CSI, fg, bg, ul);
 }
 
-//16 Colors
+//Set 16 Colors
 void SetFg16(unsigned char c) {
 
 	ActTxtColor.fg.R = c; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
@@ -490,7 +489,7 @@ void SetFB16(unsigned char fg, unsigned char bg) {
 	printf("%s%d;%dm", CSI, fg, bg);
 }
 
-// Reset To Default Color
+// Reset To Default Colors
 void ResFg(void) {
 
 	ActTxtColor.fg.R = 39; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
@@ -503,8 +502,8 @@ void ResBg(void) {
 }
 void ResUl(void) {
 
-	ActTxtColor.bg.R = 59; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s49m", CSI);
+	ActTxtColor.ul.R = 59; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
+	printf("%s59m", CSI);
 }
 void ResFB(void) {
 
@@ -519,7 +518,7 @@ void ResFBU(void) {
 	printf("%s39;49;59m", CSI);
 }
 
-// TXT Styles
+// TXT Styles - single commands
 void TxtBold(unsigned char set) {
 
 	ActTxtStyle.bold = set;
@@ -901,6 +900,7 @@ void TxtFont(unsigned char fnt) {
 	printf("%s%dm", CSI, fnt);
 }
 
+// TXT Style - combined from Structure
 void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, _Bool set) {
 
 	// set == False -> Reset all to default

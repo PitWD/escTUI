@@ -38,6 +38,7 @@ struct LifeSTRUCT {
 
 char cmdESC27[ESC27_EXCHANGE_SIZE];
 
+
 void MonitorGetESC27(void){
 
 	int i = 0;
@@ -186,6 +187,131 @@ void MonitorGetESC27(void){
 				}
 			// }
 	// Loop Minimum
+		}
+
+		// Recognize Single Click
+		if (isOnClick && (clock() > timeOnClick)){
+			// click
+			EventESC27(192);
+			isOnClick = 0;
+			printf("Click\n");
+		}
+
+		usleep(100);
+	}
+	// Loop Minimum
+
+	// Reset Mouse	
+	TrapMouse(0);
+
+	// Reset old Terminal Settings
+	#ifdef __unix__
+		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
+	#endif
+}
+
+void MonitorGetESC27II(void){
+
+	int i = 0;
+	int r = 0;
+	char c = 0;
+
+
+	ClearScreen();
+
+	TrapMouse(1);
+
+	// ScreenSize
+	// printf("%s18t", CSI);
+	r = WaitForESC27("\x1B[18t",0.2);
+
+
+	// Loop Minimum
+
+	// Recognize manual ESC
+	_Bool isOnESC27 = 0;
+	clock_t timeOnUsrEsc;
+	// Recognize Click & DblClick / Area-Selection
+	_Bool isOnClick = 0;
+	clock_t timeOnClick;
+
+	while (i != 10 && i != 13){
+		
+		i = getch();
+
+		// Recognize manual ESC
+		if (isOnESC27 && i < 1){
+			if (clock() > timeOnUsrEsc){
+				// UsrESC
+				i = 27;
+			}
+		}
+		else if (i == 27){
+			isOnESC27 = 1;
+			timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
+		}
+		else{
+			isOnESC27 = 0;
+		}
+			
+	// Loop Minimum
+
+	// Loop Minimum
+
+		if (i > 0){
+				
+			r = GetESC27(i);
+
+			switch (r){
+			case 0:
+				// Nothing
+				break;
+			case -1:
+				// Regular Key - No ESC-Sequence related stuff
+				break;
+			case 117:
+				// Mouse UP (Left / Wheel / Right)
+				if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+					// it's a (dbl)click
+					if (isOnClick && clock() < timeOnClick){
+						// dblClick
+						EventESC27(193);
+						isOnClick = 0;
+						printf("dblClick\n");
+					}
+					else{
+						// 1st Click
+						isOnClick = 1;
+						timeOnClick = clock() + mouseClickTimeout;
+					}							
+				}
+				else{
+					// it's an area
+					EventESC27(194);
+					isOnClick = 0;
+					printf("Area\n");
+				}
+				break;
+			case 109:
+				// Terminal-Size
+				if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
+					// Terminal Size changed... (Event)
+					screenHeightPrev = screenHeight;
+					screenWidthPrev = screenWidth;
+					EventESC27(195);
+				}
+				break;
+			case -2:
+				// Unknown Termination Char
+			case -4:
+				// Overflow, Too Long
+			case -5:
+				// Unexpected End Of Text
+				break;
+			default:
+				EventESC27(r);
+				break;
+			}
 		}
 
 		// Recognize Single Click

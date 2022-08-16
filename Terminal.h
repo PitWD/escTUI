@@ -30,6 +30,8 @@ unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
 // Screen
 int screenWidth = 0;
 int screenHeight = 0;
+int screenWidthPrev = 0;
+int screenHeightPrev = 0;
 _Bool screenSizeInCursorPos = 0;
 
 // Keyboard
@@ -152,7 +154,7 @@ void GetTerminalSize(void){
 
             // Placing Cursor outside Screen places Cursor on real LowerRight
             printf("\x1B[9999,9999H"); 
-            // DSR (Devive Status Report - Get Cursor Position) 
+            // DSR (Device Status Report - Get Cursor Position) 
             printf("\x1B[6n");
 
         #else
@@ -190,6 +192,7 @@ void GetTerminalSize(void){
                 //Missing
         #endif
     #endif
+
 }
 
 
@@ -588,13 +591,14 @@ int GetESC27 (int c){
 					// Actual Cursor Position
 					cursorPosY = atoi(pNumPos[1]);
 					cursorPosX = atoi(pNumPos[2]);
+					r = 107;
 					if (screenSizeInCursorPos){
 						/* code */
 						screenWidth = cursorPosX;
 						screenHeight = cursorPosY;
 						screenSizeInCursorPos = 0;
+						r = 109;
 					}
-					r = 107;
 					break;				
 				case 77:
 					// Mouse Move  /  Mouse Down / Wheel Down
@@ -1271,6 +1275,9 @@ int EventESC27 (int event){
 			// MultiKey (never seen in reality)
 			break;
 		}
+		break;
+	case 195:
+		// Terminal-Size Changed
 		break;
 	default:
 		break;
