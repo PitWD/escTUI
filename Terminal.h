@@ -1186,6 +1186,14 @@ int EventESC27 (int event){
 		// Unknown Mouse Object
 		break;
 
+	// Terminal GotFocus / LostFocus
+	case 158:
+		// Got
+		break;
+	case 159:
+		// Lost
+		break;
+
 	// 1st Level (From GetESC27()) Mouse-Events
 	case 120:
 		// Mouse Move
