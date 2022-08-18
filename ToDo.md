@@ -17,12 +17,14 @@
 <br>
 
 **008. Add TerminalSizeChangeEVENT**
-- Is there anything possible, better than just polling the Screen?  
+- ~~Is there anything possible, better than just polling the Screen?  
 Ok ! We could put the processing on the HMI-Terminal, but not on the µCs! µCs just get the Event via a regular ESC-Screensize-Command after Terminal recognized it...  
-µCs must be able to do, too! Otherwise we lose the "just a Terminal-Option" (without any kind of Win/Mac/Linux binaries)
-- MouseXY > ScreenXY is a nice indicator...
-- FocusIn/FocusOut (see 011.) is a nice indicator...
-- HAVE AN EYE on Minimize - Effects... *take care on different Terminals*   
+µCs must be able to do, too! Otherwise we lose the "just a Terminal-Option" (without any kind of Win/Mac/Linux binaries)~~
+- ~~MouseXY > ScreenXY is a nice indicator...~~
+- ~~FocusIn/FocusOut (see 011.) is a nice indicator...~~
+- ~~HAVE AN EYE on Minimize - Effects... *take care on different Terminals*~~  
+**Send GetTerminalSize after GotFocus was the simple solution**
+- done
 
 <br>
 

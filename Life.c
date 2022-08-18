@@ -166,6 +166,20 @@ void MonitorGetESC27(void){
 							printf("Area\n");
 						}
 						break;
+					case 109:
+						// Terminal-Size
+						if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
+							// Terminal Size changed... (Event)
+							screenHeightPrev = screenHeight;
+							screenWidthPrev = screenWidth;
+							EventESC27(195);
+						}
+						break;
+					case 158:
+						// GotFocus
+						GetTerminalSize();
+						EventESC27(158);
+						break;
 					case -2:
 						// Unknown Termination Char
 					case -4:
@@ -183,9 +197,10 @@ void MonitorGetESC27(void){
 					isOnESC27 = 0;
 					TxtBold(1);
 					printf("  : %s\t%s\n\n\n", KeyID2String[r], &streamInESC27[1]);
-					TxtBold(0);
+					TxtBold(0);					
 				}
 			// }
+
 	// Loop Minimum
 		}
 
@@ -259,7 +274,7 @@ void MonitorGetESC27II(void){
 	// Loop Minimum
 
 		if (i > 0){
-				
+
 			r = GetESC27(i);
 
 			switch (r){
@@ -300,6 +315,11 @@ void MonitorGetESC27II(void){
 					screenWidthPrev = screenWidth;
 					EventESC27(195);
 				}
+				break;
+			case 158:
+				// GotFocus
+				GetTerminalSize();
+				EventESC27(158);
 				break;
 			case -2:
 				// Unknown Termination Char
@@ -366,7 +386,7 @@ int main() {
 	const BD_lAUL = "╯";		// \x256F	LIGHT ARC UP AND LEFT
 	const BD_lAUR = "╰";		// \x2570	LIGHT ARC UP AND RIGHT
 	*/
-	
+
 	printf("\u2500");
 	printf("%s\n", "╮");
 	printf("╰");

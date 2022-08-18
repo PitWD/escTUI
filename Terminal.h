@@ -10,8 +10,8 @@ const char TerminalVersion [] = "1.00pa";
 #include <stdlib.h>
 #include <time.h>
 
-#define ESC_CLRSCR 0
-#define ESC_SCREENSIZE 0
+#define ESC_CLRSCR 1
+#define ESC_SCREENSIZE 1
 #define ESC_SCREENSIZE_LEGACY 0
 
 #define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
@@ -142,12 +142,11 @@ int main(void) {
 
 void GetTerminalSize(void){
 
-    /* LINUX / UNIX */
     #if ESC_SCREENSIZE
 
         screenWidth = 0;
         screenHeight = 0;
-        #ifdef ESC_SCREENSIZE_LEGACY
+        #if ESC_SCREENSIZE_LEGACY
 
             // Poll for 'CSIy;xR' - see AnsiESC.h
             screenSizeInCursorPos = 1;
@@ -166,6 +165,7 @@ void GetTerminalSize(void){
 
     #else
 
+	    /* LINUX / UNIX */
         #ifdef __unix__
         
             struct winsize w;
@@ -181,18 +181,8 @@ void GetTerminalSize(void){
             screenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
             screenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
 
-        /* ESC */
-        #else
-
-            /* !!! Not finished nor tested !!!
-            Poll for 'CSIy;xR' - is missing */
-
-
-            
-                //Missing
         #endif
     #endif
-
 }
 
 
