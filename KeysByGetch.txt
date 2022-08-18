@@ -152,6 +152,9 @@ Error - Handling
 
 157		Alt		Back			27	127
 
+158				Get Focus		27	91	73
+159				Lost Focus		27	91	79
+
 2nd Level MouseEvents
 192				Click
 193				DblClick

@@ -303,7 +303,9 @@ char *KeyID2String[] = {
 	"ShiftAltZ",
 	"UsrEscLenErr",
 	"ByteModePositionErr",
-	"AltBack"
+	"AltBack",
+	"GotFocus",
+	"LostFocus"
 };
 // Keys
 enum {
@@ -406,7 +408,7 @@ void TrapMouse(_Bool set){
 		c = 'h';
 	}
 	// Any Event (?1003) / Decimal Values (?1006)
-	printf("%s?1003%c%s?1006%c", CSI, c, CSI, c);
+	printf("%s?1003%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
 }
 
 

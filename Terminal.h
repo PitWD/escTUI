@@ -395,6 +395,14 @@ int GetESC27 (int c){
 					isByteMouse = 1;
 					return 0;
 				}
+				else if (c == 73){
+					// GotFocus
+					r = 158;
+				}
+				else if (c == 79){
+					// LostFocus
+					r = 159;
+				}
 				isCSI = 1;
 			}
 			else if (streamInESC27[1] == 93){

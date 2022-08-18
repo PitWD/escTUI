@@ -3,7 +3,8 @@
 <br>
 
 **011. ADD FocusIn / FocusOut**
-- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Any-event-tracking
+- ~~https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Any-event-tracking~~
+- done
 
 <br>
 
