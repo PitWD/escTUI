@@ -9,10 +9,12 @@
 <br>
 
 **010. Missing enumerations -- Key-IDs**
+- But who knows if I ever use them ?!?
 
 <br>
 
 **009. ClearLine & ClearPartial -- FromTo**
+- done
 
 <br>
 

@@ -372,7 +372,44 @@ void GetCursorPos(void){
 	printf("%s6n", CSI);
 }
 
-// Partial CLS
+// Clear Screens
+void ClrScrA(int xS, int yS, int xE, int yE){
+	// Area CLS from Start(xS/Ys) to End(xE/yE)
+	
+	if (yS == yE){
+		// just one Line
+		Locate(xS, yS);
+		ClrLineA(xS, xE);
+	}
+	else{
+		int x = 0;
+		int y = 0;
+		int i = 0;
+
+		// Normalize  
+		if (xS > xE){
+			x = xS;
+			xS = xE;
+			xE = x;
+		}
+		if (yS > yE){
+			y = yS;
+			yS = yE;
+			yE = y;
+		}
+		//Area Width / Height
+		x = xE - xS + 1;
+		y = yE - yS + 1;
+
+		// Reset all colors
+		ResFBU();
+
+		for (i = 0; i < y; i++){
+			Locate(xS, yS + i);
+			printf("%*s", x, "");
+		}
+	}
+}
 void ClrScrL(void) {
 	// Cls from cursor to Upper Left
 	printf("%s1J", CSI);
@@ -384,7 +421,25 @@ void ClrScrR(void) {
 }
 
 
-// Clear Line
+// Clear Lines
+void ClrLineA(int xS, int xE){
+	// ClearLine from Start(xS) to End(xE)
+
+	int x = 0;
+
+	// Normalize  
+	if (xS > xE){
+		x = xS;
+		xS = xE;
+		xE = x;
+	}
+	// Line Width
+	x = xE - xS + 1;
+
+	ResFBU();
+	LocateX(xS);
+	printf("%*s", x, "");
+}
 void ClrLine(void) {
 	// ClearLine
 	printf("%s2K", CSI);
@@ -399,7 +454,6 @@ void ClrLineR(void) {
 	// printf("%s0K", CSI);	// The '0' isn't needed.
 }
 
-
 // Trap Mouse (On / Off)
 void TrapMouse(_Bool set){
 
@@ -407,8 +461,9 @@ void TrapMouse(_Bool set){
 	if (set){
 		c = 'h';
 	}
-	// Any Event (?1003) / Decimal Values (?1006)
-	printf("%s?1003%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
+	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
+	// 1002 instead of 1003 reports position only if Mouse Button is pressed
+	printf("%s?1002%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
 }
 
 
