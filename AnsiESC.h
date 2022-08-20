@@ -93,6 +93,7 @@ char OSC[] = "\x1B]";
 TxtStyleSTRUCT ActTxtStyle;
 TxtColorSTRUCT ActTxtColor;
 
+void ResFBU(void);
 
 void InitEscSeq(void) {
 
@@ -307,6 +308,7 @@ char *KeyID2String[] = {
 	"GotFocus",
 	"LostFocus"
 };
+
 // Keys
 enum {
 	keyF1 = 1, keyF2, keyF3, keyF4, keyF5, keyF6 = 7, keyF7, keyF8, keyF9, keyF10, keyF11 = 13, keyF12
@@ -342,7 +344,7 @@ enum{trmScrSize = 109, trmIconLabel, trmWinTitle, trmERR
 */
 
 
-// Cursor Position
+// Cursor Positions
 void Locate(int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
 	printf("%s%d;%dH", CSI, y, x);
@@ -370,6 +372,39 @@ void CursorLeft(int x) {
 }
 void GetCursorPos(void){
 	printf("%s6n", CSI);
+}
+
+// Clear Lines
+void ClrLineA(int xS, int xE){
+	// ClearLine from Start(xS) to End(xE)
+
+	int x = 0;
+
+	// Normalize  
+	if (xS > xE){
+		x = xS;
+		xS = xE;
+		xE = x;
+	}
+	// Line Width
+	x = xE - xS + 1;
+
+	ResFBU();
+	LocateX(xS);
+	printf("%*s", x, "");
+}
+void ClrLine(void) {
+	// ClearLine
+	printf("%s2K", CSI);
+}
+void ClrLineL(void) {
+	// ClearLine from cursor to Left
+	printf("%s1K", CSI);
+}
+void ClrLineR(void) {
+	// ClearLine from cursor to Right
+	printf("%sK", CSI);
+	// printf("%s0K", CSI);	// The '0' isn't needed.
 }
 
 // Clear Screens
@@ -420,40 +455,6 @@ void ClrScrR(void) {
 	// printf("%s0J", CSI);	// The '0' isn't needed.
 }
 
-
-// Clear Lines
-void ClrLineA(int xS, int xE){
-	// ClearLine from Start(xS) to End(xE)
-
-	int x = 0;
-
-	// Normalize  
-	if (xS > xE){
-		x = xS;
-		xS = xE;
-		xE = x;
-	}
-	// Line Width
-	x = xE - xS + 1;
-
-	ResFBU();
-	LocateX(xS);
-	printf("%*s", x, "");
-}
-void ClrLine(void) {
-	// ClearLine
-	printf("%s2K", CSI);
-}
-void ClrLineL(void) {
-	// ClearLine from cursor to Left
-	printf("%s1K", CSI);
-}
-void ClrLineR(void) {
-	// ClearLine from cursor to Right
-	printf("%sK", CSI);
-	// printf("%s0K", CSI);	// The '0' isn't needed.
-}
-
 // Trap Mouse (On / Off)
 void TrapMouse(_Bool set){
 
@@ -465,7 +466,6 @@ void TrapMouse(_Bool set){
 	// 1002 instead of 1003 reports position only if Mouse Button is pressed
 	printf("%s?1002%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
 }
-
 
 // Set 24 bit Color
 void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
