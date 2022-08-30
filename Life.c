@@ -38,6 +38,7 @@ struct LifeSTRUCT {
 
 char cmdESC27[ESC27_EXCHANGE_SIZE];
 
+// EVENTS
 int EventESC27 (int event){
 	
 	switch (event){
@@ -863,6 +864,8 @@ void MonitorGetESC27II(void){
 				break;
 			case -1:
 				// Regular Key - No ESC-Sequence related stuff
+				printf("%c",i);
+				fflush(stdout);
 				break;
 			case 117:
 				// Mouse UP (Left / Wheel / Right)
@@ -872,7 +875,6 @@ void MonitorGetESC27II(void){
 						// dblClick
 						EventESC27(193);
 						isOnClick = 0;
-						printf("dblClick\n");
 					}
 					else{
 						// 1st Click
@@ -884,7 +886,6 @@ void MonitorGetESC27II(void){
 					// it's an area
 					EventESC27(194);
 					isOnClick = 0;
-					printf("Area\n");
 				}
 				break;
 			case 109:
@@ -919,7 +920,6 @@ void MonitorGetESC27II(void){
 			// click
 			EventESC27(192);
 			isOnClick = 0;
-			printf("Click\n");
 		}
 
 		CheckOnTimeChange();
@@ -994,7 +994,7 @@ int main() {
 	ClearScreen();
 
 	// *************************************************************
-	MonitorGetESC27();
+	MonitorGetESC27II();
 	return 0;
 	// *************************************************************
 

@@ -455,18 +455,6 @@ void ClrScrR(void) {
 	// printf("%s0J", CSI);	// The '0' isn't needed.
 }
 
-// Trap Mouse (On / Off)
-void TrapMouse(_Bool set){
-
-	char c = 'l';
-	if (set){
-		c = 'h';
-	}
-	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
-	// 1002 instead of 1003 reports position only if Mouse Button is pressed
-	printf("%s?1002%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
-}
-
 // Set 24 bit Color
 void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
 
@@ -1288,6 +1276,18 @@ void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, _Bool set) {
 		memset(&ActTxtColor, 0, sizeof(ActTxtColor));
 		printf("%s10;0;39;49;59m", CSI);
 	}
+}
+
+// Trap Mouse (On / Off)
+void TrapMouse(_Bool set){
+
+	char c = 'l';
+	if (set){
+		c = 'h';
+	}
+	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
+	// 1002 instead of 1003 reports position only if Mouse Button is pressed
+	printf("%s?1002%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
 }
 
 /*

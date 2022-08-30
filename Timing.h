@@ -54,9 +54,8 @@ void CheckOnTimeChange(void){
         clockNow = clock();
         clocksPerSecond = (clockNow - clockLast) / timeDiff;
         clockLast = clockNow;
-        clock_t userEscTimeout = 0.1 * clocksPerSecond;
-        clock_t mouseClickTimeout = 0.25 * clocksPerSecond;
-
+        userEscTimeout = 0.1 * clocksPerSecond;
+        mouseClickTimeout = 0.25 * clocksPerSecond;
 
         // A Second (ore more) is over
         timeLast = timeNow;
