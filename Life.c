@@ -587,17 +587,79 @@ void EventHourChange(void){
 	}
 }
 
+void EventHour2Change(void){}
+void EventHour3Change(void){}
+void EventHour4Change(void){}
+void EventHour6Change(void){}
+void EventHour8Change(void){}
+void EventHour12Change(void){}
+
 void EventMinuteChange(void){
+
 	// Check on HourChange
 	if (hourChanged){
 		EventHourChange();
+		if (hour2Changed){
+			EventHour2Change();
+			if (hour4Changed){
+				EventHour4Change();
+				if (hour8Changed){
+					EventHour8Change();
+				}
+			}
+		}
+		if (hour3Changed){
+			EventHour3Change();
+			if (hour6Changed){
+				EventHour6Change();
+				if (hour12Changed){
+					EventHour12Change();
+				}
+			}
+		}
 	}
 }
 
+void EventMinute2Change(){}
+void EventMinute3Change(){}
+void EventMinute4Change(){}
+void EventMinute5Change(){}
+void EventMinute6Change(){}
+void EventMinute10Change(){}
+void EventMinute12Change(){}
+void EventMinute15Change(){}
+void EventMinute20Change(){}
+void EventMinute30Change(){}
+
 void EventSecondChange(void){	
+	
 	// Check on MinuteChange
 	if (minuteChanged){
 		EventMinuteChange();
+		if (min2Changed){
+			EventMin2Change();
+			if (min4Changed){
+				EventMin4Change();
+				if (min20Changed){
+					EventMin20Change();
+				}
+			}
+		}
+		if (min3Changed){
+			EventMin3Changed();
+			if (min6Changed){
+				EventMin6Changed();
+				if (min12Changed){
+					EventMin12Change();
+				}
+			}
+			if (min15Changed){
+				EventMin15Changed();
+				if (min30Changed){
+					EventMin30Change();
+				}
+			}			
+		}
 	}
 }
 
@@ -784,12 +846,9 @@ void MonitorGetESC27(void){
 		// DO STUFF HERE STOP
 
 		// End Of Loop
-			/* Just for one loop active !
+			/* ust for one loop active !
 			 Reset as last Action of the loop! */
-			secondChanged = 0;
-			minuteChanged = 0;
-			hourChanged = 0;
-			dayChanged = 0;
+			EraseTimeChange();
 
 
 		usleep(100);
