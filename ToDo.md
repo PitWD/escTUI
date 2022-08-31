@@ -272,3 +272,8 @@ After Function brackets... Results To...
     Function(Function(Function(  1stResult  ,Function(  2ndResult  ,D))))
     Function(Function(Function(  1stResult  ,        3rdResult        )))
     Function(Function(                    4thResult                    ))
+
+`code`
+
+    12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    0000 | Function(UserA,UserB,UserC)UserD         | Function(@1,@2,@3)@4 | 000 (000,000,000,000)

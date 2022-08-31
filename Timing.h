@@ -13,8 +13,8 @@ clock_t clocksPerSecond = 45000;
 // Real System Time
 clock_t clockLast;
 clock_t clockNow;
-time_t timeLast;
 time_t timeNow;
+time_t timeLast;
 double timeDiff;
 struct tm *localTime;
 
@@ -23,6 +23,23 @@ int secondChanged = 0;  // A Second Is Over
 int minuteChanged = 0;  // A Minute
 int hourChanged = 0;    // A Hour 
 int dayChanged = 0;     // A Day
+int min2Changed = 0;    // All 2 minutes...
+int min3Changed = 0;
+int min4Changed = 0;
+int min5Changed = 0;
+int min6Changed = 0;
+int min10Changed = 0;
+int min12Changed = 0;
+int min15Changed = 0;
+int min20Changed = 0;
+int min30Changed = 0;
+int hour2Changed = 0;   // All 2 hours...
+int hour3Changed = 0;
+int hour4Changed = 0;
+int hour6Changed = 0;
+int hour8Changed = 0;
+int hour12Changed = 0;
+
 
 // Counter
 char runTimeSeconds = 0;
@@ -57,14 +74,26 @@ void CheckOnTimeChange(void){
         userEscTimeout = 0.1 * clocksPerSecond;
         mouseClickTimeout = 0.25 * clocksPerSecond;
 
+        int sec00Overflow = 0;
+
         // A Second (ore more) is over
+        if (timeDiff > 1){
+            // More...
+            localTime = localtime(&timeLast);
+            if (localTime->tm_sec + timeDiff > 60){
+                // We would have missed xx:xx:00
+                // We'll "simulate" to get all TimeChangeEvents Right
+                sec00Overflow = 1;
+            }
+        }
+    
         timeLast = timeNow;
         secondChanged = 1;
 
         //System Runtime
-        runTimeSeconds++;
-        if (runTimeSeconds = 60){
-            runTimeSeconds = 0;
+        runTimeSeconds += timeDiff;
+        if (runTimeSeconds >= 60){
+            runTimeSeconds -= 60;
             runTimeMinutes++;
             if (runTimeMinutes == 60){
                 runTimeMinutes = 0;
@@ -78,14 +107,81 @@ void CheckOnTimeChange(void){
 
         // Real Time
         localTime = localtime(&timeNow);
-        if (localTime->tm_sec == 0){
+        // Real-Time Events
+        if (localTime->tm_sec == 0 || sec00Overflow){
             minuteChanged = 1;
             if (localTime->tm_min == 0){
+                min2Changed = 1;
+                min3Changed = 1;
+                min4Changed = 1;
+                min5Changed = 1;
+                min6Changed = 1;
+                min10Changed = 1;
+                min12Changed = 1;
+                min15Changed = 1;
+                min20Changed = 1;
+                min30Changed = 1;
+
                 hourChanged = 1;
                 if (localTime->tm_hour == 0){
+                    hour2Changed = 1;
+                    hour3Changed = 1;
+                    hour4Changed = 1;
+                    hour6Changed = 1;
+                    hour8Changed = 1;
+                    hour12Changed = 1;
+
                     dayChanged = 1;
-                }  
-            }  
+                }
+                else if !(localTime->tm_hour % 2){
+                    hour2Changed = 1;
+                }
+                else if !(localTime->tm_hour % 3){
+                    hour3Changed = 1;
+                }
+                else if !(localTime->tm_hour % 4){
+                    hour4Changed = 1;
+                }
+                else if !(localTime->tm_hour % 6){
+                    hour6Changed = 1;
+                }
+                else if !(localTime->tm_hour % 8){
+                    hour8Changed = 1;
+                }
+                else if !(localTime->tm_hour % 12){
+                    hour12Changed = 1;
+                }                  
+            }
+            else if !(localTime->tm_min % 2){
+                min2Changed = 1;
+            }
+            else if !(localTime->tm_min % 3){
+                min3Changed = 1;
+            }
+            else if !(localTime->tm_min % 4){
+                min4Changed = 1;
+            }
+            else if !(localTime->tm_min % 5){
+                min5Changed = 1;
+            }
+            else if !(localTime->tm_min % 6){
+                min6Changed = 1;
+            }
+            else if !(localTime->tm_min % 10){
+                min10Changed = 1;
+            }
+            else if !(localTime->tm_min % 12){
+                min12Changed = 1;
+            }
+            else if !(localTime->tm_min % 15){
+                min15Changed = 1;
+            }
+            else if !(localTime->tm_min % 20){
+                min20Changed = 1;
+            }
+            else if !(localTime->tm_min % 30){
+                min30Changed = 1;
+            }              
         }  
     }
 }
