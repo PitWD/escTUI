@@ -18,13 +18,13 @@ const char TerminalVersion [] = "1.00pa";
 #define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
 unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
 
-#ifdef __unix__
+#if __WIN32__ || _MSC_VER
+    #include <conio.h>
+    #include <windows.h>
+#else // __unix__
     #include <termios.h>
     #include <unistd.h>
     #include <sys/ioctl.h>
-#elif __WIN32__ || _MSC_VER
-    #include <conio.h>
-    #include <windows.h>
 #endif
 
 // Screen
@@ -60,8 +60,11 @@ _Bool isWaitingForESC27 = 0;
     */
 
 /* LINUX / UNIX */
-#ifdef __unix__
+#ifdef __WIN32__
+    // #include <conio.h> 
 
+#else
+	// || __unix__ 
     static struct termios new_io;
     static struct termios old_io;
     
@@ -117,9 +120,7 @@ _Bool isWaitingForESC27 = 0;
 		}
         return c;
     }
-/* Billy OS */
-#elif __WIN32__ || _MSC_VER
-    // #include <conio.h>
+
 #endif
 
 /*

@@ -156,55 +156,55 @@ void CheckOnTimeChange(void){
                     dayChanged = 1;
                 }
                 else{
-                    if !(localTime->tm_hour % 2){
+                    if (!(localTime->tm_hour % 2)){
                         hour2Changed = 1;
                     }
-                    if !(localTime->tm_hour % 3){
+                    if (!(localTime->tm_hour % 3)){
                         hour3Changed = 1;
                     }
-                    if !(localTime->tm_hour % 4){
+                    if (!(localTime->tm_hour % 4)){
                         hour4Changed = 1;
                     }
-                    if !(localTime->tm_hour % 6){
+                    if (!(localTime->tm_hour % 6)){
                         hour6Changed = 1;
                     }
-                    if !(localTime->tm_hour % 8){
+                    if (!(localTime->tm_hour % 8)){
                         hour8Changed = 1;
                     }
-                    if !(localTime->tm_hour % 12){
+                    if (!(localTime->tm_hour % 12)){
                         hour12Changed = 1;
                     }                  
                 }               
             }
             else{
-                if !(localTime->tm_min % 2){
+                if (!(localTime->tm_min % 2)){
                     min2Changed = 1;
                 }
-                if !(localTime->tm_min % 3){
+                if (!(localTime->tm_min % 3)){
                     min3Changed = 1;
                 }
-                if !(localTime->tm_min % 4){
+                if (!(localTime->tm_min % 4)){
                     min4Changed = 1;
                 }
-                if !(localTime->tm_min % 5){
+                if (!(localTime->tm_min % 5)){
                     min5Changed = 1;
                 }
-                if !(localTime->tm_min % 6){
+                if (!(localTime->tm_min % 6)){
                     min6Changed = 1;
                 }
-                if !(localTime->tm_min % 10){
+                if (!(localTime->tm_min % 10)){
                     min10Changed = 1;
                 }
-                if !(localTime->tm_min % 12){
+                if (!(localTime->tm_min % 12)){
                     min12Changed = 1;
                 }
-                if !(localTime->tm_min % 15){
+                if (!(localTime->tm_min % 15)){
                     min15Changed = 1;
                 }
-                if !(localTime->tm_min % 20){
+                if (!(localTime->tm_min % 20)){
                     min20Changed = 1;
                 }
-                if !(localTime->tm_min % 30){
+                if (!(localTime->tm_min % 30)){
                     min30Changed = 1;
                 }
             }              

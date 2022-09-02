@@ -41,6 +41,7 @@ char cmdESC27[ESC27_EXCHANGE_SIZE];
 // EVENTS
 int EventESC27 (int event){
 	
+	int r = 0;		// Return Value
 	switch (event){
 	// F1 - F12
 	case 1:
@@ -574,6 +575,7 @@ int EventESC27 (int event){
 	default:
 		break;
 	}
+	return r;
 }
 
 void EventDayChange(void){
@@ -620,16 +622,16 @@ void EventMinuteChange(void){
 	}
 }
 
-void EventMinute2Change(){}
-void EventMinute3Change(){}
-void EventMinute4Change(){}
-void EventMinute5Change(){}
-void EventMinute6Change(){}
-void EventMinute10Change(){}
-void EventMinute12Change(){}
-void EventMinute15Change(){}
-void EventMinute20Change(){}
-void EventMinute30Change(){}
+void EventMinute2Change(void){}
+void EventMinute3Change(void){}
+void EventMinute4Change(void){}
+void EventMinute5Change(void){}
+void EventMinute6Change(void){}
+void EventMinute10Change(void){}
+void EventMinute12Change(void){}
+void EventMinute15Change(void){}
+void EventMinute20Change(void){}
+void EventMinute30Change(void){}
 
 void EventSecondChange(void){	
 	
@@ -637,26 +639,26 @@ void EventSecondChange(void){
 	if (minuteChanged){
 		EventMinuteChange();
 		if (min2Changed){
-			EventMin2Change();
+			EventMinute2Change();
 			if (min4Changed){
-				EventMin4Change();
+				EventMinute4Change();
 				if (min20Changed){
-					EventMin20Change();
+					EventMinute20Change();
 				}
 			}
 		}
 		if (min3Changed){
-			EventMin3Changed();
+			EventMinute3Change();
 			if (min6Changed){
-				EventMin6Changed();
+				EventMinute6Change();
 				if (min12Changed){
-					EventMin12Change();
+					EventMinute12Change();
 				}
 			}
 			if (min15Changed){
-				EventMin15Changed();
+				EventMinute15Change();
 				if (min30Changed){
-					EventMin30Change();
+					EventMinute30Change();
 				}
 			}			
 		}
@@ -1053,7 +1055,7 @@ int main() {
 	ClearScreen();
 
 	// *************************************************************
-	MonitorGetESC27II();
+	MonitorGetESC27();
 	return 0;
 	// *************************************************************
 
