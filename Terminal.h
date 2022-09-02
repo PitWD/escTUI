@@ -16,7 +16,8 @@ const char TerminalVersion [] = "1.00pa";
 
 #define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
 #define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
-unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
+//unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
+char streamInESC27[ESC27_STREAM_IN_SIZE];
 
 #if __WIN32__ || _MSC_VER
     #include <conio.h>
@@ -220,7 +221,8 @@ int GetESC27 (int c){
 	static _Bool allowTxt = 0;
 	static _Bool waitForEOT = 0;
 	static int numCnt = 0;
-	static unsigned char *pNumPos[ESC27_STREAM_IN_SIZE];
+	// static unsigned char *pNumPos[ESC27_STREAM_IN_SIZE];
+	static char *pNumPos[ESC27_STREAM_IN_SIZE];
 	static _Bool isNumGroup[ESC27_STREAM_IN_SIZE];
 	static unsigned char streamPos = 0;
 
