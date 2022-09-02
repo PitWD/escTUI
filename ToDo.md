@@ -2,6 +2,12 @@ Def_ ToDo
 
 <br>
 
+**014. Mac MouseScroll Y-Axis value isn't stable**  
+- even protocol is perfect (no char loss)  
+so, it seems (actually) that the Terminal is doing the shit
+
+<br>
+
 **013. WaitForESC27**
 - Catch 2nd Level Mouse Commands 
 
