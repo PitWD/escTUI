@@ -111,10 +111,10 @@ After Function brackets... Results To...
 
 | ID | Command(ID) | ( |(ParameterList) | ) | ResultTo () | Additional Memory Needs |
 |-|-|-|-|-|-|-|
-|Def|Def_OutSetting|**(**|Name, OutPort-Address, OutPort-Type, 1stPortOnAdr, PortCnt, ReWriteInterval|**)**||
-|Def|Def_Out|**(**|Name, OutSettingName, 1stPortOnAdr, PortCnt, Invert|**)**||
-|Def|Def_InSetting|**(**|Name, InPort-Address, InPort-Type, 1stPortOnAdr, PortCnt, ReadInterval|**)**||
-|Def|Def_In|**(**|Name, InSettingName, 1stPortOnAdr, PortCnt, Invert|**)**||
+|Def|Def_OutAddr|**(**|Name, OutPort-Address, OutPort-Type, 1stPortOnAdr, PortCnt, ReWriteInterval|**)**||
+|Def|Def_OutPrt|**(**|Name, OutSettingName, 1stPortOnAdr, PortCnt, Invert|**)**||
+|Def|Def_InAddr|**(**|Name, InPort-Address, InPort-Type, 1stPortOnAdr, PortCnt, ReadInterval|**)**||
+|Def|Def_InPrt|**(**|Name, InSettingName, 1stPortOnAdr, PortCnt, Invert|**)**||
 |Def|Def_Var|**(**|Name, MemPos, VarType, VarsCnt|**)**||
 |Def|Def_Const|**(**|Name, Value|**)**||
 |Def|Def_Date|**(**|Name, DD.MM.YYYY|**)**||
@@ -167,39 +167,39 @@ After Function brackets... Results To...
 ||Sum|**(**|1stVal, LastVal|**)**| |
 |-|-|-|-|-|-|-|
 ||=|**(**|1stVal, 2ndVal|**)**| | |
-||=M|**(**|1stVal, LastVal|**)**| | |
+||=M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 ||<|**(**|1stVal, 2ndVal|**)**| | |
-||<M|**(**|1stVal, LastVal|**)**| | |
+||<M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 ||>|**(**|1stVal, 2ndVal|**)**| | |
-||>M|**(**|1stVal, LastVal|**)**| | |
+||>M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 ||<=|**(**|1stVal, 2ndVal|**)**| | |
-||<=M|**(**|1stVal, LastVal|**)**| | |
+||<=M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 ||>=|**(**|1stVal, 2ndVal|**)**| | |
-||>=M|**(**|1stVal, LastVal|**)**| | |
+||>=M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 ||!=|**(**|1stVal, 2ndVal|**)**| | |
-||!=M|**(**|1stVal, LastVal|**)**| | |
+||!=M|**(**|RefVal, 1stVal, LastVal|**)**| | |
 |-|-|-|-|-|-|-|
 ||Or|**(**|1stVal, 2ndVal|**)**| |
-||OrM|**(**|1stVal, LastVal|**)**| |
+||OrM|**(**|RefVal, 1stVal, LastVal|**)**| |
 ||And|**(**|1stVal, 2ndVal|**)**| |
-||AndM|**(**|1stVal, LastVal|**)**| |
+||AndM|**(**|RefVal, 1stVal, LastVal|**)**| |
 ||Xor|**(**|1stVal, 2ndVal|**)**| |
 ||Not|**(**|Val|**)**| |
 |-|-|-|-|-|-|-|
 ||Min|**(**|1stVal, 2ndVal|**)**| |
 ||Max|**(**|1stVal, 2ndVal|**)**| |
 ||Mid|**(**|1stVal, 2ndVal|**)**| |
-||InBetween|**(**|Val, LowVal, HighVal|**)**| |
+||Inside|**(**|Val, LowVal, HighVal|**)**| |
 ||MinM|**(**|1stVal, LastVal|**)**| |
 ||MaxM|**(**|1stVal, LastVal|**)**| |
 ||MidM|**(**|1stVal, LastVal|**)**| |
-||InBetweenM|**(**|1stVal, LastVal, LowVal, HighVal|**)**| |
+||InsideM|**(**|1stVal, LastVal, LowVal, HighVal|**)**| |
 ||Avg|**(**|Val, Count, High, Low|**)**| |Count times the Val, CountPos|
 |-|-|-|-|-|-|-|
 ||Date|**(**|DD.MM.YYYY|**)**| | |
 ||Time|**(**|hh:mm:ss|**)**| | |
 ||DateTime|**(**|DD.MM.YYYY, hh:mm:ss|**)**| | |
-||NowWeekDay|**(**||**)**| | |
+||NowDay|**(**||**)**| | |
 ||NowDate|**(**||**)**| | |
 ||NowTime|**(**||**)**| | |
 ||NowDateTime|**(**||**)**| | |
@@ -208,11 +208,19 @@ After Function brackets... Results To...
 ||Timer24h|**(**|OnTime, OffTime|**)**| | |
 ||DayTimer|**(**|OnTime, OffTime, Hrs/Day, (StartDate, StartTime)|**)**| | |
 ||Interval|**(**|OnTime, OffTime, Offset|**)**| | |
-||IntervalStep|**(**|OnTime, OffTime, Repeats, StepTime, Offset|**)**| | |
-||OnDelay|**(**|Val, OnDelayTime|**)**| | WentOnTime |
-||OffDelay|**(**|Val, OffDelayTime|**)**| | WentOffTime |
-||OnOffDelay|**(**|Val, OnDelayTime, OffDelayTime|**)**| | WentOnTime, WentOffTime |
+||InterStep|**(**|OnTime, OffTime, Repeats, StepTime, Offset|**)**| | |
+||OnDelay|**(**|ValIn, OnDelayTime|**)**| | WentOnTime |
+||OffDelay|**(**|ValIn, OffDelayTime|**)**| | WentOffTime |
+||OnOffDelay|**(**|ValIn, OnDelayTime, OffDelayTime|**)**| | WentOnTime, WentOffTime |
 |-|-|-|-|-|-|-|
+||CountHigh|**(**|ValIn, Start, Step, ResetBit, ResetVal|**)**| |ActVal|
+||CountLow|**(**|ValIn, Start, Step, ResetBit, ResetVal|**)**| |ActVal|
+||CountChange|**(**|ValIn, Start, Step, ResetBit, ResetVal|**)**| |ActVal|
+|-|-|-|-|-|-|-|
+||UserCtrl|**(**|ValIn, Mode|**)**| | Mode, OnUntil, OffUntil |
+||UserIn|**(**|Name, ValBoot|**)**| | ValRun |
+||UserOut|**(**|Name|**)**| | Val |
+||UserVal|**(**|Name, ValBoot, Min, Max|**)**| | ValRun |
 
 
 
@@ -227,7 +235,6 @@ After Function brackets... Results To...
 30  &emsp;&emsp; Or (IN3, IN4).  
 40  &emsp;&emsp; Out (>, 1)  
 50  &emsp; EndIf (Label2)  
-
 
 
 <br>
