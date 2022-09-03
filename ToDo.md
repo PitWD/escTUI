@@ -2,6 +2,12 @@ Def_ ToDo
 
 <br>
 
+**015. Mac TerminalSizeChanged**
+- Lost- and GotFocus doesn't happened while changing the Size  
+so, it may depend on Linux also on the WindowManager (I'm just using IceWM)
+
+<br>
+
 **014. Mac MouseScroll Y-Axis value isn't stable**  
 - even protocol is perfect (no char loss)  
 so, it seems (actually) that the Terminal is doing the shit
