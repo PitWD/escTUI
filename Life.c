@@ -702,23 +702,35 @@ void MonitorGetESC27(void){
 	// Loop Minimum
 	while (i != 10 && i != 13){
 		
+		#if __WIN32__ || _MSC_VER
+
+			if (kbhit())
+			{
+				i = getch();
+			}
+			else
+			{
+				i = 0;
+			}
+				
+		#else
 			i = getch();
+		#endif
 
-			// Recognize manual ESC
-			if (isOnESC27 && i < 1){
-				if (clock() > timeOnUsrEsc){
-					// UsrESC
-					i = 27;
-				}
+		// Recognize manual ESC
+		if (isOnESC27 && i < 1){
+			if (clock() > timeOnUsrEsc){
+				// UsrESC
+				i = 27;
 			}
-			else if (i == 27){
-				isOnESC27 = 1;
-				timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
-			}
-			else{
-				isOnESC27 = 0;
-			}
-
+		}
+		else if (i == 27){
+			isOnESC27 = 1;
+			timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
+		}
+		else{
+			isOnESC27 = 0;
+		}
 			
 	// Loop Minimum
 
@@ -853,7 +865,7 @@ void MonitorGetESC27(void){
 			EraseTimeChange();
 
 
-		usleep(100);
+		DoEvents();
 
 	}
 	// Loop Minimum
@@ -1001,7 +1013,7 @@ void MonitorGetESC27II(void){
 			hourChanged = 0;
 			dayChanged = 0;
 
-		usleep(100);
+		DoEvents();
 	}
 	// Loop Minimum
 
@@ -1054,6 +1066,7 @@ int main() {
 
 	ClearScreen();
 
+	printf("ClocksPerSecond: %d", clocksPerSecond);
 	// *************************************************************
 	MonitorGetESC27();
 	return 0;
@@ -1069,8 +1082,21 @@ int main() {
 	clock_t timeOnUsrEsc;
 
 	do{
-		
-		i = getch();
+
+		#if __WIN32__ || _MSC_VER
+
+			if (kbhit())
+			{
+				i = getch();
+			}
+			else
+			{
+				i = 0;
+			}
+				
+		#else
+			i = getch();
+		#endif
 
 		// Recognize manual ESC
 		if (isOnESC27 && i < 1){
@@ -1091,7 +1117,7 @@ int main() {
 			r = GetESC27(i);
 		}
 
-		usleep(100);
+		DoEvents();
 
 	} while(1);
 	

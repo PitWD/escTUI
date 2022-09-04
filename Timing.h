@@ -8,7 +8,7 @@
 
 //CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
 // !!! Initial 45000 is just fine with MY development environment !!!
-clock_t clocksPerSecond = 45000;
+clock_t clocksPerSecond = CLOCKS_PER_SEC;
 
 // Real System Time
 clock_t clockLast;
@@ -47,9 +47,11 @@ char runTimeHours = 0;
 int runTimeDays = 0;
 
 // TimeIn / TimeOut to recognize ESC from User/Keyboard
-clock_t userEscTimeout = 0.1 * 45000;
+clock_t userEscTimeout; // = 0.1 * 45000;
 // TimeIn / TimeOut to recognize MouseClick as a single Click (not part of a DoubleClick)
-clock_t mouseClickTimeout = 0.25 * 45000;
+clock_t mouseClickTimeout;  // = 0.25 * 45000;
+// DoEventsTime for usleep() (Linux & Mac)
+#define DoEventsTime 100;
 
 // 01/01/2000
 time_t JAN_01_2000 = 946677600;
@@ -57,6 +59,17 @@ time_t JAN_01_2000 = 946677600;
 void InitTiming(void){
     time(&timeLast);
     clockLast = clock();
+
+    #if __WIN32__ || _MSC_VER
+
+        clocksPerSecond = CLOCKS_PER_SEC;
+    #else
+
+        clocksPerSecond = 45000;
+    #endif
+    
+    userEscTimeout = 0.1 * clocksPerSecond;
+    mouseClickTimeout = 0.25 * clocksPerSecond;
 }
 
 void EraseTimeChange(void){

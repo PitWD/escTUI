@@ -61,9 +61,10 @@ _Bool isWaitingForESC27 = 0;
     */
 
 /* LINUX / UNIX */
-#ifdef __WIN32__
-    // #include <conio.h> 
+#if __WIN32__ || _MSC_VER
 
+    // #include <conio.h> 
+	
 #else
 	// || __unix__ 
     static struct termios new_io;
@@ -124,6 +125,14 @@ _Bool isWaitingForESC27 = 0;
 
 #endif
 
+// DoEvents
+#if __WIN32__ || _MSC_VER
+
+	#define DoEvents() Sleep(0);
+#else
+
+	#define DoEvents() usleep(DoEventsTime);
+#endif
 /*
 // getch() TEST
 int main(void) {

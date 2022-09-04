@@ -370,7 +370,7 @@ void CursorRight(int x) {
 void CursorLeft(int x) {
 	printf("%s%dD", CSI, x);
 }
-void GetCursorPos(void){
+void GetAnsiCursorPos(void){
 	printf("%s6n", CSI);
 }
 
