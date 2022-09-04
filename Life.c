@@ -1066,7 +1066,6 @@ int main() {
 
 	ClearScreen();
 
-	printf("ClocksPerSecond: %d", clocksPerSecond);
 	// *************************************************************
 	MonitorGetESC27();
 	return 0;

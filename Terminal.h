@@ -131,7 +131,7 @@ _Bool isWaitingForESC27 = 0;
 	#define DoEvents() Sleep(0);
 #else
 
-	#define DoEvents() usleep(DoEventsTime);
+	#define DoEvents() usleep(100);
 #endif
 /*
 // getch() TEST
