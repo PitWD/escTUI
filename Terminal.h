@@ -128,7 +128,7 @@ _Bool isWaitingForESC27 = 0;
 // DoEvents
 #if __WIN32__ || _MSC_VER
 
-	#define DoEvents() Sleep(0);
+	#define DoEvents() Sleep(1);
 #else
 
 	#define DoEvents() usleep(100);

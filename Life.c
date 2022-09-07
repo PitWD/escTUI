@@ -1115,8 +1115,11 @@ int main() {
 		if (i > 0){
 			r = GetESC27(i);
 		}
-
-		DoEvents();
+		else
+		{
+			DoEvents();
+		}
+		
 
 	} while(1);
 	
