@@ -674,7 +674,6 @@ void MonitorGetESC27(void){
 
 	ClearScreen();
 
-
 	TrapMouse(1);
 
 	// ScreenSize
@@ -874,7 +873,9 @@ void MonitorGetESC27(void){
 	TrapMouse(0);
 
 	// Reset old Terminal Settings
-	#ifdef __unix__
+	#if __WIN32__ || _MSC_VER
+		SetVT(0);
+	#else __unix__
 		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
 	#endif
 }
@@ -1021,7 +1022,9 @@ void MonitorGetESC27II(void){
 	TrapMouse(0);
 
 	// Reset old Terminal Settings
-	#ifdef __unix__
+	#if __WIN32__ || _MSC_VER
+		SetVT(0);
+	#else __unix__
 		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
 	#endif
 }
@@ -1034,6 +1037,10 @@ int main() {
 	strcpy(symbolMisc[31].str, "☞");	// \u261E	WHITE RIGHT POINTING INDEX
 	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
 	*/
+
+	#if __WIN32__ || _MSC_VER
+		SetVT(1);
+	#endif
 	InitTiming();
 
 	printf("Hello New Project\n");

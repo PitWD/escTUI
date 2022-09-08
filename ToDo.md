@@ -2,9 +2,22 @@ Def_ ToDo
 
 <br>
 
-**015. Mac TerminalSizeChanged**
-- Lost- and GotFocus doesn't happened while changing the Size  
+**017. WIN DoEvents() is still a mess**
+
+<br>
+
+**016. WIN MS-Terminal Git-Issue "TerminalSize In Chars"**
+- https://github.com/microsoft/terminal/issues/13944
+- temporary fix needed (kernel-function - or ESC CursorPosTilt)
+
+<br>
+
+**015. Mac & WIN TerminalSizeChanged**
+- Mac: Lost- and GotFocus doesn't happened while changing the Size  
 so, it may depend on Linux also on the WindowManager (I'm just using IceWM)
+- WIN: Lost- and GotFocus doesn't happened while changing the Size
+
+**015 is definitly a THING**... shit...
 
 <br>
 
