@@ -6,8 +6,9 @@
 
 #include <time.h>
 
-//CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
+// CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
 // !!! Initial 45000 is just fine with MY development environment !!!
+// !!! On WIN it seems to be constant 1000 - like it's on most Posix 1000000
 clock_t clocksPerSecond = CLOCKS_PER_SEC;
 
 // Real System Time
@@ -60,7 +61,7 @@ void InitTiming(void){
     time(&timeLast);
     clockLast = clock();
 
-    #if __WIN32__ || _MSC_VER
+    #if __WIN32__ || _MSC_VER || __WIN64__
 
         clocksPerSecond = CLOCKS_PER_SEC;
     #else

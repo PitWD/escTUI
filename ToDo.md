@@ -9,13 +9,23 @@ Def_ ToDo
 **016. WIN MS-Terminal Git-Issue "TerminalSize In Chars"**
 - https://github.com/microsoft/terminal/issues/13944
 - temporary fix needed (kernel-function - or ESC CursorPosTilt)
+- **On Start**  
+we check on Terminal Size  
+1. `CSI 18 t`
+2. `ESC7 CSI9999;999H CSI6n ESC8`
+3. OS functions  
+Check on fail/success (from 1-3) gives us almost all we need to know about the used Terminal...
 
 <br>
 
 **015. Mac & WIN TerminalSizeChanged**
+- **This need Signal()** - forget the rest...
 - Mac: Lost- and GotFocus doesn't happened while changing the Size  
 so, it may depend on Linux also on the WindowManager (I'm just using IceWM)
 - WIN: Lost- and GotFocus doesn't happened while changing the Size
+
+
+<br>
 
 **015 is definitly a THING**... shit...
 

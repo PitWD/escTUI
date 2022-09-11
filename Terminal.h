@@ -19,7 +19,7 @@ const char TerminalVersion [] = "1.00pa";
 //unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
 char streamInESC27[ESC27_STREAM_IN_SIZE];
 
-#if __WIN32__ || _MSC_VER
+#if __WIN32__ || _MSC_VER || __WIN64__
     #include <conio.h>
     #include <windows.h>
 #else // __unix__
@@ -52,6 +52,7 @@ int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 //ESC27 Reading
 _Bool isWaitingForESC27 = 0;
 
+int WaitForESC27(char *pStrExchange, float timeOut);
 
 // Cross compatible getch() function 
     /*
@@ -164,7 +165,7 @@ _Bool isWaitingForESC27 = 0;
 		
 		// This seems to work - almost... with real Keyboard/Mouse - probably nearly perfect...
 		// But - if an answer out of "int WaitForESC27()" is too unexpected it could hang on following "c = getchar()" until next Key-Press...
-		// The VS-Code integrated terminal even need a very first keystroke to work then proper... Xterm is working from start perfect...
+		// The VS-Code integrated terminal even need a very first keystroke to work then proper... Xterm's are working from start perfect...
         ioctl(0, FIONREAD , &c);
 		if (c > 0){
 			cnt = c;
@@ -180,9 +181,9 @@ _Bool isWaitingForESC27 = 0;
 #endif
 
 // DoEvents
-#if __WIN32__ || _MSC_VER
+#if __WIN32__ || _MSC_VER || __WIN64__
 
-	#define DoEvents() Sleep(1);
+	#define DoEvents() Sleep(0);
 #else
 
 	#define DoEvents() usleep(100);
@@ -203,49 +204,69 @@ int main(void) {
     // Set Terminal Size in Chars
     // to globals: ScreenWidth & ScreenHeight
 
-void GetTerminalSize(void){
+int GetTerminalSize(void){
 
-    #if ESC_SCREENSIZE
+	// On the first run, we check and store terminals way to get TerminalSize
+	static int isSet = 0;		// 1	Xterm
+								// 2	Dumb (MS Terminal)
+								// 3	System
 
-        screenWidth = 0;
-        screenHeight = 0;
-        #if ESC_SCREENSIZE_LEGACY
-
-            // Poll for 'CSIy;xR' - see AnsiESC.h
-            screenSizeInCursorPos = 1;
-
-            // Placing Cursor outside Screen places Cursor on real LowerRight
-            printf("\x1B[9999,9999H"); 
-            // DSR (Device Status Report - Get Cursor Position) 
-            printf("\x1B[6n");
-
-        #else
-            
-            // Xterm - TerminalSize
-            printf("\x1B[18t");
-
-        #endif
-
-    #else
-
-	    /* LINUX / UNIX */
-        #ifdef __unix__
-        
-            struct winsize w;
-            ioctl(fileno(stdout), TIOCGWINSZ, &w);
-            screenWidth = (int)(w.ws_col);
-            screenHeight = (int)(w.ws_row);
-
-        /* Billy OS */
-        #elif __WIN32__ || _MSC_VER
-
+	switch (isSet){
+	case 1:
+		// Xterm
+		printf("\x1B[18t");
+		break;
+	case 2:
+		// Dumb
+		screenSizeInCursorPos = 1;
+		printf("\0337\x1B[9999;999H\x1B[6n\0338");
+		break;
+	case 0:
+		// 1st run
+		int r = 0;
+		screenWidth = 0;
+		screenHeight = 0;
+		r = WaitForESC27("\x1B[18t",0.5);
+		//r = WaitForESC27("xTerm-Test\n",0.2);
+		if (screenWidth > 0 && screenHeight > 0){
+			isSet = 1;
+			break;
+		}
+		screenSizeInCursorPos = 1;
+		r = WaitForESC27("\0337\x1B[9999;999H\x1B[6n\0338",0.2);
+		screenSizeInCursorPos = 0;
+		if (screenWidth > 0 && screenHeight > 0){
+			isSet = 2;
+			break;
+		}
+	case 3:
+		// System
+        #if __WIN32__ || _MSC_VER || __WIN64__
+	        /* Billy OS */
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
             screenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
             screenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
-
+			printf("Billy is working...\n");
+        #else 
+			/* Mac & Linux */
+            struct winsize w;
+            ioctl(fileno(stdout), TIOCGWINSZ, &w);
+            screenWidth = (int)(w.ws_col);
+            screenHeight = (int)(w.ws_row);
         #endif
-    #endif
+		if (!isSet){
+			if (screenWidth > 0 && screenHeight > 0){
+				isSet = 3;
+				break;
+			}
+			else {
+				// Hell - No way to get the TerminalSize ?!?!
+			}
+		}
+		break;
+	}	
+	return isSet;
 }
 
 
@@ -578,11 +599,15 @@ int GetESC27 (int c){
 			}
 			else if (c > 79 && c < 84){
 				// Shift OR Ctrl + F1 - F4
-				r = c - 65;
-				if (streamInESC27[4] == 53){
-					// Ctrl
-					r+= 14;
-				}
+				switch (streamInESC27[4]){
+				case 50:
+					r = c - 65;
+					break;
+				case 53:
+					r = c - 51;
+				default:
+					break;
+				}				
 			}
 			else if (c > 64 && c < 73 && c != 71){
 				// Shift OR Ctrl OR Alt + Up / Down / Right / Left / Center / End / UNKNOWN / Pos1
@@ -651,15 +676,17 @@ int GetESC27 (int c){
 				switch (c){
 				case 82:
 					// Actual Cursor Position
-					cursorPosY = atoi(pNumPos[1]);
-					cursorPosX = atoi(pNumPos[2]);
-					r = 107;
 					if (screenSizeInCursorPos){
-						/* code */
-						screenWidth = cursorPosX;
-						screenHeight = cursorPosY;
+						// but as TerminalSize substitute
+						screenWidth = atoi(pNumPos[2]);
+						screenHeight = atoi(pNumPos[1]);
 						screenSizeInCursorPos = 0;
 						r = 109;
+					}
+					else{
+						cursorPosY = atoi(pNumPos[1]);
+						cursorPosX = atoi(pNumPos[2]);
+						r = 107;
 					}
 					break;				
 				case 77:
@@ -785,12 +812,21 @@ int WaitForESC27(char *pStrExchange, float timeOut){
 
     printf("%s",pStrExchange);
 
-    timeExit = clock() + (timeOut * CLOCKS_PER_SEC);
-	
+	timeExit = clock() + (int)(timeOut * clocksPerSecond);
+
 	isWaitingForESC27 = 1;
 
     while (clock() < timeExit){
-        i = getch();
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			if (kbhit()){
+				i = getch();
+			}
+			else{
+				i = 0;
+			}
+		#else
+			i = getch();
+		#endif
         if (i > 0){
             cnt++;
             if (cnt > ESC27_EXCHANGE_SIZE - 2){
@@ -799,7 +835,7 @@ int WaitForESC27(char *pStrExchange, float timeOut){
                 return -4;
             }
             r = GetESC27(i);
-            if (r){
+            if (r > 0){
 				isWaitingForESC27 = 0;
                 return r;
             }
@@ -812,7 +848,7 @@ int WaitForESC27(char *pStrExchange, float timeOut){
         return -3;
     }
     else{
-        // Without char(s) reveived
+        // Without char(s) received
         return 0;
     }
 }

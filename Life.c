@@ -701,7 +701,7 @@ void MonitorGetESC27(void){
 	// Loop Minimum
 	while (i != 10 && i != 13){
 		
-		#if __WIN32__ || _MSC_VER
+		#if __WIN32__ || _MSC_VER || __WIN64__
 
 			if (kbhit())
 			{
@@ -1038,7 +1038,7 @@ int main() {
 	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
 	*/
 
-	#if __WIN32__ || _MSC_VER
+	#if __WIN32__ || _MSC_VER || __WIN64__
 		SetVT(1);
 	#endif
 	InitTiming();
