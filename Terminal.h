@@ -219,7 +219,7 @@ int GetTerminalSize(void){
 	case 2:
 		// Dumb
 		screenSizeInCursorPos = 1;
-		printf("\0337\x1B[9999;999H\x1B[6n\0338");
+		printf("\0337\x1B[999;9999H\x1B[6n\0338");
 		break;
 	case 0:
 		// 1st run
@@ -233,7 +233,7 @@ int GetTerminalSize(void){
 			break;
 		}
 		screenSizeInCursorPos = 1;
-		r = WaitForESC27("\0337\x1B[9999;999H\x1B[6n\0338",0.2);
+		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",0.2);
 		screenSizeInCursorPos = 0;
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 2;
@@ -598,10 +598,13 @@ int GetESC27 (int c){
 				isByteMouse = 0;
 			}
 			else if (c > 79 && c < 84){
-				// Shift OR Ctrl + F1 - F4
+				// Shift OR Alt OR Ctrl + F1 - F4
 				switch (streamInESC27[4]){
 				case 50:
 					r = c - 65;
+					break;
+				case 51:
+					r = c + 80;
 					break;
 				case 53:
 					r = c - 51;
@@ -626,15 +629,31 @@ int GetESC27 (int c){
 		case 6:
 			if (c == 126){
 				// Shift OR Ctrl + F5 - F12
-				r = streamInESC27[3] - 24;
+				switch (streamInESC27[5])				{
+				case 50:
+					/* shift */
+					r = streamInESC27[3] - 24;
+					break;
+				case 51:
+					/* alt */
+					r = streamInESC27[3] + 121; 
+					break;
+				case 53:
+					/* ctrl */
+					r = streamInESC27[3] - 10;
+				default:
+					break;
+				}
+
+				//r = streamInESC27[3] - 24;
 				if (streamInESC27[3] > 52){
 					// F5 - F8
 					r-= 10;
 				}
-				if (streamInESC27[5] == 53){
+				/*if (streamInESC27[5] == 53){
 					// Ctrl
 					r+= 14;
-				}
+				}*/
 			}
 			break;		
 		};

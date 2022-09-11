@@ -306,7 +306,22 @@ char *KeyID2String[] = {
 	"ByteModePositionErr",
 	"AltBack",
 	"GotFocus",
-	"LostFocus"
+	"LostFocus",
+	"AltF1",
+	"AltF2",
+	"AltF3",
+	"AltF4",
+	"AltF5",
+	"NA",
+	"AltF6",
+	"AltF7",
+	"AltF8",
+	"AltF9",
+	"AltF10",
+	"NA",
+	"AltF11",
+	"AltF12",
+
 };
 
 // Keys
