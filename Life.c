@@ -157,6 +157,196 @@ int EventESC27 (int event){
 		// F11
 		break;
 
+// Alt F1 - F12
+	case 160:
+		// F1
+		break;
+	case 161:
+		// F2
+		break;
+	case 162:
+		// F3
+		break;
+	case 163:
+		// F4
+		break;
+	case 164:
+		// F5
+		break;
+	case 166:
+		// F6
+		break;
+	case 167:
+		// F7
+		break;
+	case 168:
+		// F8
+		break;
+	case 169:
+		// F9
+		break;
+	case 170:
+		// F10
+		break;
+	case 172:
+		// F11
+		break;
+	case 173:
+		// F11
+		break;
+
+// ShiftAlt F1 - F12
+	case 174:
+		// F1
+		break;
+	case 175:
+		// F2
+		break;
+	case 176:
+		// F3
+		break;
+	case 177:
+		// F4
+		break;
+	case 178:
+		// F5
+		break;
+	case 180:
+		// F6
+		break;
+	case 181:
+		// F7
+		break;
+	case 182:
+		// F8
+		break;
+	case 183:
+		// F9
+		break;
+	case 184:
+		// F10
+		break;
+	case 186:
+		// F11
+		break;
+	case 187:
+		// F11
+		break;
+
+// AltCtrl F1 - F12
+	case 188:
+		// F1
+		break;
+	case 189:
+		// F2
+		break;
+	case 190:
+		// F3
+		break;
+	case 191:
+		// F4
+		break;
+	case 192:
+		// F5
+		break;
+	case 194:
+		// F6
+		break;
+	case 195:
+		// F7
+		break;
+	case 196:
+		// F8
+		break;
+	case 197:
+		// F9
+		break;
+	case 198:
+		// F10
+		break;
+	case 200:
+		// F11
+		break;
+	case 201:
+		// F12
+		break;
+
+// ShiftCtrl F1 - F12
+	case 202:
+		// F1
+		break;
+	case 203:
+		// F2
+		break;
+	case 204:
+		// F3
+		break;
+	case 205:
+		// F4
+		break;
+	case 206:
+		// F5
+		break;
+	case 208:
+		// F6
+		break;
+	case 209:
+		// F7
+		break;
+	case 210:
+		// F8
+		break;
+	case 211:
+		// F9
+		break;
+	case 212:
+		// F10
+		break;
+	case 214:
+		// F11
+		break;
+	case 215:
+		// F12
+		break;
+
+// AltCtrl F1 - F12
+	case 216:
+		// F1
+		break;
+	case 217:
+		// F2
+		break;
+	case 218:
+		// F3
+		break;
+	case 219:
+		// F4
+		break;
+	case 220:
+		// F5
+		break;
+	case 222:
+		// F6
+		break;
+	case 223:
+		// F7
+		break;
+	case 224:
+		// F8
+		break;
+	case 225:
+		// F9
+		break;
+	case 226:
+		// F10
+		break;
+	case 228:
+		// F11
+		break;
+	case 229:
+		// F12
+		break;
+
 	// Navigation
 	case 43:
 		// Up
@@ -578,9 +768,7 @@ int EventESC27 (int event){
 	return r;
 }
 
-void EventDayChange(void){
-
-}
+void EventDayChange(void){}
 
 void EventHourChange(void){	
 	// Check on DayChange
