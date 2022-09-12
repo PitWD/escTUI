@@ -2,20 +2,35 @@ Def_ ToDo
 
 <br>
 
+**018. F3 + Combination from one or more Shift-Alt-Ctrl**
+
+    // Shift OR Alt OR Ctrl + F1 - F4
+	// F3 could be CurserPos, too... WTF !
+	// 	CSI 1;2 R  -  Shift
+	// 	CSI 1;3 R  -  Alt
+	// 	CSI 1;4 R  -  ShiftAlt
+	// 	CSI 1;5 R  -  Ctrl
+	// 	CSI 1;6 R  -  ShiftCtrl
+	// 	CSI 1;7 R  -  AltCtrl
+	// 	CSI 1;8 R  -  ShiftAltCtrl
+	// Previous 7 Combinations Are CursorPositions, too... WTF !
+
+<br>
+
 **017. WIN DoEvents() is still a mess**
 
 <br>
 
 **016. WIN MS-Terminal Git-Issue "TerminalSize In Chars"**
 - https://github.com/microsoft/terminal/issues/13944
-- temporary fix needed (kernel-function - or ESC CursorPosTilt)
-- **On Start**  
-we check on Terminal Size  
-1. `CSI 18 t`
-2. `ESC7 CSI9999;999H CSI6n ESC8`
-3. OS functions  
-Check on fail/success (from 1-3) gives us almost all we need to know about the used Terminal...
-
+- ~~temporary fix needed (kernel-function - or ESC CursorPosTilt)~~
+- **~~On Start~~**  
+~~we check on Terminal Size~~  
+1. ~~`CSI 18 t`~~
+2. ~~`ESC7 CSI9999;999H CSI6n ESC8`~~
+3. ~~OS functions~~  
+~~Check on fail/success (from 1-3) gives us almost all we need to know about the used Terminal...~~
+- **DONE**
 <br>
 
 **015. Mac & WIN TerminalSizeChanged**

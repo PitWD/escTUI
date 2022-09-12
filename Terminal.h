@@ -597,8 +597,17 @@ int GetESC27 (int c){
 				}
 				isByteMouse = 0;
 			}
-			else if (c > 79 && c < 84){
+			else if (c > 79 && c < 84 && streamInESC27[2] == 49){
 				// Shift OR Alt OR Ctrl + F1 - F4
+				// F3 could be CurserPos, too... WTF !
+				// 	CSI 1;2 R  -  Shift
+				// 	CSI 1;3 R  -  Alt
+				// 	CSI 1;4 R  -  ShiftAlt
+				// 	CSI 1;5 R  -  Ctrl
+				// 	CSI 1;6 R  -  ShiftCtrl
+				// 	CSI 1;7 R  -  AltCtrl
+				// 	CSI 1;8 R  -  ShiftAltCtrl
+				// Previous 7 Combinations Are CursorPositions, too... WTF !
 				switch (streamInESC27[4]){
 				case 50:
 					// Shift
