@@ -893,6 +893,9 @@ void MonitorGetESC27(void){
 
 			if (kbhit())
 			{
+				// SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
+				// SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_END);
+
 				i = getch();
 			}
 			else
@@ -1051,8 +1054,10 @@ void MonitorGetESC27(void){
 			 Reset as last Action of the loop! */
 			EraseTimeChange();
 
-
-		DoEvents();
+		if (!i){
+			DoEvents();
+		}
+		
 
 	}
 	// Loop Minimum

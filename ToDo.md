@@ -24,7 +24,8 @@ Def_ ToDo
 <br>
 
 **017. WIN DoEvents() is still a mess**
-- Check SwitchToThread() vs Sleep()
+- ~~Check SwitchToThread() vs Sleep()~~
+- ~~done~~
 
 <br>
 

@@ -180,14 +180,29 @@ int WaitForESC27(char *pStrExchange, float timeOut);
 
 #endif
 
-// DoEvents
-#if __WIN32__ || _MSC_VER || __WIN64__
+/*
+void DoEvents(void){
 
-	#define DoEvents() Sleep(0);
+	#if __WIN32__ || _MSC_VER || __WIN64__
+		// SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_BEGIN);
+		// SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
+ 		Sleep(1);
+	#else
+
+		usleep(100);
+	#endif
+
+}
+*/
+// DoEvents
+ #if __WIN32__ || _MSC_VER || __WIN64__
+
+	#define DoEvents() Sleep(1);
 #else
 
 	#define DoEvents() usleep(100);
-#endif
+#endif 
+
 /*
 // getch() TEST
 int main(void) {
