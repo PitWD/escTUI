@@ -518,7 +518,7 @@ int EventESC27 (int event){
 		break;
 
 	// 2nd Level (From Loop()) Mouse-Events
-	case 192:
+	case 512:
 		// Click
 		switch (mouseButton){
 		case 1:
@@ -535,7 +535,7 @@ int EventESC27 (int event){
 			break;
 		}
 		break;
-	case 193:
+	case 513:
 		// DblClick
 		switch (mouseButton){
 		case 1:
@@ -552,7 +552,7 @@ int EventESC27 (int event){
 			break;
 		}
 		break;
-	case 194:
+	case 514:
 		// Area
 		switch (mouseButton){
 		case 1:
@@ -569,7 +569,7 @@ int EventESC27 (int event){
 			break;
 		}
 		break;
-	case 195:
+	case 515:
 		// Terminal-Size Changed
 		break;
 	default:
@@ -785,7 +785,7 @@ void MonitorGetESC27(void){
 							// it's a (dbl)click
 							if (isOnClick && clock() < timeOnClick){
 								// dblClick
-								EventESC27(193);
+								EventESC27(513);
 								isOnClick = 0;
 								printf("dblClick\n");
 							}
@@ -797,7 +797,7 @@ void MonitorGetESC27(void){
 						}
 						else{
 							// it's an area
-							EventESC27(194);
+							EventESC27(514);
 							isOnClick = 0;
 							printf("Area\n");
 						}
@@ -808,7 +808,7 @@ void MonitorGetESC27(void){
 							// Terminal Size changed... (Event)
 							screenHeightPrev = screenHeight;
 							screenWidthPrev = screenWidth;
-							EventESC27(195);
+							EventESC27(515);
 						}
 						break;
 					case 158:
@@ -843,7 +843,7 @@ void MonitorGetESC27(void){
 		// Recognize Single Click
 		if (isOnClick && (clock() > timeOnClick)){
 			// click
-			EventESC27(192);
+			EventESC27(512);
 			isOnClick = 0;
 			printf("Click\n");
 		}
@@ -947,7 +947,7 @@ void MonitorGetESC27II(void){
 					// it's a (dbl)click
 					if (isOnClick && clock() < timeOnClick){
 						// dblClick
-						EventESC27(193);
+						EventESC27(513);
 						isOnClick = 0;
 					}
 					else{
@@ -958,7 +958,7 @@ void MonitorGetESC27II(void){
 				}
 				else{
 					// it's an area
-					EventESC27(194);
+					EventESC27(514);
 					isOnClick = 0;
 				}
 				break;
@@ -968,7 +968,7 @@ void MonitorGetESC27II(void){
 					// Terminal Size changed... (Event)
 					screenHeightPrev = screenHeight;
 					screenWidthPrev = screenWidth;
-					EventESC27(195);
+					EventESC27(515);
 				}
 				break;
 			case 158:
@@ -992,7 +992,7 @@ void MonitorGetESC27II(void){
 		// Recognize Single Click
 		if (isOnClick && (clock() > timeOnClick)){
 			// click
-			EventESC27(192);
+			EventESC27(512);
 			isOnClick = 0;
 		}
 

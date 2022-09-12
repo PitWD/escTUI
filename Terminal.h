@@ -601,13 +601,33 @@ int GetESC27 (int c){
 				// Shift OR Alt OR Ctrl + F1 - F4
 				switch (streamInESC27[4]){
 				case 50:
+					// Shift
 					r = c - 65;
 					break;
 				case 51:
+					// Alt
 					r = c + 80;
 					break;
 				case 53:
+					//Ctrl
 					r = c - 51;
+					break;
+				case 54:
+					// Shift+Ctrl
+					r = c + 122;
+					break;
+				case 52:
+					// Shift+Alt
+					r = c + 94;
+					break;
+				case 55:
+					// Alt+Ctrl
+					r = c + 108;
+					break;
+				case 56:
+					// Shift+Alt+Ctrl
+					r = c + 136;
+					break;
 				default:
 					break;
 				}				
@@ -628,7 +648,7 @@ int GetESC27 (int c){
 
 		case 6:
 			if (c == 126){
-				// Shift OR Ctrl + F5 - F12
+				// Shift OR Alt OR Ctrl + F5 - F12
 				switch (streamInESC27[5])				{
 				case 50:
 					/* shift */
@@ -641,19 +661,31 @@ int GetESC27 (int c){
 				case 53:
 					/* ctrl */
 					r = streamInESC27[3] - 10;
+					break;
+				case 54:
+					// Shift+Ctrl
+					r = streamInESC27[3] + 163; 
+					break;
+				case 52:
+					// Shift+Alt
+					r = streamInESC27[3] + 135; 
+					break;
+				case 55:
+					// Alt+Ctrl
+					r = streamInESC27[3] + 149; 
+					break;
+				case 56:
+					// Shift+Alt+Ctrl
+					r = streamInESC27[3] + 177; 
+					break;
 				default:
 					break;
 				}
 
-				//r = streamInESC27[3] - 24;
 				if (streamInESC27[3] > 52){
 					// F5 - F8
 					r-= 10;
 				}
-				/*if (streamInESC27[5] == 53){
-					// Ctrl
-					r+= 14;
-				}*/
 			}
 			break;		
 		};
