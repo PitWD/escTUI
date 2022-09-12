@@ -2,6 +2,10 @@ Def_ ToDo
 
 <br>
 
+**019. User ESC TimeOut can be used to recognize and abort "open/broken" Sequences, too!**
+
+<br>
+
 **018. F3 + Combination from one or more Shift-Alt-Ctrl**
 
     // Shift OR Alt OR Ctrl + F1 - F4
@@ -15,9 +19,12 @@ Def_ ToDo
 	// 	CSI 1;8 R  -  ShiftAltCtrl
 	// Previous 7 Combinations Are CursorPositions, too... WTF !
 
+  - Need of a **Next 'R' Is A CursorPos** - Flag
+
 <br>
 
 **017. WIN DoEvents() is still a mess**
+- Check SwitchToThread() vs Sleep()
 
 <br>
 
@@ -30,7 +37,7 @@ Def_ ToDo
 2. ~~`ESC7 CSI9999;999H CSI6n ESC8`~~
 3. ~~OS functions~~  
 ~~Check on fail/success (from 1-3) gives us almost all we need to know about the used Terminal...~~
-- **DONE**
+- ~~done~~
 <br>
 
 **015. Mac & WIN TerminalSizeChanged**
@@ -43,6 +50,9 @@ so, it may depend on Linux also on the WindowManager (I'm just using IceWM)
 <br>
 
 **015 is definitly a THING**... shit...
+- https://www.rkoucha.fr/tech_corner/sigwinch.html
+- https://www.geeksforgeeks.org/write-a-c-program-that-doesnt-terminate-when-ctrlc-is-pressed/
+- https://manpages.ubuntu.com/manpages/bionic/de/man7/signal.7.html
 
 <br>
 
@@ -53,28 +63,29 @@ so, it seems (actually) that the Terminal is doing the shit
 <br>
 
 **013. WaitForESC27**
-- Catch 2nd Level Mouse Commands 
-
+- ~~Catch 2nd Level Mouse Commands~~ 
+- ~~done~~
 <br>
 
 **012. CLOCKS_PER_SECOND is not working as expected...**
-- done
+- ~~done~~
 
 <br>
 
 **011. ADD FocusIn / FocusOut**
 - ~~https://invisible-island.net/xterm/ctlseqs/ctlseqs.htmlDef_h3-Any-event-tracking~~
-- done
+- ~~done~~
 
 <br>
 
 **010. Missing enumerations -- Key-IDs**
-- But who knows if I ever use them ?!?
+- But who knows if I ever use them ?!?  
+I will (get rid of Deci-Numbers in EventHandler)
 
 <br>
 
 **009. ClearLine & ClearPartial -- FromTo**
-- done
+- ~~done~~
 
 <br>
 
@@ -85,8 +96,9 @@ Ok ! We could put the processing on the HMI-Terminal, but not on the µCs! µCs 
 - ~~MouseXY > ScreenXY is a nice indicator...~~
 - ~~FocusIn/FocusOut (see 011.) is a nice indicator...~~
 - ~~HAVE AN EYE on Minimize - Effects... *take care on different Terminals*~~  
-**Send GetTerminalSize after GotFocus was the simple solution**
-- done
+**~~Send GetTerminalSize after GotFocus was the simple solution~~**  
+*which was just working with Linux - see 015*
+- ~~done~~
 
 <br>
 
@@ -96,7 +108,7 @@ Ok ! We could put the processing on the HMI-Terminal, but not on the µCs! µCs 
 <br>
 
 **006. EVENT - HANDLER**
-- Mouse - almost done
+- ~~Mouse - almost done~~
 - Keys - almost done
 
 <br>
@@ -148,7 +160,7 @@ then after "some" of the following sequence it's a "???" what kills the app
 
 <br>
 
-**Thoughts about the CMD/Interprtation Structure**
+**Thoughts about the CMD/Interpretation Structure**
 
 Out- & Inputs
 - "OUT1 - OUTn" 
