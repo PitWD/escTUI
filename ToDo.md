@@ -42,10 +42,11 @@ Def_ ToDo
 <br>
 
 **015. Mac & WIN TerminalSizeChanged**
-- **This need Signal()** - forget the rest...
-- Mac: Lost- and GotFocus doesn't happened while changing the Size  
-so, it may depend on Linux also on the WindowManager (I'm just using IceWM)
-- WIN: Lost- and GotFocus doesn't happened while changing the Size
+- ~~**This need Signal()** - forget the rest...~~
+- ~~Mac: Lost- and GotFocus doesn't happened while changing the Size  
+so, it may depend on Linux also on the WindowManager (I'm just using IceWM)~~
+- ~~WIN: Lost- and GotFocus doesn't happened while changing the Size~~
+- ~~done~~ - WITHOUT Signal()...
 
 
 <br>

@@ -219,14 +219,21 @@ int main(void) {
     // Set Terminal Size in Chars
     // to globals: ScreenWidth & ScreenHeight
 
-int GetTerminalSize(void){
+int GetTerminalSize(int useIsSet){
 
 	// On the first run, we check and store terminals way to get TerminalSize
 	static int isSet = 0;		// 1	Xterm
 								// 2	Dumb (MS Terminal)
 								// 3	System
 
-	switch (isSet){
+	if (!useIsSet){
+		useIsSet = isSet;
+	}
+	else if (useIsSet < 0 || useIsSet > 3){
+		useIsSet = 3; 
+	}
+	
+	switch (useIsSet){
 	case 1:
 		// Xterm
 		printf("\x1B[18t");
@@ -262,7 +269,6 @@ int GetTerminalSize(void){
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
             screenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
             screenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
-			printf("Billy is working...\n");
         #else 
 			/* Mac & Linux */
             struct winsize w;
@@ -306,6 +312,16 @@ void ClearScreen(){
     #endif
 
 #endif
+}
+
+int ScreenSizeChanged(void){
+	if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
+		// Terminal Size changed...
+		screenHeightPrev = screenHeight;
+		screenWidthPrev = screenWidth;
+		return 1;
+	}
+	return 0;
 }
 
 int GetESC27 (int c){

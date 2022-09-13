@@ -855,29 +855,16 @@ void EventSecondChange(void){
 
 void MonitorGetESC27(void){
 
-	int i = 0;
-	int r = 0;
+	int i = 0;		// Input From stdin
+	int r = 0;		// Result From GetESC27
 	char c = 0;
 
 
 	ClearScreen();
 
 	TrapMouse(1);
-
-	// ScreenSize
-	// printf("%s18t", CSI);
-
 	
-	r = WaitForESC27("\x1B[18t",0.2);
-	if (r > 0){
-		printf("r: %d  :%s\n", r, &streamInESC27[1]);
-	}
-	r = 0;
-
-	
-	int quatsch = 0;
-
-	// Recognize manual ESC
+		// Recognize manual ESC
 		_Bool isOnESC27 = 0;
 		clock_t timeOnUsrEsc;
 	// Recognize Click & DblClick / Area-Selection
@@ -885,6 +872,13 @@ void MonitorGetESC27(void){
 		clock_t timeOnClick;
 		int posXonClick = 0;
 		int posYonClick = 0;
+	// Poll for TerminalSizeChange
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			#define Terminal_Size_Change_Trigger 10
+		#else
+			#define Terminal_Size_Change_Trigger 100
+		#endif
+		int terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
 
 	// Loop Minimum
 	while (i != 10 && i != 13){
@@ -923,16 +917,7 @@ void MonitorGetESC27(void){
 		}
 			
 	// Loop Minimum
-
-	if (!quatsch){
-		// printf("\x1B[20t");		// IconLabel
-		printf("\x1B[21t\n");		// WinTitle
-		// printf("\x1B[18t");		// TerminalSize		
-		quatsch = 1;
-	}
 	
-	// printf("loop");
-
 	// Loop Minimum
 		if (i > 0){
 	// Loop Minimum
@@ -995,16 +980,17 @@ void MonitorGetESC27(void){
 						break;
 					case 109:
 						// Terminal-Size
-						if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
+						if (ScreenSizeChanged()){
 							// Terminal Size changed... (Event)
-							screenHeightPrev = screenHeight;
-							screenWidthPrev = screenWidth;
 							EventESC27(515);
+							printf("SizeChanged:\n");
 						}
 						break;
 					case 158:
 						// GotFocus
-						GetTerminalSize();
+						// At least On Linux IceWM it happens on all ScreenResizes, too
+						// SO, it recognizes much faster than polling while idle/DOEvents()
+						GetTerminalSize(0);
 						EventESC27(158);
 						break;
 					case -2:
@@ -1055,10 +1041,23 @@ void MonitorGetESC27(void){
 			EraseTimeChange();
 
 		if (!i){
-			DoEvents();
+			// We did not received anything
+			// Time to do idle-time things
+			terminalSizeChangeCnt--;
+			if (!terminalSizeChangeCnt){
+				// Every 1.000(linux/Mac) / 100(WIN) idle-times check on ScreenSize
+				terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
+				GetTerminalSize(3);
+				if (ScreenSizeChanged()){
+					// Terminal Size changed... (Event)
+					EventESC27(515);
+					printf("SizeChanged:\n");
+				}
+			}
+			else{
+				DoEvents();
+			}	
 		}
-		
-
 	}
 	// Loop Minimum
 
@@ -1166,7 +1165,7 @@ void MonitorGetESC27II(void){
 				break;
 			case 158:
 				// GotFocus
-				GetTerminalSize();
+				GetTerminalSize(0);
 				EventESC27(158);
 				break;
 			case -2:
@@ -1246,7 +1245,7 @@ int main() {
 	
 	printf("After ClrScr\n");
 		
-	GetTerminalSize();
+	GetTerminalSize(0);
 
 	printf("After Size\n");
 
