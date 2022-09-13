@@ -2,6 +2,10 @@ Def_ ToDo
 
 <br>
 
+**020. Make an InKey-Function from getch/getch mess**
+
+<br>
+
 **019. User ESC TimeOut can be used to recognize and abort "open/broken" Sequences, too!**
 
 <br>
@@ -52,9 +56,9 @@ so, it may depend on Linux also on the WindowManager (I'm just using IceWM)~~
 <br>
 
 **015 is definitly a THING**... shit...
-- https://www.rkoucha.fr/tech_corner/sigwinch.html
-- https://www.geeksforgeeks.org/write-a-c-program-that-doesnt-terminate-when-ctrlc-is-pressed/
-- https://manpages.ubuntu.com/manpages/bionic/de/man7/signal.7.html
+- ~~https://www.rkoucha.fr/tech_corner/sigwinch.html~~
+- ~~https://www.geeksforgeeks.org/write-a-c-program-that-doesnt-terminate-when-ctrlc-is-pressed/~~
+- ~~https://manpages.ubuntu.com/manpages/bionic/de/man7/signal.7.html~~
 
 <br>
 
