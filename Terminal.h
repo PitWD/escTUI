@@ -225,10 +225,14 @@ int InKey(void){
 
 	#else
 
-		static cnt = 0;
+		static int cnt = 0;
 
-        ioctl(0, FIONREAD , &cnt);
-		if (cnt > 0){
+        if (! cnt){
+			ioctl(0, FIONREAD , &cnt);
+		}
+		
+		if (cnt){
+			cnt--;
 			return getchar();
 		}
 		else {
@@ -253,7 +257,7 @@ void DoEvents(void){
 }
 */
 // DoEvents
- #if __WIN32__ || _MSC_VER || __WIN64__
+#if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);
 #else
 	#define DoEvents() usleep(100);
@@ -275,7 +279,14 @@ int GetTerminalSize(int useIsSet){
 		// 1 = Xterm
 		// 2 = Dumb (MS Terminal)
 		// 3 = System
-							
+
+	int r = 0;
+
+    #if __WIN32__ || _MSC_VER || __WIN64__
+	#else
+		struct winsize w;
+	#endif
+
 	if (!useIsSet){
 		// use detected mode
 		useIsSet = isSet;
@@ -297,9 +308,7 @@ int GetTerminalSize(int useIsSet){
 		break;
 	case 0:
 		// 1st run
-		int r = 0;
-		r = WaitForESC27("\x1B[18t",0.5);
-		//r = WaitForESC27("xTerm-Test\n",0.2);
+		r = WaitForESC27("\x1B[18t",0.2);
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 1;
 			break;
@@ -321,7 +330,6 @@ int GetTerminalSize(int useIsSet){
             screenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
         #else 
 			/* Mac & Linux */
-            struct winsize w;
             ioctl(fileno(stdout), TIOCGWINSZ, &w);
             screenWidth = (int)(w.ws_col);
             screenHeight = (int)(w.ws_row);
@@ -964,16 +972,9 @@ int WaitForESC27(char *pStrExchange, float timeOut){
 	isWaitingForESC27 = 1;
 
     while (clock() < timeExit){
-		#if __WIN32__ || _MSC_VER || __WIN64__
-			if (kbhit()){
-				i = getch();
-			}
-			else{
-				i = 0;
-			}
-		#else
-			i = getch();
-		#endif
+		
+		i= InKey();
+
         if (i > 0){
             cnt++;
             if (cnt > ESC27_EXCHANGE_SIZE - 2){

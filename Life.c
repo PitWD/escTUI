@@ -1080,7 +1080,7 @@ void MonitorGetESC27II(void){
 
 	while (i != 10 && i != 13){
 		
-		i = getch();
+		i = InKey();
 
 		// Recognize manual ESC
 		if (isOnESC27 && i < 1){
@@ -1194,12 +1194,7 @@ void MonitorGetESC27II(void){
 	// Reset Mouse	
 	TrapMouse(0);
 
-	// Reset old Terminal Settings
-	#if __WIN32__ || _MSC_VER
-		SetVT(0);
-	#else __unix__
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
-	#endif
+	SetVT(0);
 }
 
 int main() {
@@ -1261,20 +1256,7 @@ int main() {
 
 	do{
 
-		#if __WIN32__ || _MSC_VER
-
-			if (kbhit())
-			{
-				i = getch();
-			}
-			else
-			{
-				i = 0;
-			}
-				
-		#else
-			i = getch();
-		#endif
+		i = InKey();
 
 		// Recognize manual ESC
 		if (isOnESC27 && i < 1){
@@ -1305,10 +1287,7 @@ int main() {
 	// Reset Mouse	
 	TrapMouse(0);
 
-	// Reset old Terminal Settings
-	#ifdef __unix__
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
-	#endif
+	SetVT(0);
 	// **************************************************************
 
 	return 0; 
