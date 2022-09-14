@@ -279,25 +279,21 @@ int GetTerminalSize(int set){
 	case 0:
 		// 1st run
 		r = WaitForESC27("\x1B[18t",0.2);
-		printf("Result1: %d  ",r);
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 1;
 			ClearScreen(1);
 			screenWidthPrev = screenWidth;
 			screenHeightPrev = screenHeight;
-			printf("1st Run: 1\n");
 			break;
 		}
 		screenSizeInCursorPos = 1;
 		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",0.2);
-		printf("Result2: %d  ",r);
 		screenSizeInCursorPos = 0;
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 2;
 			ClearScreen(2);
 			screenWidthPrev = screenWidth;
 			screenHeightPrev = screenHeight;
-			printf("1st Run: 2\n");
 			break;
 		}
 	case 3:
@@ -320,11 +316,11 @@ int GetTerminalSize(int set){
 				ClearScreen(3);
 				screenWidthPrev = screenWidth;
 				screenHeightPrev = screenHeight;
-				printf("1st Run: 3\n");
 				break;
 			}
 			else {
 				// Hell - No way to get the TerminalSize ?!?!
+				return 0;
 			}
 		}
 		break;
