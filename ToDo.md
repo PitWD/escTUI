@@ -30,7 +30,8 @@ Def_ ToDo
 	// 	CSI 1;8 R  -  ShiftAltCtrl
 	// Previous 7 Combinations Are CursorPositions, too... WTF !
 
-  - Need of a **Next 'R' Is A CursorPos** - Flag
+  - ~~Need of a **Next 'R' Is A CursorPos** - Flag~~
+  - ~~done~~
 
 <br>
 

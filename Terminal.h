@@ -33,13 +33,16 @@ int screenWidth = 0;
 int screenHeight = 0;
 int screenWidthPrev = 0;
 int screenHeightPrev = 0;
-_Bool screenSizeInCursorPos = 0;
+int screenSizeInCursorPos = 0;
 
 // Keyboard
 int cursorPosX = 0;
 int cursorPosY = 0;
 int cursorSelX = 0;                     // 1st point of selection rectangle
 int cursorSelY = 0;                     // or same as CursorPosX&Y = No selection
+int cursorWaitFor = 0;					// Shift OR Alt OR Ctrl + F3 
+										// Has 7 overlapping Settings with CursorPos
+										// Set cursorIsAsked true when asking 'manually' for the cursor position !!
 _Bool cursorIsSelecting = 0;            // (Moving with Shift)
 
 // Mouse
@@ -660,38 +663,42 @@ int GetESC27 (int c){
 				// 	CSI 1;7 R  -  AltCtrl
 				// 	CSI 1;8 R  -  ShiftAltCtrl
 				// Previous 7 Combinations Are CursorPositions, too... WTF !
-				switch (streamInESC27[4]){
-				case 50:
-					// Shift
-					r = c - 65;
-					break;
-				case 51:
-					// Alt
-					r = c + 80;
-					break;
-				case 53:
-					//Ctrl
-					r = c - 51;
-					break;
-				case 54:
-					// Shift+Ctrl
-					r = c + 122;
-					break;
-				case 52:
-					// Shift+Alt
-					r = c + 94;
-					break;
-				case 55:
-					// Alt+Ctrl
-					r = c + 108;
-					break;
-				case 56:
-					// Shift+Alt+Ctrl
-					r = c + 136;
-					break;
-				default:
-					break;
-				}				
+				if (!(c == 82 && (screenSizeInCursorPos || cursorWaitFor))){
+					// Not F3 while waiting for CursorPos
+					switch (streamInESC27[4]){
+					case 50:
+						// Shift
+						r = c - 65;
+						break;
+					case 51:
+						// Alt
+						r = c + 80;
+						break;
+					case 53:
+						//Ctrl
+						r = c - 51;
+						break;
+					case 54:
+						// Shift+Ctrl
+						r = c + 122;
+						break;
+					case 52:
+						// Shift+Alt
+						r = c + 94;
+						break;
+					case 55:
+						// Alt+Ctrl
+						r = c + 108;
+						break;
+					case 56:
+						// Shift+Alt+Ctrl
+						r = c + 136;
+						break;
+					default:
+						break;
+					}				
+				}
+				
 			}
 			else if (c > 64 && c < 73 && c != 71){
 				// Shift OR Ctrl OR Alt + Up / Down / Right / Left / Center / End / UNKNOWN / Pos1
@@ -798,6 +805,7 @@ int GetESC27 (int c){
 					else{
 						cursorPosY = atoi(pNumPos[1]);
 						cursorPosX = atoi(pNumPos[2]);
+						cursorWaitFor = 0;
 						r = 107;
 					}
 					break;				
@@ -901,7 +909,9 @@ int GetESC27 (int c){
 	}
 	return r;
 
-	SaveGetESC27ErrReturn: isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; return r;
+	SaveGetESC27ErrReturn: 
+	isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; screenSizeInCursorPos = 0; cursorWaitFor;
+	return r;
 
 }
 
