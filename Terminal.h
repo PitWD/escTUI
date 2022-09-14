@@ -162,12 +162,17 @@ int InKey(void){
 	#else
 
 		static int cnt = 0;
+		int c = 0;
 
-        if (! cnt){
-			ioctl(0, FIONREAD , &cnt);
+		// Seems silly to read buffer-size each time
+		ioctl(0, FIONREAD , &c);
+		// and to then eventually (re)set cnt
+		if (c > 0){
+			cnt = c;
 		}
-		
-		if (cnt){
+		// but it's a MustHave... Direct FIONREAD into cnt only if !cnt - fails with scary effects.
+
+		if (cnt > 0){
 			cnt--;
 			return getchar();
 		}
@@ -199,18 +204,47 @@ void DoEvents(void){
 	#define DoEvents() usleep(100);
 #endif 
 
+void ClearScreen(int set){
 
+	static int isSet = 0;
+	
+	switch (isSet){
+	case 1:
+	case 2:
+		// ESC-sequences are working
+		printf("\x1B[2J");          // "just" Screen
+		// printf("%s3J", CSI);	    // Including Buffer
+		break;
+	case 3:
+		// OS - Functions needed	
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			clrscr();                // It's MUCH faster via <conio.h>    
+		#else 
+			system ("clear");
+		#endif
+		break;
+	case 0:
+		// 1st call
+		isSet = set;
+		if (isSet < 1 || isSet > 3){
+			isSet = 3;
+		}
+		ClearScreen(isSet);
+	default:
+		break;
+	}
+}
 
-int GetTerminalSize(int useIsSet){
+int GetTerminalSize(int set){
 
 	// int isSet
 	// self-determined way "HowTo Get The Terminal-Size"
-	// 1st time function gets called with 'useIsSet = 0' isSet will get detected 
+	// 1st time function gets called with 'set = 0' isSet will get detected 
 	static int isSet = 0;		// 1	Xterm
 								// 2	Dumb (MS Terminal)
 								// 3	System
 							
-	// int useIsSet
+	// int set
 		// 0 = Automatic Selection
 		// 1 = Xterm
 		// 2 = Dumb (MS Terminal)
@@ -223,16 +257,16 @@ int GetTerminalSize(int useIsSet){
 		struct winsize w;
 	#endif
 
-	if (!useIsSet){
+	if (!set){
 		// use detected mode
-		useIsSet = isSet;
+		set = isSet;
 	}
-	else if (useIsSet < 0 || useIsSet > 3){
-		// Correct bad 'useIsSet' values
-		useIsSet = 3; 
+	else if (set < 0 || set > 3){
+		// Correct bad 'set' values
+		set = 3; 
 	}
 	
-	switch (useIsSet){
+	switch (set){
 	case 1:
 		// Xterm
 		printf("\x1B[18t");
@@ -245,15 +279,25 @@ int GetTerminalSize(int useIsSet){
 	case 0:
 		// 1st run
 		r = WaitForESC27("\x1B[18t",0.2);
+		printf("Result1: %d  ",r);
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 1;
+			ClearScreen(1);
+			screenWidthPrev = screenWidth;
+			screenHeightPrev = screenHeight;
+			printf("1st Run: 1\n");
 			break;
 		}
 		screenSizeInCursorPos = 1;
 		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",0.2);
+		printf("Result2: %d  ",r);
 		screenSizeInCursorPos = 0;
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 2;
+			ClearScreen(2);
+			screenWidthPrev = screenWidth;
+			screenHeightPrev = screenHeight;
+			printf("1st Run: 2\n");
 			break;
 		}
 	case 3:
@@ -273,6 +317,10 @@ int GetTerminalSize(int useIsSet){
 		if (!isSet){
 			if (screenWidth > 0 && screenHeight > 0){
 				isSet = 3;
+				ClearScreen(3);
+				screenWidthPrev = screenWidth;
+				screenHeightPrev = screenHeight;
+				printf("1st Run: 3\n");
 				break;
 			}
 			else {
@@ -282,32 +330,13 @@ int GetTerminalSize(int useIsSet){
 		break;
 	}	
 	
-	if (useIsSet){
-		return useIsSet;
+	if (set){
+		return set;
 	}
 	else{
 		return isSet;
 	}
 	
-}
-
-void ClearScreen(){
-#if ESC_CLRSCR
-
-    /* ESC */
-	printf("\x1B[2J");          // "just" Screen
-	// printf("%s3J", CSI);	    // Including Buffer
-
-#else
-
-    /* LINUX / UNIX */
-    #if __WIN32__ || _MSC_VER || __WIN64__
-        clrscr();                // It's MUCH faster via <conio.h>    
-    #else 
-        system ("clear");
-    #endif
-
-#endif
 }
 
 int ScreenSizeChanged(void){
@@ -898,14 +927,17 @@ int WaitForESC27(char *pStrExchange, float timeOut){
 	clock_t timeExit;
 
     printf("%s",pStrExchange);
+	fflush(stdout);
 
-	timeExit = clock() + (int)(timeOut * clocksPerSecond);
+	timeExit = clock() + (timeOut * clocksPerSecond);
+	printf("timeExit:%d  ",timeExit);
+	printf("clock():%d  ",clock());
 
 	isWaitingForESC27 = 1;
 
     while (clock() < timeExit){
 		
-		i= InKey();
+		i = InKey();
 
         if (i > 0){
             cnt++;
@@ -917,6 +949,7 @@ int WaitForESC27(char *pStrExchange, float timeOut){
             r = GetESC27(i);
             if (r > 0){
 				isWaitingForESC27 = 0;
+				printf("Wait4:%d  ",r);
                 return r;
             }
         }

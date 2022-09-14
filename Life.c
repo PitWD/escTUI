@@ -859,10 +859,6 @@ void MonitorGetESC27(void){
 	int r = 0;		// Result From GetESC27
 	char c = 0;
 
-
-	ClearScreen();
-
-	TrapMouse(1);
 	
 		// Recognize manual ESC
 		_Bool isOnESC27 = 0;
@@ -967,14 +963,14 @@ void MonitorGetESC27(void){
 						if (ScreenSizeChanged()){
 							// Terminal Size changed... (Event)
 							EventESC27(515);
-							printf("SizeChanged:\n");
+							printf("SizeChanged01:\n");
 						}
 						break;
 					case 158:
 						// GotFocus
 						// At least On Linux IceWM it happens on all ScreenResizes, too
 						// SO, it recognizes much faster than polling while idle/DOEvents()
-						GetTerminalSize(0);
+						//GetTerminalSize(0);
 						EventESC27(158);
 						break;
 					case -2:
@@ -1035,7 +1031,7 @@ void MonitorGetESC27(void){
 				if (ScreenSizeChanged()){
 					// Terminal Size changed... (Event)
 					EventESC27(515);
-					printf("SizeChanged:\n");
+					printf("SizeChanged02:\n");
 				}
 			}
 			else {
@@ -1044,12 +1040,6 @@ void MonitorGetESC27(void){
 		}
 	}
 	// Loop Minimum
-
-	// Reset Mouse	
-	TrapMouse(0);
-
-	// Reset old Terminal Settings
-	SetVT(0);
 
 }
 
@@ -1060,7 +1050,7 @@ void MonitorGetESC27II(void){
 	char c = 0;
 
 
-	ClearScreen();
+	ClearScreen(0);
 
 	TrapMouse(1);
 
@@ -1206,9 +1196,6 @@ int main() {
 	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
 	*/
 
-	SetVT(1);
-
-	InitTiming();
 
 	printf("Hello New Project\n");
 	
@@ -1216,12 +1203,16 @@ int main() {
 	
 	printf("After Inits\n");
 	
-	ClearScreen();
-	
-	printf("After ClrScr\n");
-		
+	SetVT(1);
+
+	TrapMouse(1);
+
+	InitTiming();
+
 	GetTerminalSize(0);
 
+	printf("After ClrScr\n");
+		
 	printf("After Size\n");
 
 	Locate(screenWidth / 2 - 10, screenHeight / 2);
@@ -1238,10 +1229,12 @@ int main() {
 	printf("╰");
 	printf("%s\n", "╯");
 
-	ClearScreen();
+	//ClearScreen(0);
 
 	// *************************************************************
 	MonitorGetESC27();
+	TrapMouse(0);
+	SetVT(0);
 	return 0;
 	// *************************************************************
 

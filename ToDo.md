@@ -3,7 +3,8 @@ Def_ ToDo
 <br>
 
 **021. Use 1st GetTerminalSize()-Result to define the HowTo-CLS**
-- static int saves last non-zero function-call
+- ~~static int saves last non-zero function-call~~
+- ~~done~~
 
 <br>
 
