@@ -883,23 +883,7 @@ void MonitorGetESC27(void){
 	// Loop Minimum
 	while (i != 10 && i != 13){
 		
-		#if __WIN32__ || _MSC_VER || __WIN64__
-
-			if (kbhit())
-			{
-				// SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-				// SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_END);
-
-				i = getch();
-			}
-			else
-			{
-				i = 0;
-			}
-				
-		#else
-			i = getch();
-		#endif
+		i = InKey();
 
 		// Recognize manual ESC
 		if (isOnESC27 && i < 1){
@@ -1054,7 +1038,7 @@ void MonitorGetESC27(void){
 					printf("SizeChanged:\n");
 				}
 			}
-			else{
+			else {
 				DoEvents();
 			}	
 		}
@@ -1065,11 +1049,8 @@ void MonitorGetESC27(void){
 	TrapMouse(0);
 
 	// Reset old Terminal Settings
-	#if __WIN32__ || _MSC_VER
-		SetVT(0);
-	#else __unix__
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_io);
-	#endif
+	SetVT(0);
+
 }
 
 void MonitorGetESC27II(void){
@@ -1230,9 +1211,8 @@ int main() {
 	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
 	*/
 
-	#if __WIN32__ || _MSC_VER || __WIN64__
-		SetVT(1);
-	#endif
+	SetVT(1);
+
 	InitTiming();
 
 	printf("Hello New Project\n");

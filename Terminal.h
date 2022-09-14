@@ -62,66 +62,101 @@ int WaitForESC27(char *pStrExchange, float timeOut);
     */
 
 /* LINUX / UNIX */
-#if __WIN32__ || _MSC_VER
 
-	int SetVT(_Bool set)
-	{
-		// Set output mode to handle virtual terminal sequences
-		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-		if (hOut == INVALID_HANDLE_VALUE)
-		{
-			printf("No hOut Handle");
-			return 0;
-		}
-		HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-		if (hIn == INVALID_HANDLE_VALUE)
-		{
-			printf("No hIn Handle");
-			return 0;
-		}
+	// Set/Reset output mode to handle virtual terminal sequences
+	int SetVT(_Bool set){
 
-		DWORD dwOriginalOutMode = 0;
-		DWORD dwOriginalInMode = 0;
-		if (!GetConsoleMode(hOut, &dwOriginalOutMode))
-		{
-			printf("Wrong hOut Mode");
-			return 0;
-		}
-		if (!GetConsoleMode(hIn, &dwOriginalInMode))
-		{
-			printf("Wrong hIn Mode");
-			return 0;
-		}
+		#if __WIN32__ || _MSC_VER || __WIN64__
 
-		DWORD dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
-		DWORD dwRequestedInModes = ENABLE_VIRTUAL_TERMINAL_INPUT;
-
-		DWORD dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
-		if (!SetConsoleMode(hOut, dwOutMode))
-		{
-			// we failed to set both modes, try to step down mode gracefully.
-			dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-			dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
-			if (!SetConsoleMode(hOut, dwOutMode))
-			{
-				// Failed to set any VT mode, can't do anything here.
-				printf("No Out Mode");
+			HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+			if (hOut == INVALID_HANDLE_VALUE){
 				return 0;
 			}
-		}
+			HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+			if (hIn == INVALID_HANDLE_VALUE){
+				return 0;
+			}
 
-		DWORD dwInMode = dwOriginalInMode | dwRequestedInModes;
-		if (!SetConsoleMode(hIn, dwInMode))
-		{
-			// Failed to set VT input mode, can't do anything here.
-			printf("No In Mode");
-			return 0;
-		}
+			DWORD dwOriginalOutMode = 0;
+			DWORD dwOriginalInMode = 0;
+			if (!GetConsoleMode(hOut, &dwOriginalOutMode)){
+				return 0;
+			}
+			if (!GetConsoleMode(hIn, &dwOriginalInMode)){
+				return 0;
+			}
 
-		return 1;
+			DWORD dwRequestedOutModes = 0;
+			DWORD dwRequestedInModes = 0;
+			DWORD dwOutMode = 0;
+			if (set){
+				dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+				dwRequestedInModes = ENABLE_VIRTUAL_TERMINAL_INPUT;
+				dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
+			}
+			
+			if (!SetConsoleMode(hOut, dwOutMode)){
+				// we failed to set both modes, try to step down mode gracefully.
+				
+				if (set){
+					dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+					dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
+				}
+				
+				if (!SetConsoleMode(hOut, dwOutMode)){
+					// Failed to set any VT mode, can't do anything here.
+					return 0;
+				}
+			}
+
+			DWORD dwInMode = 0;
+			if (set){
+				dwInMode = dwOriginalInMode | dwRequestedInModes;
+			}
+			
+			if (!SetConsoleMode(hIn, dwInMode)){
+				// Failed to set VT input mode, can't do anything here.
+				return 0;
+			}
+
+			return 1;
+		
+		#else
+
+			static struct termios new_io;
+			static struct termios old_io;
+			
+			// Set = 1		Switch to cbreak mode (Disable ECHO and ICANON)
+			// Set = 0		Switch Back
+
+			if (set){
+				// Save actual Terminal
+				if((tcgetattr(STDIN_FILENO, &old_io)) == -1){
+					return 0;
+				}
+				new_io = old_io;
+				
+				// Change Flags to cbreak-Mode
+				new_io.c_lflag = new_io.c_lflag & ~(ECHO|ICANON);
+				new_io.c_cc[VMIN] = 1;
+				new_io.c_cc[VTIME]= 0;
+				
+				// Set cbreak-Mode
+				if((tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_io)) == -1){
+					return 0;
+				}
+			}
+			else{
+				if((tcsetattr(STDIN_FILENO, TCSANOW, &old_io)) == -1){
+					return 0;
+				}
+			}
+			return 1;
+
+		#endif
 	}	
-#else
-	// || __unix__ 
+
+	/* || __unix__ 
     static struct termios new_io;
     static struct termios old_io;
     
@@ -132,7 +167,7 @@ int WaitForESC27(char *pStrExchange, float timeOut);
         
         // Save actual Terminal
         if((tcgetattr(fd, &old_io)) == -1){
-            return -1;
+            return 0;
         }
         new_io = old_io;
         
@@ -143,7 +178,7 @@ int WaitForESC27(char *pStrExchange, float timeOut);
         
         // Set cbreak-Mode
         if((tcsetattr(fd, TCSAFLUSH, &new_io)) == -1){
-            return -1;
+            return 0;
         }
         return 1;
     }
@@ -155,17 +190,12 @@ int WaitForESC27(char *pStrExchange, float timeOut);
         int c = 0;
         
 		if (!isInit){
-			if(cbreak(STDIN_FILENO) == -1) {
-				// fprintf(stderr,"cbreakERR\n");
-				return -1;
+			if(! cbreak(STDIN_FILENO)) {
+				return 0;
 	        }
 			isInit = 1;
-	        //ioctl(0, FIONREAD , &c);
 		}
 		
-		// This seems to work - almost... with real Keyboard/Mouse - probably nearly perfect...
-		// But - if an answer out of "int WaitForESC27()" is too unexpected it could hang on following "c = getchar()" until next Key-Press...
-		// The VS-Code integrated terminal even need a very first keystroke to work then proper... Xterm's are working from start perfect...
         ioctl(0, FIONREAD , &c);
 		if (c > 0){
 			cnt = c;
@@ -177,8 +207,36 @@ int WaitForESC27(char *pStrExchange, float timeOut);
 		}
         return c;
     }
+*/
 
-#endif
+int InKey(void){
+
+	// Returns next char in stdin
+	// or zero.
+
+	#if __WIN32__ || _MSC_VER || __WIN64__
+
+		if (kbhit()){
+			return getch();
+		}
+		else {
+			return 0;
+		}
+
+	#else
+
+		static cnt = 0;
+
+        ioctl(0, FIONREAD , &cnt);
+		if (cnt > 0){
+			return getchar();
+		}
+		else {
+			return 0;
+		}
+
+	#endif
+}
 
 /*
 void DoEvents(void){
@@ -196,40 +254,34 @@ void DoEvents(void){
 */
 // DoEvents
  #if __WIN32__ || _MSC_VER || __WIN64__
-
 	#define DoEvents() Sleep(1);
 #else
-
 	#define DoEvents() usleep(100);
 #endif 
 
-/*
-// getch() TEST
-int main(void) {
-    int c;
-    printf("Press 'q' to quit!\n");
-    // Waiting for q. 
-    while(( c = getch() ) != 'q');
-    return EXIT_SUCCESS;
-}
-*/
 
-
-// Cross compatible  CONSOLE_SCREEN_BUFFER_INFO 
-    // Set Terminal Size in Chars
-    // to globals: ScreenWidth & ScreenHeight
 
 int GetTerminalSize(int useIsSet){
 
-	// On the first run, we check and store terminals way to get TerminalSize
+	// int isSet
+	// self-determined way "HowTo Get The Terminal-Size"
+	// 1st time function gets called with 'useIsSet = 0' isSet will get detected 
 	static int isSet = 0;		// 1	Xterm
 								// 2	Dumb (MS Terminal)
 								// 3	System
-
+							
+	// int useIsSet
+		// 0 = Automatic Selection
+		// 1 = Xterm
+		// 2 = Dumb (MS Terminal)
+		// 3 = System
+							
 	if (!useIsSet){
+		// use detected mode
 		useIsSet = isSet;
 	}
 	else if (useIsSet < 0 || useIsSet > 3){
+		// Correct bad 'useIsSet' values
 		useIsSet = 3; 
 	}
 	
@@ -246,8 +298,6 @@ int GetTerminalSize(int useIsSet){
 	case 0:
 		// 1st run
 		int r = 0;
-		screenWidth = 0;
-		screenHeight = 0;
 		r = WaitForESC27("\x1B[18t",0.5);
 		//r = WaitForESC27("xTerm-Test\n",0.2);
 		if (screenWidth > 0 && screenHeight > 0){
@@ -287,9 +337,15 @@ int GetTerminalSize(int useIsSet){
 		}
 		break;
 	}	
-	return isSet;
+	
+	if (useIsSet){
+		return useIsSet;
+	}
+	else{
+		return isSet;
+	}
+	
 }
-
 
 void ClearScreen(){
 #if ESC_CLRSCR
