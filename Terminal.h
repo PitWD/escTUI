@@ -53,161 +53,97 @@ int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 _Bool isWaitingForESC27 = 0;
 
 int WaitForESC27(char *pStrExchange, float timeOut);
-
-// Cross compatible getch() function 
-    /*
-    Inspired by  http://cc.byexamples.com/2007/04/08/non-blocking-user-input-in-loop-without-ncurses/
-                 https://gist.github.com/FyodorK/f22af54cfc1dbcd1754c33d8cd239bef
-    but much more by the German book "C von A bis Z" (C from A to Z)
-    */
-
-/* LINUX / UNIX */
-
 	// Set/Reset output mode to handle virtual terminal sequences
-	int SetVT(_Bool set){
+int SetVT(_Bool set){
 
-		#if __WIN32__ || _MSC_VER || __WIN64__
+	#if __WIN32__ || _MSC_VER || __WIN64__
 
-			HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-			if (hOut == INVALID_HANDLE_VALUE){
-				return 0;
-			}
-			HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-			if (hIn == INVALID_HANDLE_VALUE){
-				return 0;
-			}
+		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+		if (hOut == INVALID_HANDLE_VALUE){
+			return 0;
+		}
+		HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+		if (hIn == INVALID_HANDLE_VALUE){
+			return 0;
+		}
 
-			DWORD dwOriginalOutMode = 0;
-			DWORD dwOriginalInMode = 0;
-			if (!GetConsoleMode(hOut, &dwOriginalOutMode)){
-				return 0;
-			}
-			if (!GetConsoleMode(hIn, &dwOriginalInMode)){
-				return 0;
-			}
+		DWORD dwOriginalOutMode = 0;
+		DWORD dwOriginalInMode = 0;
+		if (!GetConsoleMode(hOut, &dwOriginalOutMode)){
+			return 0;
+		}
+		if (!GetConsoleMode(hIn, &dwOriginalInMode)){
+			return 0;
+		}
 
-			DWORD dwRequestedOutModes = 0;
-			DWORD dwRequestedInModes = 0;
-			DWORD dwOutMode = 0;
+		DWORD dwRequestedOutModes = 0;
+		DWORD dwRequestedInModes = 0;
+		DWORD dwOutMode = 0;
+		if (set){
+			dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+			dwRequestedInModes = ENABLE_VIRTUAL_TERMINAL_INPUT;
+			dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
+		}
+		
+		if (!SetConsoleMode(hOut, dwOutMode)){
+			// we failed to set both modes, try to step down mode gracefully.
+			
 			if (set){
-				dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
-				dwRequestedInModes = ENABLE_VIRTUAL_TERMINAL_INPUT;
+				dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 				dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
 			}
 			
 			if (!SetConsoleMode(hOut, dwOutMode)){
-				// we failed to set both modes, try to step down mode gracefully.
-				
-				if (set){
-					dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-					dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
-				}
-				
-				if (!SetConsoleMode(hOut, dwOutMode)){
-					// Failed to set any VT mode, can't do anything here.
-					return 0;
-				}
-			}
-
-			DWORD dwInMode = 0;
-			if (set){
-				dwInMode = dwOriginalInMode | dwRequestedInModes;
-			}
-			
-			if (!SetConsoleMode(hIn, dwInMode)){
-				// Failed to set VT input mode, can't do anything here.
+				// Failed to set any VT mode, can't do anything here.
 				return 0;
 			}
+		}
 
-			return 1;
+		DWORD dwInMode = 0;
+		if (set){
+			dwInMode = dwOriginalInMode | dwRequestedInModes;
+		}
 		
-		#else
+		if (!SetConsoleMode(hIn, dwInMode)){
+			// Failed to set VT input mode, can't do anything here.
+			return 0;
+		}
 
-			static struct termios new_io;
-			static struct termios old_io;
-			
-			// Set = 1		Switch to cbreak mode (Disable ECHO and ICANON)
-			// Set = 0		Switch Back
+		return 1;
+	
+	#else
 
-			if (set){
-				// Save actual Terminal
-				if((tcgetattr(STDIN_FILENO, &old_io)) == -1){
-					return 0;
-				}
-				new_io = old_io;
-				
-				// Change Flags to cbreak-Mode
-				new_io.c_lflag = new_io.c_lflag & ~(ECHO|ICANON);
-				new_io.c_cc[VMIN] = 1;
-				new_io.c_cc[VTIME]= 0;
-				
-				// Set cbreak-Mode
-				if((tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_io)) == -1){
-					return 0;
-				}
-			}
-			else{
-				if((tcsetattr(STDIN_FILENO, TCSANOW, &old_io)) == -1){
-					return 0;
-				}
-			}
-			return 1;
+		static struct termios new_io;
+		static struct termios old_io;
+		
+		// Set = 1		Switch to cbreak mode (Disable ECHO and ICANON)
+		// Set = 0		Switch Back
 
-		#endif
-	}	
-
-	/* || __unix__ 
-    static struct termios new_io;
-    static struct termios old_io;
-    
-    // Switch to cbreak mode:
-        // Disable ECHO and ICANON
-
-    int cbreak(int fd) {
-        
-        // Save actual Terminal
-        if((tcgetattr(fd, &old_io)) == -1){
-            return 0;
-        }
-        new_io = old_io;
-        
-        // Change Flags to cbreak-Mode
-        new_io.c_lflag = new_io.c_lflag & ~(ECHO|ICANON);
-        new_io.c_cc[VMIN] = 1;
-        new_io.c_cc[VTIME]= 0;
-        
-        // Set cbreak-Mode
-        if((tcsetattr(fd, TCSAFLUSH, &new_io)) == -1){
-            return 0;
-        }
-        return 1;
-    }
-
-    int getch(void) {
-        
-		static _Bool isInit = 0;
-		static int cnt = 0;
-        int c = 0;
-        
-		if (!isInit){
-			if(! cbreak(STDIN_FILENO)) {
+		if (set){
+			// Save actual Terminal
+			if((tcgetattr(STDIN_FILENO, &old_io)) == -1){
 				return 0;
-	        }
-			isInit = 1;
+			}
+			new_io = old_io;
+			
+			// Change Flags to cbreak-Mode
+			new_io.c_lflag = new_io.c_lflag & ~(ECHO|ICANON);
+			new_io.c_cc[VMIN] = 1;
+			new_io.c_cc[VTIME]= 0;
+			
+			// Set cbreak-Mode
+			if((tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_io)) == -1){
+				return 0;
+			}
 		}
-		
-        ioctl(0, FIONREAD , &c);
-		if (c > 0){
-			cnt = c;
+		else{
+			if((tcsetattr(STDIN_FILENO, TCSANOW, &old_io)) == -1){
+				return 0;
+			}
 		}
-		if (cnt > 0 || isWaitingForESC27){
-			// printf("Chars: %d: ",cnt);
-			c = getchar();
-			cnt--;
-		}
-        return c;
-    }
-*/
+		return 1;
+	#endif
+}	
 
 int InKey(void){
 
@@ -365,14 +301,10 @@ void ClearScreen(){
 #else
 
     /* LINUX / UNIX */
-    #ifdef __unix__
-        
+    #if __WIN32__ || _MSC_VER || __WIN64__
+        clrscr();                // It's MUCH faster via <conio.h>    
+    #else 
         system ("clear");
-    
-    /* Billy OS */
-    #elif __WIN32__ || _MSC_VER
-        // system ("cls");
-        clrscr();                // It's MUCH faster via <conio.h>
     #endif
 
 #endif
