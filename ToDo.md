@@ -2,7 +2,13 @@ Def_ ToDo
 
 <br>
 
+**021. Use 1st GetTerminalSize()-Result to define the HowTo-CLS**
+- static int saves last non-zero function-call
+
+<br>
+
 **020. Make an InKey-Function from getch/getch mess**
+- ~~done~~ (together with SetVT())
 
 <br>
 
