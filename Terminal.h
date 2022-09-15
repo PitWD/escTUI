@@ -234,13 +234,13 @@ void ClearScreen(int set){
 	case 1:
 	case 2:
 		// ESC-sequences are working
-		// printf("\x1B[2J");          // "just" Screen
-		printf("\x1B[3J");	    // Including Buffer
+		printf("\x1B[2J");          // "just" Screen
+		// printf("\x1B[3J");	    // Including Buffer
 		break;
 	case 3:
 		// OS - Functions needed	
 		#if __WIN32__ || _MSC_VER || __WIN64__
-			clrscr();                // It's MUCH faster via <conio.h>    
+			system ("cls");
 		#else 
 			system ("clear");
 		#endif
