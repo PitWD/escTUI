@@ -55,7 +55,7 @@ int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 //ESC27 Reading
 _Bool isWaitingForESC27 = 0;
 
-int WaitForESC27(char *pStrExchange, float timeOut);
+int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
 	// Set/Reset output mode to handle virtual terminal sequences
 int SetVT(_Bool set){
 
@@ -168,13 +168,17 @@ int InKey(void){
 		int c = 0;
 
 		// Seems silly to read buffer-size each time
-		ioctl(0, FIONREAD , &c);
-		// and to then eventually (re)set cnt
-		if (c > 0){
-			cnt = c;
+		if((ioctl(0, FIONREAD , &c)) > -1){
+			// and to then eventually (re)set cnt
+			if (c > 0){
+				cnt = c;
+			}
+			// but it's a MustHave... Direct FIONREAD into cnt only if !cnt - fails (sometimes) with scary effects.
 		}
-		// but it's a MustHave... Direct FIONREAD into cnt only if !cnt - fails with scary effects.
-
+		else{
+			cnt = 0;
+		}
+		
 		if (cnt > 0){
 			cnt--;
 			return getchar();
@@ -184,6 +188,12 @@ int InKey(void){
 		}
 
 	#endif
+}
+
+void FlushInKey(void){
+	while (InKey()){
+		// Flush
+	}
 }
 
 /*
@@ -211,12 +221,21 @@ void ClearScreen(int set){
 
 	static int isSet = 0;
 	
-	switch (isSet){
+	if (set){
+		if (set < 1 || set > 3){
+			set = 3;
+		}
+	}
+	else{
+		set = isSet;
+	}
+	
+	switch (set){
 	case 1:
 	case 2:
 		// ESC-sequences are working
-		printf("\x1B[2J");          // "just" Screen
-		// printf("%s3J", CSI);	    // Including Buffer
+		// printf("\x1B[2J");          // "just" Screen
+		printf("\x1B[3J");	    // Including Buffer
 		break;
 	case 3:
 		// OS - Functions needed	
@@ -281,7 +300,7 @@ int GetTerminalSize(int set){
 		break;
 	case 0:
 		// 1st run
-		r = WaitForESC27("\x1B[18t",0.2);
+		r = WaitForESC27("\x1B[18t",109,0.5);
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 1;
 			ClearScreen(1);
@@ -290,7 +309,7 @@ int GetTerminalSize(int set){
 			break;
 		}
 		screenSizeInCursorPos = 1;
-		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",0.2);
+		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",107,0.5);
 		screenSizeInCursorPos = 0;
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 2;
@@ -407,15 +426,13 @@ int GetESC27 (int c){
 			// ESC came twice... p			
 			if (!streamPos){
 				// User ESC
-				isValid = 0;
-				return 108;
+				r = 108;
 			}
 			else{
 				// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
 				r = 155;
-				goto SaveGetESC27ErrReturn;
 			}
-			
+			goto SaveGetESC27ErrReturn;
 		}
 		
 		isValid = 1;
@@ -915,7 +932,7 @@ int GetESC27 (int c){
 
 }
 
-int WaitForESC27(char *pStrExchange, float timeOut){
+int WaitForESC27(char *pStrExchange,int waitForID, float timeOut){
     // Send pStrExchange[] as initial command
     // Wait max timeOut sec for the answer
     // return       -1  Illegal answer
@@ -932,14 +949,12 @@ int WaitForESC27(char *pStrExchange, float timeOut){
     int cnt = -1;
 	clock_t timeExit;
 
+	fflush(stdin);
+	FlushInKey();
     printf("%s",pStrExchange);
 	fflush(stdout);
 
-	timeExit = clock() + (timeOut * clocksPerSecond);
-	printf("timeExit:%d  ",timeExit);
-	printf("clock():%d  ",clock());
-
-	isWaitingForESC27 = 1;
+	timeExit = clock() + (long)(timeOut * clocksPerSecond);
 
     while (clock() < timeExit){
 		
@@ -949,26 +964,29 @@ int WaitForESC27(char *pStrExchange, float timeOut){
             cnt++;
             if (cnt > ESC27_EXCHANGE_SIZE - 2){
                 //Error - Answer too long
-				isWaitingForESC27 = 0;
-                return -4;
+                FlushInKey();
+				return -4;
             }
             r = GetESC27(i);
-            if (r > 0){
-				isWaitingForESC27 = 0;
-				printf("Wait4:%d  ",r);
-                return r;
+            if (r){
+				if ((r == waitForID) || (waitForID == 0)){
+					FlushInKey();				
+					return r;
+				}
+				cnt == -1;				
             }
         }
     }
+
     // TimeOut
-	isWaitingForESC27 = 0;
-    if (cnt > -1){
+	FlushInKey();
+	if (cnt > -1){
         // With char(s) received
         return -3;
     }
     else{
         // Without char(s) received
-        return 0;
+       	return 0;
     }
 }
 

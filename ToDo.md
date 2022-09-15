@@ -14,6 +14,7 @@ Def_ ToDo
 <br>
 
 **019. User ESC TimeOut can be used to recognize and abort "open/broken" Sequences, too!**
+- ~~done~~ (was existent 'from binary mouse' - but optimized)
 
 <br>
 

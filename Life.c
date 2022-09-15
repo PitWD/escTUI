@@ -1056,7 +1056,7 @@ void MonitorGetESC27II(void){
 
 	// ScreenSize
 	// printf("%s18t", CSI);
-	r = WaitForESC27("\x1B[18t",0.2);
+	r = WaitForESC27("\x1B[18t",0,0.2);
 
 
 	// Loop Minimum
@@ -1200,16 +1200,16 @@ int main() {
 	printf("Hello New Project\n");
 	
 	InitEscSeq(); InitColors();
-	
-	printf("After Inits\n");
-	
+		
 	SetVT(1);
 
 	TrapMouse(1);
 
 	InitTiming();
 
-	GetTerminalSize(0);
+	printf("After Inits\n");
+
+	printf("GetTerminalSize: %d\n",GetTerminalSize(0));
 
 	printf("After ClrScr\n");
 		
@@ -1232,6 +1232,7 @@ int main() {
 	//ClearScreen(0);
 
 	// *************************************************************
+	//ClearScreen(0);
 	MonitorGetESC27();
 	TrapMouse(0);
 	SetVT(0);
