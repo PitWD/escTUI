@@ -973,7 +973,7 @@ int WaitForESC27(char *pStrExchange,int waitForID, float timeOut){
 					FlushInKey();				
 					return r;
 				}
-				cnt == -1;				
+				cnt = -1;				
             }
         }
     }
