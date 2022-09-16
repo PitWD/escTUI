@@ -9,6 +9,7 @@ const char TerminalVersion [] = "1.00pa";
 #include <stdio.h>
 #include <stdlib.h>
 #include "Timing.h"
+#include <signal.h>
 
 #define ESC_CLRSCR 1
 #define ESC_SCREENSIZE 1
@@ -52,8 +53,27 @@ int mouseSelX = 0;                     // 1st point of selection rectangle
 int mouseSelY = 0;                     // or same as MousePosX&Y = No selection
 int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 
-//ESC27 Reading
+// ESC27 Reading
 _Bool isWaitingForESC27 = 0;
+
+// Signals
+int signalCtrlC = 0;
+int signalTerminalSize = 0;
+
+static void SignalHandler(int sig){
+	if (SIGINT == sig){
+		// Ctrl-C pressed
+		signalCtrlC = 1;
+	}
+	else if (SIGWINCH == sig){
+		// Ctrl-C pressed
+		signalTerminalSize = 1;
+	}
+	/*else if (SIG_STDIN == sig){
+		// IO - Ready
+		printf("Yeah IO-READY");
+	}*/
+}
 
 int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
 	// Set/Reset output mode to handle virtual terminal sequences
@@ -214,7 +234,7 @@ void DoEvents(void){
 #if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);
 #else
-	#define DoEvents() usleep(100);
+	#define DoEvents() usleep(DoEventsTime);
 #endif 
 
 void ClearScreen(int set){

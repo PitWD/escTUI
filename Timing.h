@@ -52,7 +52,7 @@ clock_t userEscTimeout; // = 0.1 * 45000;
 // TimeIn / TimeOut to recognize MouseClick as a single Click (not part of a DoubleClick)
 clock_t mouseClickTimeout;  // = 0.25 * 45000;
 // DoEventsTime for usleep() (Linux & Mac)
-#define DoEventsTime 100;
+#define DoEventsTime 10000
 
 // 01/01/2000
 time_t JAN_01_2000 = 946677600;

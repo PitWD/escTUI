@@ -872,7 +872,7 @@ void MonitorGetESC27(void){
 		#if __WIN32__ || _MSC_VER || __WIN64__
 			#define Terminal_Size_Change_Trigger 10
 		#else
-			#define Terminal_Size_Change_Trigger 100
+			#define Terminal_Size_Change_Trigger 10
 		#endif
 		int terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
 
@@ -1025,14 +1025,27 @@ void MonitorGetESC27(void){
 			// Time to do idle-time things
 			terminalSizeChangeCnt--;
 			if (!terminalSizeChangeCnt){
-				// Every 1.000(linux/Mac) / 100(WIN) idle-times check on ScreenSize
+				// Every xx idle-times check on ScreenSize
 				terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
-				GetTerminalSize(3);
-				if (ScreenSizeChanged()){
-					// Terminal Size changed... (Event)
-					EventESC27(515);
-					printf("SizeChanged02:\n");
-				}
+
+				#if __WIN32__ || _MSC_VER || __WIN64__
+					GetTerminalSize(3);
+					if (ScreenSizeChanged()){
+						// Terminal Size changed... (Event)
+						EventESC27(515);
+						printf("SizeChanged02:\n");
+					}
+				#else
+					if (signalTerminalSize){
+						GetTerminalSize(3);
+						signalTerminalSize = 0;
+						if (ScreenSizeChanged()){
+							// Terminal Size changed... (Event)
+							EventESC27(515);
+							printf("SizeChanged02:\n");
+						}
+					}
+				#endif
 			}
 			else {
 				DoEvents();
@@ -1199,21 +1212,26 @@ int main() {
 
 	printf("Hello New Project\n");
 	
-	InitEscSeq(); InitColors();
-		
+
+	InitEscSeq();
+	InitColors();
 	SetVT(1);
-
 	TrapMouse(1);
-
 	InitTiming();
+	signal(SIGWINCH, SignalHandler);
+	signal(SIGINT, SignalHandler);
+
 
 	printf("After Inits\n");
 
 	printf("GetTerminalSize: %d\n",GetTerminalSize(0));
 
+	printf("After Size\n");
+
+	ClearScreen(0);
+
 	printf("After ClrScr\n");
 		
-	printf("After Size\n");
 
 	Locate(screenWidth / 2 - 10, screenHeight / 2);
 	printf("Width: %d  Height: %d\n", screenWidth, screenHeight);
