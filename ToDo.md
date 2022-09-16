@@ -2,6 +2,11 @@ Def_ ToDo
 
 <br>
 
+**022. Check for MAC and CLEAN UP**
+- nothing else anymore before this isn't done!
+
+<br>
+
 **021. Use 1st GetTerminalSize()-Result to define the HowTo-CLS**
 - ~~static int saves last non-zero function-call~~
 - ~~done~~

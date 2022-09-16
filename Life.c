@@ -1220,6 +1220,7 @@ int main() {
 	InitTiming();
 	signal(SIGWINCH, SignalHandler);
 	signal(SIGINT, SignalHandler);
+	// signal(SIGURG, SignalHandler);
 
 
 	printf("After Inits\n");

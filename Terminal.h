@@ -66,17 +66,19 @@ static void SignalHandler(int sig){
 		signalCtrlC = 1;
 	}
 	else if (SIGWINCH == sig){
-		// Ctrl-C pressed
+		// Terminal-Size Changed
 		signalTerminalSize = 1;
 	}
-	/*else if (SIG_STDIN == sig){
+	/*else if (SIGURG == sig){
 		// IO - Ready
 		printf("Yeah IO-READY");
 	}*/
 }
 
 int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
-	// Set/Reset output mode to handle virtual terminal sequences
+
+// Set/Reset output mode to handle virtual terminal sequences
+// and for (LINUX/Mac) to (re)set c_break mode
 int SetVT(_Bool set){
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
@@ -216,21 +218,6 @@ void FlushInKey(void){
 	}
 }
 
-/*
-void DoEvents(void){
-
-	#if __WIN32__ || _MSC_VER || __WIN64__
-		// SetPriorityClass(GetCurrentProcess(), PROCESS_MODE_BACKGROUND_BEGIN);
-		// SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
- 		Sleep(1);
-	#else
-
-		usleep(100);
-	#endif
-
-}
-*/
-// DoEvents
 #if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);
 #else
