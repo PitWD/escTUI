@@ -1056,149 +1056,7 @@ void MonitorGetESC27(void){
 
 }
 
-void MonitorGetESC27II(void){
 
-	int i = 0;
-	int r = 0;
-	char c = 0;
-
-
-	ClearScreen(0);
-
-	TrapMouse(1);
-
-	// ScreenSize
-	// printf("%s18t", CSI);
-	r = WaitForESC27("\x1B[18t",0,0.2);
-
-
-	// Loop Minimum
-
-	// Recognize manual ESC
-	_Bool isOnESC27 = 0;
-	clock_t timeOnUsrEsc;
-	// Recognize Click & DblClick / Area-Selection
-	_Bool isOnClick = 0;
-	clock_t timeOnClick;
-
-	while (i != 10 && i != 13){
-		
-		i = InKey();
-
-		// Recognize manual ESC
-		if (isOnESC27 && i < 1){
-			if (clock() > timeOnUsrEsc){
-				// UsrESC
-				i = 27;
-			}
-		}
-		else if (i == 27){
-			isOnESC27 = 1;
-			timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
-		}
-		else{
-			isOnESC27 = 0;
-		}
-			
-	// Loop Minimum
-
-	// Loop Minimum
-
-		if (i > 0){
-
-			r = GetESC27(i);
-
-			switch (r){
-			case 0:
-				// Nothing
-				break;
-			case -1:
-				// Regular Key - No ESC-Sequence related stuff
-				printf("%c",i);
-				fflush(stdout);
-				break;
-			case 117:
-				// Mouse UP (Left / Wheel / Right)
-				if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
-					// it's a (dbl)click
-					if (isOnClick && clock() < timeOnClick){
-						// dblClick
-						EventESC27(513);
-						isOnClick = 0;
-					}
-					else{
-						// 1st Click
-						isOnClick = 1;
-						timeOnClick = clock() + mouseClickTimeout;
-					}							
-				}
-				else{
-					// it's an area
-					EventESC27(514);
-					isOnClick = 0;
-				}
-				break;
-			case 109:
-				// Terminal-Size
-				if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
-					// Terminal Size changed... (Event)
-					screenHeightPrev = screenHeight;
-					screenWidthPrev = screenWidth;
-					EventESC27(515);
-				}
-				break;
-			case 158:
-				// GotFocus
-				GetTerminalSize(0);
-				EventESC27(158);
-				break;
-			case -2:
-				// Unknown Termination Char
-			case -4:
-				// Overflow, Too Long
-			case -5:
-				// Unexpected End Of Text
-				break;
-			default:
-				EventESC27(r);
-				break;
-			}
-		}
-
-		// Recognize Single Click
-		if (isOnClick && (clock() > timeOnClick)){
-			// click
-			EventESC27(512);
-			isOnClick = 0;
-		}
-
-		CheckOnTimeChange();
-		if (secondChanged){
-			// A Second (ore more) is over
-			EventSecondChange();	// Activates all other Minute/Hour/DayChange Events
-		}
-		
-		// DO STUFF HERE START
-
-		// DO STUFF HERE STOP
-
-		// End Of Loop
-			/* Just for one loop active !
-			 Reset as last Action of the loop! */
-			secondChanged = 0;
-			minuteChanged = 0;
-			hourChanged = 0;
-			dayChanged = 0;
-
-		DoEvents();
-	}
-	// Loop Minimum
-
-	// Reset Mouse	
-	TrapMouse(0);
-
-	SetVT(0);
-}
 
 int main() {
 	
@@ -1218,7 +1076,10 @@ int main() {
 	SetVT(1);
 	TrapMouse(1);
 	InitTiming();
-	signal(SIGWINCH, SignalHandler);
+	#if __WIN32__ || _MSC_VER || __WIN64__
+	#else
+		signal(SIGWINCH, SignalHandler);
+	#endif
 	signal(SIGINT, SignalHandler);
 	// signal(SIGURG, SignalHandler);
 

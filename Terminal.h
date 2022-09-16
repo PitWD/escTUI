@@ -65,10 +65,13 @@ static void SignalHandler(int sig){
 		// Ctrl-C pressed
 		signalCtrlC = 1;
 	}
-	else if (SIGWINCH == sig){
-		// Terminal-Size Changed
-		signalTerminalSize = 1;
-	}
+	#if __WIN32__ || _MSC_VER || __WIN64__
+	#else	
+		else if (SIGWINCH == sig){
+			// Terminal-Size Changed
+			signalTerminalSize = 1;
+		}
+	#endif
 	/*else if (SIGURG == sig){
 		// IO - Ready
 		printf("Yeah IO-READY");
