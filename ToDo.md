@@ -2,8 +2,13 @@ Def_ ToDo
 
 <br>
 
+**023. Check on if the "silly-thing" in InKey() is gone with introduced FlushInKey()...**
+- !!! Do 022. first !!!
+
+<br>
+
 **022. Check for MAC and CLEAN UP**
-- nothing else anymore before this isn't done!
+- **nothing else anymore before this isn't done!**
 
 <br>
 
