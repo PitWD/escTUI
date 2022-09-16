@@ -2,13 +2,21 @@ Def_ ToDo
 
 <br>
 
+**024. Optimize CheckOnTimeChange() within core-loop**
+- **!!! Do 022. first !!!**
+- look for signal (On timer) sets the flag
+- move flag-check into idle-time
+
+<br>
+
 **023. Check on if the "silly-thing" in InKey() is gone with introduced FlushInKey()...**
-- !!! Do 022. first !!!
+- **!!! Do 022. first !!!**
 
 <br>
 
 **022. Check for MAC and CLEAN UP**
 - **nothing else anymore before this isn't done!**
+- remove case 109 & 158 within core-loop
 
 <br>
 
