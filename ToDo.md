@@ -2,10 +2,31 @@ Def_ ToDo
 
 <br>
 
+**027. Move ToDo to GitHub-Issues...**
+- **!!! Do 022. first !!!**
+
+<br>
+
+**026. Normize variable Naming**
+- **!!! Do 022. first !!!**
+- pXYZ - pointer
+- gXYZ - global
+- gpXYZ - global pointer
+- little HowTo to the whole naming thing
+
+<br>
+
+**025. Esc27Events change to alt+shift+ctrl flags**
+- **!!! Do 022. first !!!**
+- identify missing MAC-Key-Sequences
+
+<br>
+
 **024. Optimize CheckOnTimeChange() within core-loop**
 - **!!! Do 022. first !!!**
 - look for signal (On timer) sets the flag
 - move flag-check into idle-time
+- check signal() for calling "function(set)-see 022." on exit and err cases
 
 <br>
 
@@ -17,6 +38,12 @@ Def_ ToDo
 **022. Check for MAC and CLEAN UP**
 - **nothing else anymore before this isn't done!**
 - remove case 109 & 158 within core-loop
+- declaration of all functions in all *.h
+- add function-header to all functions (look for vs-code documentation addin)
+- Init/Exit processes into function(set)
+  - c_break +etc. globals to statics in function
+  - add serious error-handling
+
 
 <br>
 
@@ -171,8 +198,8 @@ Ok ! We could put the processing on the HMI-Terminal, but not on the µCs! µCs 
 
 **004. ByteMouseBug X/Y greater 255**
 - ~~It starts, that the axis is deleted in terminal -> TUI communication~~  **fixed** (covered by UsrEscLenErr)  
-~~then it flips to ByteValues smaller 32  "01" & "02"~~ **fixed** (covered by ByteModePositionErr)  
-then after "some" of the following sequence it's a "???" what kills the app
+~~then it flips to ByteValues smaller 32  "01" & "02" **fixed** (covered by ByteModePositionErr)  
+then after "some" of the following sequence it's a "???" what kills the app~~  
 27: ESC  
 91: [  
 77: M  
