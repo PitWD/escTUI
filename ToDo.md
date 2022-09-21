@@ -43,6 +43,9 @@ Def_ ToDo
 - Init/Exit processes into function(set)
   - c_break +etc. globals to statics in function
   - add serious error-handling
+- Use UserESC-Timeout for recognizing unfinished but valid (so, broken & unknown) sequences  
+use the missing Mac-Keys (see 025.) to praxis-test...  
+*(019. wasn't fully done - just inside GetESC27() but not inside Core-Loop)*
 
 
 <br>
