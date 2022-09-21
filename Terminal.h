@@ -398,8 +398,12 @@ int GetESC27 (int c){
 	//					-1	= Unknown / Illegal
 	//					-4	= overflow - too long
 	//					-5	= unexpected EOT
+	//					-3	= timeOut of a broken, or valid but unknown sequence
 	//					 0	= Valid, but waiting for more Bytes to identify
 	//					 n	= The pressed key (see related enum's)
+	
+	// Input value		-1	= CoreLoop has recognized timeout
+	
 	int r = -1;		
 
 	if (c == 127){
@@ -458,6 +462,11 @@ int GetESC27 (int c){
 		streamInESC27[1] = 0;		
 		return 0;
 	
+	}
+	else if(c == -1){
+		// TimeOut of a broken, or valid but unknown sequence
+		r = -3;
+		goto SaveGetESC27ErrReturn;
 	}
 	
 	else if (!isValid){

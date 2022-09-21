@@ -43,6 +43,9 @@ int EventESC27 (int event){
 	
 	int r = 0;		// Return Value
 	switch (event){
+	// A regular Key got pressed
+	case -1:
+		break;
 	// F1 - F12
 	case 1:
 		// F1
@@ -630,7 +633,10 @@ int EventESC27 (int event){
 		// Cursor Position
 		break;
 	case 109:
-		// Terminal Size
+		// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
+		if (ScreenSizeChanged()){
+			// Terminal Size has changed...
+		}
 		break;
 	case 110:
 		// Terminal Icon Label
@@ -759,9 +765,21 @@ int EventESC27 (int event){
 			break;
 		}
 		break;
-	case 515:
-		// Terminal-Size Changed
+
+	// Errors
+	case -3:
+		// TimeOut of a broken, or valid but unknown sequence
 		break;
+	case -2:
+		// Unknown Termination Char
+		break;
+	case -4:
+		// Overflow, Too Long
+		break;
+	case -5:
+		// Unexpected End Of Text
+		break;
+
 	default:
 		break;
 	}
@@ -860,11 +878,14 @@ void MonitorGetESC27(void){
 	char c = 0;
 
 	
-		// Recognize manual ESC
-		_Bool isOnESC27 = 0;
+	// Recognize manual ESC
+		int isOnUsrESC27 = 0;
 		clock_t timeOnUsrEsc;
+	// Recognize broken Sequences by timeout
+		int isOnESC27 = 0;
+		clock_t timeOnEsc;
 	// Recognize Click & DblClick / Area-Selection
-		_Bool isOnClick = 0;
+		int isOnClick = 0;
 		clock_t timeOnClick;
 		int posXonClick = 0;
 		int posYonClick = 0;
@@ -882,32 +903,39 @@ void MonitorGetESC27(void){
 		i = InKey();
 
 		// Recognize manual ESC
-		if (isOnESC27 && i < 1){
+		if (isOnUsrESC27 && i < 1){
 			if (clock() > timeOnUsrEsc){
 				// UsrESC
 				i = 27;
 			}
 		}
+		// Recognize timeout while receiving ESC
+		else if (isOnESC27 && !isOnUsrESC27 && i < 0){
+			// The !isOnUsrESC27 signals we already got more chars than just the 1st ESC
+			if (clock() > timeOnEsc){
+				// Broken, or valid and unknown, Sequence
+				i = -1;
+			}		
+		}
+		
 		else if (i == 27){
-			isOnESC27 = 1;
-			timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
+			// Entrance into (User)ESC-Sequences recognition
+			isOnUsrESC27 = 1; isOnESC27= 1;
+			timeOnUsrEsc = clock() + userEscTimeout;
+			// timeout for broken sequence twice as regular UserESC
+			timeOnEsc = timeOnUsrEsc + userEscTimeout;
 		}
 		else{
-			isOnESC27 = 0;
+			// any char after 1st ESC immediately disables possibility on UserESC
+			isOnUsrESC27 = 0;
 		}
 			
 	// Loop Minimum
 	
 	// Loop Minimum
-		if (i > 0){
+		if (i){
 	// Loop Minimum
-			/*
-			if(i == 32){
-				printf("\n");
-			}
-			
-			else{
-			*/	
+			if (i > 0){
 				TxtItalic(1);
 				SetFg16(fgRed);
 				printf("%d", i);
@@ -924,75 +952,56 @@ void MonitorGetESC27(void){
 				}
 				
 				printf("\n");
-				
-				// Loop Minimum
-				
-					r = GetESC27(i);
-					switch (r){
-					case 0:
-						// Nothing
-						break;
-					case -1:
-						// Regular Key - No ESC-Sequence related stuff
-						break;
-					case 117:
-						// Mouse UP (Left / Wheel / Right)
-						if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
-							// it's a (dbl)click
-							if (isOnClick && clock() < timeOnClick){
-								// dblClick
-								EventESC27(513);
-								isOnClick = 0;
-								printf("dblClick\n");
-							}
-							else{
-								// 1st Click
-								isOnClick = 1;
-								timeOnClick = clock() + mouseClickTimeout;
-							}							
+			}
+			// Loop Minimum
+			
+				r = GetESC27(i);
+				switch (r){
+				case 0:
+					// Nothing (waiting for more...)
+					break;
+				case -1:
+					// Regular Key - No ESC-Sequence/SpecialKey related stuff
+					break;
+				case 117:
+					// Mouse UP (Left / Wheel / Right)
+					if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+						// it's a (dbl)click
+						if (isOnClick && clock() < timeOnClick){
+							// dblClick
+							EventESC27(513);
+							isOnClick = 0;
+							printf("dblClick\n");
 						}
 						else{
-							// it's an area
-							EventESC27(514);
-							isOnClick = 0;
-							printf("Area\n");
-						}
-						break;
-					case 109:
-						// Terminal-Size
-						if (ScreenSizeChanged()){
-							// Terminal Size changed... (Event)
-							EventESC27(515);
-							printf("SizeChanged01:\n");
-						}
-						break;
-					case 158:
-						// GotFocus
-						// At least On Linux IceWM it happens on all ScreenResizes, too
-						// SO, it recognizes much faster than polling while idle/DOEvents()
-						//GetTerminalSize(0);
-						EventESC27(158);
-						break;
-					case -2:
-						// Unknown Termination Char
-					case -4:
-						// Overflow, Too Long
-					case -5:
-						// Unexpected End Of Text
-						break;
-					default:
-						EventESC27(r);
-						break;
+							// 1st Click
+							isOnClick = 1;
+							timeOnClick = clock() + mouseClickTimeout;
+						}							
 					}
-				// Loop Minimum
-				
-				if (r > 0){
-					isOnESC27 = 0;
-					TxtBold(1);
-					printf("  : %s\t%s\n\n\n", KeyID2String[r], &streamInESC27[1]);
-					TxtBold(0);					
+					else{
+						// it's an area
+						EventESC27(514);
+						isOnClick = 0;
+						printf("Area\n");
+					}
+					break;
+				default:
+					break;
 				}
-			// }
+				if (r){
+					// Disable timeouts
+					isOnUsrESC27 = 0; isOnESC27 = 0;
+					EventESC27(r);
+				}
+				
+			// Loop Minimum
+			
+			if (r > 0){
+				TxtBold(1);
+				printf("  : %s\t%s\n\n\n", KeyID2String[r], &streamInESC27[1]);
+				TxtBold(0);					
+			}
 
 	// Loop Minimum
 		}
@@ -1030,20 +1039,12 @@ void MonitorGetESC27(void){
 
 				#if __WIN32__ || _MSC_VER || __WIN64__
 					GetTerminalSize(3);
-					if (ScreenSizeChanged()){
-						// Terminal Size changed... (Event)
-						EventESC27(515);
-						printf("SizeChanged02:\n");
-					}
+					EventESC27(109);
 				#else
 					if (signalTerminalSize){
 						GetTerminalSize(3);
+						EventESC27(109);
 						signalTerminalSize = 0;
-						if (ScreenSizeChanged()){
-							// Terminal Size changed... (Event)
-							EventESC27(515);
-							printf("SizeChanged02:\n");
-						}
 					}
 				#endif
 			}
@@ -1124,8 +1125,11 @@ int main() {
 
 	TrapMouse(1);
 
+	// Recognize broken sequences - and valid, but unknown sequences
+	int isOnESC27 = 0;
 	// Recognize manual ESC
-	_Bool isOnESC27 = 0;
+	int isOnUsrESC27 = 0;
+
 	clock_t timeOnUsrEsc;
 
 	do{
@@ -1133,18 +1137,23 @@ int main() {
 		i = InKey();
 
 		// Recognize manual ESC
-		if (isOnESC27 && i < 1){
+		if (isOnUsrESC27 && i < 1){
 			if (clock() > timeOnUsrEsc){
 				// UsrESC
 				i = 27;
 			}
 		}
+		else if (isOnESC27)
+		{
+			/* code */
+		}
+		
 		else if (i == 27){
-			isOnESC27 = 1;
-			timeOnUsrEsc = clock() + userEscTimeout;	// Timing interacts with Loop-Sleep...
+			isOnUsrESC27 = 1;
+			timeOnUsrEsc = clock() + userEscTimeout;	
 		}
 		else{
-			isOnESC27 = 0;
+			isOnUsrESC27 = 0;
 		}
 			
 		if (i > 0){

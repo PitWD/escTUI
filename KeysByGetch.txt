@@ -240,5 +240,3 @@ Error - Handling
 513				DblClick
 514				Area
 
-2nd Level ScreenEvents
-515				Terminal-Size Changed
