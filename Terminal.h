@@ -937,7 +937,7 @@ int GetESC27 (int c){
 	return r;
 
 	SaveGetESC27ErrReturn: 
-	isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; screenSizeInCursorPos = 0; cursorWaitFor;
+	isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; screenSizeInCursorPos = 0; cursorWaitFor = 0;
 	return r;
 
 }
