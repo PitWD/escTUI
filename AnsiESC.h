@@ -1349,18 +1349,6 @@ void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, _Bool set) {
 	}
 }
 
-// Trap Mouse (On / Off)
-void TrapMouse(int set){
-
-	char c = 'l';
-	if (set){
-		c = 'h';
-	}
-	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
-	// 1002 instead of 1003 reports position only if Mouse Button is pressed
-	printf("%s?1002%c%s?1006%c%s?1004%c", CSI, c, CSI, c, CSI, c);
-}
-
 /*
 										EOF - Detailed Description
 

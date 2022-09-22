@@ -60,29 +60,21 @@ _Bool isWaitingForESC27 = 0;
 int signalCtrlC = 0;
 int signalTerminalSize = 0;
 
-static void SignalHandler(int sig){
-	if (SIGINT == sig){
-		// Ctrl-C pressed
-		signalCtrlC = 1;
-	}
-	#if __WIN32__ || _MSC_VER || __WIN64__
-	#else	
-		else if (SIGWINCH == sig){
-			// Terminal-Size Changed
-			signalTerminalSize = 1;
-		}
-	#endif
-	/*else if (SIGURG == sig){
-		// IO - Ready
-		printf("Yeah IO-READY");
-	}*/
-}
 
+int SetVT(int set);
+int InKey(void);
+void FlushInKey(void);
+int ClearScreen(int set);
+int GetTerminalSize(int set);
+int ScreenSizeChanged(void);
+int GetESC27 (int c);
 int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
+void SignalHandler(int sig);
+void TrapMouse(int set);
 
 // Set/Reset output mode to handle virtual terminal sequences
 // and for (LINUX/Mac) to (re)set c_break mode
-int SetVT(_Bool set){
+int SetVT(int set){
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 
@@ -1001,6 +993,36 @@ int WaitForESC27(char *pStrExchange,int waitForID, float timeOut){
         // Without char(s) received
        	return 0;
     }
+}
+
+void SignalHandler(int sig){
+	if (SIGINT == sig){
+		// Ctrl-C pressed
+		signalCtrlC = 1;
+	}
+	#if __WIN32__ || _MSC_VER || __WIN64__
+	#else	
+		else if (SIGWINCH == sig){
+			// Terminal-Size Changed
+			signalTerminalSize = 1;
+		}
+	#endif
+	/*else if (SIGURG == sig){
+		// IO - Ready
+		printf("Yeah IO-READY");
+	}*/
+}
+
+// Trap Mouse (On / Off)
+void TrapMouse(int set){
+
+	char c = 'l';
+	if (set){
+		c = 'h';
+	}
+	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
+	// 1002 instead of 1003 reports position only if Mouse Button is pressed
+	printf("\x1B[?1002%c\x1B[?1006%c\x1B[?1004%c", c, c, c);
 }
 
 

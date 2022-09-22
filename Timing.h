@@ -57,6 +57,10 @@ clock_t mouseClickTimeout;  // = 0.25 * 45000;
 // 01/01/2000
 time_t JAN_01_2000 = 946677600;
 
+void InitTiming(void);
+void EraseTimeChange(void);
+void CheckOnTimeChange(void);
+
 void InitTiming(void){
     time(&timeLast);
     clockLast = clock();
