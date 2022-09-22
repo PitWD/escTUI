@@ -1350,7 +1350,7 @@ void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, _Bool set) {
 }
 
 // Trap Mouse (On / Off)
-void TrapMouse(_Bool set){
+void TrapMouse(int set){
 
 	char c = 'l';
 	if (set){
