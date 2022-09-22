@@ -229,23 +229,26 @@ void FlushInKey(void){
 
 int ClearScreen(int set){
 
-	static int isSet = 0;
+	// Set > 0 defines the CLS-Mode (IsSet)
+	// Set = 0 uses defined CLS-Mode
+	// Default Mode is 3 (OS)
+	
+	static int isSet = 3;
 	
 	if (set){
+		// 1st call with defined HowTo
 		if (set < 1 || set > 3){
-			set = 3;
+			isSet = 3;
 		}
-	}
-	else{
-		set = isSet;
+		isSet = set;
 	}
 	
-	switch (set){
+	switch (isSet){
 	case 1:
 	case 2:
 		// ESC-sequences are working
-		//printf("\x1B[2J");          // "just" Screen
-		 printf("\x1B[3J");	    // Including Buffer
+		printf("\x1B[2J");
+		printf("\x1B[1;1H");	// Cursor To 1,1
 		break;
 	case 3:
 		// OS - Functions needed	
@@ -255,13 +258,6 @@ int ClearScreen(int set){
 			system ("clear");
 		#endif
 		break;
-	case 0:
-		// 1st call
-		isSet = set;
-		if (isSet < 1 || isSet > 3){
-			isSet = 3;
-		}
-		ClearScreen(isSet);
 	default:
 		break;
 	}

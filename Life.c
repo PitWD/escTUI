@@ -1105,6 +1105,11 @@ int main() {
 	#endif
 	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
 
+	printf("Synchronize CLS-Mode With Size-Mode...\n");
+	r = ClearScreen(r);
+	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n",r);
+	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
+
 	printf("Set Trap Mouse Mode... ");
 	TrapMouse(1);
 	printf("OK\n\n");
