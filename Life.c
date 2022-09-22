@@ -871,7 +871,7 @@ void EventSecondChange(void){
 	}
 }
 
-void MonitorGetESC27(void){
+void CoreLoop(void){
 
 	int i = 0;		// Input From stdin
 	int r = 0;		// Result From GetESC27
@@ -1068,112 +1068,77 @@ int main() {
 	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
 	*/
 
+	int r = 0;
 
-	printf("Hello New Project\n");
-	
+	printf("Hello New Project\n\n");
+	printf("Try To Start Video Terminal Mode... ");
+	if (!SetVT(1)){
+		printf("ERROR!\n");
+		printf("STOP PROJECT\n");
+		return 0;
+	}
+	printf("OK\n\n");
+
+	printf("Try To Clear Screen...\n");
+	r = ClearScreen(0);
+	if (!r){
+		// Can't happen....
+		printf("Clear Screen... ERROR!\n");
+		printf("STOP PROJECT\n");
+		return 0;
+	}
+	printf("Clear Screen... OK, CLS-Mode: %d\n\n",r);
+
+	printf("Try To Fetch Terminal Size... ");
+	r = GetTerminalSize(0);
+	if (!r){
+		printf("ERROR!\n");
+		printf("STOP PROJECT\n");
+		return 0;
+	}
+	printf("OK, Size-Mode: %d\n",r);
+	#if __WIN32__ || _MSC_VER || __WIN64__
+		printf("Billy-OS: Screen Size Changes Get Polled...Sorry.\n");
+	#else
+		signal(SIGWINCH, SignalHandler);
+		printf("Posix-OS: Screen Size Changes Get Signaled.\n");
+	#endif
+	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
+
+	printf("Set Trap Mouse Mode... ");
+	TrapMouse(1);
+	printf("OK\n\n");
+
+	printf("Catch Ctrl-C... ");
+	signal(SIGINT, SignalHandler);
+	printf("OK\n\n");
+
+	printf("Initializing Timing... ");
+	InitTiming();
+	printf("OK\n\n");
 
 	InitEscSeq();
 	InitColors();
-	SetVT(1);
-	TrapMouse(1);
-	InitTiming();
-	#if __WIN32__ || _MSC_VER || __WIN64__
-	#else
-		signal(SIGWINCH, SignalHandler);
-	#endif
-	signal(SIGINT, SignalHandler);
-	// signal(SIGURG, SignalHandler);
-
-
-	printf("After Inits\n");
-
-	printf("GetTerminalSize: %d\n",GetTerminalSize(0));
-
-	printf("After Size\n");
+	
+	// *************************************************************
+	//ClearScreen(0);
+	CoreLoop();
+	// *************************************************************
 
 	ClearScreen(0);
-
-	printf("After ClrScr\n");
-		
-
-	Locate(screenWidth / 2 - 10, screenHeight / 2);
-	printf("Width: %d  Height: %d\n", screenWidth, screenHeight);
-
-	/*	const BD_lADR = "╭";		// \x256D	LIGHT ARC DOWN AND RIGHT
-	const BD_lADL = "╮";		// \x256E	LIGHT ARC DOWN AND LEFT
-	const BD_lAUL = "╯";		// \x256F	LIGHT ARC UP AND LEFT
-	const BD_lAUR = "╰";		// \x2570	LIGHT ARC UP AND RIGHT
-	*/
-
-	printf("\u2500");
-	printf("%s\n", "╮");
-	printf("╰");
-	printf("%s\n", "╯");
-
-	//ClearScreen(0);
-
-	// *************************************************************
-	//ClearScreen(0);
-	MonitorGetESC27();
+	printf("Re-Set Trap Mouse Mode... ");
 	TrapMouse(0);
-	SetVT(0);
+	printf("OK\n\n");
+
+	printf("Try To Re-Set Video Terminal Mode... ");
+	if (!SetVT(0)){
+		printf("ERROR!\n");
+		return -1;
+	}
+	printf("OK\n\n");
+
 	return 0;
-	// *************************************************************
 
-	int i = 0;
-	int r = 0;
-
-	TrapMouse(1);
-
-	// Recognize broken sequences - and valid, but unknown sequences
-	int isOnESC27 = 0;
-	// Recognize manual ESC
-	int isOnUsrESC27 = 0;
-
-	clock_t timeOnUsrEsc;
-
-	do{
-
-		i = InKey();
-
-		// Recognize manual ESC
-		if (isOnUsrESC27 && i < 1){
-			if (clock() > timeOnUsrEsc){
-				// UsrESC
-				i = 27;
-			}
-		}
-		else if (isOnESC27)
-		{
-			/* code */
-		}
-		
-		else if (i == 27){
-			isOnUsrESC27 = 1;
-			timeOnUsrEsc = clock() + userEscTimeout;	
-		}
-		else{
-			isOnUsrESC27 = 0;
-		}
-			
-		if (i > 0){
-			r = GetESC27(i);
-		}
-		else
-		{
-			DoEvents();
-		}
-		
-
-	} while(1);
-	
-	// Reset Mouse	
-	TrapMouse(0);
-
-	SetVT(0);
-	// **************************************************************
-
-	return 0; 
 };
 
 /*

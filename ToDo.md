@@ -40,7 +40,7 @@ Def_ ToDo
 - (1) ~~remove case 109 & 158 within core-loop~~
 - declaration of all functions in all *.h
 - add function-header to all functions (look for vs-code documentation addin)
-- Init/Exit processes into function(set)
+- (3) Init/Exit processes into function(set)
   - c_break +etc. globals to statics in function
   - add serious error-handling
 - (2) ~~Use UserESC-Timeout for recognizing unfinished but valid (so, broken & unknown) sequences  

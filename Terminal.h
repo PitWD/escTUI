@@ -227,7 +227,7 @@ void FlushInKey(void){
 	#define DoEvents() usleep(DoEventsTime);
 #endif 
 
-void ClearScreen(int set){
+int ClearScreen(int set){
 
 	static int isSet = 0;
 	
@@ -244,8 +244,8 @@ void ClearScreen(int set){
 	case 1:
 	case 2:
 		// ESC-sequences are working
-		printf("\x1B[2J");          // "just" Screen
-		// printf("\x1B[3J");	    // Including Buffer
+		//printf("\x1B[2J");          // "just" Screen
+		 printf("\x1B[3J");	    // Including Buffer
 		break;
 	case 3:
 		// OS - Functions needed	
@@ -265,6 +265,7 @@ void ClearScreen(int set){
 	default:
 		break;
 	}
+	return isSet;
 }
 
 int GetTerminalSize(int set){
@@ -313,7 +314,6 @@ int GetTerminalSize(int set){
 		r = WaitForESC27("\x1B[18t",109,0.5);
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 1;
-			ClearScreen(1);
 			screenWidthPrev = screenWidth;
 			screenHeightPrev = screenHeight;
 			break;
@@ -323,7 +323,6 @@ int GetTerminalSize(int set){
 		screenSizeInCursorPos = 0;
 		if (screenWidth > 0 && screenHeight > 0){
 			isSet = 2;
-			ClearScreen(2);
 			screenWidthPrev = screenWidth;
 			screenHeightPrev = screenHeight;
 			break;
@@ -345,7 +344,6 @@ int GetTerminalSize(int set){
 		if (!isSet){
 			if (screenWidth > 0 && screenHeight > 0){
 				isSet = 3;
-				ClearScreen(3);
 				screenWidthPrev = screenWidth;
 				screenHeightPrev = screenHeight;
 				break;
@@ -403,7 +401,7 @@ int GetESC27 (int c){
 	//					 n	= The pressed key (see related enum's)
 	
 	// Input value		-1	= CoreLoop has recognized timeout
-	
+
 	int r = -1;		
 
 	if (c == 127){
