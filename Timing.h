@@ -9,48 +9,54 @@
 // CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
 // !!! Initial 45000 is just fine with MY development environment !!!
 // !!! On WIN it seems to be constant 1000 - like it's on most Posix 1000000
-clock_t clocksPerSecond = CLOCKS_PER_SEC;
+clock_t gClocksPerSecond = CLOCKS_PER_SEC;
+static clock_t lClockLast;
 
 // Real System Time
-clock_t clockLast;
-clock_t clockNow;
-time_t timeNow;
-time_t timeLast;
-double timeDiff;
-struct tm *localTime;
+static time_t lTimeNow;
+static time_t lTimeLast;
+int gHour = 0;
+int gMin = 0;
+int gSec = 0;
+int gDay = 0;
+int gMonth = 0;
+int gYear = 0;
+char gStrDate[] = "01.01.1970";
+char gStrTime[] = "00:00:00";
 
 // Events
-int secondChanged = 0;  // A Second Is Over
-int minuteChanged = 0;  // A Minute
-int hourChanged = 0;    // A Hour 
-int dayChanged = 0;     // A Day
-int min2Changed = 0;    // All 2 minutes...
-int min3Changed = 0;
-int min4Changed = 0;
-int min5Changed = 0;
-int min6Changed = 0;
-int min10Changed = 0;
-int min12Changed = 0;
-int min15Changed = 0;
-int min20Changed = 0;
-int min30Changed = 0;
-int hour2Changed = 0;   // All 2 hours...
-int hour3Changed = 0;
-int hour4Changed = 0;
-int hour6Changed = 0;
-int hour8Changed = 0;
-int hour12Changed = 0;
+int gSecondChanged = 0;  // A Second Is Over
+int gMinuteChanged = 0;  // A Minute
+int gHourChanged = 0;    // A Hour 
+int gDayChanged = 0;     // A Day
+int gMin2Changed = 0;    // All 2 minutes...
+int gMin3Changed = 0;
+int gMin4Changed = 0;
+int gMin5Changed = 0;
+int gMin6Changed = 0;
+int gMin10Changed = 0;
+int gMin12Changed = 0;
+int gMin15Changed = 0;
+int gMin20Changed = 0;
+int gMin30Changed = 0;
+int gHour2Changed = 0;   // All 2 hours...
+int gHour3Changed = 0;
+int gHour4Changed = 0;
+int gHour6Changed = 0;
+int gHour8Changed = 0;
+int gHour12Changed = 0;
 
 // Counter
-char runTimeSeconds = 0;
-char runTimeMinutes = 0;
-char runTimeHours = 0;
-int runTimeDays = 0;
+int gRunTimeSec = 0;
+int gRunTimeMin = 0;
+int gRunTimeHour = 0;
+int gRunTimeDays = 0;
+char gStrRunTime[] = "00000d 00:00:00";
 
 // TimeIn / TimeOut to recognize ESC from User/Keyboard
-clock_t userEscTimeout; // = 0.1 * 45000;
+clock_t gUserEscTimeout; // = 0.1 * 45000;
 // TimeIn / TimeOut to recognize MouseClick as a single Click (not part of a DoubleClick)
-clock_t mouseClickTimeout;  // = 0.25 * 45000;
+clock_t gMouseClickTimeout;  // = 0.25 * 45000;
 // DoEventsTime for usleep() (Linux & Mac)
 #define DoEventsTime 10000
 
@@ -58,7 +64,7 @@ clock_t mouseClickTimeout;  // = 0.25 * 45000;
 time_t JAN_01_2000 = 946677600;
 
 /**
- * @brief Declaration FUNCTIONS
+ * @brief Declaration FUNCTIONS in Timing.h
  */
 void InitTiming(void);
 void EraseTimeChange(void);
@@ -68,187 +74,250 @@ void CheckOnTimeChange(void);
  * @brief   Setup Timing Constants / Variables / Settings
  *          Elementary to get called before using
  *          Terminal.h or Timing.h functions!
- */
-void InitTiming(void){
-    time(&timeLast);
-    clockLast = clock();
+ * 
+ * @private *pLocalTime (struct pm) helper to get RealTime 00:00:00
+ * 
+ * @internal    lClockLast (clock_t) helper for CheckOnTimeChange()
+ * 
+ * @internal    lTimeLast (time_t) helper for CheckOnTimeChange()
+ * 
+ * @internal    lTimeNow (time_t) helper to (also) get RealTime 00:00:00
 
+*/
+void InitTiming(void){
+
+    struct tm *pLocalTime;
+
+    time(&lTimeLast);
+    time(&lTimeNow);
+    lClockLast = clock();
+
+    pLocalTime = localtime(&lTimeNow);
+    gSec = pLocalTime->tm_sec;
+    gMin = pLocalTime->tm_min;
+    gHour = pLocalTime->tm_hour;
+    gDay = pLocalTime->tm_mday;
+    gMonth = pLocalTime->tm_mon + 1;
+    gYear = pLocalTime->tm_year + 1900;
+
+    sprintf(gStrTime,"%02d:%02d:%02d", gHour, gMin, gSec);
+    sprintf(gStrDate,"%02d.%02d.%04d", gDay, gMonth, gYear);
+    
     #if __WIN32__ || _MSC_VER || __WIN64__
 
-        clocksPerSecond = CLOCKS_PER_SEC;
+        gClocksPerSecond = CLOCKS_PER_SEC;
     #else
 
-        clocksPerSecond = 45000;
+        gClocksPerSecond = 45000;
     #endif
     
-    userEscTimeout = 0.1 * clocksPerSecond;
-    mouseClickTimeout = 0.25 * clocksPerSecond;
+    gUserEscTimeout = 0.1 * gClocksPerSecond;
+    gMouseClickTimeout = 0.25 * gClocksPerSecond;
 }
 
 /**
  * @brief   Reset Global TimeEventFlags
  */
 void EraseTimeChange(void){
-    secondChanged = 0;  // A Second Is Over
-    minuteChanged = 0;  // A Minute
-    hourChanged = 0;    // A Hour 
-    dayChanged = 0;     // A Day
-    min2Changed = 0;    // All 2 minutes...
-    min3Changed = 0;
-    min4Changed = 0;
-    min5Changed = 0;
-    min6Changed = 0;
-    min10Changed = 0;
-    min12Changed = 0;
-    min15Changed = 0;
-    min20Changed = 0;
-    min30Changed = 0;
-    hour2Changed = 0;   // All 2 hours...
-    hour3Changed = 0;
-    hour4Changed = 0;
-    hour6Changed = 0;
-    hour8Changed = 0;
-    hour12Changed = 0;
+    gSecondChanged = 0;  // A Second Is Over
+    gMinuteChanged = 0;  // A Minute
+    gHourChanged = 0;    // A Hour 
+    gDayChanged = 0;     // A Day
+    gMin2Changed = 0;    // All 2 minutes...
+    gMin3Changed = 0;
+    gMin4Changed = 0;
+    gMin5Changed = 0;
+    gMin6Changed = 0;
+    gMin10Changed = 0;
+    gMin12Changed = 0;
+    gMin15Changed = 0;
+    gMin20Changed = 0;
+    gMin30Changed = 0;
+    gHour2Changed = 0;   // All 2 hours...
+    gHour3Changed = 0;
+    gHour4Changed = 0;
+    gHour6Changed = 0;
+    gHour8Changed = 0;
+    gHour12Changed = 0;
 }
 
 /**
- * @brief   (Re)Calculate clocksPerSecond depending on CPU-Power
- *          Calculate Runtime
- *          Calculate TimeEvents / Set Global TimeEventFlags
+ * @brief   (Re)Calculate gClocksPerSecond depending on CPU-Power
+ *          to then (Re)Calculate User-ESC & MouseClick TimeOut
+ *          Calculate and set Runtime globals
+ *          Set Realtime globals
+ *          Calculate TimeEvents / Set Global TimeEvent-Flags
  * 
  * @private sec00Overflow (int)
  *          helper to handle TimeDiff > 1 sec right
  *          (call function at least twice per second to get ALL
  *           events with a +/- 1sec. tolerance.)
+ * 
+ * @private timeDiff (double) helper to calculate time since last call
+ *          it's just full seconds - but difftime()-result is double...
+ * 
+ * @private *pLocalTime (struct tm) helper to calculate time since last call
+ * 
+ * @private clockNow (clock_t) helper to calculate clocks() since last call
+ * 
+ * @internal    lClockLast (clock_t) helper to calculate clocks() since last call
+ * 
+ * @internal    lTimeLast (clock_t) helper to calculate time since last call
+ * 
+ * @public  gRunTimeDays, gRuntimeHours, gRunTimeMin, gRunTimeSec, gStrRunTime
+ * 
+ * @public  gClocksPerSecond, gUserEscTimeOut, gMouseClickTimeOut
+ * 
+ * @public  gDay, gMonth, gYear, gHour, gMin, gSec, gStrDate, gStrTime
+ * 
+ * @public  gSecondChanged, gDayChanged + all gMin*Changed, gHour*Changed
+ *  
  */
 void CheckOnTimeChange(void){
 
     int sec00Overflow = 0;
+    double timeDiff = 0;
+    struct tm *pLocalTime;
+    clock_t clockNow;
 
-    time(&timeNow);
-    timeDiff = difftime(timeNow,timeLast);
+    time(&lTimeNow);
+    timeDiff = difftime(lTimeNow,lTimeLast);
 
     // A Second (ore more) is over
     if (timeDiff){
 
         // Adjust clocksPerSecond
         clockNow = clock();
-        clocksPerSecond = (clockNow - clockLast) / timeDiff;
-        clockLast = clockNow;
-        userEscTimeout = 0.1 * clocksPerSecond;
-        mouseClickTimeout = 0.25 * clocksPerSecond;
+        gClocksPerSecond = (clockNow - lClockLast) / timeDiff;
+        lClockLast = clockNow;
+        gUserEscTimeout = 0.1 * gClocksPerSecond;
+        gMouseClickTimeout = 0.25 * gClocksPerSecond;
 
         if (timeDiff > 1){
             // More than a second...
-            localTime = localtime(&timeLast);
-            if (localTime->tm_sec + timeDiff > 60){
+            pLocalTime = localtime(&lTimeLast);
+            if (pLocalTime->tm_sec + timeDiff > 60){
                 // We would have missed xx:xx:00
                 // We'll "simulate" to get all TimeChangeEvents right
                 sec00Overflow = 1;
             }
         }
     
-        timeLast = timeNow;
-        secondChanged = 1;
+        lTimeLast = lTimeNow;
+        gSecondChanged = 1;
 
         //System Runtime
-        runTimeSeconds += timeDiff;
-        if (runTimeSeconds >= 60){
-            runTimeSeconds -= 60;
-            runTimeMinutes++;
-            if (runTimeMinutes == 60){
-                runTimeMinutes = 0;
-                runTimeHours++;
-                if (runTimeHours == 24){
-                    runTimeHours = 0;
-                    runTimeDays++;
+        gRunTimeSec += timeDiff;
+        if (gRunTimeSec >= 60){
+            gRunTimeSec -= 60;
+            gRunTimeMin++;
+            if (gRunTimeMin >= 60){
+                gRunTimeMin -= 60;
+                gRunTimeHour++;
+                if (gRunTimeHour >= 24){
+                    gRunTimeHour -= 24;
+                    gRunTimeDays++;
                 }
             }
         }
+        sprintf(gStrRunTime,"%5dd %02d:%02d:%02d", gRunTimeDays, gRunTimeHour, gRunTimeMin, gRunTimeSec);
 
         // Real Time
-        localTime = localtime(&timeNow);
+        pLocalTime = localtime(&lTimeNow);
+
+        gSec = pLocalTime->tm_sec;
+        
         // Real-Time Events
-        if (localTime->tm_sec == 0 || sec00Overflow){
-            minuteChanged = 1;
-            if (localTime->tm_min == 0){
-                min2Changed = 1;
-                min3Changed = 1;
-                min4Changed = 1;
-                min5Changed = 1;
-                min6Changed = 1;
-                min10Changed = 1;
-                min12Changed = 1;
-                min15Changed = 1;
-                min20Changed = 1;
-                min30Changed = 1;
+        if (gSec == 0 || sec00Overflow){
+            gMinuteChanged = 1;
+            gMin = pLocalTime->tm_min;
+            if (gMin == 0){
+                gMin2Changed = 1;
+                gMin3Changed = 1;
+                gMin4Changed = 1;
+                gMin5Changed = 1;
+                gMin6Changed = 1;
+                gMin10Changed = 1;
+                gMin12Changed = 1;
+                gMin15Changed = 1;
+                gMin20Changed = 1;
+                gMin30Changed = 1;
 
-                hourChanged = 1;
+                gHourChanged = 1;
+                gHour = pLocalTime->tm_hour;
 
-                if (localTime->tm_hour == 0){
-                    hour2Changed = 1;
-                    hour3Changed = 1;
-                    hour4Changed = 1;
-                    hour6Changed = 1;
-                    hour8Changed = 1;
-                    hour12Changed = 1;
+                if (gHour == 0){
+                    gHour2Changed = 1;
+                    gHour3Changed = 1;
+                    gHour4Changed = 1;
+                    gHour6Changed = 1;
+                    gHour8Changed = 1;
+                    gHour12Changed = 1;
 
-                    dayChanged = 1;
+                    gDayChanged = 1;
+
+                    gDay = pLocalTime->tm_mday;
+                    gMonth = pLocalTime->tm_mon + 1;
+                    gYear = pLocalTime->tm_year + 1900;
+                    sprintf(gStrDate,"%02d.%02d.%04d", gDay, gMonth, gYear);
                 }
                 else{
-                    if (!(localTime->tm_hour % 2)){
-                        hour2Changed = 1;
+                    if (!(gHour % 2)){
+                        gHour2Changed = 1;
+                        if (!(gHour % 4)){
+                            gHour4Changed = 1;
+                            if (!(gHour % 8)){
+                                gHour8Changed = 1;
+                            }
+                        }
                     }
-                    if (!(localTime->tm_hour % 3)){
-                        hour3Changed = 1;
+                    if (!(gHour % 3)){
+                        gHour3Changed = 1;
+                        if (!(gHour % 6)){
+                            gHour6Changed = 1;
+                            if (!(gHour % 12)){
+                                gHour12Changed = 1;
+                            }                  
+                        }
                     }
-                    if (!(localTime->tm_hour % 4)){
-                        hour4Changed = 1;
-                    }
-                    if (!(localTime->tm_hour % 6)){
-                        hour6Changed = 1;
-                    }
-                    if (!(localTime->tm_hour % 8)){
-                        hour8Changed = 1;
-                    }
-                    if (!(localTime->tm_hour % 12)){
-                        hour12Changed = 1;
-                    }                  
                 }               
             }
             else{
-                if (!(localTime->tm_min % 2)){
-                    min2Changed = 1;
+                if (!(gMin % 2)){
+                    gMin2Changed = 1;
+                    if (!(gMin % 4)){
+                        gMin4Changed = 1;
+                    }
                 }
-                if (!(localTime->tm_min % 3)){
-                    min3Changed = 1;
+                if (!(gMin % 3)){
+                    gMin3Changed = 1;
+                    if (!(gMin % 6)){
+                        gMin6Changed = 1;
+                        if (!(gMin % 12)){
+                            gMin12Changed = 1;
+                        }
+                    }
                 }
-                if (!(localTime->tm_min % 4)){
-                    min4Changed = 1;
-                }
-                if (!(localTime->tm_min % 5)){
-                    min5Changed = 1;
-                }
-                if (!(localTime->tm_min % 6)){
-                    min6Changed = 1;
-                }
-                if (!(localTime->tm_min % 10)){
-                    min10Changed = 1;
-                }
-                if (!(localTime->tm_min % 12)){
-                    min12Changed = 1;
-                }
-                if (!(localTime->tm_min % 15)){
-                    min15Changed = 1;
-                }
-                if (!(localTime->tm_min % 20)){
-                    min20Changed = 1;
-                }
-                if (!(localTime->tm_min % 30)){
-                    min30Changed = 1;
+                if (!(gMin % 5)){
+                    gMin5Changed = 1;
+                    if (!(gMin % 10)){
+                        gMin10Changed = 1;
+                        if (!(gMin % 20)){
+                            gMin20Changed = 1;
+                        }
+                    }
+                    if (!(gMin % 15)){
+                        gMin15Changed = 1;
+                        if (!(gMin % 30)){
+                            gMin30Changed = 1;
+                        }
+                    }
                 }
             }              
-        }  
+        } 
+
+        sprintf(gStrTime,"%02d:%02d:%02d", gHour, gMin, gSec);
+
     }
 }
 

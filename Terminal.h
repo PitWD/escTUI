@@ -1050,7 +1050,7 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
     printf("%s",pStrExchange);
 	fflush(stdout);
 
-	timeExit = clock() + (long)(timeOut * clocksPerSecond);
+	timeExit = clock() + (long)(timeOut * gClocksPerSecond);
 
     while (clock() < timeExit){
 		

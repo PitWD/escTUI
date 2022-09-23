@@ -790,7 +790,7 @@ void EventDayChange(void){}
 
 void EventHourChange(void){	
 	// Check on DayChange
-	if (dayChanged){
+	if (gDayChanged){
 		EventDayChange();
 	}
 }
@@ -805,22 +805,22 @@ void EventHour12Change(void){}
 void EventMinuteChange(void){
 
 	// Check on HourChange
-	if (hourChanged){
+	if (gHourChanged){
 		EventHourChange();
-		if (hour2Changed){
+		if (gHour2Changed){
 			EventHour2Change();
-			if (hour4Changed){
+			if (gHour4Changed){
 				EventHour4Change();
-				if (hour8Changed){
+				if (gHour8Changed){
 					EventHour8Change();
 				}
 			}
 		}
-		if (hour3Changed){
+		if (gHour3Changed){
 			EventHour3Change();
-			if (hour6Changed){
+			if (gHour6Changed){
 				EventHour6Change();
-				if (hour12Changed){
+				if (gHour12Changed){
 					EventHour12Change();
 				}
 			}
@@ -842,28 +842,28 @@ void EventMinute30Change(void){}
 void EventSecondChange(void){	
 	
 	// Check on MinuteChange
-	if (minuteChanged){
+	if (gMinuteChanged){
 		EventMinuteChange();
-		if (min2Changed){
+		if (gMin2Changed){
 			EventMinute2Change();
-			if (min4Changed){
+			if (gMin4Changed){
 				EventMinute4Change();
-				if (min20Changed){
+				if (gMin20Changed){
 					EventMinute20Change();
 				}
 			}
 		}
-		if (min3Changed){
+		if (gMin3Changed){
 			EventMinute3Change();
-			if (min6Changed){
+			if (gMin6Changed){
 				EventMinute6Change();
-				if (min12Changed){
+				if (gMin12Changed){
 					EventMinute12Change();
 				}
 			}
-			if (min15Changed){
+			if (gMin15Changed){
 				EventMinute15Change();
-				if (min30Changed){
+				if (gMin30Changed){
 					EventMinute30Change();
 				}
 			}			
@@ -921,9 +921,9 @@ void CoreLoop(void){
 		else if (i == 27){
 			// Entrance into (User)ESC-Sequences recognition
 			isOnUsrESC27 = 1; isOnESC27= 1;
-			timeOnUsrEsc = clock() + userEscTimeout;
+			timeOnUsrEsc = clock() + gUserEscTimeout;
 			// timeout for broken sequence twice as regular UserESC
-			timeOnEsc = timeOnUsrEsc + userEscTimeout;
+			timeOnEsc = timeOnUsrEsc + gUserEscTimeout;
 		}
 		else{
 			// any char after 1st ESC immediately disables possibility on UserESC
@@ -976,7 +976,7 @@ void CoreLoop(void){
 						else{
 							// 1st Click
 							isOnClick = 1;
-							timeOnClick = clock() + mouseClickTimeout;
+							timeOnClick = clock() + gMouseClickTimeout;
 						}							
 					}
 					else{
@@ -1015,7 +1015,7 @@ void CoreLoop(void){
 		}
 
 		CheckOnTimeChange();
-		if (secondChanged){
+		if (gSecondChanged){
 			// A Second (ore more) is over
 			EventSecondChange();	// Activates all other Minute/Hour/DayChange Events
 		}
@@ -1074,7 +1074,8 @@ int main() {
 
 	printf("Initializing Timing... ");
 	InitTiming();
-	printf("OK\n\n");
+	printf("OK\n");
+	printf("%s - %s\n\n", gStrDate, gStrTime);
 
 	printf("Try To Enable Video Terminal Mode... ");
 	if (!SetVT(1)){
@@ -1150,6 +1151,10 @@ int main() {
 		return -1;
 	}
 	printf("OK\n\n");
+
+	printf("%s - %s\n", gStrDate, gStrTime);
+	printf("Runtime: %s\n\n", gStrRunTime);
+
 
 	return 0;
 
