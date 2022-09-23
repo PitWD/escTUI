@@ -818,7 +818,7 @@ void EventHour12Change(void){
 }
 
 void EventMinuteChange(void){
-
+	printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
 	// Check on HourChange
 	if (gHourChanged){
 		EventHourChange();
@@ -883,9 +883,6 @@ void EventSecondChange(void){
 			EventMinute2Change();
 			if (gMin4Changed){
 				EventMinute4Change();
-				if (gMin20Changed){
-					EventMinute20Change();
-				}
 			}
 		}
 		if (gMin3Changed){
@@ -896,13 +893,23 @@ void EventSecondChange(void){
 					EventMinute12Change();
 				}
 			}
+		}
+		if (gMin5Changed){
+			EventMinute5Change();
 			if (gMin15Changed){
 				EventMinute15Change();
 				if (gMin30Changed){
 					EventMinute30Change();
 				}
 			}			
+			if (gMin10Changed){
+				EventMinute10Change();
+				if (gMin20Changed){
+					EventMinute30Change();
+				}
+			}			
 		}
+		
 	}
 }
 
