@@ -1070,7 +1070,12 @@ int main() {
 
 	int r = 0;
 
-	printf("Hello New Project\n\n");
+	printf("\nHello New Project\n\n");
+
+	printf("Initializing Timing... ");
+	InitTiming();
+	printf("OK\n\n");
+
 	printf("Try To Enable Video Terminal Mode... ");
 	if (!SetVT(1)){
 		printf("ERROR!\n");
@@ -1120,10 +1125,6 @@ int main() {
 
 	printf("Catch Ctrl-C... ");
 	signal(SIGINT, SignalHandler);
-	printf("OK\n\n");
-
-	printf("Initializing Timing... ");
-	InitTiming();
 	printf("OK\n\n");
 
 	InitEscSeq();

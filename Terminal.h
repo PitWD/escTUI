@@ -11,15 +11,6 @@ const char TerminalVersion [] = "1.00pa";
 #include "Timing.h"
 #include <signal.h>
 
-#define ESC_CLRSCR 1
-#define ESC_SCREENSIZE 1
-#define ESC_SCREENSIZE_LEGACY 0
-
-#define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
-#define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
-//unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
-char streamInESC27[ESC27_STREAM_IN_SIZE];
-
 #if __WIN32__ || _MSC_VER || __WIN64__
     #include <conio.h>
     #include <windows.h>
@@ -28,6 +19,11 @@ char streamInESC27[ESC27_STREAM_IN_SIZE];
     #include <unistd.h>
     #include <sys/ioctl.h>
 #endif
+
+#define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
+#define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
+//unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
+char streamInESC27[ESC27_STREAM_IN_SIZE];
 
 // Screen
 int screenWidth = 0;
@@ -230,7 +226,6 @@ int InKey(void){
 
 /**
  * @brief 	Flush buffer the "hard (and all time successful) way"
- * 
  */
 void FlushInKey(void){
 	while (InKey()){
@@ -240,7 +235,6 @@ void FlushInKey(void){
 
 /**
  * @brief 	DoEvents() - release CPU during idle times
- * 
  */
 #if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);

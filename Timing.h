@@ -57,10 +57,18 @@ clock_t mouseClickTimeout;  // = 0.25 * 45000;
 // 01/01/2000
 time_t JAN_01_2000 = 946677600;
 
+/**
+ * @brief Declaration FUNCTIONS
+ */
 void InitTiming(void);
 void EraseTimeChange(void);
 void CheckOnTimeChange(void);
 
+/**
+ * @brief   Setup Timing Constants / Variables / Settings
+ *          Elementary to get called before using
+ *          Terminal.h or Timing.h functions!
+ */
 void InitTiming(void){
     time(&timeLast);
     clockLast = clock();
@@ -77,6 +85,9 @@ void InitTiming(void){
     mouseClickTimeout = 0.25 * clocksPerSecond;
 }
 
+/**
+ * @brief   Reset Global TimeEventFlags
+ */
 void EraseTimeChange(void){
     secondChanged = 0;  // A Second Is Over
     minuteChanged = 0;  // A Minute
@@ -100,10 +111,24 @@ void EraseTimeChange(void){
     hour12Changed = 0;
 }
 
+/**
+ * @brief   (Re)Calculate clocksPerSecond depending on CPU-Power
+ *          Calculate Runtime
+ *          Calculate TimeEvents / Set Global TimeEventFlags
+ * 
+ * @private sec00Overflow (int)
+ *          helper to handle TimeDiff > 1 sec right
+ *          (call function at least twice per second to get ALL
+ *           events with a +/- 1sec. tolerance.)
+ */
 void CheckOnTimeChange(void){
+
+    int sec00Overflow = 0;
 
     time(&timeNow);
     timeDiff = difftime(timeNow,timeLast);
+
+    // A Second (ore more) is over
     if (timeDiff){
 
         // Adjust clocksPerSecond
@@ -113,11 +138,8 @@ void CheckOnTimeChange(void){
         userEscTimeout = 0.1 * clocksPerSecond;
         mouseClickTimeout = 0.25 * clocksPerSecond;
 
-        int sec00Overflow = 0;
-
-        // A Second (ore more) is over
         if (timeDiff > 1){
-            // More...
+            // More than a second...
             localTime = localtime(&timeLast);
             if (localTime->tm_sec + timeDiff > 60){
                 // We would have missed xx:xx:00
