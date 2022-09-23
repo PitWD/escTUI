@@ -787,15 +787,18 @@ int EventESC27 (int event){
 }
 
 void EventDayChange(void){
+	SetFg16(fgYellowB);
 	printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
 }
 
 void EventHourChange(void){	
+	SetFg16(fgBlueB);
 	printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
 	// Check on DayChange
 	if (gDayChanged){
 		EventDayChange();
 	}
+	SetFg16(fgBlue);
 }
 
 void EventHour2Change(void){
@@ -841,6 +844,7 @@ void EventMinuteChange(void){
 			}
 		}
 	}
+	ResFg();
 }
 
 void EventMinute2Change(void){
@@ -875,10 +879,14 @@ void EventMinute30Change(void){
 }
 
 void EventSecondChange(void){	
+	SetFg16(fgWhite);
 	printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
+	ResFg();
 	// Check on MinuteChange
 	if (gMinuteChanged){
+		SetFg16(fgGreenB);
 		EventMinuteChange();
+		SetFg16(fgGreen);
 		if (gMin2Changed){
 			EventMinute2Change();
 			if (gMin4Changed){
@@ -909,7 +917,7 @@ void EventSecondChange(void){
 				}
 			}			
 		}
-		
+	ResFg();	
 	}
 }
 
