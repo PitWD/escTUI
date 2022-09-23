@@ -39,7 +39,7 @@ Def_ ToDo
 - **nothing else anymore before this isn't done!**
 - (1) ~~remove case 109 & 158 within core-loop~~
 - (4) ~~declaration of all functions in all *.h~~
-- add function-header to all functions (look for vs-code documentation addin)
+- (5) add function-header to all functions (look for vs-code documentation addin)
 - ~~(3) Init/Exit processes into function(set)~~ (actually still part of main())
   - ~~c_break +etc. globals to statics in function~~
   - ~~add serious error-handling~~

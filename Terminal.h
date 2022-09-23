@@ -72,8 +72,19 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
 void SignalHandler(int sig);
 void TrapMouse(int set);
 
-// Set/Reset output mode to handle virtual terminal sequences
-// and for (LINUX/Mac) to (re)set c_break mode
+/**
+ * @brief 	Set/Reset output mode to handle virtual terminal sequences
+ * 			and for (LINUX/Mac) to (re)set c_break mode
+ * 
+ * @param 	set 
+ * 			1 = Set
+ * 			0 = Reset
+ * 
+ * @return 	int 
+ * 			1 = Success
+ * 			0 = Failed
+ */
+
 int SetVT(int set){
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
@@ -165,6 +176,13 @@ int SetVT(int set){
 	#endif
 }	
 
+/**
+ * @brief	Non-Blocking GetChar
+ * 
+ * @return 	int 
+ * 			1-255 	= char 
+ * 			0		= there was no char in buffer
+ */
 int InKey(void){
 
 	// Returns next char in stdin
@@ -207,28 +225,45 @@ int InKey(void){
 	#endif
 }
 
+/**
+ * @brief 	Flush buffer the "hard (and all time successful) way"
+ * 
+ */
 void FlushInKey(void){
 	while (InKey()){
 		// Flush
 	}
 }
 
+/**
+ * @brief 	DoEvents() - release CPU during idle times
+ * 
+ */
 #if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);
 #else
 	#define DoEvents() usleep(DoEventsTime);
 #endif 
 
+/**
+ * @brief 	Clear Screen - ESC & OS
+ * 
+ * @param 	set 0 = Use last used way to CLS
+ * 				1 = Use ESC (Xterm)
+ * 				2 = Use ESC (Dumb)
+ * 				3 = Use OS
+ * 			If set isn't valid it gets 3 (OperatingSystem)
+ * 			There is no real (Xterm/Dumb)-Version like with GetTerminalSize!
+ * 
+ * @private	isSet (static int) holds the last used way to CLS
+ * 
+ * @return	int 1-3 = used way to CLS
+ */
 int ClearScreen(int set){
-
-	// Set > 0 defines the CLS-Mode (IsSet)
-	// Set = 0 uses defined CLS-Mode
-	// Default Mode is 3 (OS)
 	
 	static int isSet = 3;
 	
 	if (set){
-		// 1st call with defined HowTo
 		if (set < 1 || set > 3){
 			isSet = 3;
 		}
@@ -238,12 +273,10 @@ int ClearScreen(int set){
 	switch (isSet){
 	case 1:
 	case 2:
-		// ESC-sequences are working
 		printf("\x1B[2J");
-		printf("\x1B[1;1H");	// Cursor To 1,1
+		printf("\x1B[1;1H");
 		break;
 	case 3:
-		// OS - Functions needed	
 		#if __WIN32__ || _MSC_VER || __WIN64__
 			system ("cls");
 		#else 
@@ -256,20 +289,24 @@ int ClearScreen(int set){
 	return isSet;
 }
 
+/**
+ * @brief	Get Terminal Size - ESC & OS
+ * 
+ * @param 	set	0 = determine on 1st call "HowTo Get The Terminal-Size"
+ * 				0 = from 2nd call "Use determined HowTo"
+ * 				1 = ESC-Xterm
+ * 				2 = ESC-Dumb (Billy-OS, some Linux)
+ * 				3 = OS
+ * 
+ * @private	isSet (static int) holds the determined HowTo GetTerminalSize
+ * @private r (dynamic int) just a helper
+ * 
+ * @return	int 1-3 = used way to GetTerminalSize
+ * 			      0 = unable to GetTerminalSize
+ */
 int GetTerminalSize(int set){
 
-	// int isSet
-	// self-determined way "HowTo Get The Terminal-Size"
-	// 1st time function gets called with 'set = 0' isSet will get detected 
-	static int isSet = 0;		// 1	Xterm
-								// 2	Dumb (MS Terminal)
-								// 3	System
-							
-	// int set
-		// 0 = Automatic Selection
-		// 1 = Xterm
-		// 2 = Dumb (MS Terminal)
-		// 3 = System
+	static int isSet = 0;
 
 	int r = 0;
 
@@ -353,9 +390,14 @@ int GetTerminalSize(int set){
 	
 }
 
+/**
+ * @brief 	Check On If ScreenSize Has Changed
+ * 
+ * @return	int	1 = Changed
+ * 				0 = Not Changed
+ */
 int ScreenSizeChanged(void){
 	if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
-		// Terminal Size changed...
 		screenHeightPrev = screenHeight;
 		screenWidthPrev = screenWidth;
 		return 1;
@@ -363,32 +405,70 @@ int ScreenSizeChanged(void){
 	return 0;
 }
 
+/**
+ * @brief 	Analyze stream (char by char) on ESC-Sequences
+ * 
+ * @param 	c 1-255 = (next) char
+ * 				-1	= CoreLoop recognized a TimeOut (reset statics/function)
+ * 
+ * @private	isValid (static int / bool)
+ * 			True as long it could be a valid ESC sequence
+ * 
+ * @private	isCSI (static int / bool)
+ * 			Becomes True if sequence starts with a CSI
+ * 
+ * @private isOSC (static int / bool)
+ * 			Becomes True if sequence starts with an OSC
+ * 
+ * @private	isMouse (static int / bool)
+ * 			Becomes True if sequence should be a DECIMAL mouse sequence
+ 
+ * @private	isByteMouse (static int / bool)
+ * 			Becomes True if sequence should be a BYTE mouse sequence
+ * 			!! Do NEVER Use Byte Mode Terminals with height or width > 223 !!
+ * 
+ * @private allowTxt (static int / bool)
+ * 			Becomes True if sequence should be a TEXT containing sequence
+ * 
+ * @private waitForEOT (static int / bool)
+ * 			Becomes True (after ESC) when the next char must be a EndOfText
+ * 
+ * @private numCnt (static int)
+ * 			counts the colon and semi-colon separated decimal numbers in a stream
+ * 
+ * @private *pNumPos[] (static char pointer)
+ * 			Start(s) of recognized numbers
+ * 
+ * @private isNumGroup[] (static int / bool)
+ * 			if number is/was a group (colon separated)
+ * 
+ * @private streamPos (static int)
+ * 			counts the actual chars/position in the stream
+ * 
+ * @private r (dynamic int) helper for return
+ * 			
+ * @return	int	-2	= just the Termination Char was unknown.
+				-1	= Unknown / Illegal
+				-4	= overflow - too long
+				-5	= unexpected EOT
+				-3	= timeOut of a broken, or valid but unknown sequence
+				 0	= Valid, but waiting for more Bytes to identify/finish sequence
+				 n	= The ESC-Sequence (see related enum's)
+ */
 int GetESC27 (int c){
 
-	//	c = one (by one) char from the stream
-
-	static _Bool isValid = 0;
-	static _Bool isCSI = 0;
-	static _Bool isOSC = 0;
-	static _Bool isMouse = 0;
-	static _Bool isByteMouse = 0;
-	static _Bool allowTxt = 0;
-	static _Bool waitForEOT = 0;
+	static int isValid = 0;
+	static int isCSI = 0;
+	static int isOSC = 0;
+	static int isMouse = 0;
+	static int isByteMouse = 0;
+	static int allowTxt = 0;
+	static int waitForEOT = 0;
 	static int numCnt = 0;
-	// static unsigned char *pNumPos[ESC27_STREAM_IN_SIZE];
-	static char *pNumPos[ESC27_STREAM_IN_SIZE];
-	static _Bool isNumGroup[ESC27_STREAM_IN_SIZE];
-	static unsigned char streamPos = 0;
 
-	// Return value 	-2	= just the Termination Char was unknown.
-	//					-1	= Unknown / Illegal
-	//					-4	= overflow - too long
-	//					-5	= unexpected EOT
-	//					-3	= timeOut of a broken, or valid but unknown sequence
-	//					 0	= Valid, but waiting for more Bytes to identify
-	//					 n	= The pressed key (see related enum's)
-	
-	// Input value		-1	= CoreLoop has recognized timeout
+	static char *pNumPos[ESC27_STREAM_IN_SIZE];
+	static int isNumGroup[ESC27_STREAM_IN_SIZE];
+	static int streamPos = 0;
 
 	int r = -1;		
 
@@ -937,21 +1017,35 @@ int GetESC27 (int c){
 
 }
 
-int WaitForESC27(char *pStrExchange,int waitForID, float timeOut){
-    // Send pStrExchange[] as initial command
-    // Wait max timeOut sec for the answer
-    // return       -1  Illegal answer
-    //              -2  Unknown Termination
-    //              -3  Timeout with char(s) received
-    //              -4  Answer too long
-	//				-5	Unknown Terminal Sequence
-    //               0  Timeout without char(s) received
-    //              1-n Known ESC sequence
-    // saveAnswer   1   pStrExchange returns the received char(s)
+/**
+ * @brief Send command to Terminal and wait for an answer
+ * 
+ * @param	*pStrExchange (Command)
+ * 
+ * @param	waitForID	0 = accept all valid answers
+ * 						n = accept just answer n
+ * 
+ * @param	timeOut 	(float in seconds)
+ * 						wait max this time for an answer
+ * 
+ * @private	r (int)		helper for return
+ * 
+ * @private i (int)		helper for InKey()
+ * 
+ * @private gotChar		if we received something
+ * 			(int / bool)
+ * 
+ * @private timeExit	helper for TimeOut
+ * 			(clock_t)
+ * 			
+ * @return	int 		n = received sequence (see GetESC27-return)
+						0 = TimeOut (without chars) or wrong answer
+ */
+int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 
     int r = 0;
     int i = 0;
-    int cnt = -1;
+	int gotChar = 0;
 	clock_t timeExit;
 
 	fflush(stdin);
@@ -966,26 +1060,26 @@ int WaitForESC27(char *pStrExchange,int waitForID, float timeOut){
 		i = InKey();
 
         if (i > 0){
-            cnt++;
-            if (cnt > ESC27_EXCHANGE_SIZE - 2){
-                //Error - Answer too long
-                FlushInKey();
-				return -4;
-            }
+			gotChar = 1;
             r = GetESC27(i);
-            if (r){
+            if (r > 0){
 				if ((r == waitForID) || (waitForID == 0)){
+					// Valid
 					FlushInKey();				
 					return r;
 				}
-				cnt = -1;				
             }
+			else if (r < 0){
+				// Error
+                FlushInKey();
+				return r;
+			}			
         }
     }
 
     // TimeOut
 	FlushInKey();
-	if (cnt > -1){
+	if (gotChar){
         // With char(s) received
         return -3;
     }
