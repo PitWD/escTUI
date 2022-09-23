@@ -786,21 +786,36 @@ int EventESC27 (int event){
 	return r;
 }
 
-void EventDayChange(void){}
+void EventDayChange(void){
+	printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
+}
 
 void EventHourChange(void){	
+	printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
 	// Check on DayChange
 	if (gDayChanged){
 		EventDayChange();
 	}
 }
 
-void EventHour2Change(void){}
-void EventHour3Change(void){}
-void EventHour4Change(void){}
-void EventHour6Change(void){}
-void EventHour8Change(void){}
-void EventHour12Change(void){}
+void EventHour2Change(void){
+	printf("  Hour2Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventHour3Change(void){
+	printf("  Hour3Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventHour4Change(void){
+	printf("  Hour4Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventHour6Change(void){
+	printf("  Hour6Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventHour8Change(void){
+	printf("  Hour8Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventHour12Change(void){
+	printf(" Hour12Change: %s - %s\n",gStrRunTime, gStrTime);
+}
 
 void EventMinuteChange(void){
 
@@ -828,19 +843,39 @@ void EventMinuteChange(void){
 	}
 }
 
-void EventMinute2Change(void){}
-void EventMinute3Change(void){}
-void EventMinute4Change(void){}
-void EventMinute5Change(void){}
-void EventMinute6Change(void){}
-void EventMinute10Change(void){}
-void EventMinute12Change(void){}
-void EventMinute15Change(void){}
-void EventMinute20Change(void){}
-void EventMinute30Change(void){}
+void EventMinute2Change(void){
+	printf("   Min2Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute3Change(void){
+	printf("   Min3Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute4Change(void){
+	printf("   Min4Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute5Change(void){
+	printf("   Min5Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute6Change(void){
+	printf("   Min6Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute10Change(void){
+	printf("  Min10Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute12Change(void){
+	printf("  Min12Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute15Change(void){
+	printf("  Min15Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute20Change(void){
+	printf("  Min20Change: %s - %s\n",gStrRunTime, gStrTime);
+}
+void EventMinute30Change(void){
+	printf("  Min30Change: %s - %s\n",gStrRunTime, gStrTime);
+}
 
 void EventSecondChange(void){	
-	
+	printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
 	// Check on MinuteChange
 	if (gMinuteChanged){
 		EventMinuteChange();

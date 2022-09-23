@@ -2,16 +2,21 @@ Def_ ToDo
 
 <br>
 
+**028. Just Billy-OS! Something messy with '\n' at Quit-Procedure**
+
+<br>
+
 **027. Move ToDo to GitHub-Issues...**
 - **!!! Do 022. first !!!**
 
 <br>
 
-**026. Normize variable Naming**
+**026. Normalize variable Naming**
 - **!!! Do 022. first !!!**
 - pXYZ - pointer
 - gXYZ - global
 - gpXYZ - global pointer
+- lXYZ - local
 - little HowTo to the whole naming thing
 
 <br>

@@ -82,7 +82,10 @@ void CheckOnTimeChange(void);
  * @internal    lTimeLast (time_t) helper for CheckOnTimeChange()
  * 
  * @internal    lTimeNow (time_t) helper to (also) get RealTime 00:00:00
-
+ * 
+ * @public  gDay, gMonth, gYear, gHour, gMin, gSec, gStrDate, gStrTime
+ * 
+ * @public  gClocksPerSecond, gUserEscTimeOut, gMouseClickTimeOut
 */
 void InitTiming(void){
 
@@ -93,6 +96,7 @@ void InitTiming(void){
     lClockLast = clock();
 
     pLocalTime = localtime(&lTimeNow);
+    
     gSec = pLocalTime->tm_sec;
     gMin = pLocalTime->tm_min;
     gHour = pLocalTime->tm_hour;
