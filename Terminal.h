@@ -60,7 +60,9 @@ _Bool isWaitingForESC27 = 0;
 int signalCtrlC = 0;
 int signalTerminalSize = 0;
 
-
+/**
+ * @brief Declaration FUNCTIONS
+ */
 int SetVT(int set);
 int InKey(void);
 void FlushInKey(void);
@@ -71,6 +73,7 @@ int GetESC27 (int c);
 int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
 void SignalHandler(int sig);
 void TrapMouse(int set);
+void TrapFocus(int set);
 
 /**
  * @brief 	Set/Reset output mode to handle virtual terminal sequences
@@ -1032,7 +1035,7 @@ int GetESC27 (int c){
  * 
  * @private i (int)		helper for InKey()
  * 
- * @private gotChar		if we received something
+ * @private gotChar		if we received something (TimeOut-Helper)
  * 			(int / bool)
  * 
  * @private timeExit	helper for TimeOut
@@ -1089,6 +1092,11 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
     }
 }
 
+/**
+ * @brief Signal-Handler for signal()
+ * 
+ * @param sig (int)
+ */
 void SignalHandler(int sig){
 	if (SIGINT == sig){
 		// Ctrl-C pressed
@@ -1107,18 +1115,41 @@ void SignalHandler(int sig){
 	}*/
 }
 
-// Trap Mouse (On / Off)
+/**
+ * @brief Enable / Disable Mouse Trapping
+ * 
+ * @param set (int / bool)	1 = Enable
+ * 							0 = Disable
+ * 
+ * @private c (char)		helper for set
+ */
 void TrapMouse(int set){
 
 	char c = 'l';
 	if (set){
 		c = 'h';
 	}
-	// Any Event (1003) / Decimal Values (1006) / Focus (1004)
+	// Any Event (1003) / Decimal Values (1006)
 	// 1002 instead of 1003 reports position only if Mouse Button is pressed
-	printf("\x1B[?1002%c\x1B[?1006%c\x1B[?1004%c", c, c, c);
+	printf("\x1B[?1002%c\x1B[?1006%c", c, c);
 }
 
+/**
+ * @brief Enable / Disable TerminalFocus Trapping
+ * 
+ * @param set (int / bool)	1 = Enable
+ * 							0 = Disable
+ * 
+ * @private c (char)		helper for set
+ */
+void TrapFocus(int set){
+
+	char c = 'l';
+	if (set){
+		c = 'h';
+	}
+	printf("\x1B[?1004%c", c);
+}
 
 /*
 										EOF - Detailed Description

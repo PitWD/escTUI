@@ -1071,7 +1071,7 @@ int main() {
 	int r = 0;
 
 	printf("Hello New Project\n\n");
-	printf("Try To Start Video Terminal Mode... ");
+	printf("Try To Enable Video Terminal Mode... ");
 	if (!SetVT(1)){
 		printf("ERROR!\n");
 		printf("STOP PROJECT\n");
@@ -1110,8 +1110,12 @@ int main() {
 	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n",r);
 	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
 
-	printf("Set Trap Mouse Mode... ");
+	printf("Enable Trap Mouse Mode... ");
 	TrapMouse(1);
+	printf("OK\n\n");
+
+	printf("Enable Trap Focus Change... ");
+	TrapFocus(1);
 	printf("OK\n\n");
 
 	printf("Catch Ctrl-C... ");
@@ -1131,11 +1135,15 @@ int main() {
 	// *************************************************************
 
 	ClearScreen(0);
-	printf("Re-Set Trap Mouse Mode... ");
+	printf("Disable Trap Mouse Mode... ");
 	TrapMouse(0);
 	printf("OK\n\n");
 
-	printf("Try To Re-Set Video Terminal Mode... ");
+	printf("Disable Trap Focus Change... ");
+	TrapFocus(0);
+	printf("OK\n\n");
+
+	printf("Try To Set Back Terminal From Video Mode... ");
 	if (!SetVT(0)){
 		printf("ERROR!\n");
 		return -1;
