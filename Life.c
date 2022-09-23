@@ -905,7 +905,7 @@ void EventSecondChange(void){
 			if (gMin10Changed){
 				EventMinute10Change();
 				if (gMin20Changed){
-					EventMinute30Change();
+					EventMinute20Change();
 				}
 			}			
 		}
