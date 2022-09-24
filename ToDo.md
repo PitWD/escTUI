@@ -2,6 +2,10 @@ Def_ ToDo
 
 <br>
 
+**029. Just MAC! Something messy with ZSH & Sleep/WakeUp...**
+
+<br>
+
 **028. Just Billy-OS! Something messy with '\n' at Quit-Procedure**
 
 <br>
@@ -44,7 +48,7 @@ Def_ ToDo
 - **nothing else anymore before this isn't done!**
 - (1) ~~remove case 109 & 158 within core-loop~~
 - (4) ~~declaration of all functions in all *.h~~
-- (5) add function-header to all functions (look for vs-code documentation addin)
+- (5) ~~add function-header to all functions (look for vs-code documentation addin)~~ (almost done)
 - ~~(3) Init/Exit processes into function(set)~~ (actually still part of main())
   - ~~c_break +etc. globals to statics in function~~
   - ~~add serious error-handling~~
