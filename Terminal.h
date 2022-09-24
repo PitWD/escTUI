@@ -53,8 +53,9 @@ int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 _Bool isWaitingForESC27 = 0;
 
 // Signals
-int signalCtrlC = 0;
-int signalTerminalSize = 0;
+int gSignalCtrlC = 0;
+int gSignalTerminalSize = 0;
+int gSignalInterval = 0;
 
 /**
  * @brief Declaration FUNCTIONS
@@ -1094,13 +1095,17 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 void SignalHandler(int sig){
 	if (SIGINT == sig){
 		// Ctrl-C pressed
-		signalCtrlC = 1;
+		gSignalCtrlC = 1;
 	}
 	#if __WIN32__ || _MSC_VER || __WIN64__
 	#else	
 		else if (SIGWINCH == sig){
 			// Terminal-Size Changed
-			signalTerminalSize = 1;
+			gSignalTerminalSize = 1;
+		}
+		else if (SIGALRM == sig){
+			// 31/3 Interval
+			gSignalInterval = 1;
 		}
 	#endif
 	/*else if (SIGURG == sig){

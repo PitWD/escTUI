@@ -22,7 +22,7 @@ int gDay = 0;
 int gMonth = 0;
 int gYear = 0;
 char gStrDate[] = "01.01.1970";
-char gStrTime[] = "00:00:00    ";
+char gStrTime[] = "00:00:00      ";     // Trailing Spaces To Prevent Mac-Sleep-Overflow
 
 // Events
 int gSecondChanged = 0;  // A Second Is Over
@@ -51,7 +51,7 @@ int gRunTimeSec = 0;
 int gRunTimeMin = 0;
 int gRunTimeHour = 0;
 int gRunTimeDays = 0;
-char gStrRunTime[] = "00000d 00:00:00     ";
+char gStrRunTime[] = "00000d 00:00:00      ";   // Trailing Spaces To Prevent Mac-Sleep-Overflow
 
 // TimeIn / TimeOut to recognize ESC from User/Keyboard
 clock_t gUserEscTimeout; // = 0.1 * 45000;

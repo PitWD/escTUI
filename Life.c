@@ -1064,44 +1064,63 @@ void CoreLoop(void){
 			printf("Click\n");
 		}
 
-		CheckOnTimeChange();
-		if (gSecondChanged){
-			// A Second (ore more) is over
-			EventSecondChange();	// Activates all other Minute/Hour/DayChange Events
-		}
+		if (!i){
+			// We did not received anything
+			// Time to check for RealTime things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				CheckOnTimeChange();
+			#else
+				if (gSignalInterval){
+					CheckOnTimeChange();
+				}
+			#endif
+			if (gSecondChanged){
+				// A Second (ore more) is over
+				EventSecondChange();	// Activates all other Minute/Hour/DayChange Events
+			}
+		}				
+
 		
 		// DO STUFF HERE START
 
 		// DO STUFF HERE STOP
 
-		// End Of Loop
-			/* ust for one loop active !
-			 Reset as last Action of the loop! */
-			EraseTimeChange();
-
+		
 		if (!i){
 			// We did not received anything
-			// Time to do idle-time things
-			terminalSizeChangeCnt--;
-			if (!terminalSizeChangeCnt){
-				// Every xx idle-times check on ScreenSize
-				terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
-
-				#if __WIN32__ || _MSC_VER || __WIN64__
+			// Time to do 2nd Time idle-time things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				terminalSizeChangeCnt--;
+				if (!terminalSizeChangeCnt){
+					// Every xx idle-times check on ScreenSize
+					terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
 					GetTerminalSize(3);
 					EventESC27(109);
-				#else
-					if (signalTerminalSize){
+				}
+				else {
+					DoEvents();
+				}	
+			#else
+				if (gSignalInterval){
+					if (gSignalTerminalSize){
 						GetTerminalSize(3);
 						EventESC27(109);
-						signalTerminalSize = 0;
+						gSignalTerminalSize = 0;
 					}
-				#endif
-			}
-			else {
-				DoEvents();
-			}	
+					gSignalInterval = 0;
+				}
+				else {
+					DoEvents();
+				}	
+			#endif
 		}
+
+		/* just for one loop active !
+			Reset as last Action of the loop! */
+		if (gSecondChanged){
+			EraseTimeChange();
+		}
+
 	}
 	// Loop Minimum
 
@@ -1157,7 +1176,7 @@ int main() {
 		printf("Billy-OS: Screen Size Changes Get Polled...Sorry.\n");
 	#else
 		signal(SIGWINCH, SignalHandler);
-		printf("Posix-OS: Screen Size Changes Get Signaled.\n");
+		printf("Some-X-OS: Screen Size Changes Get Signaled.\n");
 	#endif
 	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
 
@@ -1178,6 +1197,14 @@ int main() {
 	signal(SIGINT, SignalHandler);
 	printf("OK\n\n");
 
+	#if __WIN32__ || _MSC_VER || __WIN64__
+		printf("Billy-OS: Check On Real-Time Changes Get Polled...Sorry.\n\n");
+	#else
+		signal(SIGALRM, SignalHandler);
+		ualarm(333333,333333);
+		printf("Some-X-OS: Check On Real-Time Changes Get Signaled.\n\n");
+	#endif
+	
 	InitEscSeq();
 	InitColors();
 	
