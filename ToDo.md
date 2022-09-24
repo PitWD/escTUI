@@ -33,9 +33,9 @@ Def_ ToDo
 
 **024. Optimize CheckOnTimeChange() within core-loop**
 - **!!! Do 022. first !!!**
-- look for signal (On timer) sets the flag
-- move flag-check into idle-time
-- check signal() for calling "function(set)-see 022." on exit and err cases
+- ~~look for signal (On timer) sets the flag~~
+- ~~move flag-check into idle-time~~
+- ~~check signal() for calling "function(set)-see 022." on exit and err cases~~
 
 <br>
 
