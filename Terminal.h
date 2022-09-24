@@ -202,19 +202,21 @@ int InKey(void){
 		static int cnt = 0;
 		int c = 0;
 
-		// Seems silly to read buffer-size each time
-		if((ioctl(0, FIONREAD , &c)) > -1){
-			// and to then eventually (re)set cnt
-			if (c > 0){
-				cnt = c;
+		if(cnt < 1){	// Just this 'IF' is the 023. FIX
+			// Seems silly to read buffer-size each time
+			if((ioctl(0, FIONREAD , &c)) > -1){
+				// and to then eventually (re)set cnt
+				if (c > 0){
+					cnt = c;
+				}
+				// but it's a MustHave... Direct FIONREAD into cnt only if !cnt - fails (sometimes) with scary effects.
 			}
-			// but it's a MustHave... Direct FIONREAD into cnt only if !cnt - fails (sometimes) with scary effects.
-		}
-		else{
-			cnt = 0;
-		}
+			else{
+				cnt = 0;
+			}
+		}				// 023. FIX
 		
-		if (cnt > 0){
+		if (cnt){
 			cnt--;
 			return getchar();
 		}

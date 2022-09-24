@@ -2,7 +2,12 @@ Def_ ToDo
 
 <br>
 
+**030. Do 'something' with Ctrl-C**
+
+<br>
+
 **029. Just MAC! Something messy with ZSH & Sleep/WakeUp...**
+- ~~done~~ *(trailing space - overflow seconds...)*
 
 <br>
 
@@ -11,28 +16,28 @@ Def_ ToDo
 <br>
 
 **027. Move ToDo to GitHub-Issues...**
-- **!!! Do 022. first !!!**
+- **~~!!! Do 022. first !!!~~**
 
 <br>
 
 **026. Normalize variable Naming**
-- **!!! Do 022. first !!!**
-- pXYZ - pointer
-- gXYZ - global
-- gpXYZ - global pointer
-- lXYZ - local
-- little HowTo to the whole naming thing
+- **~~!!! Do 022. first !!!~~**
+- ~~pXYZ - pointer~~
+- ~~gXYZ - global~~
+- ~~gpXYZ - global pointer~~
+- ~~lXYZ - local~~
+- **little HowTo to the whole naming thing**
 
 <br>
 
 **025. Esc27Events change to alt+shift+ctrl flags**
-- **!!! Do 022. first !!!**
+- **~~!!! Do 022. first !!!~~**
 - identify missing MAC-Key-Sequences
 
 <br>
 
 **024. Optimize CheckOnTimeChange() within core-loop**
-- **!!! Do 022. first !!!**
+- **~~!!! Do 022. first !!!~~**
 - ~~look for signal (On timer) sets the flag~~
 - ~~move flag-check into idle-time~~
 - ~~check signal() for calling "function(set)-see 022." on exit and err cases~~
@@ -40,12 +45,13 @@ Def_ ToDo
 <br>
 
 **023. Check on if the "silly-thing" in InKey() is gone with introduced FlushInKey()...**
-- **!!! Do 022. first !!!**
+- **~~!!! Do 022. first !!!~~**
+- ~~done~~ (after tested)
 
 <br>
 
 **022. Check for MAC and CLEAN UP**
-- **nothing else anymore before this isn't done!**
+- **~~nothing else anymore before this isn't done!~~**
 - (1) ~~remove case 109 & 158 within core-loop~~
 - (4) ~~declaration of all functions in all *.h~~
 - (5) ~~add function-header to all functions (look for vs-code documentation addin)~~ (almost done)
