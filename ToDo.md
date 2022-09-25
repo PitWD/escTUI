@@ -3,14 +3,14 @@
 <br>
 
 **031. Next Time On A Mac...**
-- Find reason for UserKey slowness (99% it's compile/debug related  
-or the '333333'-scale is 'wrong' on Macs  
-!! But SecondChangeEvent is right !!)
+- ~~Find reason for UserKey slowness (99% it's compile/debug related~~  
+~~or the '333333'-scale is 'wrong' on Macs~~  
+~~!! But SecondChangeEvent is right !!)~~
 
 <br>
 
 **030. Do 'something' with Ctrl-C**
--ooops... need full implementation of all Ctrl-A - Ctrl-Z
+- ~~ooops... need full implementation of all Ctrl-A - Ctrl-Z~~
 
 <br>
 

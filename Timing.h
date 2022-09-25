@@ -202,11 +202,11 @@ void CheckOnTimeChange(void){
             pLocalTime = localtime(&lTimeLast);
             if (pLocalTime->tm_sec + timeDiff > 60){
                 // We would have missed xx:xx:00
-                // We'll "simulate" to get all TimeChangeEvents right
+                // We'll have to "simulate" to get all TimeChangeEvents right
                 sec00Overflow = 1;
             }
         }
-    
+
         lTimeLast = lTimeNow;
         gSecondChanged = 1;
 
