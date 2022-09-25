@@ -235,6 +235,33 @@ Error - Handling
 228		ShiftAltCtrl	F11				27	91	50	(51)59	56	126
 229		ShiftAltCtrl	F12				27	91	50	(52)59	56	126
 
+230		Ctrl			A				1
+231		Ctrl			B				2
+232		Ctrl			C				3
+233		Ctrl			D				4
+234		Ctrl			E				5
+235		Ctrl			F				6
+236		Ctrl			G				7
+237		Ctrl			H				8
+238		Ctrl			I				9
+239		Ctrl			J				10
+240		Ctrl			K				11
+241		Ctrl			L				12
+242		Ctrl			M				13
+243		Ctrl			N				14
+244		Ctrl			O				15
+245		Ctrl			P				16
+246		Ctrl			Q				17
+247		Ctrl			R				18
+248		Ctrl			S				19
+249		Ctrl			T				20
+250		Ctrl			U				21
+251		Ctrl			V				22
+252		Ctrl			W				23
+253		Ctrl			X				24
+254		Ctrl			Y				25
+255		Ctrl			Z				26
+
 2nd Level MouseEvents
 512				Click
 513				DblClick

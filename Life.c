@@ -350,6 +350,88 @@ int EventESC27 (int event){
 		// F12
 		break;
 
+	// Ctrl-A - Ctrl-Z
+	// (but a lot are special - see cases above
+	//  a lot are also not supported on all OSs)
+	case 230:
+		// Ctrl-A
+		break;
+	case 231:
+		// Ctrl-B
+		break;
+	case 232:
+		// Ctrl-C
+		break;
+	case 233:
+		// Ctrl-D
+		break;
+	case 234:
+		// Ctrl-E
+		break;
+	case 235:
+		// Ctrl-F
+		break;
+	case 236:
+		// Ctrl-G
+		break;
+	case 237:
+		// Ctrl-H
+		break;
+	case 238:
+		// Ctrl-I
+		break;
+	case 239:
+		// Ctrl-J
+		break;
+	case 240:
+		// Ctrl-K
+		break;
+	case 241:
+		// Ctrl-L
+		break;
+	case 242:
+		// Ctrl-M
+		break;
+	case 243:
+		// Ctrl-N
+		break;
+	case 244:
+		// Ctrl-O
+		break;
+	case 245:
+		// Ctrl-P
+		break;
+	case 246:
+		// Ctrl-Q
+		break;
+	case 247:
+		// Ctrl-R
+		break;
+	case 248:
+		// Ctrl-S
+		break;
+	case 249:
+		// Ctrl-T
+		break;
+	case 250:
+		// Ctrl-U
+		break;
+	case 251:
+		// Ctrl-V
+		break;
+	case 252:
+		// Ctrl-W
+		break;
+	case 253:
+		// Ctrl-X
+		break;
+	case 254:
+		// Ctrl-Y
+		break;
+	case 255:
+		// Ctrl-Z
+		break;
+
 	// Navigation
 	case 43:
 		// Up
@@ -967,7 +1049,6 @@ void CoreLoop(void){
 				i = -1;
 			}		
 		}
-		
 		else if (i == 27){
 			// Entrance into (User)ESC-Sequences recognition
 			isOnUsrESC27 = 1; isOnESC27= 1;
@@ -978,6 +1059,12 @@ void CoreLoop(void){
 		else{
 			// any char after 1st ESC immediately disables possibility on UserESC
 			isOnUsrESC27 = 0;
+		}
+
+		if (gSignalCtrlC){
+			// Ctrl-C
+			i = 3;
+			gSignalCtrlC = 0;
 		}
 			
 	// Loop Minimum

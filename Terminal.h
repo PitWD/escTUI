@@ -482,6 +482,77 @@ int GetESC27 (int c){
 		streamInESC27[1] = 0;
 		goto SaveGetESC27ErrReturn;
 	}
+	else if (c < 32){
+		switch (c){
+		case 9:
+			// TAB
+			streamInESC27[1] = 0;
+			r = 113;
+			goto SaveGetESC27ErrReturn;
+			break;
+		case 10:
+		case 13:
+			// ENTER
+			streamInESC27[1] = 0;
+			r = 115;
+			goto SaveGetESC27ErrReturn;
+			break;
+		case 27:
+			// (Re)entering ESC Mode	
+			if (allowTxt){
+				// expecting "EndOfText" '\' as next char
+				waitForEOT = 1;
+				return 0;
+			}
+			
+			if (isValid){
+				// ESC came twice... p			
+				if (!streamPos){
+					// User ESC
+					r = 108;
+				}
+				else{
+					// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
+					r = 155;
+				}
+				goto SaveGetESC27ErrReturn;
+			}
+			
+			isValid = 1;
+			isCSI = 0;
+			isOSC = 0;
+			isMouse = 0;
+			isByteMouse = 0;
+			allowTxt = 0;
+			waitForEOT = 0;
+			streamPos = 0;
+			numCnt = 0;
+			streamInESC27[0] = 27;
+			streamInESC27[1] = 0;		
+			return 0;
+			break;
+		case -1:
+			// TimeOut of a broken, or valid but unknown sequence
+			r = -3;
+			goto SaveGetESC27ErrReturn;
+
+		default:
+			// Ctrl-A - Ctrl-Z
+			// (but a lot are special - see cases above
+			//  a lot are also not supported on all OSs)
+			r = 229 + c;
+			goto SaveGetESC27ErrReturn;
+			break;
+		}
+	}
+	else {
+		if (!isValid){
+			// Something not related to ESC (all regular User Pressed Stuff...)
+			return -1;
+		}
+	}
+
+/*	
 	else if (c == 9){
 		// TAB
 		streamInESC27[1] = 0;
@@ -539,7 +610,7 @@ int GetESC27 (int c){
 		// Something not related to ESC 
 		return -1;
 	}
-
+*/
 	streamPos++;
 	
 	if (streamPos < ESC27_STREAM_IN_SIZE - 1)
@@ -1098,6 +1169,10 @@ void SignalHandler(int sig){
 	if (SIGINT == sig){
 		// Ctrl-C pressed
 		gSignalCtrlC = 1;
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			// Catch Ctrl-C again...
+			signal(SIGINT, SignalHandler);
+		#endif
 	}
 	#if __WIN32__ || _MSC_VER || __WIN64__
 	#else	
