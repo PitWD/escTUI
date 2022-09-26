@@ -89,6 +89,10 @@ int SetVT(int set){
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 
+		static isSet = 0;
+		static DWORD dwStartModeOut = 0;
+		static DWORD dwStartModeIn = 0;
+
 		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		if (hOut == INVALID_HANDLE_VALUE){
 			return 0;
@@ -107,14 +111,25 @@ int SetVT(int set){
 			return 0;
 		}
 
+		if (!isSet){
+			dwStartModeOut = dwOriginalOutMode;
+			dwStartModeIn = dwOriginalInMode;
+		}
+		
 		DWORD dwRequestedOutModes = 0;
 		DWORD dwRequestedInModes = 0;
 		DWORD dwOutMode = 0;
+		
 		if (set){
 			dwRequestedOutModes = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
 			dwRequestedInModes = ENABLE_VIRTUAL_TERMINAL_INPUT;
 			dwOutMode = dwOriginalOutMode | dwRequestedOutModes;
 		}
+		else{
+			dwRequestedInModes = dwStartModeIn;
+			dwOutMode = dwStartModeOut;
+		}
+		
 		
 		if (!SetConsoleMode(hOut, dwOutMode)){
 			// we failed to set both modes, try to step down mode gracefully.
@@ -134,6 +149,10 @@ int SetVT(int set){
 		if (set){
 			dwInMode = dwOriginalInMode | dwRequestedInModes;
 		}
+		else{
+			dwInMode = dwStartModeIn;
+		}
+		
 		
 		if (!SetConsoleMode(hIn, dwInMode)){
 			// Failed to set VT input mode, can't do anything here.
