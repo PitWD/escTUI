@@ -20,6 +20,7 @@
 <br>
 
 **028. Just Billy-OS! Something messy with '\n' at Quit-Procedure**
+- ~~done~~
 
 <br>
 

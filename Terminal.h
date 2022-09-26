@@ -114,6 +114,7 @@ int SetVT(int set){
 		if (!isSet){
 			dwStartModeOut = dwOriginalOutMode;
 			dwStartModeIn = dwOriginalInMode;
+			isSet = 1;
 		}
 		
 		DWORD dwRequestedOutModes = 0;
