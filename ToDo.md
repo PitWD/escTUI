@@ -41,7 +41,8 @@
 
 **025. Esc27Events change to alt+shift+ctrl flags**
 - **~~!!! Do 022. first !!!~~**
-- identify missing MAC-Key-Sequences
+- **still...** Esc27Events change to alt+shift+ctrl flags
+- identify missing MAC-Key-Sequences *not really anymore*
 
 <br>
 

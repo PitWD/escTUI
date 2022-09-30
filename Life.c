@@ -1263,7 +1263,7 @@ int main() {
 		printf("Billy-OS: Screen Size Changes Get Polled...Sorry.\n");
 	#else
 		signal(SIGWINCH, SignalHandler);
-		printf("Some-X-OS: Screen Size Changes Get Signaled.\n");
+		printf("PosiX-OS: Screen Size Changes Get Signaled.\n");
 	#endif
 	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
 
@@ -1274,11 +1274,11 @@ int main() {
 
 	printf("Enable Trap Mouse Mode... ");
 	TrapMouse(1);
-	printf("OK\n\n");
+	printf("(probably) OK\n\n");
 
 	printf("Enable Trap Focus Change... ");
 	TrapFocus(1);
-	printf("OK\n\n");
+	printf("(probably) OK\n\n");
 
 	printf("Catch Ctrl-C... ");
 	signal(SIGINT, SignalHandler);
@@ -1289,7 +1289,7 @@ int main() {
 	#else
 		signal(SIGALRM, SignalHandler);
 		ualarm(333333,333333);
-		printf("Some-X-OS: Check On Real-Time Changes Get Signaled.\n\n");
+		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n\n");
 	#endif
 	
 	InitEscSeq();
