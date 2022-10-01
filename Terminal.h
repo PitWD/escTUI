@@ -23,31 +23,31 @@ const char TerminalVersion [] = "1.00pa";
 #define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
 #define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
 //unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
-char streamInESC27[ESC27_STREAM_IN_SIZE];
+char gStreamInESC27[ESC27_STREAM_IN_SIZE];
 
 // Screen
-int screenWidth = 0;
-int screenHeight = 0;
-int screenWidthPrev = 0;
-int screenHeightPrev = 0;
-int screenSizeInCursorPos = 0;
+int gScreenWidth = 0;
+int gScreenHeight = 0;
+int gScreenWidthPrev = 0;
+int gScreenHeightPrev = 0;
+int gScreenSizeInCursorPos = 0;
 
 // Keyboard
-int cursorPosX = 0;
-int cursorPosY = 0;
-int cursorSelX = 0;                     // 1st point of selection rectangle
-int cursorSelY = 0;                     // or same as CursorPosX&Y = No selection
-int cursorWaitFor = 0;					// Shift OR Alt OR Ctrl + F3 
+int gCursorPosX = 0;
+int gCursorPosY = 0;
+int gCursorSelX = 0;                     // 1st point of selection rectangle
+int gCursorSelY = 0;                     // or same as CursorPosX&Y = No selection
+int gCursorWaitFor = 0;					// Shift OR Alt OR Ctrl + F3 
 										// Has 7 overlapping Settings with CursorPos
 										// Set cursorIsAsked true when asking 'manually' for the cursor position !!
-_Bool cursorIsSelecting = 0;            // (Moving with Shift)
+_Bool gCursorIsSelecting = 0;            // (Moving with Shift)
 
 // Mouse
-int mousePosX = 0;
-int mousePosY = 0;
-int mouseSelX = 0;                     // 1st point of selection rectangle
-int mouseSelY = 0;                     // or same as MousePosX&Y = No selection
-int mouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
+int gMousePosX = 0;
+int gMousePosY = 0;
+int gMouseSelX = 0;                     // 1st point of selection rectangle
+int gMouseSelY = 0;                     // or same as MousePosX&Y = No selection
+int gMouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 
 // ESC27 Reading
 _Bool isWaitingForESC27 = 0;
@@ -351,25 +351,25 @@ int GetTerminalSize(int set){
 		break;
 	case 2:
 		// Dumb
-		screenSizeInCursorPos = 1;
+		gScreenSizeInCursorPos = 1;
 		printf("\0337\x1B[999;9999H\x1B[6n\0338");
 		break;
 	case 0:
 		// 1st run
 		r = WaitForESC27("\x1B[18t",109,0.5);
-		if (screenWidth > 0 && screenHeight > 0){
+		if (gScreenWidth > 0 && gScreenHeight > 0){
 			isSet = 1;
-			screenWidthPrev = screenWidth;
-			screenHeightPrev = screenHeight;
+			gScreenWidthPrev = gScreenWidth;
+			gScreenHeightPrev = gScreenHeight;
 			break;
 		}
-		screenSizeInCursorPos = 1;
+		gScreenSizeInCursorPos = 1;
 		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",107,0.5);
-		screenSizeInCursorPos = 0;
-		if (screenWidth > 0 && screenHeight > 0){
+		gScreenSizeInCursorPos = 0;
+		if (gScreenWidth > 0 && gScreenHeight > 0){
 			isSet = 2;
-			screenWidthPrev = screenWidth;
-			screenHeightPrev = screenHeight;
+			gScreenWidthPrev = gScreenWidth;
+			gScreenHeightPrev = gScreenHeight;
 			break;
 		}
 	case 3:
@@ -383,14 +383,14 @@ int GetTerminalSize(int set){
         #else 
 			/* Mac & Linux */
             ioctl(fileno(stdout), TIOCGWINSZ, &w);
-            screenWidth = (int)(w.ws_col);
-            screenHeight = (int)(w.ws_row);
+            gScreenWidth = (int)(w.ws_col);
+            gScreenHeight = (int)(w.ws_row);
         #endif
 		if (!isSet){
-			if (screenWidth > 0 && screenHeight > 0){
+			if (gScreenWidth > 0 && gScreenHeight > 0){
 				isSet = 3;
-				screenWidthPrev = screenWidth;
-				screenHeightPrev = screenHeight;
+				gScreenWidthPrev = gScreenWidth;
+				gScreenHeightPrev = gScreenHeight;
 				break;
 			}
 			else {
@@ -417,9 +417,9 @@ int GetTerminalSize(int set){
  * 				0 = Not Changed
  */
 int ScreenSizeChanged(void){
-	if ((screenWidth != screenWidthPrev) || (screenHeight != screenHeightPrev)){
-		screenHeightPrev = screenHeight;
-		screenWidthPrev = screenWidth;
+	if ((gScreenWidth != gScreenWidthPrev) || (gScreenHeight != gScreenHeightPrev)){
+		gScreenHeightPrev = gScreenHeight;
+		gScreenWidthPrev = gScreenWidth;
 		return 1;
 	}
 	return 0;
@@ -499,21 +499,21 @@ int GetESC27 (int c){
 			// Alt-Back
 			r += 51;
 		}
-		streamInESC27[1] = 0;
+		gStreamInESC27[1] = 0;
 		goto SaveGetESC27ErrReturn;
 	}
 	else if (c < 32){
 		switch (c){
 		case 9:
 			// TAB
-			streamInESC27[1] = 0;
+			gStreamInESC27[1] = 0;
 			r = 113;
 			goto SaveGetESC27ErrReturn;
 			break;
 		case 10:
 		case 13:
 			// ENTER
-			streamInESC27[1] = 0;
+			gStreamInESC27[1] = 0;
 			r = 115;
 			goto SaveGetESC27ErrReturn;
 			break;
@@ -547,8 +547,8 @@ int GetESC27 (int c){
 			waitForEOT = 0;
 			streamPos = 0;
 			numCnt = 0;
-			streamInESC27[0] = 27;
-			streamInESC27[1] = 0;		
+			gStreamInESC27[0] = 27;
+			gStreamInESC27[1] = 0;		
 			return 0;
 			break;
 		case -1:
@@ -635,8 +635,8 @@ int GetESC27 (int c){
 	
 	if (streamPos < ESC27_STREAM_IN_SIZE - 1)
 	{
-		streamInESC27[streamPos] = c;
-		streamInESC27[streamPos + 1] = 0;
+		gStreamInESC27[streamPos] = c;
+		gStreamInESC27[streamPos + 1] = 0;
 	}
 	else{
 		// Overflow
@@ -649,7 +649,7 @@ int GetESC27 (int c){
 			if (isOSC){
 				if (c == 92){
 					// EndOfText
-					switch (streamInESC27[2]){
+					switch (gStreamInESC27[2]){
 					case 76:
 						// Window title
 						r = 110;
@@ -689,7 +689,7 @@ int GetESC27 (int c){
 			}
 			
 		case 2:
-			if (streamInESC27[1] == 79){
+			if (gStreamInESC27[1] == 79){
 				if (c > 79 && c < 84){
 					// F1 - F4
 					r = c - 79;
@@ -699,7 +699,7 @@ int GetESC27 (int c){
 					isCSI = 1;
 				}
 			}
-			else if (streamInESC27[1] == 91){
+			else if (gStreamInESC27[1] == 91){
 				if (c > 64 && c < 73 && c != 71){
 					// Up / Down / Right / Left / Center / End / UNKNOWN / Pos1
 					r = c - 22;
@@ -728,7 +728,7 @@ int GetESC27 (int c){
 				}
 				isCSI = 1;
 			}
-			else if (streamInESC27[1] == 93){
+			else if (gStreamInESC27[1] == 93){
 				if (c == 76 || c == 108){
 					// Icon label & Window title
 					allowTxt = 1;
@@ -744,22 +744,22 @@ int GetESC27 (int c){
 
 		case 3:
 			if (c == 126){
-				if (streamInESC27[2] > 49 && streamInESC27[2] < 55){
+				if (gStreamInESC27[2] > 49 && gStreamInESC27[2] < 55){
 					// Ins / Del / PgUp / PgDown
-					r = streamInESC27[2] + 1;
+					r = gStreamInESC27[2] + 1;
 				}
 			}
 			break;
 		
 		case 4:
 			if (c == 126){
-				if (streamInESC27[3] < 53){
+				if (gStreamInESC27[3] < 53){
 					// F9 / F10 / F11 / F12
-					r = streamInESC27[3] - 38;
+					r = gStreamInESC27[3] - 38;
 				}
-				else if (streamInESC27[3] < 58){
+				else if (gStreamInESC27[3] < 58){
 					// F5 / F6 / F7  F8
-					r = streamInESC27[3] - 48;
+					r = gStreamInESC27[3] - 48;
 				}
 			}
 			break;
@@ -769,9 +769,9 @@ int GetESC27 (int c){
 				// Mouse in ByteMode...
 				// ByteMode is dangerous! XY-Positions > 223 may crash the Terminal ! 
 				// But ByteMode has just ~40% of the data volume....
-				mousePosX = 0; mousePosY = 0;
-				if (streamInESC27[4]>32){
-					mousePosX = streamInESC27[4] - 32;
+				gMousePosX = 0; gMousePosY = 0;
+				if (gStreamInESC27[4]>32){
+					gMousePosX = gStreamInESC27[4] - 32;
 				}
 				else{
 					// Mouse-X Out Of Range
@@ -779,8 +779,8 @@ int GetESC27 (int c){
 					goto SaveGetESC27ErrReturn;
 				}
 				
-				if (streamInESC27[5]>32){
-					mousePosY = streamInESC27[5] - 32;
+				if (gStreamInESC27[5]>32){
+					gMousePosY = gStreamInESC27[5] - 32;
 				}
 				else{
 					// Mouse-Y Out Of Range
@@ -788,7 +788,7 @@ int GetESC27 (int c){
 					goto SaveGetESC27ErrReturn;
 				}
 				
-				r = streamInESC27[3];
+				r = gStreamInESC27[3];
 				// Switch off Shift / Alt / Ctrl
 				r &= ~((1 << 2) | (1 << 3) | (1 << 4));
 
@@ -796,14 +796,14 @@ int GetESC27 (int c){
 				case 32:
 					// LeftDown
 					r = 116;
-					mouseButton = 1;
-					mouseSelX = mousePosX; mouseSelY = mousePosY;
+					gMouseButton = 1;
+					gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 					break;
 				case 34:
 					// RightDown
 					r = 126;
-					mouseButton = 4;
-					mouseSelX = mousePosX; mouseSelY = mousePosY;
+					gMouseButton = 4;
+					gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 					break;
 				case 35:
 					// Mouse Up (Wheel / Right / Left)
@@ -812,8 +812,8 @@ int GetESC27 (int c){
 				case 33:
 					// WheelDown
 					r = 118;
-					mouseButton = 2;
-					mouseSelX = mousePosX; mouseSelY = mousePosY;
+					gMouseButton = 2;
+					gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 					break;
 				case 67:
 					// MouseMove - (All Keys Up)
@@ -845,7 +845,7 @@ int GetESC27 (int c){
 				}
 				isByteMouse = 0;
 			}
-			else if (c > 79 && c < 84 && streamInESC27[2] == 49){
+			else if (c > 79 && c < 84 && gStreamInESC27[2] == 49){
 				// Shift OR Alt OR Ctrl + F1 - F4
 				// F3 could be CurserPos, too... WTF !
 				// 	CSI 1;2 R  -  Shift
@@ -856,9 +856,9 @@ int GetESC27 (int c){
 				// 	CSI 1;7 R  -  AltCtrl
 				// 	CSI 1;8 R  -  ShiftAltCtrl
 				// Previous 7 Combinations Are CursorPositions, too... WTF !
-				if (!(c == 82 && (screenSizeInCursorPos || cursorWaitFor))){
+				if (!(c == 82 && gScreenSizeInCursorPos || gCursorWaitFor)){
 					// Not F3 while waiting for CursorPos
-					switch (streamInESC27[4]){
+					switch (gStreamInESC27[4]){
 					case 50:
 						// Shift
 						r = c - 65;
@@ -896,11 +896,11 @@ int GetESC27 (int c){
 			else if (c > 64 && c < 73 && c != 71){
 				// Shift OR Ctrl OR Alt + Up / Down / Right / Left / Center / End / UNKNOWN / Pos1
 				r = c - 9;
-				if (streamInESC27[4] == 53){
+				if (gStreamInESC27[4] == 53){
 					// Ctrl
 					r+= 8;
 				}
-				if (streamInESC27[4] == 51){
+				if (gStreamInESC27[4] == 51){
 					// Alt
 					r+= 16;
 				}
@@ -910,40 +910,40 @@ int GetESC27 (int c){
 		case 6:
 			if (c == 126){
 				// Shift OR Alt OR Ctrl + F5 - F12
-				switch (streamInESC27[5])				{
+				switch (gStreamInESC27[5])				{
 				case 50:
 					/* shift */
-					r = streamInESC27[3] - 24;
+					r = gStreamInESC27[3] - 24;
 					break;
 				case 51:
 					/* alt */
-					r = streamInESC27[3] + 121; 
+					r = gStreamInESC27[3] + 121; 
 					break;
 				case 53:
 					/* ctrl */
-					r = streamInESC27[3] - 10;
+					r = gStreamInESC27[3] - 10;
 					break;
 				case 54:
 					// Shift+Ctrl
-					r = streamInESC27[3] + 163; 
+					r = gStreamInESC27[3] + 163; 
 					break;
 				case 52:
 					// Shift+Alt
-					r = streamInESC27[3] + 135; 
+					r = gStreamInESC27[3] + 135; 
 					break;
 				case 55:
 					// Alt+Ctrl
-					r = streamInESC27[3] + 149; 
+					r = gStreamInESC27[3] + 149; 
 					break;
 				case 56:
 					// Shift+Alt+Ctrl
-					r = streamInESC27[3] + 177; 
+					r = gStreamInESC27[3] + 177; 
 					break;
 				default:
 					break;
 				}
 
-				if (streamInESC27[3] > 52){
+				if (gStreamInESC27[3] > 52){
 					// F5 - F8
 					r-= 10;
 				}
@@ -968,12 +968,12 @@ int GetESC27 (int c){
 					// it's starting with a digit...					
 					numCnt = 1;
 					isNumGroup[1] = 0;
-					pNumPos[1] = &(streamInESC27[streamPos]);
+					pNumPos[1] = &(gStreamInESC27[streamPos]);
 				}
 				if (c > 57){
 					// colon & semi-colon
 					numCnt++;
-					pNumPos[numCnt] = &(streamInESC27[streamPos + 1]);
+					pNumPos[numCnt] = &(gStreamInESC27[streamPos + 1]);
 					isNumGroup[numCnt] = 0;
 					if (c == 58){
 						// previous and next number are a colon separated group
@@ -988,17 +988,17 @@ int GetESC27 (int c){
 				switch (c){
 				case 82:
 					// Actual Cursor Position
-					if (screenSizeInCursorPos){
+					if (gScreenSizeInCursorPos){
 						// but as TerminalSize substitute
-						screenWidth = atoi(pNumPos[2]);
-						screenHeight = atoi(pNumPos[1]);
-						screenSizeInCursorPos = 0;
+						gScreenWidth = atoi(pNumPos[2]);
+						gScreenHeight = atoi(pNumPos[1]);
+						gScreenSizeInCursorPos = 0;
 						r = 109;
 					}
 					else{
-						cursorPosY = atoi(pNumPos[1]);
-						cursorPosX = atoi(pNumPos[2]);
-						cursorWaitFor = 0;
+						gCursorPosY = atoi(pNumPos[1]);
+						gCursorPosX = atoi(pNumPos[2]);
+						gCursorWaitFor = 0;
 						r = 107;
 					}
 					break;				
@@ -1007,8 +1007,8 @@ int GetESC27 (int c){
 				case 109:
 					// Mouse Up / Wheel Up
 					if  (isMouse){
-						mousePosX = atoi(pNumPos[2]);
-						mousePosY = atoi(pNumPos[3]);
+						gMousePosX = atoi(pNumPos[2]);
+						gMousePosY = atoi(pNumPos[3]);
 						r = (atoi(pNumPos[1]));
 						// Switch off Shift / Alt / Ctrl
 						r &= ~((1 << 2) | (1 << 3) | (1 << 4));
@@ -1038,20 +1038,20 @@ int GetESC27 (int c){
 								break;
 							case 0:
 								// Button Down
-								mouseButton = 1;
-								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								gMouseButton = 1;
+								gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 								r = 116;
 								break;
 							case 2:
 								// Right Button Down
-								mouseButton = 4;
-								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								gMouseButton = 4;
+								gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 								r = 126;
 								break;
 							case 1:
 								// Wheel Down
-								mouseButton = 2;
-								mouseSelX = mousePosX; mouseSelY = mousePosY;
+								gMouseButton = 2;
+								gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 								r = 118;
 								break;
 							case 33:
@@ -1082,8 +1082,8 @@ int GetESC27 (int c){
                     switch (atoi(pNumPos[1])){
                     case 8:
                         // ScreenSize
-                        screenHeight = atoi(pNumPos[2]);
-                        screenWidth = atoi(pNumPos[3]);
+                        gScreenHeight = atoi(pNumPos[2]);
+                        gScreenWidth = atoi(pNumPos[3]);
                         r = 109;
                         break;
                     
@@ -1103,7 +1103,7 @@ int GetESC27 (int c){
 	return r;
 
 	SaveGetESC27ErrReturn: 
-	isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0; screenSizeInCursorPos = 0; cursorWaitFor = 0;
+	isValid = 0; allowTxt = 0; isMouse = 0;	isByteMouse = 0;gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
 	return r;
 
 }

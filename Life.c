@@ -755,7 +755,7 @@ int EventESC27 (int event){
 		break;
 	case 117:
 		// MouseUp
-		switch (mouseButton){
+		switch (gMouseButton){
 		case 1:
 			// Left
 			break;
@@ -798,7 +798,7 @@ int EventESC27 (int event){
 	// 2nd Level (From Loop()) Mouse-Events
 	case 512:
 		// Click
-		switch (mouseButton){
+		switch (gMouseButton){
 		case 1:
 			// Left
 			break;
@@ -815,7 +815,7 @@ int EventESC27 (int event){
 		break;
 	case 513:
 		// DblClick
-		switch (mouseButton){
+		switch (gMouseButton){
 		case 1:
 			// Left
 			break;
@@ -832,7 +832,7 @@ int EventESC27 (int event){
 		break;
 	case 514:
 		// Area
-		switch (mouseButton){
+		switch (gMouseButton){
 		case 1:
 			// Left
 			break;
@@ -1102,7 +1102,7 @@ void CoreLoop(void){
 					break;
 				case 117:
 					// Mouse UP (Left / Wheel / Right)
-					if ((mouseSelX == mousePosX) && (mouseSelY == mousePosY)){
+					if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
 						// it's a (dbl)click
 						if (isOnClick && clock() < timeOnClick){
 							// dblClick
@@ -1136,7 +1136,7 @@ void CoreLoop(void){
 			
 			if (r > 0){
 				TxtBold(1);
-				printf("  : %s\t%s\n\n\n", KeyID2String[r], &streamInESC27[1]);
+				printf("  : %s\t%s\n\n\n", KeyID2String[r], &gStreamInESC27[1]);
 				TxtBold(0);					
 			}
 
@@ -1265,12 +1265,12 @@ int main() {
 		signal(SIGWINCH, SignalHandler);
 		printf("PosiX-OS: Screen Size Changes Get Signaled.\n");
 	#endif
-	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
+	printf("Width: %d  Height: %d\n\n", gScreenWidth, gScreenHeight);
 
 	printf("Synchronize CLS-Mode With Size-Mode...\n");
 	r = ClearScreen(r);
 	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n",r);
-	printf("Width: %d  Height: %d\n\n", screenWidth, screenHeight);
+	printf("Width: %d  Height: %d\n\n", gScreenWidth, gScreenHeight);
 
 	printf("Enable Trap Mouse Mode... ");
 	TrapMouse(1);

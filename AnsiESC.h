@@ -467,7 +467,7 @@ void CursorLeft(int x) {
 	printf("%s%dD", CSI, x);
 }
 void GetAnsiCursorPos(void){
-	cursorWaitFor = 1;
+	gCursorWaitFor = 1;
 	printf("%s6n", CSI);
 }
 
