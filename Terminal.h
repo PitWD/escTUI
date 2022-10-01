@@ -378,8 +378,8 @@ int GetTerminalSize(int set){
 	        /* Billy OS */
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-            screenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
-            screenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+            gScreenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
+            gScreenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
         #else 
 			/* Mac & Linux */
             ioctl(fileno(stdout), TIOCGWINSZ, &w);
