@@ -2,6 +2,16 @@
 
 <br>
 
+**032. ANSI ESC Injection**  
+*I found a guy who investigated malleolus ESC-Sequences. It led me to multiple cognations.*  
+- The byte-wise approach of GetESC27() to rather declare a sequence as early as possible as 'broken' than to wait for something with sense - and to never wait for an 'end of sequence' was smart...  
+  - But it's hardcore missing a 'FlushInKey()' after recognizing a broken or regular sequence...  
+This Flush must stop on next ESC!
+- Cause this base-concept seems for security reasons very worth to stay as it is, it now gets attention!  
+  - there are at least plenty IFs which should be switched...
+
+<br>
+
 **031. Next Time On A Mac...**
 - ~~Find reason for UserKey slowness (99% it's compile/debug related~~  
 ~~or the '333333'-scale is 'wrong' on Macs~~  
