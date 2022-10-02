@@ -704,6 +704,34 @@ int GetESC27 (int c){
 					// Up / Down / Right / Left / Center / End / UNKNOWN / Pos1
 					r = c - 22;
 				}
+				else{
+					switch (c){
+					case 90:
+						// Shift-TAB
+						r = 114;
+						break;
+					case 60:
+						// Mouse Trapping Start
+						isMouse = 1;
+						return 0;
+					case 77:
+						// Byte-Mouse Trapping Start
+						isByteMouse = 1;
+						return 0;
+					case 73:
+						// GotFocus
+						r = 158;
+						break;
+					case 79:
+						// LostFocus
+						r = 159;
+						break;
+					default:
+						break;
+					}
+				}
+				
+				/*
 				else if (c == 90){
 					// Shift-TAB
 					r = 114;
@@ -726,6 +754,7 @@ int GetESC27 (int c){
 					// LostFocus
 					r = 159;
 				}
+				*/
 				isCSI = 1;
 			}
 			else if (gStreamInESC27[1] == 93){
