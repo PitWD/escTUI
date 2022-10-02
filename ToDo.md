@@ -8,7 +8,7 @@
   - But it's hardcore missing a 'FlushInKey()' after recognizing a broken or regular sequence...  
 This Flush must stop on next ESC!
 - Cause this base-concept seems for security reasons very worth to stay as it is, it now gets attention!  
-  - there are at least plenty IFs which should be switched...
+  - ~~there are at least plenty IFs which should be switched...~~
 
 <br>
 

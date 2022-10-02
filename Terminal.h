@@ -572,65 +572,6 @@ int GetESC27 (int c){
 		}
 	}
 
-/*	
-	else if (c == 9){
-		// TAB
-		streamInESC27[1] = 0;
-		r = 113;
-		goto SaveGetESC27ErrReturn;
-	}
-	else if (c == 10 || c == 13){
-		// ENTER
-		streamInESC27[1] = 0;
-		r = 115;
-		goto SaveGetESC27ErrReturn;
-	}
-	else if (c == 27){
-		// (Re)entering ESC Mode	
-		if (allowTxt){
-			// expecting "EndOfText" '\' as next char
-			waitForEOT = 1;
-			return 0;
-		}
-		
-		if (isValid){
-			// ESC came twice... p			
-			if (!streamPos){
-				// User ESC
-				r = 108;
-			}
-			else{
-				// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
-				r = 155;
-			}
-			goto SaveGetESC27ErrReturn;
-		}
-		
-		isValid = 1;
-		isCSI = 0;
-		isOSC = 0;
-	 	isMouse = 0;
-	 	isByteMouse = 0;
-		allowTxt = 0;
-		waitForEOT = 0;
-		streamPos = 0;
-		numCnt = 0;
-		streamInESC27[0] = 27;
-		streamInESC27[1] = 0;		
-		return 0;
-	
-	}
-	else if(c == -1){
-		// TimeOut of a broken, or valid but unknown sequence
-		r = -3;
-		goto SaveGetESC27ErrReturn;
-	}
-	
-	else if (!isValid){
-		// Something not related to ESC 
-		return -1;
-	}
-*/
 	streamPos++;
 	
 	if (streamPos < ESC27_STREAM_IN_SIZE - 1)
@@ -730,31 +671,6 @@ int GetESC27 (int c){
 						break;
 					}
 				}
-				
-				/*
-				else if (c == 90){
-					// Shift-TAB
-					r = 114;
-				}
-				else if (c == 60){
-					// Mouse Trapping Start
-					isMouse = 1;
-					return 0;
-				}
-				else if (c == 77){
-					// Byte-Mouse Trapping Start
-					isByteMouse = 1;
-					return 0;
-				}
-				else if (c == 73){
-					// GotFocus
-					r = 158;
-				}
-				else if (c == 79){
-					// LostFocus
-					r = 159;
-				}
-				*/
 				isCSI = 1;
 			}
 			else if (gStreamInESC27[1] == 93){
