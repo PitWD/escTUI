@@ -2,22 +2,69 @@
 										-------------------------
 ID	shift/ctrl	key						0	1	2	3	4	5	6
 
-1				F1						27	79	(80)
-2				F2						27	79	(81)
-3				F3						27	79	(82)
-4				F4						27	79	(83)
+1-31	(ASCII-ControlCharacters) - mapped to Ctrl-A - Ctrl-Z (if possible)...
 
-5				F5						27	91	49	(53)126
+65-90			Alt-A / ShiftAlt-A	-	Alt-Z / ShiftAlt-Z
 
-7				F6						27	91	49	(55)126
-8				F7						27	91	49	(56)126
-9				F8						27	91	49	(57)126
+127				Back
 
-10				F9						27	91	50	(48)126
-11				F10						27	91	50	(49)126
+128				F1						27	79	(80)
+129				F2						27	79	(81)
+130				F3						27	79	(82)
+131				F4						27	79	(83)
 
-13				F11						27	91	50	(51)126
-14				F12						27	91	50	(52)126
+132				F5						27	91	49	(53)126
+
+133				F6						27	91	49	(55)126
+134				F7						27	91	49	(56)126
+135				F8						27	91	49	(57)126
+
+136				F9						27	91	50	(48)126
+137				F10						27	91	50	(49)126
+
+138				F11						27	91	50	(51)126
+139				F12						27	91	50	(52)126
+
+144				UP						27	91	(65)
+145				DOWN					27	91	(66)
+146				Right					27	91	(67)
+147				Left					27	91	(68)
+148				Center					27	91	(69)
+149				END						27	91	(70)
+150				Unknown					27	91	(71)
+151				Pos1					27	91	(72)
+
+152				Ins						27	91	(50)126
+153				Del						27	91	(51)126
+
+154				PgUp					27	91	(53)126
+155				PgDown					27	91	(54)126
+
+160				Got Focus				27	91	(73)
+161				Lost Focus				27	91	(79)
+
+162				LeftMouseDown
+163				WheelMouseDown
+164				RightMouseDown
+165				MouseUp
+166				MouseMove
+167				LeftDownMouseMove
+168				WheelDownMouseMove
+169				RightDownMouseMove
+170				ScrollWheelUp
+171				ScrollWheelDown
+172				UMO - UnknownMouseObject
+
+176				UTO - Unknown Terminal Info Object
+177				ScreenSize
+178				Window Title
+179				Icon Label
+
+180				Cursor Pos
+
+200				Mouse Click
+201				Mouse DblClick
+202				Mouse Area
 
 
 15		shift	F1						27	91	49	59	50	(80)

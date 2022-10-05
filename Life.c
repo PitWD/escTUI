@@ -42,829 +42,567 @@ char cmdESC27[ESC27_EXCHANGE_SIZE];
 int EventESC27 (int event){
 	
 	int r = 0;		// Return Value
-	switch (event){
-	// A regular Key got pressed
-	case -1:
-		break;
-	// F1 - F12
-	case 1:
-		// F1
-		break;
-	case 2:
-		// F2
-		break;
-	case 3:
-		// F3
-		break;
-	case 4:
-		// F4
-		break;
-	case 5:
-		// F5
-		break;
-	case 7:
-		// F6
-		break;
-	case 8:
-		// F7
-		break;
-	case 9:
-		// F8
-		break;
-	case 10:
-		// F9
-		break;
-	case 11:
-		// F10
-		break;
-	case 13:
-		// F11
-		break;
-	case 14:
-		// F11
-		break;
-
-	// Shift F1 - F12
-	case 15:
-		// F1
-		break;
-	case 16:
-		// F2
-		break;
-	case 17:
-		// F3
-		break;
-	case 18:
-		// F4
-		break;
-	case 19:
-		// F5
-		break;
-	case 21:
-		// F6
-		break;
-	case 22:
-		// F7
-		break;
-	case 23:
-		// F8
-		break;
-	case 24:
-		// F9
-		break;
-	case 25:
-		// F10
-		break;
-	case 27:
-		// F11
-		break;
-	case 28:
-		// F11
-		break;
-
-	// CTRL F1 - F12
-	case 29:
-		// F1
-		break;
-	case 30:
-		// F2
-		break;
-	case 31:
-		// F3
-		break;
-	case 32:
-		// F4
-		break;
-	case 33:
-		// F5
-		break;
-	case 35:
-		// F6
-		break;
-	case 36:
-		// F7
-		break;
-	case 37:
-		// F8
-		break;
-	case 38:
-		// F9
-		break;
-	case 39:
-		// F10
-		break;
-	case 41:
-		// F11
-		break;
-	case 42:
-		// F11
-		break;
-
-// Alt F1 - F12
-	case 160:
-		// F1
-		break;
-	case 161:
-		// F2
-		break;
-	case 162:
-		// F3
-		break;
-	case 163:
-		// F4
-		break;
-	case 164:
-		// F5
-		break;
-	case 166:
-		// F6
-		break;
-	case 167:
-		// F7
-		break;
-	case 168:
-		// F8
-		break;
-	case 169:
-		// F9
-		break;
-	case 170:
-		// F10
-		break;
-	case 172:
-		// F11
-		break;
-	case 173:
-		// F11
-		break;
-
-// ShiftAlt F1 - F12
-	case 174:
-		// F1
-		break;
-	case 175:
-		// F2
-		break;
-	case 176:
-		// F3
-		break;
-	case 177:
-		// F4
-		break;
-	case 178:
-		// F5
-		break;
-	case 180:
-		// F6
-		break;
-	case 181:
-		// F7
-		break;
-	case 182:
-		// F8
-		break;
-	case 183:
-		// F9
-		break;
-	case 184:
-		// F10
-		break;
-	case 186:
-		// F11
-		break;
-	case 187:
-		// F11
-		break;
-
-// AltCtrl F1 - F12
-	case 188:
-		// F1
-		break;
-	case 189:
-		// F2
-		break;
-	case 190:
-		// F3
-		break;
-	case 191:
-		// F4
-		break;
-	case 192:
-		// F5
-		break;
-	case 194:
-		// F6
-		break;
-	case 195:
-		// F7
-		break;
-	case 196:
-		// F8
-		break;
-	case 197:
-		// F9
-		break;
-	case 198:
-		// F10
-		break;
-	case 200:
-		// F11
-		break;
-	case 201:
-		// F12
-		break;
-
-// ShiftCtrl F1 - F12
-	case 202:
-		// F1
-		break;
-	case 203:
-		// F2
-		break;
-	case 204:
-		// F3
-		break;
-	case 205:
-		// F4
-		break;
-	case 206:
-		// F5
-		break;
-	case 208:
-		// F6
-		break;
-	case 209:
-		// F7
-		break;
-	case 210:
-		// F8
-		break;
-	case 211:
-		// F9
-		break;
-	case 212:
-		// F10
-		break;
-	case 214:
-		// F11
-		break;
-	case 215:
-		// F12
-		break;
-
-// AltCtrl F1 - F12
-	case 216:
-		// F1
-		break;
-	case 217:
-		// F2
-		break;
-	case 218:
-		// F3
-		break;
-	case 219:
-		// F4
-		break;
-	case 220:
-		// F5
-		break;
-	case 222:
-		// F6
-		break;
-	case 223:
-		// F7
-		break;
-	case 224:
-		// F8
-		break;
-	case 225:
-		// F9
-		break;
-	case 226:
-		// F10
-		break;
-	case 228:
-		// F11
-		break;
-	case 229:
-		// F12
-		break;
-
-	// Ctrl-A - Ctrl-Z
-	// (but a lot are special - see cases above
-	//  a lot are also not supported on all OSs)
-	case 230:
-		// Ctrl-A
-		break;
-	case 231:
-		// Ctrl-B
-		break;
-	case 232:
-		// Ctrl-C
-		break;
-	case 233:
-		// Ctrl-D
-		break;
-	case 234:
-		// Ctrl-E
-		break;
-	case 235:
-		// Ctrl-F
-		break;
-	case 236:
-		// Ctrl-G
-		break;
-	case 237:
-		// Ctrl-H
-		break;
-	case 238:
-		// Ctrl-I
-		break;
-	case 239:
-		// Ctrl-J
-		break;
-	case 240:
-		// Ctrl-K
-		break;
-	case 241:
-		// Ctrl-L
-		break;
-	case 242:
-		// Ctrl-M
-		break;
-	case 243:
-		// Ctrl-N
-		break;
-	case 244:
-		// Ctrl-O
-		break;
-	case 245:
-		// Ctrl-P
-		break;
-	case 246:
-		// Ctrl-Q
-		break;
-	case 247:
-		// Ctrl-R
-		break;
-	case 248:
-		// Ctrl-S
-		break;
-	case 249:
-		// Ctrl-T
-		break;
-	case 250:
-		// Ctrl-U
-		break;
-	case 251:
-		// Ctrl-V
-		break;
-	case 252:
-		// Ctrl-W
-		break;
-	case 253:
-		// Ctrl-X
-		break;
-	case 254:
-		// Ctrl-Y
-		break;
-	case 255:
-		// Ctrl-Z
-		break;
-
-	// Navigation
-	case 43:
-		// Up
-		break;
-	case 44:
-		// Down
-		break;
-	case 45:
-		// Right
-		break;
-	case 46:
-		// Left
-		break;
-	case 47:
-		// Center
-		break;
-	case 48:
-		// End
-		break;
-	case 50:
-		// Pos1
-		break;
-	case 51:
-		// Ins
-		break;
-	case 52:
-		// Del
-		break;
-	case 54:
-		// PgUp
-		break;
-	case 55:
-		// PgDown
-		break;
-
-	// Shift Navigation
-	case 56:
-		// Up
-		break;
-	case 57:
-		// Down
-		break;
-	case 58:
-		// Right
-		break;
-	case 59:
-		// Left
-		break;
-	case 61:
-		// End
-		break;
-	case 63:
-		// Pos1
-		break;
-
-	// Ctrl Navigation
-	case 64:
-		// Up
-		break;
-	case 65:
-		// Down
-		break;
-	case 66:
-		// Right
-		break;
-	case 67:
-		// Left
-		break;
-	case 68:
-		// Center
-		break;
-	case 69:
-		// End
-		break;
-	case 71:
-		// Pos1
-		break;
-
-	// ALT Navigation
-	case 72:
-		// Up
-		break;
-	case 73:
-		// Down
-		break;
-	case 74:
-		// Right
-		break;
-	case 75:
-		// Left
-		break;
-	case 76:
-		// Center
-		break;
-	case 77:
-		// End
-		break;
-	case 79:
-		// Pos1
-		break;
-
-	// ALT-A - ALT-Z
-	case 80:
-		// A
-		break;
-	case 81:
-		// B
-		break;
-	case 82:
-		// C
-		break;
-	case 83:
-		// D
-		break;
-	case 84:
-		// E
-		break;
-	case 85:
-		// F
-		break;
-	case 86:
-		// G
-		break;
-	case 87:
-		// H
-		break;
-	case 88:
-		// I
-		break;
-	case 89:
-		// J
-		break;
-	case 90:
-		// K
-		break;
-	case 91:
-		// L
-		break;
-	case 92:
-		// M
-		break;
-	case 93:
-		// N
-		break;
-	case 94:
-		// O
-		break;
-	case 95:
-		// P
-		break;
-	case 96:
-		// Q
-		break;
-	case 97:
-		// R
-		break;
-	case 98:
-		// S
-		break;
-	case 99:
-		// T
-		break;
-	case 100:
-		// U
-		break;
-	case 101:
-		// V
-		break;
-	case 102:
-		// W
-		break;
-	case 103:
-		// X
-		break;
-	case 104:
-		// Y
-		break;
-	case 105:
-		// Z
-		break;
-
-	// ShiftALT-A - ShiftALT-Z
-	case 129:
-		// A
-		break;
-	case 130:
-		// B
-		break;
-	case 131:
-		// C
-		break;
-	case 132:
-		// D
-		break;
-	case 133:
-		// E
-		break;
-	case 134:
-		// F
-		break;
-	case 135:
-		// G
-		break;
-	case 136:
-		// H
-		break;
-	case 137:
-		// I
-		break;
-	case 138:
-		// J
-		break;
-	case 139:
-		// K
-		break;
-	case 140:
-		// L
-		break;
-	case 141:
-		// M
-		break;
-	case 142:
-		// N
-		break;
-	case 143:
-		// O - but is occupied by F1-F4
-		break;
-	case 144:
-		// P
-		break;
-	case 145:
-		// Q
-		break;
-	case 146:
-		// R
-		break;
-	case 147:
-		// S
-		break;
-	case 148:
-		// T
-		break;
-	case 149:
-		// U
-		break;
-	case 150:
-		// V
-		break;
-	case 151:
-		// W
-		break;
-	case 152:
-		// X
-		break;
-	case 153:
-		// Y
-		break;
-	case 154:
-		// Z
-		break;
-
-	// 'Single'-Keys
-	case 106:
-		// Back
-		break;
-	case 108:
-		// ESC
-		break;
-	case 113:
-		// TAB
-		break;
-	case 114:
-		// Shift-TAB
-		break;
-	case 115:
-		// ENTER
-		break;
 	
-	// Answers
-	case 107:
-		// Cursor Position
-		break;
-	case 109:
-		// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
-		if (ScreenSizeChanged()){
-			// Terminal Size has changed...
-		}
-		break;
-	case 110:
-		// Terminal Icon Label
-		break;
-	case 111:
-		// Terminal Name
-		break;
+	// Modification Keys
+	int keyState = (gKeyShift) + (gKeyAlt * 2) + (gKeyCtrl * 4);
 
-	// Errors 
-	case 112:
-		// Terminal Error
-		break;
-	case 155:
-		// Len Err By Too Early Following ESC
-		break;
-	case 156:
-		// Position Overflow In Mouse Byte-Mode 
-		break;
-	case 125:
-		// Unknown Mouse Object
-		break;
-
-	// Terminal GotFocus / LostFocus
-	case 158:
-		// Got
-		break;
-	case 159:
-		// Lost
-		break;
-
-	// 1st Level (From GetESC27()) Mouse-Events
-	case 120:
-		// Mouse Move
-		break;
-	case 117:
-		// MouseUp
-		switch (gMouseButton){
-		case 1:
-			// Left
-			break;
-		case 4:
-			// Right
-			break;
-		case 2:
-			// Wheel
-			break;
-		default:
-			// MultiKey (never seen in reality)
-			break;
-		}
-		break;
-	case 116:
-		// Left Mouse Down
-		break;
-	case 121:
-		// Left Down Mouse Move
-		break;
-	case 126:
-		// Right Mouse Down
-		break;
-	case 127:
-		// Right Down Mouse Move
-		break;
-	case 118:
-		// Wheel Mouse Down
-		break;
-	case 122:
-		// Wheel Down Mouse Move
-		break;
-	case 123:
-		// WheelScrollUp
-		break;
-	case 124:
-		// WheelScrollDown
-		break;
-
-	// 2nd Level (From Loop()) Mouse-Events
-	case 512:
-		// Click
-		switch (gMouseButton){
-		case 1:
-			// Left
-			break;
-		case 4:
-			// Right
-			break;
-		case 2:
-			// Wheel
-			break;
-		default:
-			// MultiKey (never seen in reality)
-			break;
-		}
-		break;
-	case 513:
-		// DblClick
-		switch (gMouseButton){
-		case 1:
-			// Left
-			break;
-		case 4:
-			// Right
-			break;
-		case 2:
-			// Wheel
-			break;
-		default:
-			// MultiKey (never seen in reality)
-			break;
-		}
-		break;
-	case 514:
-		// Area
-		switch (gMouseButton){
-		case 1:
-			// Left
-			break;
-		case 4:
-			// Right
-			break;
-		case 2:
-			// Wheel
-			break;
-		default:
-			// MultiKey (never seen in reality)
-			break;
-		}
-		break;
-
-	// Errors
-	case -3:
-		// TimeOut of a broken, or valid but unknown sequence
-		break;
-	case -2:
-		// Unknown Termination Char
-		break;
-	case -4:
-		// Overflow, Too Long
-		break;
-	case -5:
-		// Unexpected End Of Text
-		break;
-
-	default:
-		break;
+	if (gKeyShift){
+		printf("Shift-");
 	}
+	if (gKeyAlt){
+		printf("Alt-");
+	}
+	if (gKeyCtrl){
+		printf("Ctrl-");
+	}
+	
+	TxtBold(1);
+
+	if (event == -1){
+		// A regular Key got pressed
+	}
+	else if (event > 143 && event < 157){
+		// Navigation Keys
+		switch (event){
+		case 144:
+			// Up
+			printf("Up");
+			switch (keyState){
+			case 1:
+				// Shift
+				break;
+			case 2:
+				// Alt
+				break;
+			case 4:
+				// Ctrl
+				break;
+			default:
+				// Just the Key
+				break;
+			}
+			break;
+		case 145:
+			// Down
+			printf("Down");
+			break;
+		case 146:
+			// Right
+			printf("Right");
+			break;
+		case 147:
+			// Left
+			printf("Left");
+			break;
+		case 148:
+			// Center
+			printf("Center");
+			break;
+		case 149:
+			// End
+			printf("End");
+			break;
+		case 150:
+			// Unknown
+			printf("150");
+			break;
+		case 151:
+			// Pos1
+			printf("Pos1");
+			break;
+		case 152:
+			// Ins
+			printf("Ins");
+			break;
+		case 153:
+			// Del
+			printf("Del");
+			break;
+		case 155:
+			// PgUp
+			printf("PgUp");
+			break;
+		case 156:
+			// PgDown
+			printf("PgDown");
+			break;
+		}
+	}
+	else if (event > 126 && event < 140){
+		// Delete & F1 - F12
+		if (event != 127){
+			printf("F%d", event - 127);
+		}
+		
+		switch (event){
+		case 127:
+			printf("Back");
+			// Back
+			if (gKeyAlt){
+				/* code */
+			}
+			else{
+				/* code */
+			}	
+			break;	
+		case 128:
+			// F1
+			switch (keyState){
+			case 0:
+				// Just the Key
+				break;
+			case 1:
+				// Shift
+				break;
+			case 2:
+				// Ctrl
+				break;
+			case 3:
+				// Shift-Ctrl
+				break;
+			case 4:
+				// Alt
+				break;
+			case 5:
+				// Shift-Alt
+				break;
+			case 6:
+				// Alt-Ctrl
+				break;
+			case 7:
+				// Shift-Alt-Ctrl
+				break;
+			default:
+				break;
+			}
+			break;
+		case 129:
+			// F2
+			break;
+		case 130:
+			// F3
+			break;
+		case 131:
+			// F4
+			break;
+		case 132:
+			// F5
+			break;
+		case 133:
+			// F6
+			break;
+		case 134:
+			// F7
+			break;
+		case 135:
+			// F8
+			break;
+		case 136:
+			// F9
+			break;
+		case 137:
+			// F10
+			break;
+		case 138:
+			// F11
+			break;
+		case 139:
+			// F12
+			break;
+		}
+	}
+	else if (event > 64 && event < 91){
+		// (Shift)ALT-A - (Shift)ALT-Z
+		printf("%c", (char)event);
+		switch(event){
+		case 65:
+			// A
+			if (gKeyShift){
+				// Shift-Alt
+			}
+			else{
+				// Alt
+			}
+			break;
+		case 66:
+			// B
+			break;
+		case 67:
+			// C
+			break;
+		case 68:
+			// D
+			break;
+		case 69:
+			// E
+			break;
+		case 70:
+			// F
+			break;
+		case 71:
+			// G
+			break;
+		case 72:
+			// H
+			break;
+		case 73:
+			// I
+			break;
+		case 74:
+			// J
+			break;
+		case 75:
+			// K
+			break;
+		case 76:
+			// L
+			break;
+		case 77:
+			// M
+			break;
+		case 78:
+			// N
+			break;
+		case 79:
+			// O
+			break;
+		case 80:
+			// P
+			break;
+		case 81:
+			// Q
+			break;
+		case 82:
+			// R
+			break;
+		case 83:
+			// S
+			break;
+		case 84:
+			// T
+			break;
+		case 85:
+			// U
+			break;
+		case 86:
+			// V
+			break;
+		case 87:
+			// W
+			break;
+		case 88:
+			// X
+			break;
+		case 89:
+			// Y
+			break;
+		case 90:
+			// Z
+			break;
+		}
+	}
+	else if (event > 0 && event < 28){
+		// Ctrl-A - Ctrl-Z
+		// (but a lot are special - see cases above
+		//  a lot are also not supported on all OSs)
+		printf("CC: %c", (char)event+64);
+		switch(event){
+		case 1:
+			// Ctrl-A
+			break;
+		case 2:
+			// Ctrl-B
+			break;
+		case 3:
+			// Ctrl-C
+			break;
+		case 4:
+			// Ctrl-D
+			break;
+		case 5:
+			// Ctrl-E
+			break;
+		case 6:
+			// Ctrl-F
+			break;
+		case 7:
+			// Ctrl-G
+			break;
+		case 8:
+			// Ctrl-H
+			break;
+		case 9:
+			// TAB
+			if (gKeyShift){
+				// Shift-Tab
+			}
+			else{
+				// Tab
+			}
+			break;
+		case 10:
+			// LF
+			break;
+		case 11:
+			// Ctrl-K
+			break;
+		case 12:
+			// Ctrl-L
+			break;
+		case 13:
+			// CR
+			break;
+		case 14:
+			// Ctrl-N
+			break;
+		case 15:
+			// Ctrl-O
+			break;
+		case 16:
+			// Ctrl-P
+			break;
+		case 17:
+			// Ctrl-Q
+			break;
+		case 18:
+			// Ctrl-R
+			break;
+		case 19:
+			// Ctrl-S
+			break;
+		case 20:
+			// Ctrl-T
+			break;
+		case 21:
+			// Ctrl-U
+			break;
+		case 22:
+			// Ctrl-V
+			break;
+		case 23:
+			// Ctrl-W
+			break;
+		case 24:
+			// Ctrl-X
+			break;
+		case 25:
+			// Ctrl-Y
+			break;
+		case 26:
+			// Ctrl-Z
+			break;
+		case 27:
+			// ESC
+			break;
+		}
+	}
+	else if (event > 159 && event < 181){
+		// Mouse and Terminal-Answers
+		switch(event){
+		case 180:
+			// Cursor Position
+			printf("CursorPos");
+			break;
+		case 177:
+			// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
+			printf("ScreenSize");
+			if (ScreenSizeChanged()){
+				printf("(Changed)");
+			}
+			break;
+		case 179:
+			// Terminal Icon Label
+			printf("IconLabel");
+			break;
+		case 178:
+			// Terminal Name
+			printf("TerminalName");
+			break;
+		case 176:
+			// Unknown Terminal Info Object
+			printf("UTO");
+			break;
+
+		// Terminal GotFocus / LostFocus
+		case 160:
+			// Got
+			printf("GotFocus");
+			break;
+		case 161:
+			// Lost
+			printf("LostFocus");
+			break;
+
+		// 1st Level (From GetESC27()) Mouse-Events
+		case 166:
+			// Mouse Move
+			printf("MouseMove");
+			break;
+		case 165:
+			// MouseUp
+			switch (gMouseButton){
+			case 1:
+				// Left
+				printf("MouseLeftUp");
+				break;
+			case 4:
+				// Right
+				printf("MouseRightUp");
+				break;
+			case 2:
+				// Wheel
+				printf("MouseWheelUp");
+				break;
+			default:
+				// MultiKey (never seen in reality)
+				printf("MouseMultiKeyUp");
+				break;
+			}
+			break;
+		case 162:
+			// Left Mouse Down
+			printf("MouseLeftDown");
+			break;
+		case 167:
+			// Left Down Mouse Move
+			printf("MouseLeftDownMove");
+			break;
+		case 164:
+			// Right Mouse Down
+			printf("MouseRightDown");
+			break;
+		case 169:
+			// Right Down Mouse Move
+			printf("MouseRightDownMove");
+			break;
+		case 163:
+			// Wheel Mouse Down
+			printf("MouseWheelDown");
+			break;
+		case 168:
+			// Wheel Down Mouse Move
+			printf("MouseWheelDownMove");
+			break;
+		case 170:
+			// WheelScrollUp
+			printf("MouseWheelScrollUp");
+			break;
+		case 171:
+			// WheelScrollDown
+			printf("MouseWheelScrollDown");
+			break;
+		case 172:
+			// Unknown Mouse Object
+			printf("UMO");
+			break;
+		}
+	}
+	else if (event > 199 && event < 203){
+		// 2nd Level (From Loop()) Mouse-Events
+		
+		switch (gMouseButton){
+		case 1:
+			// Left
+			printf("Left-");
+			break;
+		case 4:
+			// Right
+			printf("Right-");
+			break;
+		case 2:
+			// Wheel
+			printf("Wheel-");
+			break;
+		default:
+			// MultiKey (never seen in reality)
+			printf("Multi-");
+			break;
+		}
+
+		switch(event){
+		case 200:
+			// Click
+			printf("Click");
+			switch (gMouseButton){
+			case 1:
+				// Left
+				break;
+			case 4:
+				// Right
+				break;
+			case 2:
+				// Wheel
+				break;
+			default:
+				// MultiKey (never seen in reality)
+				break;
+			}
+			break;
+		case 201:
+			// DblClick
+			printf("DblClick");
+			break;
+		case 202:
+			// Area
+			printf("Area");
+			break;
+
+		}
+	}
+	else{
+		// Errors
+		switch(event){
+		case -3:
+			// TimeOut of a broken, or valid but unknown sequence
+			printf("ERR -3 TimeOut");
+			break;
+		case -2:
+			// Unknown Termination/Identification Char
+			printf("ERR -2 Termination/Identification");
+			break;
+		case -4:
+			// Overflow, Too Long
+			printf("ERR -4 Overflow");
+			break;
+		case -5:
+			// Unexpected End Of Text
+			printf("ERR -5 UnexpectedEOT");
+			break;
+		case -6:
+			// Overlapping Sequence - already done in CoreLoop
+			printf("ERR -6 Overlapping");
+			break;
+		case -7:
+			// ByteMouse Out Of Range
+			printf("ERR -7 ByteMouse");
+			break;
+
+		default:
+			// Unexpected...
+			printf("ERR - WTF");
+			break;
+		}
+	}
+	gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
+
+	if (event > 31){
+		printf("  : %s\n", &gStreamInESC27[1]);
+	}
+	else{
+		printf("\n");
+	}
+
+	if (event != -1){
+		/* code */
+		printf("Event: %d", event);
+
+		printf("\n\n\n");
+
+	}
+
+
+	TxtBold(0);					
+
 	return r;
 }
 
@@ -999,8 +737,11 @@ void EventSecondChange(void){
 				}
 			}			
 		}
-	ResFg();	
 	}
+
+	ResFg();	
+	EraseTimeChange();
+
 }
 
 void CoreLoop(void){
@@ -1035,18 +776,24 @@ void CoreLoop(void){
 		i = InKey();
 
 		// Recognize manual ESC
-		if (isOnUsrESC27 && i < 1){
+		if (isOnUsrESC27 && !i){
 			if (clock() > timeOnUsrEsc){
 				// UsrESC
 				i = 27;
 			}
 		}
 		// Recognize timeout while receiving ESC
-		else if (isOnESC27 && !isOnUsrESC27 && i < 0){
+		else if (isOnESC27 && !isOnUsrESC27 && !i){
 			// The !isOnUsrESC27 signals we already got more chars than just the 1st ESC
 			if (clock() > timeOnEsc){
-				// Broken, or valid and unknown, Sequence
-				i = -1;
+				if (r == -6){
+					// ShiftAlt-O (overlapping with F1-F4)
+					i = -2;
+				}
+				else{
+					// Broken, or valid and unknown, Sequence
+					i = -1;
+				}				
 			}		
 		}
 		else if (i == 27){
@@ -1100,15 +847,14 @@ void CoreLoop(void){
 				case -1:
 					// Regular Key - No ESC-Sequence/SpecialKey related stuff
 					break;
-				case 117:
+				case 165:
 					// Mouse UP (Left / Wheel / Right)
 					if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
 						// it's a (dbl)click
 						if (isOnClick && clock() < timeOnClick){
 							// dblClick
-							EventESC27(513);
+							EventESC27(201);
 							isOnClick = 0;
-							printf("dblClick\n");
 						}
 						else{
 							// 1st Click
@@ -1118,27 +864,28 @@ void CoreLoop(void){
 					}
 					else{
 						// it's an area
-						EventESC27(514);
+						EventESC27(202);
 						isOnClick = 0;
-						printf("Area\n");
 					}
 					break;
 				default:
 					break;
 				}
-				if (r){
+				if (r && r != -6){
 					// Disable timeouts
 					isOnUsrESC27 = 0; isOnESC27 = 0;
 					EventESC27(r);
+					r = 0;
 				}
+				else if(r == -6){
+					// The case that F1-F4 and ShiftAlt-O are overlapping...
+					// So, we push the Event when TimeOut occurs (see above)
+				}
+				
+				
 				
 			// Loop Minimum
 			
-			if (r > 0){
-				TxtBold(1);
-				printf("  : %s\t%s\n\n\n", KeyID2String[r], &gStreamInESC27[1]);
-				TxtBold(0);					
-			}
 
 	// Loop Minimum
 		}
@@ -1146,9 +893,8 @@ void CoreLoop(void){
 		// Recognize Single Click
 		if (isOnClick && (clock() > timeOnClick)){
 			// click
-			EventESC27(512);
+			EventESC27(200);
 			isOnClick = 0;
-			printf("Click\n");
 		}
 
 		if (!i){
@@ -1182,7 +928,7 @@ void CoreLoop(void){
 					// Every xx idle-times check on ScreenSize
 					terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
 					GetTerminalSize(3);
-					EventESC27(109);
+					EventESC27(177);
 				}
 				else {
 					DoEvents();
@@ -1191,24 +937,20 @@ void CoreLoop(void){
 				if (gSignalInterval){
 					if (gSignalTerminalSize){
 						GetTerminalSize(3);
-						EventESC27(109);
+						EventESC27(177);
 						gSignalTerminalSize = 0;
 					}
 					gSignalInterval = 0;
 				}
 				else {
 					DoEvents();
+					//gKeyAlt = 0; gKeyCtrl = 0; gKeyShift = 0; gKeyMeta = 0;
 				}	
 			#endif
 		}
-
-		/* just for one loop active !
-			Reset as last Action of the loop! */
-		if (gSecondChanged){
-			EraseTimeChange();
-		}
-
 	}
+	
+
 	// Loop Minimum
 
 }

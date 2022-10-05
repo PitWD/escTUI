@@ -2,6 +2,13 @@
 
 <br>
 
+**While 025. ...**
+- CR / LF - splittet - **right return missing**
+- if (!(c == 82 && gScreenSizeInCursorPos || gCursorWaitFor)){ **MOFF**
+
+
+<br>
+
 **032. ANSI ESC Injection**  
 *I found a guy who investigated malleolus ESC-Sequences. It led me to multiple cognations.*  
 - The byte-wise approach of GetESC27() to rather declare a sequence as early as possible as 'broken' than to wait for something with sense - and to never wait for an 'end of sequence' was smart...  
@@ -35,7 +42,6 @@ This Flush must stop on next ESC!
 <br>
 
 **027. Move ToDo to GitHub-Issues...**
-- **~~!!! Do 022. first !!!~~**
 
 <br>
 
@@ -50,8 +56,7 @@ This Flush must stop on next ESC!
 <br>
 
 **025. Esc27Events change to alt+shift+ctrl flags**
-- **~~!!! Do 022. first !!!~~**
-- **still...** Esc27Events change to alt+shift+ctrl flags
+- Esc27Events change to alt+shift+ctrl flags
 - identify missing MAC-Key-Sequences *not really anymore*
 
 <br>
