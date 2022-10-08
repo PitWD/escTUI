@@ -407,7 +407,7 @@ int EventESC27 (int event){
 			// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
 			printf("ScreenSize");
 			if (ScreenSizeChanged()){
-				printf("(Changed)");
+				printf(" (Changed)");
 			}
 			break;
 		case 179:
@@ -600,7 +600,6 @@ int EventESC27 (int event){
 
 	}
 
-
 	TxtBold(0);					
 
 	return r;
@@ -786,6 +785,7 @@ void CoreLoop(void){
 		else if (isOnESC27 && !isOnUsrESC27 && !i){
 			// The !isOnUsrESC27 signals we already got more chars than just the 1st ESC
 			if (clock() > timeOnEsc){
+				isOnESC27 = 0;
 				if (r == -6){
 					// ShiftAlt-O (overlapping with F1-F4)
 					i = -2;
@@ -849,6 +849,8 @@ void CoreLoop(void){
 					break;
 				case 165:
 					// Mouse UP (Left / Wheel / Right)
+					EventESC27(165);
+					r = 0;
 					if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
 						// it's a (dbl)click
 						if (isOnClick && clock() < timeOnClick){

@@ -481,6 +481,8 @@ int ScreenSizeChanged(void){
 				-3	= timeOut of a broken, or valid but unknown sequence
 				-6	= Overlapping Shift-Alt-O
 				-7	= ByteMouse Out Of Range (!! Better don't do ByteMouseMode !!)
+				-8	= Valid but unknown text-sequence
+				-9	= Useless ESC - unknown reason...
 				 0	= Valid, but waiting for more Bytes to identify/finish sequence
 				 n	= The ESC-Sequence (see related enum's)
  */
@@ -499,7 +501,7 @@ int GetESC27 (int c){
 	static int isNumGroup[ESC27_STREAM_IN_SIZE];
 	static int streamPos = 0;
 
-	int r = -1;		
+	int r = 0;		
 
 	if (c == 127){
 		// Back
@@ -532,11 +534,10 @@ int GetESC27 (int c){
 				// ESC came twice... p			
 				if (!streamPos){
 					// User ESC
-					r = 27;
 				}
 				else{
 					// looks like UserESC - but is BS (e.g. Overflow Mouse in ByteMode)
-					r = -3;
+					r = -9;
 				}
 				goto SaveGetESC27ErrReturn;
 			}
@@ -569,6 +570,7 @@ int GetESC27 (int c){
 		}
 	}
 
+	r = 0;
 	streamPos++;
 	
 	if (streamPos < ESC27_STREAM_IN_SIZE - 1)
@@ -597,6 +599,11 @@ int GetESC27 (int c){
 						// Icon label
 						r = 179;
 					}
+					case else{
+						// valid but unknown text
+						r = -8;
+					}
+					
 				}
 				goto SaveGetESC27ErrReturn;
 			}			
@@ -624,10 +631,6 @@ int GetESC27 (int c){
 				// Except ShiftAlt + O, could expand to F1-F4
 				gKeyAlt = 1;
 				gKeyShift = 1;
-			}
-			else{
-				// Waiting for more...
-				r = 0;
 			}
 			break;
 		case 2:
@@ -679,14 +682,9 @@ int GetESC27 (int c){
 				if (c == 76 || c == 108){
 					// Icon label & Window title
 					allowTxt = 1;
-					r = 0;
 				}			
 				isOSC = 1;
 			}
-			else{
-				isValid = 0;
-			}
-			
 			break;
 
 		case 3:
@@ -697,10 +695,6 @@ int GetESC27 (int c){
 					r += 102;
 					goto SaveGetESC27Return;
 				}
-				else{
-					r = -1;
-				}
-				
 			}
 			break;
 		
@@ -829,9 +823,6 @@ int GetESC27 (int c){
 					gKeyShift = 1;
 					goto SaveGetESC27Return;
 				}
-				else{
-					r = -1;
-				}
 			}
 			break;
 		case 6:
@@ -847,11 +838,10 @@ int GetESC27 (int c){
 		return 0;
 	}
 	
-	if (r && r != -6){
+	if (!r){
 		// Unknown OR valid OR flexible Sequence found
 		// -6 (79) = Overlapping ShiftAlt-O with F1-F4
-		isValid = 0;
-		if (r == -1 && isCSI){
+		if (isCSI){
 			if (c > 46 && c < 60){
 				// All numbers 0-9 and ; and : are valid (values and separators)
 				if (!numCnt){
@@ -872,8 +862,6 @@ int GetESC27 (int c){
 						isNumGroup[numCnt - 1] = 1;
 					}
 				}
-				r = 0;
-				isValid = 1;
 			}
 			else{
 				// Any known terminator of a flexible length sequence ?
@@ -986,42 +974,39 @@ int GetESC27 (int c){
 					break;
 				default:
 					// Unknown or broken sequence
-					r = -2;
+					// r = -2;
 					break;
 				}
 			}
 		}	
 	}
+	if (r < -1 || r == 27){
+		// more or less fucked up - or valid Start
+		gStreamInESC27[0] = 0;
+		gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
+		//gMouseButton = 0;
+		gStreamInESC27[1] = 0;
+		isCSI = 0; isOSC = 0; allowTxt = 0; numCnt = 0; waitForEOT = 0;
+		isMouse = 0; isByteMouse = 0; gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
+		streamPos = 0;
+		if (c == 27){
+			isValid = 1;
+		}
+		else{
+			isValid = 0;
+			FlushInKey();
+		}
+	}
+	else if (r > 0){
+		// valid sequence
+		isValid = 0;
+	}
+	else{
+		// 0 = Wait for more
+		// -1 = valid - but not ESC - related...
+	}
+	
 	return r;
-
-	SaveGetESC27ErrReturn:
-	isValid = 0;
-	gStreamInESC27[0] = 0;
-	gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
-	//gMouseButton = 0;
-	gStreamInESC27[1] = 0;
-	isCSI = 0; isOSC = 0; allowTxt = 0; numCnt = 0; waitForEOT = 0;
-	isMouse = 0; isByteMouse = 0; gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
-	streamPos = 0;
-	return r;
-
-	SaveNewESC27Return:
-	gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
-	//gMouseButton = 0;
-	gStreamInESC27[1] = 0;
-	isCSI = 0; isOSC = 0; allowTxt = 0; numCnt = 0; waitForEOT = 0;
-	isMouse = 0; isByteMouse = 0; gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
-	streamPos = 0;
-	return r;
-
-	SaveGetESC27Return:
-	isValid = 0;
-	gStreamInESC27[0] = 0;
-	isCSI = 0; isOSC = 0; allowTxt = 0; numCnt = 0; waitForEOT = 0;
-	isMouse = 0; isByteMouse = 0; gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
-	streamPos = 0;
-	return r;
-
 }
 
 /**
@@ -1055,7 +1040,7 @@ static int GetESC27_CheckOnF512(void){
 		r += 78;
 		break;
 	default:
-		r = -1;
+		r = 0;
 		break;
 	}
 	return r;
@@ -1095,7 +1080,7 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
 		gKeyShift = 1; gKeyAlt = 1; gKeyCtrl = 1;
 		break;
 	default:
-		r= -1;
+		r= 0;
 		break;
 	}				
 	return r;
