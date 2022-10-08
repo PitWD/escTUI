@@ -399,7 +399,7 @@ int EventESC27 (int event){
 	else if (event > 159 && event < 181){
 		// Mouse and Terminal-Answers
 		switch(event){
-		case 180:
+		case 190:
 			// Cursor Position
 			printf("CursorPos");
 			break;
@@ -782,7 +782,7 @@ void CoreLoop(void){
 			}
 		}
 		// Recognize timeout while receiving ESC
-		else if (isOnESC27 && !isOnUsrESC27 && !i){
+		else if (isOnESC27 && (!isOnUsrESC27 && !i)){
 			// The !isOnUsrESC27 signals we already got more chars than just the 1st ESC
 			if (clock() > timeOnEsc){
 				isOnESC27 = 0;
@@ -792,6 +792,7 @@ void CoreLoop(void){
 				}
 				else{
 					// Broken, or valid and unknown, Sequence
+					printf("TimeOutCase");
 					i = -1;
 				}				
 			}		
@@ -840,6 +841,7 @@ void CoreLoop(void){
 			// Loop Minimum
 			
 				r = GetESC27(i);
+
 				switch (r){
 				case 0:
 					// Nothing (waiting for more...)
@@ -850,6 +852,7 @@ void CoreLoop(void){
 				case 165:
 					// Mouse UP (Left / Wheel / Right)
 					EventESC27(165);
+					isOnESC27 = 0;
 					r = 0;
 					if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
 						// it's a (dbl)click

@@ -59,8 +59,9 @@ ID	shift/ctrl	key						0	1	2	3	4	5	6
 177				ScreenSize
 178				Window Title
 179				Icon Label
+180				UTO - Unknown Terminal Text Object
 
-180				Cursor Pos
+190				Cursor Pos
 
 200				Mouse Click
 201				Mouse DblClick
