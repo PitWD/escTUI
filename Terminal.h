@@ -726,25 +726,17 @@ int GetESC27 (int c){
 					switch (r){
 					case 32:
 						// LeftDown
-						r = 162;
-						gMouseButton = 1;
-						gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
-						break;
+					case 33:
+						// WheelDown
 					case 34:
 						// RightDown
-						r = 164;
-						gMouseButton = 4;
+						gMouseButton = 1 << (r - 32);
 						gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
+						r += 130;
 						break;
 					case 35:
 						// Mouse Up (Wheel / Right / Left)
 						r = 165;
-						break;
-					case 33:
-						// WheelDown
-						r = 163;
-						gMouseButton = 2;
-						gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
 						break;
 					case 67:
 						// MouseMove - (All Keys Up)
@@ -813,9 +805,13 @@ int GetESC27 (int c){
 					if (r > 49 && r < 55 && r != 52){
 						// Del 
 						// Ins - just WIN ?
-						// PgUp / PgDown - never seen
 						r += 102;
-						gKeyShift = 1;
+						if (gStreamInESC27[4] == 50){
+							gKeyShift = 1;
+						}
+						else{
+							gKeyCtrl = 1;
+						}
 					}
 				}
 				break;
@@ -913,21 +909,13 @@ int GetESC27 (int c){
 									break;
 								case 0:
 									// Button Down
-									gMouseButton = 1;
-									gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
-									r = 162;
-									break;
-								case 2:
-									// Right Button Down
-									gMouseButton = 4;
-									gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
-									r = 164;
-									break;
 								case 1:
 									// Wheel Down
-									gMouseButton = 2;
+								case 2:
+									// Right Button Down
+									gMouseButton = 1 << r;
 									gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
-									r = 163;
+									r += 162;
 									break;
 								case 33:
 									// Move Wheel Pressed

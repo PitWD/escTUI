@@ -2,19 +2,23 @@
 
 <br>
 
-**While 025. ...**
-- CR / LF - splittet - **right return missing**
-- if (!(c == 82 && gScreenSizeInCursorPos || gCursorWaitFor)){ **MOFF**
+**034. Change GetESC27 (-6)-Response to a positive response...**
+- *faster exit...*
 
+<br>
+
+**033. While 025. ...**
+- ~~CR / LF - splittet - **right return missing**~~
+- ~~if (!(c == 82 && gScreenSizeInCursorPos || gCursorWaitFor)){ **MOFF**~~
 
 <br>
 
 **032. ANSI ESC Injection**  
 *I found a guy who investigated malleolus ESC-Sequences. It led me to multiple cognations.*  
-- The byte-wise approach of GetESC27() to rather declare a sequence as early as possible as 'broken' than to wait for something with sense - and to never wait for an 'end of sequence' was smart...  
-  - But it's hardcore missing a 'FlushInKey()' after recognizing a broken or regular sequence...  
-This Flush must stop on next ESC!
-- Cause this base-concept seems for security reasons very worth to stay as it is, it now gets attention!  
+- ~~The byte-wise approach of GetESC27() to rather declare a sequence as early as possible as 'broken' than to wait for something with sense - and to never wait for an 'end of sequence' was smart...~~  
+  - ~~But it's hardcore missing a 'FlushInKey()' after recognizing a broken or regular sequence...~~  
+**This Flush must stop on next ESC!**
+- ~~Cause this base-concept seems for security reasons very worth to stay as it is, it now gets attention!~~  
   - ~~there are at least plenty IFs which should be switched...~~
 
 <br>
@@ -56,8 +60,8 @@ This Flush must stop on next ESC!
 <br>
 
 **025. Esc27Events change to alt+shift+ctrl flags**
-- Esc27Events change to alt+shift+ctrl flags
-- identify missing MAC-Key-Sequences *not really anymore*
+- ~~Esc27Events change to alt+shift+ctrl flags~~
+- ~~identify missing MAC-Key-Sequences *not really anymore*~~
 
 <br>
 
