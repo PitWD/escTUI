@@ -2,6 +2,13 @@
 
 <br>
 
+**035. DblClick TimeOut (on Mac - ? but rather CPU-depending ?)**
+- Raspi on table...
+- generic Area-Tolerance during DblClick time...
+- M1 Mac suffers like an i5 Mac - so, it's rather not the CPU...
+
+<br>
+
 **034. Change GetESC27 (-6)-Response to a positive response...**
 - *faster exit...*
 
