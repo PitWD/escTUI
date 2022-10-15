@@ -869,8 +869,17 @@ void CoreLoop(void){
 					}
 					else{
 						// it's an area
-						EventESC27(202);
-						isOnClick = 0;
+						if (isOnClick && clock() < timeOnClick){
+							// but nobody can define an area that fast,
+							// so we decide for dblClick
+							EventESC27(201);
+							isOnClick = 0;
+						}
+						else{
+							// finally area
+							EventESC27(202);
+							isOnClick = 0;
+						}
 					}
 					break;
 				default:

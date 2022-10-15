@@ -117,6 +117,9 @@ void InitTiming(void){
     
     gUserEscTimeout = 0.1 * gClocksPerSecond;
     gMouseClickTimeout = 0.25 * gClocksPerSecond;
+    #if __APPLE__
+        gMouseClickTimeout *= 2;
+    #endif
 }
 
 /**
