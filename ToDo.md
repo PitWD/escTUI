@@ -6,12 +6,15 @@
 - Raspi on table...
 - ~~generic Area-Tolerance during DblClick time...~~
 - M1 Mac suffers like an i5 Mac - so, it's rather not the CPU...
-- MAC - MouseDown comes "too" late - oh this explains a lot - damn... 
+- MAC - MouseDown comes "too" late - oh this explains a lot - damn...  
+but this differs also between regular/magic/airpad - mouse
 
 <br>
 
 **034. Change GetESC27 (-6)-Response to a positive response...**
-- *faster exit...*
+- ~~*faster exit...*~~
+- ~~the (-6) - solution is much too good to read/understandable (for me)~~  
+~~I give a shit on the two "if(){}" which could be faster...~~
 
 <br>
 
