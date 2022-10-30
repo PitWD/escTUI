@@ -8,6 +8,8 @@
 - M1 Mac suffers like an i5 Mac - so, it's rather not the CPU...
 - MAC - MouseDown comes "too" late - oh this explains a lot - damn...  
 but this differs also between regular/magic/airpad - mouse
+- MAC - (sometimes) Mouse-Up before MouseDown while DblClicking
+
 
 <br>
 
