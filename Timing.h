@@ -117,10 +117,6 @@ void InitTiming(void){
     
     gUserEscTimeout = 0.1 * gClocksPerSecond;
     gMouseClickTimeout = 0.25 * gClocksPerSecond;
-    #if __APPLE__
-        // It's NOT an timing problem...
-        gMouseClickTimeout *= 1;
-    #endif
 }
 
 /**
@@ -199,7 +195,12 @@ void CheckOnTimeChange(void){
         gClocksPerSecond = (clockNow - lClockLast) / timeDiff;
         lClockLast = clockNow;
         gUserEscTimeout = 0.1 * gClocksPerSecond;
-        gMouseClickTimeout = 0.25 * gClocksPerSecond;
+        #if __APPLE__
+            // MouseDown happens when MouseUp has happened too
+            gMouseClickTimeout = 0.5 * gClocksPerSecond;
+        #else
+            gMouseClickTimeout = 0.25 * gClocksPerSecond;
+        #endif
 
         if (timeDiff > 1){
             // More than a second...

@@ -857,7 +857,8 @@ void CoreLoop(void){
 					if (isOnClick){
 						// refresh timeout for MAC dblClick issues...
 						timeOnClick = clock() + gMouseClickTimeout;
-					}					
+					}
+					break;					
 				case 165:
 					// Mouse UP (Left / Wheel / Right)
 					EventESC27(165);
