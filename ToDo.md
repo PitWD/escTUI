@@ -9,6 +9,8 @@
 - MAC - MouseDown comes "too" late - oh this explains a lot - damn...  
 but this differs also between regular/magic/airpad - mouse
 - MAC - (sometimes) Mouse-Up before MouseDown while DblClicking
+- As deeper I'm investigating - as worse the MAC-Mouse thing is looking  
+
 
 
 <br>

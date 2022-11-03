@@ -837,6 +837,7 @@ void CoreLoop(void){
 				}
 				
 				printf("\n");
+				fflush(stdout);
 			}
 			// Loop Minimum
 			
@@ -849,6 +850,14 @@ void CoreLoop(void){
 				case -1:
 					// Regular Key - No ESC-Sequence/SpecialKey related stuff
 					break;
+				case 162:
+				case 163:
+				case 164:
+					// Mouse Down
+					if (isOnClick){
+						// refresh timeout for MAC dblClick issues...
+						timeOnClick = clock() + gMouseClickTimeout;
+					}					
 				case 165:
 					// Mouse UP (Left / Wheel / Right)
 					EventESC27(165);
