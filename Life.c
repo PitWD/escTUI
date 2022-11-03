@@ -862,9 +862,16 @@ void CoreLoop(void){
 							isOnClick = 0;
 						}
 						else{
-							// 1st Click
-							isOnClick = 1;
-							timeOnClick = clock() + gMouseClickTimeout;
+							if (!isOnClick){
+								// 1st Click
+								isOnClick = 1;
+								timeOnClick = clock() + gMouseClickTimeout;
+							}
+							else{
+								// MAC 'fast' dblClick
+								EventESC27(201);
+								isOnClick = 0;
+							}
 						}							
 					}
 					else{
