@@ -2,16 +2,26 @@
 
 <br>
 
+**037. EventArray with pointers to functions, instead of switch**
+
+<br>
+
+**036. AnsiESC.h**
+- Reduce CSI's to constant's within fprint's
+- SetTxtStyle() - call functions instead of strcat's
+
+<br>
+
 **035. DblClick TimeOut (on Mac - ? but rather CPU-depending ?)**
 - Raspi on table...
 - ~~generic Area-Tolerance during DblClick time...~~
-- M1 Mac suffers like an i5 Mac - so, it's rather not the CPU...
-- MAC - MouseDown comes "too" late - oh this explains a lot - damn...  
-but this differs also between regular/magic/airpad - mouse
-- MAC - (sometimes) Mouse-Up before MouseDown while DblClicking
-- As deeper I'm investigating - as worse the MAC-Mouse thing is looking  
-
-
+- ~~M1 Mac suffers like an i5 Mac - so, it's rather not the CPU...~~
+- ~~MAC - MouseDown comes "too" late - oh this explains a lot - damn...~~  
+~~but this differs also between regular/magic/airpad - mouse~~
+- ~~MAC - (sometimes) Mouse-Up before MouseDown while DblClicking~~
+- ~~As deeper I'm investigating - as worse the MAC-Mouse thing is looking~~  
+- ~~Uhhh - yeah - and finally MAC and Me were both stupid...~~
+- **~~DONE~~**
 
 <br>
 

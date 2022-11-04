@@ -196,8 +196,9 @@ void CheckOnTimeChange(void){
         lClockLast = clockNow;
         gUserEscTimeout = 0.1 * gClocksPerSecond;
         #if __APPLE__
-            // MouseDown happens when MouseUp has happened too
-            gMouseClickTimeout = 0.5 * gClocksPerSecond;
+            // MAC is sending MouseDown together with MouseUp when user releases button
+            // Win & Linux is sending MouseDown when user presses MouseDown
+            gMouseClickTimeout = 0.33 * gClocksPerSecond;
         #else
             gMouseClickTimeout = 0.25 * gClocksPerSecond;
         #endif
