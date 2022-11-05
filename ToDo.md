@@ -7,8 +7,8 @@
 <br>
 
 **036. AnsiESC.h**
-- Reduce CSI's to constant's within fprint's
-- SetTxtStyle() - call functions instead of strcat's
+- ~~Reduce CSI's to constant's within fprint's~~
+- ~~SetTxtStyle() - call functions instead of strcat's~~
 
 <br>
 

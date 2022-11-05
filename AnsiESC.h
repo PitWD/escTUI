@@ -64,12 +64,12 @@ typedef struct {
 	unsigned char framed			:1;
 	unsigned char encircled			:1;
 	unsigned char overline			:1;
-	unsigned char under_right		:1;		// CSI60m (Ideogram 'rarely supported')
-	unsigned char under_dbl			:1;		// CSI61m ( "    "    "   "   "     "  )
+	unsigned char ideo_right		:1;		// CSI60m (Ideogram 'rarely supported')
+	unsigned char ideo_dbl_right	:1;		// CSI61m ( "    "    "   "   "     "  )
 	
-	unsigned char over_left			:1;		// CSI62m ( "    "    "   "   "     "  )
-	unsigned char over_dbl			:1;		// CSI63m ( "    "    "   "   "     "  )
-	unsigned char stress			:1;		// CSI64m ( "    "    "   "   "     "  )
+	unsigned char ideo_left			:1;		// CSI62m ( "    "    "   "   "     "  )
+	unsigned char ideo_dbl_left		:1;		// CSI63m ( "    "    "   "   "     "  )
+	unsigned char ideo_stress		:1;		// CSI64m ( "    "    "   "   "     "  )
 	unsigned char dbl_width			:1;
 	unsigned char dbl_height		:1;
 	unsigned char dummy1			:1;		// Fill the 3rd unsigned char
@@ -443,32 +443,32 @@ enum{trmScrSize = 109, trmIconLabel, trmWinTitle, trmERR
 // Cursor Positions
 void Locate(int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
-	printf("%s%d;%dH", CSI, y, x);
+	printf("\x1B[%d;%dH", y, x);
 }
 void LocateX(int x) {
-	printf("%s%dG", CSI, x);
+	printf("\x1B[%dG", x);
 }
 void CursorUp(int y) {
-	printf("%s%dA", CSI, y);
+	printf("\x1B[%dA", y);
 }
 void CursorUp1st(int y) {
-	printf("%s%dF", CSI, y);
+	printf("\x1B[%dF", y);
 }
 void CursorDown(int y) {
-	printf("%s%dB", CSI, y);
+	printf("\x1B[%dB", y);
 }
 void CursorDown1st(int y) {
-	printf("%s%dE", CSI, y);
+	printf("\x1B[%dE", y);
 }
 void CursorRight(int x) {
-	printf("%s%dC", CSI, x);
+	printf("\x1B[%dC", x);
 }
 void CursorLeft(int x) {
-	printf("%s%dD", CSI, x);
+	printf("\x1B[%dD", x);
 }
 void GetAnsiCursorPos(void){
 	gCursorWaitFor = 1;
-	printf("%s6n", CSI);
+	printf("\x1B[6n");
 }
 
 // Clear Lines
@@ -492,15 +492,15 @@ void ClrLineA(int xS, int xE){
 }
 void ClrLine(void) {
 	// ClearLine
-	printf("%s2K", CSI);
+	printf("\x1B[2K");
 }
 void ClrLineL(void) {
 	// ClearLine from cursor to Left
-	printf("%s1K", CSI);
+	printf("\x1B[1K");
 }
 void ClrLineR(void) {
 	// ClearLine from cursor to Right
-	printf("%sK", CSI);
+	printf("\x1B[K");
 	// printf("%s0K", CSI);	// The '0' isn't needed.
 }
 
@@ -544,827 +544,674 @@ void ClrScrA(int xS, int yS, int xE, int yE){
 }
 void ClrScrL(void) {
 	// Cls from cursor to Upper Left
-	printf("%s1J", CSI);
+	printf("\x1B[1J");
 }
 void ClrScrR(void) {
 	// Cls from cursor to LowerRight
-	printf("%sJ", CSI);
+	printf("\x1B[J");
 	// printf("%s0J", CSI);	// The '0' isn't needed.
-}
-
-// Set 24 bit Color
-void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
-
-	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
-	printf("%s38;2;%d;%d;%dm", CSI, r, g, b);
-}
-void SetBgRGB(unsigned char r, unsigned char g, unsigned char b) {
-
-	ActTxtColor.bg.R = r; ActTxtColor.bg.G = g; ActTxtColor.bg.B = b; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
-	printf("%s48;2;%d;%d;%dm", CSI, r, g, b);
-}
-void SetUlRGB(unsigned char r, unsigned char g, unsigned char b) {
-
-	ActTxtColor.ul.R = r; ActTxtColor.ul.G = g; ActTxtColor.ul.B = b; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
-	printf("%s58;2;%d;%d;%dm", CSI, r, g, b);
-}
-void SetFBrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB) {
-	//SetFgRGB(fgR, fgG, fgB);
-	//SetBgRGB(bgR, bgG, bgB);
-	ActTxtColor.fg.R = fgR; ActTxtColor.fg.G = fgG; ActTxtColor.fg.B = fgB;
-	ActTxtColor.bg.R = bgR; ActTxtColor.bg.G = bgR; ActTxtColor.bg.B = bgB; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
-	printf("%s38;2;%d;%d;%d;48;2;%d;%d;%dm", CSI, fgR, fgG, fgB, bgR, bgG, bgB);
-}
-void SetFBUrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB, unsigned char ulR, unsigned char ulG, unsigned char ulB) {
-	//SetFgRGB(fgR, fgG, fgB);
-	//SetBgRGB(bgR, bgG, bgB);
-	ActTxtColor.ul.R = ulR; ActTxtColor.ul.G = ulG; ActTxtColor.ul.B = ulB;
-	ActTxtColor.fg.R = fgR; ActTxtColor.fg.G = fgG; ActTxtColor.fg.B = fgB;
-	ActTxtColor.bg.R = bgR; ActTxtColor.bg.G = bgR; ActTxtColor.bg.B = bgB; ActTxtColor.mode = 2; ActTxtStyle.pColor = NULL;
-	printf("%s38;2;%d;%d;%d;48;2;%d;%d;%d;58;2;%d;%d;%dm", CSI, fgR, fgG, fgB, bgR, bgG, bgB, ulR, ulG, ulB);
-}
-
-// Set 256 Colors
-void SetFg255(unsigned char c) {
-
-	ActTxtColor.fg.R = c; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
-	printf("%s38;5;%dm", CSI, c);
-}
-void SetBg255(unsigned char c) {
-
-	ActTxtColor.bg.R = c; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
-	printf("%s48;5;%dm", CSI, c);
-}
-void SetUl255(unsigned char c) {
-
-	ActTxtColor.ul.R = c; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
-	printf("%s58;5;%dm", CSI, c);
-}
-void SetFB255(unsigned char fg, unsigned char bg) {
-
-	ActTxtColor.fg.R = fg;
-	ActTxtColor.bg.R = bg; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
-	printf("%s38;5;%d;48;5;%dm", CSI, fg, bg);
-}
-void SetFBU255(unsigned char fg, unsigned char bg, unsigned char ul) {
-
-	ActTxtColor.fg.R = fg; ActTxtColor.ul.R = ul;
-	ActTxtColor.bg.R = bg; ActTxtColor.mode = 1; ActTxtStyle.pColor = NULL;
-	printf("%s38;5;%d;48;5;%d;58;5;%dm", CSI, fg, bg, ul);
-}
-
-//Set 16 Colors
-void SetFg16(unsigned char c) {
-
-	ActTxtColor.fg.R = c; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s%dm", CSI, c);
-}
-void SetBg16(unsigned char c) {
-	
-	ActTxtColor.bg.R = c; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	//SetForeColor(c);					// just the value of c differs between fg and bg)
-	printf("%s%dm", CSI, c);
-}
-void SetFB16(unsigned char fg, unsigned char bg) {
-
-	ActTxtColor.fg.R = fg; ActTxtColor.bg.R = bg; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s%d;%dm", CSI, fg, bg);
 }
 
 // Reset To Default Colors
 void ResFg(void) {
-
 	ActTxtColor.fg.R = 39; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s39m", CSI);
+	printf("\x1B[39m");
 }
 void ResBg(void) {
-
 	ActTxtColor.bg.R = 49; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s49m", CSI);
+	printf("\x1B[49m");
 }
 void ResUl(void) {
-
 	ActTxtColor.ul.R = 59; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
-	printf("%s59m", CSI);
+	printf("\x1B[59m");
 }
 void ResFB(void) {
-
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49;
 	ActTxtColor.mode = 0; ActTxtStyle.pColor = 0;
-	printf("%s39;49;59m", CSI);
+	printf("\x1B[39;49;59m");
 }
 void ResFBU(void) {
-
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49; ActTxtColor.ul.R = 59;
 	ActTxtColor.mode = 0; ActTxtStyle.pColor = 0;
-	printf("%s39;49;59m", CSI);
+	printf("\x1B[39;49;59m");
+}
+
+// Set 24 bit Color
+void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
+	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b; ActTxtColor.mode = 2;
+	printf("\x1B[38;2;%d;%d;%dm", r, g, b);
+}
+void SetBgRGB(unsigned char r, unsigned char g, unsigned char b) {
+	ActTxtColor.bg.R = r; ActTxtColor.bg.G = g; ActTxtColor.bg.B = b; ActTxtColor.mode = 2;
+	printf("\x1B[48;2;%d;%d;%dm", r, g, b);
+}
+void SetUlRGB(unsigned char r, unsigned char g, unsigned char b) {
+	ActTxtColor.ul.R = r; ActTxtColor.ul.G = g; ActTxtColor.ul.B = b; ActTxtColor.mode = 2;
+	printf("\x1B[58;2;%d;%d;%dm", r, g, b);
+}
+void SetFBrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB) {
+	SetFgRGB(fgR, fgG, fgB);
+	SetBgRGB(bgR, bgG, bgB);
+}
+void SetFBUrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB, unsigned char ulR, unsigned char ulG, unsigned char ulB) {
+	SetFgRGB(fgR, fgG, fgB);
+	SetBgRGB(bgR, bgG, bgB);
+	SetUlRGB(ulR, ulG, ulB);
+}
+
+// Set 256 Colors
+void SetFg255(unsigned char c) {
+	ActTxtColor.fg.R = c; ActTxtColor.mode = 1;
+	printf("\x1B[38;5;%dm", c);
+}
+void SetBg255(unsigned char c) {
+	ActTxtColor.bg.R = c; ActTxtColor.mode = 1;
+	printf("\x1B[48;5;%dm", c);
+}
+void SetUl255(unsigned char c) {
+	ActTxtColor.ul.R = c; ActTxtColor.mode = 1;
+	printf("\x1B[58;5;%dm", c);
+}
+void SetFB255(unsigned char fg, unsigned char bg) {
+	SetFg255(fg);
+	SetBg255(bg);
+}
+void SetFBU255(unsigned char fg, unsigned char bg, unsigned char ul) {
+	SetFg255(fg);
+	SetBg255(bg);
+	SetUl255(ul);
+}
+
+//Set 16 Colors
+void SetFg16(unsigned char c){
+	// ForeGround	
+	if (!((c > 29 && c < 38) || (c > 89 && c < 98))){
+		ResFg();
+	}
+	else{
+		ActTxtColor.fg.R = c; ActTxtColor.mode = 0;
+		printf("\x1B[%dm", c);
+	}	
+}
+void SetBg16(unsigned char c) {	
+	// BackGround
+	if (!((c > 39 && c < 48) || (c > 99 && c < 108))){
+		ResBg();
+	}
+	else{
+		ActTxtColor.bg.R = c; ActTxtColor.mode = 0;
+		printf("\x1B[%dm", c);
+	}
+}
+void SetFB16(unsigned char fg, unsigned char bg) {
+	SetFg16(fg);
+	SetBg16(bg);
 }
 
 // TXT Styles - single commands
 void TxtBold(unsigned char set) {
-
 	ActTxtStyle.bold = set;
 	ActTxtStyle.faint = 0;
 	if (set) {
 		// Set
-		printf("%s1m", CSI);
+		printf("\x1B[1m");
 	}
 	else {
 		// Reset
-		printf("%s22m", CSI);
+		printf("\x1B[22m");
 	}
 }
-void TxtFaint(_Bool set) {
-
+void TxtFaint(int set) {
 	ActTxtStyle.faint = set;
 	ActTxtStyle.bold = 0;
 	if (set) {
 		// Set
-		printf("%s2m", CSI);
+		printf("\x1B[2m");
 	}
 	else {
 		// Reset
-		printf("%s22m", CSI);
+		printf("\x1B[22m");
 	}
 }
-void TxtItalic(_Bool set) {
-	
+void TxtItalic(int set) {
 	ActTxtStyle.italic = set;
 	if (set) {
 		// Set
-		printf("%s3m", CSI);
+		printf("\x1B[3m");
 	}
 	else {
 		// Reset
-		printf("%s23m", CSI);
+		printf("\x1B[23m");
 	}
 }
-void TxtUnder(_Bool set) {
-
+void TxtUnder(int set) {
 	ActTxtStyle.underline = set;
 	if (set) {
 		// Set
-		printf("%s4m", CSI);
+		printf("%s4m");
 	}
 	else {
 		// Reset
-		printf("%s%sm", CSI, RUL);
+		printf("\x1B[%sm", RUL);
 	}
 }
-void TxtDblUnder(_Bool set) {
-
+void TxtDblUnder(int set) {
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 2;
-		printf("%s21m", CSI);
+		printf("\x1B[21m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtCurlUnder(_Bool set) {
-
+void TxtCurlUnder(int set) {
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 3;
-		printf("%s4:3m", CSI);
+		printf("\x1B[4:3m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDotUnder(_Bool set) {
-
+void TxtDotUnder(int set) {
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 4;
-		printf("%s4:4m", CSI);
+		printf("\x1B[4:4m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDashUnder(_Bool set) {
-
+void TxtDashUnder(int set) {
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 5;
-		printf("%s4:5m", CSI);
+		printf("\x1B[4:5m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDashDotUnder(_Bool set) {
-
+void TxtDashDotUnder(int set) {
 	// Undocumented DashDot - just a prognosis
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 6;
-		printf("%s4:6m", CSI);
+		printf("\x1B[4:6m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDblCurlUnder(_Bool set) {
-
+void TxtDblCurlUnder(int set) {
 	// Undocumented DoubleCurl - just a prognosis
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 7;
-		printf("%s4:7m", CSI);
+		printf("\x1B[4:7m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDblDotUnder(_Bool set) {
-
+void TxtDblDotUnder(int set) {
 	// Undocumented DoubleDotted - just a prognosis
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 8;
-		printf("%s4:8m", CSI);
+		printf("\x1B[4:8m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtDblDashUnder(_Bool set) {
-
+void TxtDblDashUnder(int set) {
 	// Undocumented DoubleDashed - just a prognosis
 	if (set) {
 		// Set
 		ActTxtStyle.underline = 9;
-		printf("%s4:9m", CSI);
+		printf("\x1B[4:9m");
 	}
 	else {
 		// Reset
-		ActTxtStyle.underline = 0;
-		printf("%s%sm", CSI, RUL);
+		TxtUnder(0);
 	}
 }
-void TxtBlink(_Bool set) {
 
+void TxtResetBlink(void){
+	printf("\x1B[25m");
+}
+void TxtBlink(int set) {
 	ActTxtStyle.blink = set;
 	ActTxtStyle.fast = 0;
 	if (set) {
 		// Set
-		printf("%s5m", CSI);
+		printf("\x1B[5m");
 	}
 	else {
 		// Reset
-		printf("%s25m", CSI);
+		TxtResetBlink();
 	}
 }
-void TxtFastBlink(_Bool set) {
-
+void TxtFastBlink(int set) {
 	ActTxtStyle.fast = set;
 	ActTxtStyle.blink = 0;
 	if (set) {
 		// Set
-		printf("%s6m", CSI);
+		printf("\x1B[6m");
 	}
 	else {
 		// Reset
-		printf("%s25m", CSI);
+		TxtResetBlink();
 	}
 }
-void TxtReverse(_Bool set) {
-
+void TxtReverse(int set) {
 	ActTxtStyle.reverse = set;
 	if (set) {
 		// Set
-		printf("%s7m", CSI);
+		printf("\x1B[7m");
 	}
 	else {
 		// Reset
-		printf("%s27m", CSI);
+		printf("\x1B[27m");
 	}
 }
-void TxtInvisible(_Bool set) {
-
+void TxtInvisible(int set) {
 	ActTxtStyle.invisible = set;
 	if (set) {
 		// Set
-		printf("%s8m", CSI);
+		printf("\x1B[8m");
 	}
 	else {
 		// Reset
-		printf("%s28m", CSI);
+		printf("\x1B[28m");
 	}
 }
-void TxtStrike(_Bool set) {
-
+void TxtStrike(int set) {
 	ActTxtStyle.strike = set;
 	if (set) {
 		// Set
-		printf("%s9m", CSI);
+		printf("\x1B[9m");
 	}
 	else {
 		// Reset
-		printf("%s29m", CSI);
+		printf("\x1B[29m");
 	}
 }
-void TxtSuperscript(_Bool set) {
-
+void TxtResetSscript(void){
+	printf("\x1B[75m");
+}
+void TxtSuperscript(int set) {
 	ActTxtStyle.superscript = set;
 	ActTxtStyle.subscript = 0;
 	if (set) {
 		// Set
-		printf("%s73m", CSI);
+		printf("\x1B[73m");
 	}
 	else {
 		// Reset
-		printf("%s75m", CSI);
+		TxtResetSscript();
 	}
 }
-void TxtSubscript(_Bool set) {
-
+void TxtSubscript(int set) {
 	ActTxtStyle.subscript = set;
 	ActTxtStyle.superscript = 0;
 	if (set) {
 		// Set
-		printf("%s74m", CSI);
+		printf("\x1B[74m");
 	}
 	else {
 		// Reset
-		printf("%s75m", CSI);
+		TxtResetSscript();
 	}
 }
-void TxtProportional(_Bool set){
-
+void TxtProportional(int set){
 	ActTxtStyle.proportional = set;
 	if (set) {
 		// Set
-		printf("%s26m", CSI);
+		printf("\x1B[26m");
 	}
 	else {
 		// Reset
-		printf("%s50m", CSI);
+		printf("\x1B[50m");
 	}
 }
-void TxtFramed(_Bool set) {
-
+void TxtFramed(int set) {
 	ActTxtStyle.framed = set;
 	ActTxtStyle.encircled = 0;
 	if (set) {
 		// Set
-		printf("%s51m", CSI);
+		printf("\x1B[51m");
 	}
 	else {
 		// Reset
-		printf("%s54m", CSI);
+		printf("\x1B[54m");
 	}
 }
-void TxtEncircled(_Bool set) {
-
+void TxtEncircled(int set) {
 	ActTxtStyle.encircled = set;
 	ActTxtStyle.framed = 0;
 	if (set) {
 		// Set
-		printf("%s52m", CSI);
+		printf("\x1B[52m");
 	}
 	else {
 		// Reset
-		printf("%s54m", CSI);
+		printf("\x1B[54m");
 	}
 }
-void TxtOverline(_Bool set) {
-
+void TxtOverline(int set) {
 	ActTxtStyle.overline = set;
 	if (set) {
 		// Set
-		printf("%s53m", CSI);
+		printf("\x1B[53m");
 	}
 	else {
 		// Reset
-		printf("%s55m", CSI);
+		printf("\x1B[55m");
 	}
 }
-void TxtUnderRight(void) {
 
-	ActTxtStyle.under_right = 1;
-	printf("%s60m", CSI);
+void TxtResetIdeo(void) {
+	ActTxtStyle.ideo_right = 0; ActTxtStyle.ideo_dbl_right = 0;
+	ActTxtStyle.ideo_left = 0; ActTxtStyle.ideo_dbl_left = 0;
+	ActTxtStyle.ideo_stress = 0;
+	printf("\x1B[65m");
 }
-void TxtUnderDbl(void) {
-
-	ActTxtStyle.under_dbl = 1;
-	printf("%s61m", CSI);
+void TxtIdeoRight(int set) {
+	if (set){
+		ActTxtStyle.ideo_right = 1;
+		printf("\x1B[60m");
+	}
+	else{
+		TxtResetIdeo();
+	}
 }
-void TxtOverLeft(void) {
-
-	ActTxtStyle.over_left = 1;
-	printf("%s62m", CSI);
+void TxtIdeoDblRight(int set) {
+	if (set){
+		ActTxtStyle.ideo_dbl_right = 1;
+		printf("\x1B[61m");
+	}
+	else{
+		TxtResetIdeo();
+	}
 }
-void TxtOverDbl(void) {
-
-	ActTxtStyle.over_dbl = 1;
-	printf("%s63m", CSI);
+void TxtIdeoLeft(int set) {
+	if (set){
+		ActTxtStyle.ideo_left = 1;
+		printf("\x1B[62m");
+	}
+	else{
+		TxtResetIdeo();
+	}
 }
-void TxtStress(void) {
-
-	ActTxtStyle.stress = 1;
-	printf("%s64m", CSI);
+void TxtIdeoDblLeft(int set) {
+	if (set){
+		ActTxtStyle.ideo_dbl_left = 1;
+		printf("\x1B[63m");
+	}
+	else{
+		TxtResetIdeo();
+	}
 }
-void TxtOffUOS(void) {
-
-	ActTxtStyle.under_right = 0; ActTxtStyle.under_dbl = 0;
-	ActTxtStyle.over_left = 0; ActTxtStyle.over_dbl = 0;
-	ActTxtStyle.stress = 0;
-	printf("%s65m", CSI);
+void TxtIdeoStress(int set) {
+	if (set){
+		ActTxtStyle.ideo_stress = 1;
+		printf("\x1B[64m");
+	}
+	else{
+		TxtResetIdeo();
+	}
 }
-void TxtDblTop(_Bool set) {
 
+void TxtResetDblTBW(void){
+	printf("\x1B#5");
+}
+void TxtDblTop(int set) {
 	// DoubleHeight + DoubleWidth Top-Part
 	ActTxtStyle.dbl_height = set;
 	ActTxtStyle.dbl_width = 0;
 	if (set) {
 		// Set
-		printf("%s3", FP3);
+		printf("\x1B#3");
 	}
 	else {
 		// Reset
-		printf("%s5", CSI);
+		TxtResetDblTBW();
 	}
 }
-void TxtDblBot(_Bool set) {
-
+void TxtDblBot(int set) {
 	// DoubleHeight + DoubleWidth Bottom-Part
 	ActTxtStyle.dbl_height = set;
 	ActTxtStyle.dbl_width = 0;
 	if (set) {
 		// Set
-		printf("%s4", FP3);
+		printf("\x1B#4");
 	}
 	else {
 		// Reset
-		printf("%s5", CSI);
+		TxtResetDblTBW();
 	}
 }
-void TxtDblWidth(_Bool set) {
-
+void TxtDblWidth(int set) {
 	// DoubleWidth 
 	ActTxtStyle.dbl_width = set;
 	ActTxtStyle.dbl_height = 0;
 	if (set) {
 		// Set
-		printf("%s6", FP3);
+		printf("\x1B#6");
 	}
 	else {
 		// Reset
-		printf("%s5", CSI);
+		TxtResetDblTBW();
 	}
 }
-void TxtFont(unsigned char fnt) {
+
+void TxtFont(int fnt) {
 
 	// 10 = Default Font
 	// 11 - 19 User Fonts @INVESTIGATE@
 	// 20 = Fraktur
 
-	if (fnt < 10 || fnt > 20 ) { fnt = 10; }
+	if (fnt > 10){
+		fnt = 10;
+	}
+	if (fnt < 0){
+		fnt = 0;
+	}
+	
 	ActTxtStyle.font = fnt;
-	printf("%s%dm", CSI, fnt);
+	printf("%s%dm", CSI, fnt + 10);
 }
 
 // TXT Style - combined from Structure
-void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, _Bool set) {
+void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, int set) {
 
 	// set == False -> Reset all to default
 
-	// ActTxtStyle containing the 'last' state and is updated after return
-
-	char strOut[256]; strcat(strOut, CSI);
-	_Bool changed = 0;
-
 	if (set) {
 		if (pTxtStyle->bold != ActTxtStyle.bold) {
-
-			changed = 1;
-			ActTxtStyle.bold = pTxtStyle->bold;
-			ActTxtStyle.faint = 0;
-			if (ActTxtStyle.bold) {
-				strcat(strOut, "1;");
-			}
-			else {
-				strcat(strOut, "22;");
-			}
+			TxtBold(pTxtStyle->bold);
 		}
 		if (pTxtStyle->faint != ActTxtStyle.faint) {
-
-			changed = 1;
-			ActTxtStyle.faint = pTxtStyle->faint;
-			ActTxtStyle.bold = 0;
-			if (ActTxtStyle.faint) {
-				strcat(strOut, "2;");
-			}
-			else {
-				strcat(strOut, "22;");
-			}
+			TxtFaint(pTxtStyle->faint);
 		}
 		if (pTxtStyle->italic != ActTxtStyle.italic) {
-
-			changed = 1;
-			ActTxtStyle.italic = pTxtStyle->italic;
-			if (ActTxtStyle.italic) {
-				strcat(strOut, "3;");
-			}
-			else {
-				strcat(strOut, "23;");
-			}
+			TxtItalic(pTxtStyle->italic);
 		}
 		if (pTxtStyle->underline != ActTxtStyle.underline) {
-
-			changed = 1;
 			ActTxtStyle.underline = pTxtStyle->underline;
-			switch (ActTxtStyle.underline) {
+			switch (pTxtStyle->underline) {
 			case 0: // None
-				strcat(strOut, RUL);
-				strcat(strOut, ";");
-				break;
 			case 1: // Single
-				strcat(strOut, "4;"); break;
+				TxtUnder(pTxtStyle->underline);
+				break;
 			case 2: // Double
-				strcat(strOut, "21;"); break;
+				TxtDblUnder(1);
+				break;
 			case 3: // Curly
-				strcat(strOut, "4:3;"); break;
+				TxtCurlUnder(1);
+				break;
 			case 4: // Dot
-				strcat(strOut, "4:4;"); break;
+				TxtUnder(1);
+				break;
 			case 5: // Dash
-				strcat(strOut, "4:5;"); break;
+				TxtDashUnder(1);
+				break;
 			case 6: // DashDot
-				strcat(strOut, "4:6;"); break;
+				TxtDashDotUnder(1);
+				break;
 			case 7: // Double Curly
-				strcat(strOut, "4:7;"); break;
+				TxtDblCurlUnder(1);
+				break;
 			case 8: // Double Dot
-				strcat(strOut, "4:8;"); break;
+				TxtDblDotUnder(1);
+				break;
 			case 9: // Double Dash
-				strcat(strOut, "4:9;"); break;
+				TxtDblDashUnder(1);
+				break;
 			default:
 				// This would be an error !!
-				strcat(strOut, RUL);
-				strcat(strOut, ";");
 				pTxtStyle->underline = 0;
-				ActTxtStyle.underline = 0;
+				TxtUnder(0);
 				break;
 			}
 		}
-		if (pTxtStyle->blink != ActTxtStyle.blink) {
 
-			changed = 1;
-			ActTxtStyle.blink = pTxtStyle->blink;
-			ActTxtStyle.fast = 0;
-				if (ActTxtStyle.blink) {
-					strcat(strOut, "5;");
-				}
-				else {
-					strcat(strOut, "25;");
-				}
+		if (pTxtStyle->blink != ActTxtStyle.blink) {
+			if (!pTxtStyle->fast){
+				TxtBlink(pTxtStyle->blink);
+			}			
 		}
 		if (pTxtStyle->fast != ActTxtStyle.fast) {
-
-			changed = 1;
-			ActTxtStyle.fast = pTxtStyle->fast;
-			ActTxtStyle.blink = 0;
-				if (ActTxtStyle.fast) {
-					strcat(strOut, "6;");
-				}
-				else {
-					strcat(strOut, "25;");
-				}
+			TxtFastBlink(pTxtStyle->fast);
 		}
+
 		if (pTxtStyle->reverse != ActTxtStyle.reverse) {
-
-			changed = 1;
-			ActTxtStyle.reverse = pTxtStyle->reverse;
-			if (ActTxtStyle.reverse) {
-				strcat(strOut, "7;");
-			}
-			else {
-				strcat(strOut, "27;");
-			}
+			TxtReverse(pTxtStyle->reverse);
 		}
+		
 		if (pTxtStyle->invisible != ActTxtStyle.invisible) {
-
-			changed = 1;
-			ActTxtStyle.invisible = pTxtStyle->invisible;
-			if (ActTxtStyle.invisible) {
-				strcat(strOut, "8;");
-			}
-			else {
-				strcat(strOut, "28;");
-			}
+			TxtInvisible(pTxtStyle->invisible);
 		}
+
 		if (pTxtStyle->strike != ActTxtStyle.strike) {
-
-			changed = 1;
-			ActTxtStyle.strike = pTxtStyle->strike;
-			if (ActTxtStyle.strike) {
-				strcat(strOut, "9;");
-			}
-			else {
-				strcat(strOut, "29;");
-			}
+			TxtStrike(pTxtStyle->strike);
 		}
-		if (pTxtStyle->superscript != ActTxtStyle.superscript) {
 
-			changed = 1;
-			ActTxtStyle.superscript = pTxtStyle->superscript;
-			ActTxtStyle.subscript = 0;
-				if (ActTxtStyle.superscript) {
-					strcat(strOut, "73;");
-				}
-				else {
-					strcat(strOut, "75;");
-				}
+		if (pTxtStyle->superscript != ActTxtStyle.superscript) {
+			if (!pTxtStyle->subscript){
+				TxtSuperscript(pTxtStyle->superscript);
+			}			
 		}
 		if (pTxtStyle->subscript != ActTxtStyle.subscript) {
-
-			changed = 1;
-			ActTxtStyle.subscript = pTxtStyle->subscript;
-			ActTxtStyle.superscript = 0;
-				if (ActTxtStyle.subscript) {
-					strcat(strOut, "74;");
-				}
-				else {
-					strcat(strOut, "75;");
-				}
+			TxtSubscript(pTxtStyle->subscript);
 		}
+
 		if (pTxtStyle->proportional != ActTxtStyle.proportional) {
-
-			changed = 1;
-			ActTxtStyle.proportional = pTxtStyle->proportional;
-			if (ActTxtStyle.proportional) {
-				strcat(strOut, "26;");
-			}
-			else {
-				strcat(strOut, "50;");
-			}
+			TxtProportional(pTxtStyle->proportional);
 		}
-		if (pTxtStyle->framed != ActTxtStyle.framed) {
 
-			changed = 1;
-			ActTxtStyle.framed = pTxtStyle->framed;
-			ActTxtStyle.encircled = 0;
-				if (ActTxtStyle.framed) {
-					strcat(strOut, "51;");
-				}
-				else {
-					strcat(strOut, "54;");
-				}
+		if (pTxtStyle->framed != ActTxtStyle.framed) {
+			if (!pTxtStyle->encircled){
+				TxtFramed(pTxtStyle->framed);
+			}			
 		}
 		if (pTxtStyle->encircled != ActTxtStyle.encircled) {
-
-			changed = 1;
-			ActTxtStyle.encircled = pTxtStyle->encircled;
-			ActTxtStyle.framed = 0;
-				if (ActTxtStyle.encircled) {
-					strcat(strOut, "52;");
-				}
-				else {
-					strcat(strOut, "54;");
-				}
+			TxtEncircled(pTxtStyle->encircled);
 		}
+
 		if (pTxtStyle->overline != ActTxtStyle.overline) {
+			TxtOverline(pTxtStyle->overline);
+		}
 
-			changed = 1;
-			ActTxtStyle.overline = pTxtStyle->overline;
-			if (ActTxtStyle.overline) {
-				strcat(strOut, "53;");
+		if ((pTxtStyle->ideo_right != ActTxtStyle.ideo_right) ||
+			(pTxtStyle->ideo_dbl_right != ActTxtStyle.ideo_dbl_right) ||
+			(pTxtStyle->ideo_left != ActTxtStyle.ideo_left) ||
+			(pTxtStyle->ideo_dbl_left != ActTxtStyle.ideo_dbl_left) ||
+			(pTxtStyle->ideo_stress != ActTxtStyle.ideo_stress)) {
+
+			TxtResetIdeo();		// 1st... Reset them all...
+
+			if (pTxtStyle->ideo_right) {
+				TxtIdeoRight(1);
 			}
-			else {
-				strcat(strOut, "55;");
+			else if (pTxtStyle->ideo_dbl_right) {
+				TxtIdeoDblRight(1);
+			}
+			else if (pTxtStyle->ideo_left) {
+				TxtIdeoLeft(1);
+			}
+			else if (pTxtStyle->ideo_dbl_left) {
+				TxtIdeoDblLeft(1);
+			}
+			else if (pTxtStyle->ideo_stress) {
+				TxtIdeoStress(1);
 			}
 		}
-		if ((pTxtStyle->under_right != ActTxtStyle.under_right) ||
-			(pTxtStyle->under_dbl != ActTxtStyle.under_dbl) ||
-			(pTxtStyle->over_left != ActTxtStyle.over_left) ||
-			(pTxtStyle->over_dbl != ActTxtStyle.over_dbl) ||
-			(pTxtStyle->stress != ActTxtStyle.stress)) {
 
-			changed = 1;
-			strcat(strOut, "65;");		// 1st... Reset them all...
-
-			ActTxtStyle.under_right = pTxtStyle->under_right;
-			if (ActTxtStyle.under_right) {
-				strcat(strOut, "60;");
-			}
-			ActTxtStyle.under_dbl = pTxtStyle->under_dbl;
-			if (ActTxtStyle.under_dbl) {
-				strcat(strOut, "61;");
-			}
-			ActTxtStyle.over_left = pTxtStyle->over_left;
-			if (ActTxtStyle.over_left) {
-				strcat(strOut, "62;");
-			}
-			ActTxtStyle.over_dbl = pTxtStyle->over_dbl;
-			if (ActTxtStyle.over_dbl) {
-				strcat(strOut, "63;");
-			}
-			ActTxtStyle.stress = pTxtStyle->stress;
-			if (ActTxtStyle.stress) {
-				strcat(strOut, "64;");
-			}
-		}
 		if (pTxtStyle->font != ActTxtStyle.font) {
-
-			changed = 1;
-			if (pTxtStyle->font < 10 || pTxtStyle->font > 20) {
+			if (pTxtStyle->font > 10) {
 				pTxtStyle->font = 10;
 			}
-			ActTxtStyle.font = pTxtStyle->font;
-			char buffer[3];
-			snprintf(buffer, 3, "%d;", ActTxtStyle.font);
-			strcat(strOut, buffer);
+			TxtFont(pTxtStyle->font);
 		}
-		if (pTxtStyle->pColor != ActTxtStyle.pColor) {
-
-			changed = 1;
-			char buffer[18];
-			switch (pTxtStyle->pColor->mode) {
-			case 0:		// 16 (has no UnderLineColor)
-				if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
-					unsigned char fg = pTxtStyle->pColor->fg.R;
-					if ((fg < 30 || fg > 97) || (fg > 37 && fg < 90)) {
-						fg = 39;	// ERR, so we set default
-						pTxtStyle->pColor->fg.R = 39;
-					}
-					snprintf(buffer, 18, "%d;", fg);
-					strcat(strOut, buffer);
-					ActTxtColor.fg.R = fg;
+		
+		switch (pTxtStyle->pColor->mode) {
+		case 0:		// 16 (has no UnderLineColor)
+			if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
+				if (!((pTxtStyle->pColor->fg.R > 29 && pTxtStyle->pColor->fg.R < 38) || (pTxtStyle->pColor->fg.R > 89 && pTxtStyle->pColor->fg.R < 98))){
+					pTxtStyle->pColor->fg.R = 39;
+					ResFg();
 				}
-				if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
-					unsigned char bg = pTxtStyle->pColor->bg.R;
-					if ((bg < 40 || bg > 107) || (bg > 47 && bg < 100)) {
-						bg = 49;	// ERR, so we set default
-						pTxtStyle->pColor->bg.R = 49;
-					}
-					snprintf(buffer, 18, "%d;", bg);
-					strcat(strOut, buffer);
-					ActTxtColor.bg.R = bg;
+				else{
+					SetFg16(pTxtStyle->pColor->fg.R);
 				}
-				break;
-			
-			case 1:		// 255
-				if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
-					unsigned char fg = pTxtStyle->pColor->fg.R;
-					snprintf(buffer, 18, "38;5;%d;", fg);
-					strcat(strOut, buffer);
-					ActTxtColor.fg.R = fg;
-				}
-				if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
-					unsigned char bg = pTxtStyle->pColor->bg.R;
-					snprintf(buffer, 18, "48;5;%d;", bg);
-					strcat(strOut, buffer);
-					ActTxtColor.bg.R = bg;
-				}
-				if (pTxtStyle->pColor->ul.R != ActTxtColor.ul.R) {
-					unsigned char ul = pTxtStyle->pColor->ul.R;
-					snprintf(buffer, 18, "58;5;%d;", ul);
-					strcat(strOut, buffer);
-					ActTxtColor.ul.R = ul;
-				}
-				break;
-			
-			case 2:		// RGB
-				if (pTxtStyle->pColor->fg.Color != ActTxtColor.fg.Color) {
-					ActTxtColor.fg.Color = pTxtStyle->pColor->fg.Color;
-					snprintf(buffer, 18, "38;2;%d;%d;%d;", ActTxtColor.fg.R, ActTxtColor.fg.G, ActTxtColor.fg.B);
-					strcat(strOut, buffer);
-				}
-				if (pTxtStyle->pColor->bg.Color != ActTxtColor.bg.Color) {
-					ActTxtColor.bg.Color = pTxtStyle->pColor->bg.Color;
-					snprintf(buffer, 18, "48;2;%d;%d;%d;", ActTxtColor.bg.R, ActTxtColor.bg.G, ActTxtColor.bg.B);
-					strcat(strOut, buffer);
-				}
-				if (pTxtStyle->pColor->ul.Color != ActTxtColor.ul.Color) {
-					ActTxtColor.ul.Color = pTxtStyle->pColor->ul.Color;
-					snprintf(buffer, 18, "58;2;%d;%d;%d;", ActTxtColor.ul.R, ActTxtColor.ul.G, ActTxtColor.ul.B);
-					strcat(strOut, buffer);
-				}
-				break;
 			}
-			ActTxtStyle.pColor = pTxtStyle->pColor;
-		}
-		if (changed) {
-			// replace last ';' with 'm' (CSI/SGI termination)
-			int last = strlen(strOut) - 1;
-			strOut[last] = 0x6D;
+			if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
+				if (!((pTxtStyle->pColor->bg.R > 39 && pTxtStyle->pColor->bg.R < 48) || (pTxtStyle->pColor->bg.R > 99 && pTxtStyle->pColor->bg.R < 108))){
+					pTxtStyle->pColor->bg.R = 49;
+					ResBg();
+				}
+				else{
+					SetBg16(pTxtStyle->pColor->bg.R);
+				}
+			}
+			break;
+		
+		case 1:		// 255
+			if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
+				SetFg255(pTxtStyle->pColor->fg.R);
+			}
+			if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
+				SetBg255(pTxtStyle->pColor->bg.R);
+			}
+			if (pTxtStyle->pColor->ul.R != ActTxtColor.ul.R) {
+				SetUl255(pTxtStyle->pColor->ul.R);
+			}
+			break;
+		
+		case 2:		// RGB
+			if (pTxtStyle->pColor->fg.Color != ActTxtColor.fg.Color) {
+				SetFgRGB(pTxtStyle->pColor->fg.R, pTxtStyle->pColor->fg.G, pTxtStyle->pColor->fg.B);
+			}
+			if (pTxtStyle->pColor->bg.Color != ActTxtColor.bg.Color) {
+				SetBgRGB(pTxtStyle->pColor->bg.R, pTxtStyle->pColor->bg.G, pTxtStyle->pColor->bg.B);
+			}
+			if (pTxtStyle->pColor->ul.Color != ActTxtColor.ul.Color) {
+				SetUlRGB(pTxtStyle->pColor->ul.R, pTxtStyle->pColor->ul.G, pTxtStyle->pColor->ul.B);
+			}
+			break;
 		}
 	}
 	else {
