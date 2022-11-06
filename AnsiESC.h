@@ -688,7 +688,7 @@ void TxtUnder(int set) {
 	ActTxtStyle.underline = set;
 	if (set) {
 		// Set
-		printf("%s4m");
+		printf("\x1B[4m");
 	}
 	else {
 		// Reset
