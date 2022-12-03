@@ -592,6 +592,10 @@ int EventESC27 (int event){
 		printf("\n");
 	}
 
+	// To prevent Debug-PrintOut irritations under WIN
+	// (while ScreenSize - Polling)
+	gStreamInESC27[1] = 0;
+
 	if (event != -1){
 		/* code */
 		printf("Event: %d", event);
