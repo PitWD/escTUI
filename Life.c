@@ -845,70 +845,71 @@ void CoreLoop(void){
 			}
 			// Loop Minimum
 			
-				r = GetESC27(i);
+			r = GetESC27(i);
 
-				switch (r){
-				case 0:
-					// Nothing (waiting for more...)
-					break;
-				case -1:
-					// Regular Key - No ESC-Sequence/SpecialKey related stuff
-					break;
-				case 162:
-				case 163:
-				case 164:
-					// Mouse Down
-					if (isOnClick){
-						// refresh timeout for MAC dblClick issues...
-						timeOnClick = clock() + gMouseClickTimeout;
-					}
-					break;					
-				case 165:
-					// Mouse UP (Left / Wheel / Right)
-					EventESC27(165);
-					isOnESC27 = 0;
-					r = 0;
-					if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
-						// it's a (dbl)click
-						if (isOnClick && clock() < timeOnClick){
-							// dblClick
-							EventESC27(201);
-							isOnClick = 0;
-						}
-						else{
-							// 1st Click
-							isOnClick = 1;
-							timeOnClick = clock() + gMouseClickTimeout;
-						}							
+			switch (r){
+			case 0:
+				// Nothing (waiting for more...)
+				break;
+			case -1:
+				// Regular Key - No ESC-Sequence/SpecialKey related stuff
+				break;
+			case 162:
+			case 163:
+			case 164:
+				// Mouse Down
+				if (isOnClick){
+					// refresh timeout for MAC dblClick issues...
+					timeOnClick = clock() + gMouseClickTimeout;
+				}
+				break;					
+			case 165:
+				// Mouse UP (Left / Wheel / Right)
+				EventESC27(165);
+				isOnESC27 = 0;
+				r = 0;
+				if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
+					// it's a (dbl)click
+					if (isOnClick && clock() < timeOnClick){
+						// dblClick
+						EventESC27(201);
+						isOnClick = 0;
 					}
 					else{
-						// it's an area
-						if (isOnClick && clock() < timeOnClick){
-							// but nobody can define an area that fast,
-							// so we decide for dblClick
-							EventESC27(201);
-							isOnClick = 0;
-						}
-						else{
-							// finally area
-							EventESC27(202);
-							isOnClick = 0;
-						}
+						// 1st Click
+						isOnClick = 1;
+						timeOnClick = clock() + gMouseClickTimeout;
+					}							
+				}
+				else{
+					// it's an area
+					if (isOnClick && clock() < timeOnClick){
+						// but nobody can define an area that fast,
+						// so we decide for dblClick
+						EventESC27(201);
+						isOnClick = 0;
 					}
-					break;
-				default:
-					break;
+					else{
+						// finally area
+						EventESC27(202);
+						isOnClick = 0;
+					}
 				}
-				if (r && r != -6){
-					// Disable timeouts
-					isOnUsrESC27 = 0; isOnESC27 = 0;
-					EventESC27(r);
-					r = 0;
-				}
-				else if(r == -6){
-					// The case that F1-F4 and ShiftAlt-O are overlapping...
-					// So, we push the Event when TimeOut occurs (see above)
-				}
+				break;
+			default:
+				break;
+			}
+			
+			if (r && r != -6){
+				// Disable timeouts
+				isOnUsrESC27 = 0; isOnESC27 = 0;
+				EventESC27(r);
+				r = 0;
+			}
+			else if(r == -6){
+				// The case that F1-F4 and ShiftAlt-O are overlapping...
+				// So, we push the Event when TimeOut occurs (see above)
+			}
 				
 				
 				
