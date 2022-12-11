@@ -6,6 +6,9 @@
 
 #include <time.h>
 
+#define IS_REVERSE_DEBUG 1
+#define IS_TIME_EVENT_DEBUG 0
+
 // CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
 // !!! Initial 45000 is just fine with MY development environment !!!
 // !!! On WIN it seems to be constant 1000 - like it's on most Posix 1000000

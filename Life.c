@@ -610,41 +610,64 @@ int EventESC27 (int event){
 }
 
 void EventDayChange(void){
-	SetFg16(fgYellowB);
-	printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgYellowB);
+		printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 
+
 void EventHourChange(void){	
-	SetFg16(fgBlueB);
-	printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgBlueB);
+		printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+
 	// Check on DayChange
 	if (gDayChanged){
 		EventDayChange();
 	}
-	SetFg16(fgBlue);
+		
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgBlue);
+	#endif
 }
 
 void EventHour2Change(void){
-	printf("  Hour2Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Hour2Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventHour3Change(void){
-	printf("  Hour3Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG	
+		printf("  Hour3Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventHour4Change(void){
-	printf("  Hour4Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG	
+		printf("  Hour4Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventHour6Change(void){
-	printf("  Hour6Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Hour6Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventHour8Change(void){
-	printf("  Hour8Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Hour8Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventHour12Change(void){
-	printf(" Hour12Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf(" Hour12Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 
 void EventMinuteChange(void){
-	printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 	// Check on HourChange
 	if (gHourChanged){
 		EventHourChange();
@@ -667,44 +690,68 @@ void EventMinuteChange(void){
 			}
 		}
 	}
-	ResFg();
+	#if IS_TIME_EVENT_DEBUG
+		ResFg();
+	#endif
 }
 
 void EventMinute2Change(void){
-	printf("   Min2Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Min2Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute3Change(void){
-	printf("   Min3Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Min3Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute4Change(void){
-	printf("   Min4Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Min4Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute5Change(void){
-	printf("   Min5Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Min5Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute6Change(void){
-	printf("   Min6Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Min6Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute10Change(void){
-	printf("  Min10Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Min10Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute12Change(void){
-	printf("  Min12Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Min12Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute15Change(void){
-	printf("  Min15Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Min15Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute20Change(void){
-	printf("  Min20Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Min20Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 void EventMinute30Change(void){
-	printf("  Min30Change: %s - %s\n",gStrRunTime, gStrTime);
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Min30Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
 }
 
 void EventSecondChange(void){	
-	SetFg16(fgWhite);
-	printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
-	ResFg();
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgWhite);
+		printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
+		ResFg();
+	#endif
 	// Check on MinuteChange
 	if (gMinuteChanged){
 		SetFg16(fgGreenB);
@@ -742,7 +789,10 @@ void EventSecondChange(void){
 		}
 	}
 
-	ResFg();	
+	#if IS_TIME_EVENT_DEBUG
+		ResFg();
+	#endif
+
 	EraseTimeChange();
 
 }
