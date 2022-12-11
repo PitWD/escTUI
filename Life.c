@@ -47,16 +47,24 @@ int EventESC27 (int event){
 	int keyState = (gKeyShift) + (gKeyAlt * 2) + (gKeyCtrl * 4);
 
 	if (gKeyShift){
-		printf("Shift-");
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("Shift-");
+		#endif
 	}
 	if (gKeyAlt){
-		printf("Alt-");
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("Alt-");
+		#endif
 	}
 	if (gKeyCtrl){
-		printf("Ctrl-");
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("Ctrl-");
+		#endif
 	}
 	
-	TxtBold(1);
+	#if IS_TERMINAL_EVENT_DEBUG
+		TxtBold(1);
+	#endif
 
 	if (event == -1){
 		// A regular Key got pressed
@@ -66,7 +74,9 @@ int EventESC27 (int event){
 		switch (event){
 		case 144:
 			// Up
-			printf("Up");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Up");
+			#endif
 			switch (keyState){
 			case 1:
 				// Shift
@@ -84,59 +94,86 @@ int EventESC27 (int event){
 			break;
 		case 145:
 			// Down
-			printf("Down");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Down");
+			#endif
 			break;
 		case 146:
 			// Right
-			printf("Right");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Right");
+			#endif
 			break;
 		case 147:
 			// Left
-			printf("Left");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Left");
+			#endif
 			break;
 		case 148:
 			// Center
-			printf("Center");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Center");
+			#endif
 			break;
 		case 149:
 			// End
-			printf("End");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("End");
+			#endif
 			break;
 		case 150:
 			// Unknown
-			printf("150");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("150");
+			#endif
 			break;
 		case 151:
 			// Pos1
-			printf("Pos1");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Pos1");
+			#endif
 			break;
 		case 152:
 			// Ins
-			printf("Ins");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Ins");
+			#endif
 			break;
 		case 153:
 			// Del
-			printf("Del");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Del");
+			#endif
 			break;
 		case 155:
 			// PgUp
-			printf("PgUp");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("PgUp");
+			#endif
 			break;
 		case 156:
 			// PgDown
-			printf("PgDown");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("PgDown");
+			#endif
 			break;
 		}
 	}
 	else if (event > 126 && event < 140){
 		// Delete & F1 - F12
-		if (event != 127){
-			printf("F%d", event - 127);
-		}
+		
+		#if IS_TERMINAL_EVENT_DEBUG
+			if (event != 127){
+				printf("F%d", event - 127);
+			}
+		#endif
 		
 		switch (event){
 		case 127:
-			printf("Back");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Back");
+			#endif
 			// Back
 			if (gKeyAlt){
 				/* code */
@@ -213,7 +250,9 @@ int EventESC27 (int event){
 	}
 	else if (event > 64 && event < 91){
 		// (Shift)ALT-A - (Shift)ALT-Z
-		printf("%c", (char)event);
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("%c", (char)event);
+		#endif
 		switch(event){
 		case 65:
 			// A
@@ -305,7 +344,9 @@ int EventESC27 (int event){
 		// Ctrl-A - Ctrl-Z
 		// (but a lot are special - see cases above
 		//  a lot are also not supported on all OSs)
-		printf("CC: %c", (char)event+64);
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("CC: %c", (char)event+64);
+		#endif
 		switch(event){
 		case 1:
 			// Ctrl-A
@@ -401,99 +442,143 @@ int EventESC27 (int event){
 		switch(event){
 		case 190:
 			// Cursor Position
-			printf("CursorPos");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("CursorPos");
+			#endif
 			break;
 		case 177:
 			// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
-			printf("ScreenSize");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ScreenSize");
+			#endif
 			if (ScreenSizeChanged()){
-				printf(" (Changed)");
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf(" (Changed)");
+				#endif
 			}
 			break;
 		case 179:
 			// Terminal Icon Label
-			printf("IconLabel");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("IconLabel");
+			#endif
 			break;
 		case 178:
 			// Terminal Name
-			printf("TerminalName");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("TerminalName");
+			#endif
 			break;
 		case 176:
 			// Unknown Terminal Info Object
-			printf("UTO");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("UTO");
+			#endif
 			break;
 
 		// Terminal GotFocus / LostFocus
 		case 160:
 			// Got
-			printf("GotFocus");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("GotFocus");
+			#endif
 			break;
 		case 161:
 			// Lost
-			printf("LostFocus");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("LostFocus");
+			#endif
 			break;
 
 		// 1st Level (From GetESC27()) Mouse-Events
 		case 166:
 			// Mouse Move
-			printf("MouseMove");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseMove");
+			#endif
 			break;
 		case 165:
 			// MouseUp
 			switch (gMouseButton){
 			case 1:
 				// Left
-				printf("MouseLeftUp");
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("MouseLeftUp");
+				#endif
 				break;
 			case 4:
 				// Right
-				printf("MouseRightUp");
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("MouseRightUp");
+				#endif
 				break;
 			case 2:
 				// Wheel
-				printf("MouseWheelUp");
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("MouseWheelUp");
+				#endif
 				break;
 			default:
 				// MultiKey (never seen in reality)
-				printf("MouseMultiKeyUp");
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("MouseMultiKeyUp");
+				#endif
 				break;
 			}
 			break;
 		case 162:
 			// Left Mouse Down
-			printf("MouseLeftDown");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseLeftDown");
+			#endif
 			break;
 		case 167:
 			// Left Down Mouse Move
-			printf("MouseLeftDownMove");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseLeftDownMove");
+			#endif
 			break;
 		case 164:
 			// Right Mouse Down
-			printf("MouseRightDown");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseRightDown");
+			#endif
 			break;
 		case 169:
 			// Right Down Mouse Move
-			printf("MouseRightDownMove");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseRightDownMove");
+			#endif
 			break;
 		case 163:
 			// Wheel Mouse Down
-			printf("MouseWheelDown");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseWheelDown");
+			#endif
 			break;
 		case 168:
 			// Wheel Down Mouse Move
-			printf("MouseWheelDownMove");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseWheelDownMove");
+			#endif
 			break;
 		case 170:
 			// WheelScrollUp
-			printf("MouseWheelScrollUp");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseWheelScrollUp");
+			#endif
 			break;
 		case 171:
 			// WheelScrollDown
-			printf("MouseWheelScrollDown");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("MouseWheelScrollDown");
+			#endif
 			break;
 		case 172:
 			// Unknown Mouse Object
-			printf("UMO");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("UMO");
+			#endif
 			break;
 		}
 	}
@@ -503,26 +588,36 @@ int EventESC27 (int event){
 		switch (gMouseButton){
 		case 1:
 			// Left
-			printf("Left-");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Left-");
+			#endif
 			break;
 		case 4:
 			// Right
-			printf("Right-");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Right-");
+			#endif
 			break;
 		case 2:
 			// Wheel
-			printf("Wheel-");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Wheel-");
+			#endif
 			break;
 		default:
 			// MultiKey (never seen in reality)
-			printf("Multi-");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Multi-");
+			#endif
 			break;
 		}
 
 		switch(event){
 		case 200:
 			// Click
-			printf("Click");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Click");
+			#endif
 			switch (gMouseButton){
 			case 1:
 				// Left
@@ -540,11 +635,15 @@ int EventESC27 (int event){
 			break;
 		case 201:
 			// DblClick
-			printf("DblClick");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("DblClick");
+			#endif
 			break;
 		case 202:
 			// Area
-			printf("Area");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("Area");
+			#endif
 			break;
 
 		}
@@ -554,58 +653,78 @@ int EventESC27 (int event){
 		switch(event){
 		case -3:
 			// TimeOut of a broken, or valid but unknown sequence
-			printf("ERR -3 TimeOut");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -3 TimeOut");
+			#endif
 			break;
 		case -2:
 			// Unknown Termination/Identification Char
-			printf("ERR -2 Termination/Identification");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -2 Termination/Identification");
+			#endif
 			break;
 		case -4:
 			// Overflow, Too Long
-			printf("ERR -4 Overflow");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -4 Overflow");
+			#endif
 			break;
 		case -5:
 			// Unexpected End Of Text
-			printf("ERR -5 UnexpectedEOT");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -5 UnexpectedEOT");
+			#endif
 			break;
 		case -6:
 			// Overlapping Sequence - already done in CoreLoop
-			printf("ERR -6 Overlapping");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -6 Overlapping");
+			#endif
 			break;
 		case -7:
 			// ByteMouse Out Of Range
-			printf("ERR -7 ByteMouse");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR -7 ByteMouse");
+			#endif
 			break;
 
 		default:
 			// Unexpected...
-			printf("ERR - WTF");
+			#if IS_TERMINAL_EVENT_DEBUG
+				printf("ERR - WTF");
+			#endif
 			break;
 		}
 	}
 	gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
 
 	if (event > 31){
-		printf("  : %s\n", &gStreamInESC27[1]);
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("  : %s\n", &gStreamInESC27[1]);
+		#endif
 	}
 	else{
-		printf("\n");
+		#if IS_TERMINAL_EVENT_DEBUG
+			printf("\n");
+		#endif
 	}
 
-	// To prevent Debug-PrintOut irritations under WIN
-	// (while ScreenSize - Polling)
-	gStreamInESC27[1] = 0;
+	#if IS_TERMINAL_EVENT_DEBUG
+		// To prevent Debug-PrintOut irritations under WIN
+		// (while ScreenSize - Polling)
+		gStreamInESC27[1] = 0;
 
-	if (event != -1){
-		/* code */
-		printf("Event: %d", event);
+		if (event != -1){
+			/* code */
+			printf("Event: %d", event);
 
-		printf("\n\n\n");
+			printf("\n\n\n");
 
-	}
+		}
 
-	TxtBold(0);					
-
+		TxtBold(0);					
+	#endif
+	
 	return r;
 }
 
@@ -846,7 +965,9 @@ void CoreLoop(void){
 				}
 				else{
 					// Broken, or valid and unknown, Sequence
-					printf("TimeOutCase");
+					#if IS_TERMINAL_EVENT_DEBUG
+						printf("TimeOutCase");
+					#endif
 					i = -1;
 				}				
 			}		

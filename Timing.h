@@ -8,6 +8,7 @@
 
 #define IS_REVERSE_DEBUG 0
 #define IS_TIME_EVENT_DEBUG 0
+#define IS_TERMINAL_EVENT_DEBUG 0
 
 // CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
 // !!! Initial 45000 is just fine with MY development environment !!!
