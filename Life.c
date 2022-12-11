@@ -874,25 +874,27 @@ void CoreLoop(void){
 	// Loop Minimum
 		if (i){
 	// Loop Minimum
-			if (i > 0){
-				TxtItalic(1);
-				SetFg16(fgRed);
-				printf("%d", i);
-				TxtItalic(0);
-				SetFg16(0);
-				if (i > 31){// && i < 128){
-					c = i;
-					printf(": %c",c);
+			#if IS_REVERSE_DEBUG
+				if (i > 0){
+					TxtItalic(1);
+					SetFg16(fgRed);
+					printf("%d", i);
+					TxtItalic(0);
+					SetFg16(0);
+					if (i > 31){// && i < 128){
+						c = i;
+						printf(": %c",c);
+					}
+					else if (i == 27){
+						TxtBold(1);
+						printf(": ESC");
+						TxtBold(0);
+					}
+					
+					printf("\n");
+					fflush(stdout);
 				}
-				else if (i == 27){
-					TxtBold(1);
-					printf(": ESC");
-					TxtBold(0);
-				}
-				
-				printf("\n");
-				fflush(stdout);
-			}
+			#endif
 			// Loop Minimum
 			
 			r = GetESC27(i);

@@ -6,7 +6,7 @@
 
 #include <time.h>
 
-#define IS_REVERSE_DEBUG 1
+#define IS_REVERSE_DEBUG 0
 #define IS_TIME_EVENT_DEBUG 0
 
 // CLOCKS_PER_SEC you can't trust - main app has to call CalcClocksPerSecond at least ones!
