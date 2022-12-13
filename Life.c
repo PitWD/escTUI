@@ -724,7 +724,7 @@ int EventESC27 (int event){
 
 		TxtBold(0);					
 	#endif
-	
+
 	return r;
 }
 
@@ -735,21 +735,12 @@ void EventDayChange(void){
 	#endif
 }
 
-
 void EventHourChange(void){	
 	#if IS_TIME_EVENT_DEBUG
 		SetFg16(fgBlueB);
 		printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-
-	// Check on DayChange
-	if (gDayChanged){
-		EventDayChange();
-	}
-		
-	#if IS_TIME_EVENT_DEBUG
 		SetFg16(fgBlue);
-	#endif
+	#endif		
 }
 
 void EventHour2Change(void){
@@ -787,6 +778,12 @@ void EventMinuteChange(void){
 	#if IS_TIME_EVENT_DEBUG
 		printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
 	#endif
+}
+
+void CalcEventMinuteChange(void){
+	
+	EventMinuteChange();
+
 	// Check on HourChange
 	if (gHourChanged){
 		EventHourChange();
@@ -807,6 +804,10 @@ void EventMinuteChange(void){
 					EventHour12Change();
 				}
 			}
+		}
+		// Check on DayChange
+		if (gDayChanged){
+			EventDayChange();
 		}
 	}
 	#if IS_TIME_EVENT_DEBUG
@@ -865,17 +866,27 @@ void EventMinute30Change(void){
 	#endif
 }
 
-void EventSecondChange(void){	
+void EventSecondChange(void){
 	#if IS_TIME_EVENT_DEBUG
 		SetFg16(fgWhite);
 		printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
 		ResFg();
 	#endif
+}
+
+void CalcEventSecondChange(void){	
+	
+	EventSecondChange();
+
 	// Check on MinuteChange
 	if (gMinuteChanged){
-		SetFg16(fgGreenB);
-		EventMinuteChange();
-		SetFg16(fgGreen);
+		#if IS_TIME_EVENT_DEBUG
+			SetFg16(fgGreenB);
+		#endif
+		CalcEventMinuteChange();
+		#if IS_TIME_EVENT_DEBUG
+			SetFg16(fgGreen);
+		#endif
 		if (gMin2Changed){
 			EventMinute2Change();
 			if (gMin4Changed){
@@ -1111,7 +1122,7 @@ void CoreLoop(void){
 			#endif
 			if (gSecondChanged){
 				// A Second (ore more) is over
-				EventSecondChange();	// Activates all other Minute/Hour/DayChange Events
+				CalcEventSecondChange();	// Activates all other Minute/Hour/DayChange Events
 			}
 		}				
 
