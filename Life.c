@@ -730,19 +730,15 @@ int EventESC27 (int event){
 
 void EventDayChange(void){
 	#if IS_TIME_EVENT_DEBUG
-		SetFg16(fgYellowB);
 		printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
 	#endif
 }
 
 void EventHourChange(void){	
 	#if IS_TIME_EVENT_DEBUG
-		SetFg16(fgBlueB);
 		printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
-		SetFg16(fgBlue);
 	#endif		
 }
-
 void EventHour2Change(void){
 	#if IS_TIME_EVENT_DEBUG
 		printf("  Hour2Change: %s - %s\n",gStrRunTime, gStrTime);
@@ -779,42 +775,6 @@ void EventMinuteChange(void){
 		printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
 	#endif
 }
-
-void CalcEventMinuteChange(void){
-	
-	EventMinuteChange();
-
-	// Check on HourChange
-	if (gHourChanged){
-		EventHourChange();
-		if (gHour2Changed){
-			EventHour2Change();
-			if (gHour4Changed){
-				EventHour4Change();
-				if (gHour8Changed){
-					EventHour8Change();
-				}
-			}
-		}
-		if (gHour3Changed){
-			EventHour3Change();
-			if (gHour6Changed){
-				EventHour6Change();
-				if (gHour12Changed){
-					EventHour12Change();
-				}
-			}
-		}
-		// Check on DayChange
-		if (gDayChanged){
-			EventDayChange();
-		}
-	}
-	#if IS_TIME_EVENT_DEBUG
-		ResFg();
-	#endif
-}
-
 void EventMinute2Change(void){
 	#if IS_TIME_EVENT_DEBUG
 		printf("   Min2Change: %s - %s\n",gStrRunTime, gStrTime);
@@ -866,24 +826,112 @@ void EventMinute30Change(void){
 	#endif
 }
 
+
 void EventSecondChange(void){
 	#if IS_TIME_EVENT_DEBUG
-		SetFg16(fgWhite);
 		printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
-		ResFg();
+	#endif
+}
+void EventSecond2Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Sec2Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond3Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Sec3Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond4Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Sec4Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond5Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Sec5Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond6Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("   Sec6Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond10Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Sec10Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond12Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Sec12Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond15Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Sec15Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond20Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Sec20Change: %s - %s\n",gStrRunTime, gStrTime);
+	#endif
+}
+void EventSecond30Change(void){
+	#if IS_TIME_EVENT_DEBUG
+		printf("  Sec30Change: %s - %s\n",gStrRunTime, gStrTime);
 	#endif
 }
 
-void CalcEventSecondChange(void){	
+void DoTimerEvents(void){	
+
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgWhiteB);
+	#endif
 	
 	EventSecondChange();
+
+	#if IS_TIME_EVENT_DEBUG
+		SetFg16(fgWhite);
+	#endif
+
+	if (gSec2Changed){
+		EventSecond2Change();
+		if (gSec4Changed){
+			EventSecond4Change();
+		}
+	}
+	if (gSec3Changed){
+		EventSecond3Change();
+		if (gSec6Changed){
+			EventSecond6Change();
+			if (gSec12Changed){
+				EventSecond12Change();
+			}
+		}
+	}
+	if (gSec5Changed){
+		EventSecond5Change();
+		if (gSec15Changed){
+			EventSecond15Change();
+			if (gSec30Changed){
+				EventSecond30Change();
+			}
+		}			
+		if (gSec10Changed){
+			EventSecond10Change();
+			if (gSec20Changed){
+				EventSecond20Change();
+			}
+		}			
+	}
 
 	// Check on MinuteChange
 	if (gMinuteChanged){
 		#if IS_TIME_EVENT_DEBUG
 			SetFg16(fgGreenB);
 		#endif
-		CalcEventMinuteChange();
+		EventMinuteChange();
 		#if IS_TIME_EVENT_DEBUG
 			SetFg16(fgGreen);
 		#endif
@@ -916,6 +964,42 @@ void CalcEventSecondChange(void){
 					EventMinute20Change();
 				}
 			}			
+		}
+
+		// Check on HourChange
+		if (gHourChanged){
+			#if IS_TIME_EVENT_DEBUG
+				SetFg16(fgBlueB);
+			#endif
+			EventHourChange();
+			#if IS_TIME_EVENT_DEBUG
+				SetFg16(fgBlue);
+			#endif
+			if (gHour2Changed){
+				EventHour2Change();
+				if (gHour4Changed){
+					EventHour4Change();
+					if (gHour8Changed){
+						EventHour8Change();
+					}
+				}
+			}
+			if (gHour3Changed){
+				EventHour3Change();
+				if (gHour6Changed){
+					EventHour6Change();
+					if (gHour12Changed){
+						EventHour12Change();
+					}
+				}
+			}
+			// Check on DayChange
+			if (gDayChanged){
+				#if IS_TIME_EVENT_DEBUG
+					SetFg16(fgYellowB);
+				#endif
+				EventDayChange();
+			}
 		}
 	}
 
@@ -1120,7 +1204,7 @@ void CoreLoop(void){
 			#endif
 			if (gSecondChanged){
 				// A Second (ore more) is over
-				CalcEventSecondChange();	// Activates all other Minute/Hour/DayChange Events
+				DoTimerEvents();	// Activates all other Minute/Hour/DayChange Events
 			}
 		}				
 
@@ -1303,6 +1387,5 @@ Files			    		Creation Date   Alpha Date      BetaDate        Creator
 
 BugID		Description									Found by / Date		Fixed by / Date
 */
-
 
 

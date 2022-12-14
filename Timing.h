@@ -19,7 +19,7 @@ static clock_t lClockLast;
 // Real System Time
 static time_t lTimeNow;
 static time_t lTimeLast;
-int gTime = 0;                 // THE Serial Time (time() but shifted by user)
+time_t gTime = 0;              // THE Serial Time (time() but shifted by user)
 static lTimeShift = 946677600; // 01/01/2000
 int gHour = 0;
 int gMin = 0;
@@ -35,6 +35,18 @@ int gSecondChanged = 0;  // A Second Is Over
 int gMinuteChanged = 0;  // A Minute
 int gHourChanged = 0;    // A Hour 
 int gDayChanged = 0;     // A Day
+
+int gSec2Changed = 0;    // All 2 seconds...
+int gSec3Changed = 0;
+int gSec4Changed = 0;
+int gSec5Changed = 0;
+int gSec6Changed = 0;
+int gSec10Changed = 0;
+int gSec12Changed = 0;
+int gSec15Changed = 0;
+int gSec20Changed = 0;
+int gSec30Changed = 0;
+
 int gMin2Changed = 0;    // All 2 minutes...
 int gMin3Changed = 0;
 int gMin4Changed = 0;
@@ -45,6 +57,7 @@ int gMin12Changed = 0;
 int gMin15Changed = 0;
 int gMin20Changed = 0;
 int gMin30Changed = 0;
+
 int gHour2Changed = 0;   // All 2 hours...
 int gHour3Changed = 0;
 int gHour4Changed = 0;
@@ -53,7 +66,7 @@ int gHour8Changed = 0;
 int gHour12Changed = 0;
 
 // Counter
-int gRunTime = 0;
+time_t gRunTime = 0;
 int gRunTimeSec = 0;
 int gRunTimeMin = 0;
 int gRunTimeHour = 0;
@@ -134,6 +147,16 @@ void EraseTimeChange(void){
     gMinuteChanged = 0;  // A Minute
     gHourChanged = 0;    // A Hour 
     gDayChanged = 0;     // A Day
+    gSec2Changed = 0;    // All 2 seconds...
+    gSec3Changed = 0;
+    gSec4Changed = 0;
+    gSec5Changed = 0;
+    gSec6Changed = 0;
+    gSec10Changed = 0;
+    gSec12Changed = 0;
+    gSec15Changed = 0;
+    gSec20Changed = 0;
+    gSec30Changed = 0;
     gMin2Changed = 0;    // All 2 minutes...
     gMin3Changed = 0;
     gMin4Changed = 0;
@@ -250,8 +273,20 @@ void CheckOnTimeChange(void){
         
         // Real-Time Events
         if (gSec == 0 || sec00Overflow){
+            gSec2Changed = 1;
+            gSec3Changed = 1;
+            gSec4Changed = 1;
+            gSec5Changed = 1;
+            gSec6Changed = 1;
+            gSec10Changed = 1;
+            gSec12Changed = 1;
+            gSec15Changed = 1;
+            gSec20Changed = 1;
+            gSec30Changed = 1;
+
             gMinuteChanged = 1;
             gMin = pLocalTime->tm_min;
+            
             if (gMin == 0){
                 gMin2Changed = 1;
                 gMin3Changed = 1;
@@ -336,7 +371,39 @@ void CheckOnTimeChange(void){
                 }
             }              
         } 
-
+        else{
+            if (!(gSec % 2)){
+                gSec2Changed = 1;
+                if (!(gSec % 4)){
+                    gSec4Changed = 1;
+                }
+            }
+            if (!(gSec % 3)){
+                gSec3Changed = 1;
+                if (!(gSec % 6)){
+                    gSec6Changed = 1;
+                    if (!(gSec % 12)){
+                        gSec12Changed = 1;
+                    }
+                }
+            }
+            if (!(gSec % 5)){
+                gSec5Changed = 1;
+                if (!(gSec % 10)){
+                    gSec10Changed = 1;
+                    if (!(gSec % 20)){
+                        gSec20Changed = 1;
+                    }
+                }
+                if (!(gSec % 15)){
+                    gSec15Changed = 1;
+                    if (!(gSec % 30)){
+                        gSec30Changed = 1;
+                    }
+                }
+            }
+        }
+        
         sprintf(gStrTime,"%02d:%02d:%02d", gHour, gMin, gSec);
 
     }
