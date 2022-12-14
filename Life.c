@@ -923,8 +923,6 @@ void CalcEventSecondChange(void){
 		ResFg();
 	#endif
 
-	EraseTimeChange();
-
 }
 
 void CoreLoop(void){
@@ -1127,10 +1125,14 @@ void CoreLoop(void){
 		}				
 
 		
-		// DO STUFF HERE START
+		// DO USER STUFF HERE START
 
-		// DO STUFF HERE STOP
+		// DO USER STUFF HERE STOP
 
+		// Erase Timer Events		
+		if (gSecondChanged){
+			EraseTimeChange();
+		}
 		
 		if (!i){
 			// We did not received anything
