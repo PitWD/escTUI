@@ -19,6 +19,8 @@ static clock_t lClockLast;
 // Real System Time
 static time_t lTimeNow;
 static time_t lTimeLast;
+int gTime = 0;                 // THE Serial Time (time() but shifted by user)
+static lTimeShift = 946677600; // 01/01/2000
 int gHour = 0;
 int gMin = 0;
 int gSec = 0;
@@ -51,6 +53,7 @@ int gHour8Changed = 0;
 int gHour12Changed = 0;
 
 // Counter
+int gRunTime = 0;
 int gRunTimeSec = 0;
 int gRunTimeMin = 0;
 int gRunTimeHour = 0;
@@ -63,9 +66,6 @@ clock_t gUserEscTimeout; // = 0.1 * 45000;
 clock_t gMouseClickTimeout;  // = 0.25 * 45000;
 // DoEventsTime for usleep() (Linux & Mac)
 #define DoEventsTime 10000
-
-// 01/01/2000
-time_t JAN_01_2000 = 946677600;
 
 /**
  * @brief Declaration FUNCTIONS in Timing.h
@@ -97,6 +97,9 @@ void InitTiming(void){
 
     time(&lTimeLast);
     time(&lTimeNow);
+    
+    gTime = lTimeNow - lTimeShift;
+
     lClockLast = clock();
 
     pLocalTime = localtime(&lTimeNow);
@@ -194,6 +197,9 @@ void CheckOnTimeChange(void){
     // A Second (ore more) is over
     if (timeDiff){
 
+        // THE Serial Time
+        gTime = lTimeNow - lTimeShift;
+
         // Adjust clocksPerSecond
         clockNow = clock();
         gClocksPerSecond = (clockNow - lClockLast) / timeDiff;
@@ -222,6 +228,7 @@ void CheckOnTimeChange(void){
 
         //System Runtime
         gRunTimeSec += timeDiff;
+        gRunTime += timeDiff;
         if (gRunTimeSec >= 60){
             gRunTimeSec -= 60;
             gRunTimeMin++;
