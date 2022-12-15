@@ -20,7 +20,7 @@ static clock_t lClockLast;
 static time_t lTimeNow;
 static time_t lTimeLast;
 time_t gTime = 0;              // THE Serial Time (time() but shifted by user)
-static lTimeShift = 946677600; // 01/01/2000
+static time_t lTimeShift = 946677600; // 01/01/2000
 int gHour = 0;
 int gMin = 0;
 int gSec = 0;
