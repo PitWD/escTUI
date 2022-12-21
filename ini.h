@@ -113,30 +113,44 @@ int IniGetTokens(char *strIN, char **tokens){
     //          Value
 
     int count = 0; 
+    int i = 0;
 
     char *token = strtok(strIN, ".");
  
     while (token != NULL){
-        
+
+        printf("%s\n",token);
+
         // Size actual Token Length + "[.]" 
-        tokens[count] = malloc(strlen(token) + 3);
-        
-        if (count == 0){
-            // Embed Main into [Main]
-            sprintf(tokens[count], "[%s]", token);
+        tokens[count] = malloc(strlen(token) + 3 + count);
+        tokens[count][0] = '[';
+        tokens[count][1] = '\0';
+
+        for (i = 0; i < count; i++){
+            tokens[count][i + 1] = '.';
         }
-        else{
-            // Embed Subs into [.Sub]
-            sprintf(tokens[count], "[.%s]", token);
+        if (count){
+            tokens[count][i + 1] = '\0';
         }
+
+        strcat(tokens[count], token);
         token = strtok(NULL, ".");
+
+        tokens[count][strlen(tokens[count])] = ']';
+        tokens[count][strlen(tokens[count]) + 1] = '\0';
+
+        printf("%s\n",tokens[count]);
+
         count++;
     }
     
+    count--;
+
     // remove "[." and "]" from the Value token
     if(count)
-        IniTrimCnt(tokens[count - 1], 2, 1);
+        IniTrimCnt(tokens[count], count + 1, 1);
 
+    count++;
     return count;
 }
 
