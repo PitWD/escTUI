@@ -30,7 +30,7 @@ void IniRemoveRemark (char *strIN){
     int i = 0;
     int inQuote = 0;
 
-    for (i; i <= l; i++){
+    for (i = 0; i <= l; i++){
         if (strIN[i] == '#' && !inQuote){
             strIN[i] = '\0';
             break;
@@ -193,6 +193,8 @@ int IniFindValue(char *fileName, char *strReturn, char *strSearch){
     }
 
     int r = 0;
+    int i = 0;
+
     sprintf(strReturn, "0");
 
     // Tokens
@@ -213,52 +215,74 @@ int IniFindValue(char *fileName, char *strReturn, char *strSearch){
         // Uppercase the first chars (length of actual token)
         // IniUcaseLen(strIN, strlen(strTokens[actToken]));
 
+        // Check if line is above actual token-level
+        if (strIN[0] == '['){
+            if (actToken){
+                if (strIN[actToken] != '.'){
+                    // Broken Token
+                    r = -2;
+                    sprintf(strReturn, "-2");
+                    printf("Broken: %s",strIN);
+                    break;
+                }
+            }         
+        }
+        
+        i = strlen(strTokens[actToken]);
+
         // Check if line starts with actual token
-        if(strncasecmp(strIN, strTokens[actToken], strlen(strTokens[actToken])) == 0){
-            if (actToken == cntTokens){
-                
-                // Remove all chars left of "="
-                char *pEqual = strchr(strIN, '=');
-                if (pEqual){
-                    memmove(strIN, pEqual + 1, strlen(pEqual));
-                }
+        if(strncasecmp(strIN, strTokens[actToken], i) == 0){
+            
+            // Prevent that Token in File is longer (3rd case is just for [Main]-Level)
+            if ((strIN[i] == ' ')  || (strIN[i] == '=') || (strlen(strIN)-1 == i)){
+                // Token has the right length
 
-                // Trim whitespaces
-                IniTrim(strIN);
+                if (actToken == cntTokens){
+                    // It's the Value-Token
 
-                // Remove 1st and last " from Text if they're present
-                if (strIN[0] == '"'){
-                    // Value is a text
-                    IniTrimCnt(strIN,1,0);
-                    if (strIN[strlen(strIN) - 2] == '"'){
-                        IniTrimCnt(strIN,0,2);
+                    // Remove all chars left of "="
+                    char *pEqual = strchr(strIN, '=');
+                    if (pEqual){
+                        memmove(strIN, pEqual + 1, strlen(pEqual));
                     }
-                    sprintf(strReturn, strIN);
-                    r = 1;
-                }
-                else{
-                    // Value is a number or True or False
-                    if(strncasecmp(strIN, "true", 4) == 0){
-                        // True
-                        sprintf(strReturn, "1");
-                        r = 2;
-                    }
-                    else if(strncasecmp(strIN, "false", 5) == 0){
-                        // False
-                        sprintf(strReturn, "0");
-                        r = 2;
+
+                    // Trim whitespaces
+                    IniTrim(strIN);
+
+                    // Remove 1st and last " from Text if they're present
+                    if (strIN[0] == '"'){
+                        // Value is a text
+                        IniTrimCnt(strIN,1,0);
+                        if (strIN[strlen(strIN) - 2] == '"'){
+                            IniTrimCnt(strIN,0,2);
+                        }
+                        sprintf(strReturn, "%s", strIN);
+                        r = 1;
                     }
                     else{
-                        // Number
-                        sprintf(strReturn, strIN);
-                        r = 3;
-                    }                    
-                }   
-                break;    
-            }
-            else{
-                actToken++;
-            }                        
+                        // Value is a number or True or False
+                        if(strncasecmp(strIN, "true", 4) == 0){
+                            // True
+                            sprintf(strReturn, "1");
+                            r = 2;
+                        }
+                        else if(strncasecmp(strIN, "false", 5) == 0){
+                            // False
+                            sprintf(strReturn, "0");
+                            r = 2;
+                        }
+                        else{
+                            // Number
+                            sprintf(strReturn, "%s",strIN);
+                            r = 3;
+                        }                    
+                    }   
+                    break;    
+                }
+                else{
+                    actToken++;
+                }                        
+            }               
         }
     }
 

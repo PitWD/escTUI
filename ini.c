@@ -3,7 +3,7 @@
 
 int main(){
 
-    char strOut[] = "   1X- jhk\"#\"jhhkh#jhkjhjhkjh -X0           ";
+    char strOut[] = "   1X- jhk\"#\"jhhkh#jhkjhhgfhgfhfhfhgfjhkjh -X0           ";
     printf("\nSTART->%s<-END\n\n",strOut);
 
     IniTrimL(strOut);
@@ -61,9 +61,13 @@ int main(){
     printf("\n");
 
     char strReturn[255];
-    strcpy(strOut, "global.size.width");
+    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext");
     i = IniFindValue("desktops.ini", strReturn, strOut);
     switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
     case -1:
         // File Error
         printf("FileError!: ");
