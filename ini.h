@@ -41,12 +41,47 @@ void IniTrimRemark (char *strIN){
 
 }
 
+int IniGetRemark (char *strIN){
+    
+    // Returns Remark with leading whitespaces
+    // "Value = 1234       # MyRemark"
+    // results in:
+    // "       # MyRemark"
+    
+    int l = strlen(strIN) - 1; 
+    int i = 0;
+    int inQuote = 0;
+    int nonSpace = 0;
+
+    for (i = 0; i < l; i++){
+        if (!inQuote){
+            if (strIN[i] == '#'){
+                // Remark found
+                memmove(strIN, strIN + nonSpace + 1, l - nonSpace);
+                strIN[l - nonSpace] = '\0';
+                return 1;
+            }
+            else if (strIN[i] != ' ' && strIN[i] != '\t'){
+                // Last Non-Whitespace
+                nonSpace = i;
+            }  
+        }
+        if (strIN[i] == '"')
+            inQuote = !inQuote;
+    }
+    return 0;
+}
+
 void IniTrimNonNumeric(char *strIN){
 
-    // Remove all chars but 0-9 / a-f / A-F
+    // Removes from Right all non-numeric and non-hex characters until the first
+    // decimal or hex is found
+    // "Value = &h234af0 some BS"
+    // results in:
+    // "Value = &h234af0"
+
     int i = strlen(strIN) - 1;
     char c = 0;
-
 
     for (i; i >= 0; i--){
         c = strIN[i];
@@ -57,7 +92,7 @@ void IniTrimNonNumeric(char *strIN){
     }
 }
 
-void IniTrimWhiteSpacesLR(char *strIN, int L, int R){
+void IniTrimWhiteSpacesLR(char *strIN, int l, int r){
     
     // L & R are bool to remove whitespaces
     // Left and/or Right
@@ -67,12 +102,12 @@ void IniTrimWhiteSpacesLR(char *strIN, int L, int R){
     char *pRight = strIN + strlen(strIN) - 1;
 
     // Traverse string from both ends until a non-space character is found
-    if (L){
+    if (l){
         while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t'))
             pLeft++;
     }
     
-    if (R){
+    if (r){
         while (pRight > pLeft && (*pRight == ' ' || *pRight == '\t'))
             pRight--;
     }
@@ -80,15 +115,6 @@ void IniTrimWhiteSpacesLR(char *strIN, int L, int R){
     pRight++;
     memmove(strIN, pLeft, pRight - pLeft);
     strIN[pRight - pLeft] = '\0';
-
-    /*
-    // Write all non-space characters from left to right
-    while (pLeft <= pRight)
-        *strIN++ = *pLeft++;
-    
-    // Terminate the string with a null character
-    *strIN = '\0';
-    */
 }
 #define IniTrimWS_L(strIN) IniTrimWhiteSpacesLR(strIN,1,0)
 #define IniTrimWS_R(strIN) IniTrimWhiteSpacesLR(strIN,0,1)
@@ -219,6 +245,7 @@ void IniLcaseLen(char strIN[], int len) {
 #define IniLcase(strIN) IniLcaseLen(strIN, strlen(strIN))
 
 int IniFindValueLineNr(char *fileName, char *strSearch){
+    
     FILE *file = fopen(fileName, "r");
     if (file == NULL) {
         // File-Error
@@ -407,7 +434,7 @@ int IniInsertReplaceString (char *fileName, char *strIN, int linePos, int insert
         }
     }
 
-    // Close the file
+    // Close the files
     fclose(fpRead);
     fclose(fpWrite);
 
