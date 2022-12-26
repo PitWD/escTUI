@@ -176,12 +176,14 @@ void IniTrimCntLR(char *strIN, int l, int r){
 
 int IniGetTokens(char *strIN, char **tokens){
     
-    // Split string like "Main.Sub1.Sub1.Value" into their tokens
+    // Split string like "Main.Sub1.Sub1.Value" into **tokens
     // like:    [Main]
     //          [.Sub1]
-    //          [.Sub2]
+    //          [..Sub2]
     //          Value
-
+    //
+    // Returns the count of tokens
+    
     int count = 0; 
     int i = 0;
 
@@ -234,7 +236,7 @@ void IniUcaseLen(char strIN[], int len) {
 
 void IniLcaseLen(char strIN[], int len) {
    
-   // Convert string to lower case
+   // Convert 1st len chars to lower case
 
     if (len <= strlen(strIN)){
         for (int c = 0; c < len; c++){
@@ -245,7 +247,25 @@ void IniLcaseLen(char strIN[], int len) {
 #define IniLcase(strIN) IniLcaseLen(strIN, strlen(strIN))
 
 int IniFindValueLineNr(char *fileName, char *strSearch){
-    
+
+    //  [Global]
+    //      [.Sub1]
+    //          [..SubSub]
+    //              Value = 1234
+    //      [.Sub2]
+    //          [..SubSub]
+    //              Value = 1234
+
+    // With a strSearch like "global.sub1.subsub.value"
+    // we get a return of
+    // 4 
+    // for the 4th Line... containing the searched value...
+
+    // Returns  0 = Value does not exist
+    //         -1 = File Error
+    //         -2 = Broken Token
+    //         >0 = Line with Value
+
     FILE *file = fopen(fileName, "r");
     if (file == NULL) {
         // File-Error
@@ -312,8 +332,22 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
 
 int IniGetValue(char *fileName, char *strReturn, char *strSearch){
 
+    // Returns  0 = Value does not exist
+    //         -1 = File Error.
+    //         -2 = Broken Token
+    //          1 = Value is a text
+    //          2 = Value is a bool
+    //          3 = Value is an int
+    //          4 = Value is a float
+    //
+    // strReturn, returns from a line like:
+    // "          Value = 123,456  # MyRemark"
+    // just the Value:
+    // "123.456"
+    // "," & "." are seen as valid decimal points
+
     int cntLine = IniFindValueLineNr(fileName, strSearch);
-    int r = 0;
+    int r = cntLine;
 
     if (cntLine > 0){
         // File and Search exist
@@ -376,18 +410,16 @@ int IniGetValue(char *fileName, char *strReturn, char *strSearch){
             }
             else{
                 // Number
-
-                // Make comma to dot...
-                char *pComma = strchr(strIN, ',');
-                if (pComma != NULL) {
-                    *pComma = '.';
-                }
-
+                r = 3;                
                 // remove all non-numeric trailing characters
                 IniTrimNonNumeric(strIN);
-
+                // Make 1st comma to dot...
+                char *pComma = strchr(strIN, ',');
+                if (pComma != NULL) {
+                    r++;
+                    *pComma = '.';
+                }
                 sprintf(strReturn, "%s",strIN);
-                r = 3;
             }                    
         }   
     }
@@ -395,7 +427,22 @@ int IniGetValue(char *fileName, char *strReturn, char *strSearch){
     return r;     
 }
 
-int IniInsertReplaceString (char *fileName, char *strIN, int linePos, int insert){
+int IniInsertReplaceLine (char *fileName, char *strIN, int linePos, int insert){
+    
+    // Copies fpRead Line for Line to fpWrite
+    // When linePos is reached
+    //  strIN gets inserted as line (!! with attached '\n' !!)
+    // If insert is set
+    //  the original line on linePos gets copied on linePos++
+    // If insert is not set
+    //  the original line on linePos gets deleted
+    //
+    // Returns  -1 fpRead File Error
+    //          -2 fpWrite File Error (temp - file)
+    //          -3 rename File Error
+    //          -4 delete Temp-File Error
+    //         >=0 copied lines
+
     FILE *fpRead; 
     FILE *fpWrite; 
     
@@ -449,8 +496,8 @@ int IniInsertReplaceString (char *fileName, char *strIN, int linePos, int insert
 
     return actLine;
 }
-#define IniInsertString(fileName, strIN, linePos) IniInsertReplaceString(fileName, strIN, linePos, 1)
-#define IniReplaceString(fileName, strIN, linePos) IniInsertReplaceString(fileName, strIN, linePos, 0)
+#define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
+#define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
 
 /*

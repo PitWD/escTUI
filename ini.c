@@ -137,7 +137,7 @@ int main(){
     printf("->%s<-\n\n", strOut);
 
     strcpy(strOut, "                    CaptionText = \"FixedTopNeuerVersuch\"");
-    IniReplaceString("desktops.ini",strOut,52);
+    IniReplaceLine("desktops.ini",strOut,52);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
     i = IniGetValue("desktops.ini", strReturn, strOut);
@@ -175,7 +175,7 @@ int main(){
 
 //return 0;
     strcpy(strOut, "                    CaptionText = \"FixedTop\"");
-    IniReplaceString("desktops.ini",strOut,52);
+    IniReplaceLine("desktops.ini",strOut,52);
     strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
     i = IniGetValue("desktops.ini", strReturn, strOut);
     switch (i){
