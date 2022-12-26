@@ -310,7 +310,7 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
     return r;
 } 
 
-int IniFindValue(char *fileName, char *strReturn, char *strSearch){
+int IniGetValue(char *fileName, char *strReturn, char *strSearch){
 
     int cntLine = IniFindValueLineNr(fileName, strSearch);
     int r = 0;
@@ -327,70 +327,69 @@ int IniFindValue(char *fileName, char *strReturn, char *strSearch){
             return - 1;
         }
 
+        // Trash Lines before our line....
         while (cntLine > 0){
-
             fgets(strIN, STR_SMALL_SIZE, file);
-
             cntLine--;
+        }
 
-            // Remove remarks
-            IniTrimRemark(strIN);
+        // Remove remarks
+        IniTrimRemark(strIN);
 
-            // Remove all chars left of "="
-            IniTrimChar_L(strIN, '=');
+        // Remove all chars left of "="
+        IniTrimChar_L(strIN, '=');
 
-            // Remove equal
-            IniTrimCnt_L(strIN, 1);
+        // Remove equal
+        IniTrimCnt_L(strIN, 1);
 
-            // Trim whitespaces
-            IniTrimWS_L(strIN);
+        // Trim whitespaces
+        IniTrimWS_L(strIN);
 
-            // Remove 1st and last " from Text if they're present
-            if (strIN[0] == '"'){
-                // Value is a text
+        // Remove 1st and last " from Text if they're present
+        if (strIN[0] == '"'){
+            // Value is a text
 
-                // Remove leading '"'
-                IniTrimCnt_L(strIN,1);
+            // Remove leading '"'
+            IniTrimCnt_L(strIN,1);
 
-                // Remove all trailing nonsense
-                IniTrimChar_R(strIN, '"');
-                if (strIN[strlen(strIN) - 1] == '"'){
-                    // Text was fully encapsulated
-                    IniTrimCnt_R(strIN,1);
-                }
-                
-                sprintf(strReturn, "%s",strIN);
-                r = 1;
+            // Remove all trailing nonsense
+            IniTrimChar_R(strIN, '"');
+            if (strIN[strlen(strIN) - 1] == '"'){
+                // Text was fully encapsulated
+                IniTrimCnt_R(strIN,1);
+            }
+            
+            sprintf(strReturn, "%s",strIN);
+            r = 1;
+        }
+        else{
+            // Value is a number or True or False
+            if(strncasecmp(strIN, "true", 4) == 0){
+                // True
+                sprintf(strReturn, "1");
+                r = 2;
+            }
+            else if(strncasecmp(strIN, "false", 5) == 0){
+                // False
+                sprintf(strReturn, "0");
+                r = 2;
             }
             else{
-                // Value is a number or True or False
-                if(strncasecmp(strIN, "true", 4) == 0){
-                    // True
-                    sprintf(strReturn, "1");
-                    r = 2;
+                // Number
+
+                // Make comma to dot...
+                char *pComma = strchr(strIN, ',');
+                if (pComma != NULL) {
+                    *pComma = '.';
                 }
-                else if(strncasecmp(strIN, "false", 5) == 0){
-                    // False
-                    sprintf(strReturn, "0");
-                    r = 2;
-                }
-                else{
-                    // Number
 
-                    // Make comma to dot...
-                    char *pComma = strchr(strIN, ',');
-                    if (pComma != NULL) {
-                        *pComma = '.';
-                    }
+                // remove all non-numeric trailing characters
+                IniTrimNonNumeric(strIN);
 
-                    // remove all non-numeric trailing characters
-                    IniTrimNonNumeric(strIN);
-
-                    sprintf(strReturn, "%s",strIN);
-                    r = 3;
-                }                    
-            }   
-        }
+                sprintf(strReturn, "%s",strIN);
+                r = 3;
+            }                    
+        }   
     }
 
     return r;     
