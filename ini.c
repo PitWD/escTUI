@@ -242,5 +242,9 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strReturn);    
+    printf("%s<-\n\n", strReturn);
+
+    strcpy(strOut, "Value = 1234          # My Remark");
+    i = IniGetRemark(strOut);    
+    printf("%s<- :%d\n\n", strOut, i);
 }
