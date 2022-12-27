@@ -4,6 +4,7 @@
 
 #define STR_SMALL_SIZE 255
 #define STR_MID_SIZE 1024
+#define INI_TAB_LEN 4
 
 void IniTrimRemark (char *strIN){
     
@@ -70,6 +71,24 @@ int IniGetRemark (char *strIN){
             inQuote = !inQuote;
     }
     return 0;
+}
+
+int IniCountFrontSpaces (char *strIN){
+
+    int l = strlen(strIN);
+    int r = 0;
+
+    for (int i = 0; i < l; i++){
+        if (trIN[i] != ' '){
+            r++;
+        }
+        else if (strIN[i] != '\t'){
+            r += INI_TAB_LEN;
+        }
+        else{
+            return r;
+        }
+    }
 }
 
 void IniTrimNonNumeric(char *strIN){
@@ -499,6 +518,107 @@ int IniInsertReplaceLine (char *fileName, char *strIN, int linePos, int insert){
 #define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
 #define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
+int IniChangeValue (char *strIN, char *strValue, int valType){
+
+    // a string like:
+
+    // "             Value = 1234     # MyRemark"
+    // gets splitted into
+    // "             Value =" (strValue)
+    // and
+    // "     # MyRemark" (strRemark)
+
+    // when we replace "1234" with strVal
+    // we try to preserve the position of the "#"
+    // if strIn is too long, we place it on a tab
+    //
+
+    // Returns  -1 for no success
+    //           0 text as it is success 
+    //           4 text embedded in ""
+    //           1 int
+    //           2 float
+    //           3 hex
+
+    char strValOrg[STR_SMALL_SIZE] = strcpy(strValOrg, strIN);
+    IniTrimRemark(strValOrg);
+    IniTrimChar_R(strValOrg, '=');
+
+    char strRemark[STR_SMALL_SIZE] = IniGetRemark(strIN);
+
+    char *pEnd = '\0';
+
+    // Check and Format strValue
+    switch (valType){
+    case 1:
+        // as int
+        long lNum = strtol(strValue, &pEnd, 10);   
+        if (*pEnd != '\0'){
+            // No int found
+            return -1;
+        }
+        sprintf(strValue, " %ld", lNum);
+        break;
+    case 2:
+        // as float
+        double dNum = strtod(strValue, &pEnd);
+        if (*pEnd != '\0'){
+            // No float found
+            return -1;
+        }
+        sprintf(strValue, " %.6f", dNum);
+        break;
+    case 3:
+        // as hex
+        long hNum = strtol(strValue, &pEnd, 16);
+        if (*pEnd != '\0'){
+            // No hex found
+            return -1;
+        }
+        sprintf(strValue, " 0x%lX", hNum);
+        break;
+    case 4:
+        // as text embedded in ""
+        sprintf(strValue, " \"%s\"", strValue);
+        break;
+    default:
+        // as it is, but with leading space
+        sprintf(strValue, " %s", strValue);
+        break;
+    }
+
+    // Check and place Remark
+    if (strlen(strRemark)){
+        // Line contains a remark
+
+        int lenDiff = strlen(strValue) - (strlen(strIN) - strlen(strValOrg) - strlen(strRemark));
+
+        int lenSpaces = IniCountFrontSpaces(strRemark);
+
+        if (lenDiff > 0){
+            // New Value is longer than the old one
+
+            if (lenSpaces < lenDiff){
+                // Add missing spaces
+                sprintf(strRemark, "%*c%s", lenDiff - lenSpaces, strRemark)
+            }
+            else if (lenSpaces > lenDiff){
+                // Remove the too much spaces
+                sprintf(strRemark, "%s", strRemark[lenSpaces - lenDiff])
+            }
+        }
+        else if (lenDiff < 0){
+            // New Value is shorter than the old one
+            // Add spaces
+            sprintf(strRemark, "%*c%s", -lenDiff, strRemark)
+        }
+        else{
+            // Same length
+        }
+    }
+
+
+}
 
 /*
 int IniFindValueFAST(char *fileName, char *strReturn, char *strSearch){
