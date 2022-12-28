@@ -247,4 +247,133 @@ int main(){
     strcpy(strOut, "Value = 1234          # My Remark");
     i = IniGetRemark(strOut);    
     printf("%s<- :%d\n\n", strOut, i);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    char strVal[255];
+    strcpy(strVal, "12340");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123401");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1234012");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123401234");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1234012345");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123456");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123401234567");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1234012345678");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123456789");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123401234567890");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1234012345678901");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123456789012");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123401234567890123");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1234012345678901234");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123456789012345");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12340123456789012345");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "5678");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "123");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "12");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+    strcpy(strOut, "        Value = 1234          # My Remark");
+    printf("%s\n", strOut);
+    strcpy(strVal, "1");
+    IniChangeValueLine(strOut, strVal, 0);
+    printf("%s\n\n", strOut);
+
+return 0;
 }

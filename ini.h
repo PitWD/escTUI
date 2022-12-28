@@ -79,16 +79,17 @@ int IniCountFrontSpaces (char *strIN){
     int r = 0;
 
     for (int i = 0; i < l; i++){
-        if (trIN[i] != ' '){
+        if (strIN[i] == ' '){
             r++;
         }
-        else if (strIN[i] != '\t'){
+        else if (strIN[i] == '\t'){
             r += INI_TAB_LEN;
         }
         else{
             return r;
         }
     }
+    return r;
 }
 
 void IniTrimNonNumeric(char *strIN){
@@ -99,10 +100,10 @@ void IniTrimNonNumeric(char *strIN){
     // results in:
     // "Value = &h234af0"
 
-    int i = strlen(strIN) - 1;
+    // int i = strlen(strIN) - 1;
     char c = 0;
 
-    for (i; i >= 0; i--){
+    for (int i = strlen(strIN) - 1; i >= 0; i--){
         c = strIN[i];
         if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
             break;
@@ -518,7 +519,7 @@ int IniInsertReplaceLine (char *fileName, char *strIN, int linePos, int insert){
 #define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
 #define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
-int IniChangeValue (char *strIN, char *strValue, int valType){
+int IniChangeValueLine (char *strIN, char *strValue, int valType){
 
     // a string like:
 
@@ -540,50 +541,57 @@ int IniChangeValue (char *strIN, char *strValue, int valType){
     //           2 float
     //           3 hex
 
-    char strValOrg[STR_SMALL_SIZE] = strcpy(strValOrg, strIN);
-    IniTrimRemark(strValOrg);
-    IniTrimChar_R(strValOrg, '=');
+    char strPreVal[STR_SMALL_SIZE];
+    strcpy(strPreVal, strIN);
+    IniTrimRemark(strPreVal);
+    IniTrimChar_R(strPreVal, '=');
 
-    char strRemark[STR_SMALL_SIZE] = IniGetRemark(strIN);
-
-    char *pEnd = '\0';
+    char strRemark[STR_SMALL_SIZE];
+    strcpy(strRemark, strIN);
+    IniGetRemark(strRemark);
+ 
+    char *pEnd;
+    long lNum = 0;
+    double dNum = 0;
+    long hNum = 0;
 
     // Check and Format strValue
+    char strValNew[STR_SMALL_SIZE];
     switch (valType){
     case 1:
         // as int
-        long lNum = strtol(strValue, &pEnd, 10);   
+        lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd != '\0'){
             // No int found
             return -1;
         }
-        sprintf(strValue, " %ld", lNum);
+        sprintf(strValNew, " %ld", lNum);
         break;
     case 2:
         // as float
-        double dNum = strtod(strValue, &pEnd);
+        dNum = strtod(strValue, &pEnd);
         if (*pEnd != '\0'){
             // No float found
             return -1;
         }
-        sprintf(strValue, " %.6f", dNum);
+        sprintf(strValNew, " %.6f", dNum);
         break;
     case 3:
         // as hex
-        long hNum = strtol(strValue, &pEnd, 16);
+        hNum = strtol(strValue, &pEnd, 16);
         if (*pEnd != '\0'){
             // No hex found
             return -1;
         }
-        sprintf(strValue, " 0x%lX", hNum);
+        sprintf(strValNew, " 0x%lX", hNum);
         break;
     case 4:
         // as text embedded in ""
-        sprintf(strValue, " \"%s\"", strValue);
+        sprintf(strValNew, " \"%s\"", strValue);
         break;
     default:
         // as it is, but with leading space
-        sprintf(strValue, " %s", strValue);
+        sprintf(strValNew, " %s", strValue);
         break;
     }
 
@@ -591,32 +599,52 @@ int IniChangeValue (char *strIN, char *strValue, int valType){
     if (strlen(strRemark)){
         // Line contains a remark
 
-        int lenDiff = strlen(strValue) - (strlen(strIN) - strlen(strValOrg) - strlen(strRemark));
+        int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark));
 
         int lenSpaces = IniCountFrontSpaces(strRemark);
 
         if (lenDiff > 0){
             // New Value is longer than the old one
+            // check if the longer value fit's into the leading spaces of strRemark
 
             if (lenSpaces < lenDiff){
-                // Add missing spaces
-                sprintf(strRemark, "%*c%s", lenDiff - lenSpaces, strRemark)
+                // Missing space in total
+
+                // Remove all spaces
+                sprintf(strRemark, "%s", &strRemark[lenSpaces]);
+
+                // add missing spaces (Tab adjusted)
+                sprintf(strIN, "%*c%s", INI_TAB_LEN - ((lenDiff - lenSpaces) % INI_TAB_LEN), ' ', strRemark);
             }
             else if (lenSpaces > lenDiff){
+                // Enough spaces
+                
                 // Remove the too much spaces
-                sprintf(strRemark, "%s", strRemark[lenSpaces - lenDiff])
+                sprintf(strIN, "%s", &strRemark[lenDiff]);
             }
-        }
+            else{
+                // Like spaces
+
+                // Remove all spaces, but Add a 'TAB'
+                sprintf(strIN, "%*c%s", INI_TAB_LEN, ' ', &strRemark[lenDiff]);
+            } 
+       }
         else if (lenDiff < 0){
             // New Value is shorter than the old one
             // Add spaces
-            sprintf(strRemark, "%*c%s", -lenDiff, strRemark)
+            sprintf(strIN, "%*c%s", -lenDiff, ' ', strRemark);
         }
         else{
             // Same length
+            sprintf(strIN, "%s", strRemark);                
         }
+        sprintf(strRemark, "%s", strIN);                
     }
 
+    // Join them together
+    sprintf(strIN, "%s%s%s", strPreVal, strValNew, strRemark);
+
+    return valType;
 
 }
 
