@@ -347,7 +347,7 @@ int main(){
 
     strcpy(strOut, "        Value = 1234          # My Remark");
     printf("%s\n", strOut);
-    strcpy(strVal, "12340123456789012345");
+    strcpy(strVal, "123401234567890123456");
     IniChangeValueLine(strOut, strVal, 0);
     printf("%s\n\n", strOut);
 

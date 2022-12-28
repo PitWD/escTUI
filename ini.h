@@ -534,7 +534,8 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
     // if strIn is too long, we place it on a tab
     //
 
-    // Returns  -1 for no success
+    // Returns  -1 DataType Error
+    //          -2 Overflow return string
     //           0 text as it is success 
     //           4 text embedded in ""
     //           1 int
@@ -601,17 +602,17 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
 
         int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark));
 
-        int lenSpaces = IniCountFrontSpaces(strRemark);
-
         if (lenDiff > 0){
             // New Value is longer than the old one
             // check if the longer value fit's into the leading spaces of strRemark
 
+            // Count spaces (respecting tabs)
+            int lenSpaces = IniCountFrontSpaces(strRemark);
+            // Remove all spaces
+            IniTrimWS(strRemark);
+
             if (lenSpaces < lenDiff){
                 // Missing space in total
-
-                // Remove all spaces
-                sprintf(strRemark, "%s", &strRemark[lenSpaces]);
 
                 // add missing spaces (Tab adjusted)
                 sprintf(strIN, "%*c%s", INI_TAB_LEN - ((lenDiff - lenSpaces) % INI_TAB_LEN), ' ', strRemark);
@@ -619,14 +620,14 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
             else if (lenSpaces > lenDiff){
                 // Enough spaces
                 
-                // Remove the too much spaces
-                sprintf(strIN, "%s", &strRemark[lenDiff]);
+                // Add back the needed spaces
+                sprintf(strIN, "%*c%s", lenSpaces - lenDiff, ' ', strRemark);
             }
             else{
                 // Like spaces
 
                 // Remove all spaces, but Add a 'TAB'
-                sprintf(strIN, "%*c%s", INI_TAB_LEN, ' ', &strRemark[lenDiff]);
+                sprintf(strIN, "%*c%s", INI_TAB_LEN, ' ', strRemark);
             } 
        }
         else if (lenDiff < 0){
@@ -641,10 +642,17 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
         sprintf(strRemark, "%s", strIN);                
     }
 
-    // Join them together
-    sprintf(strIN, "%s%s%s", strPreVal, strValNew, strRemark);
-
-    return valType;
+    if ((strlen(strPreVal) + strlen(strValNew) + strlen(strRemark)) < STR_SMALL_SIZE){
+        // Join them together
+        sprintf(strIN, "%s%s%s", strPreVal, strValNew, strRemark);
+        return valType;
+    }
+    else{
+        // String would been longer than STR_SMALL_SIZE
+        strIN[0] = '0';
+        return -2;
+    }
+        
 
 }
 
