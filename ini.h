@@ -368,6 +368,9 @@ int IniGetValue(const char *fileName, char *strSearch){
     // Returns  0 = Value does not exist
     //         -1 = File Error.
     //         -2 = Broken Token
+    //         -3 = Broken int 
+    //         -4 = Broken float 
+    //         -5 = Broken hex 
     //          1 = Value is a text
     //          2 = Value is a bool
     //          3 = Value is an int
@@ -385,6 +388,10 @@ int IniGetValue(const char *fileName, char *strSearch){
 
     if (cntLine > 0){
         // File and Search exist
+
+        long lNum = 0;
+        double dNum = 0;
+        char *pEnd;
 
         char strIN[STR_SMALL_SIZE];
         sprintf(strIN, "%s", strSearch);
@@ -419,7 +426,7 @@ int IniGetValue(const char *fileName, char *strSearch){
             r = 1;
         }
         else{
-            // Value is a number or True or False
+            // Value is a number or True or False or hex
             if(strncasecmp(strIN, "true", 4) == 0){
                 // True
                 sprintf(strSearch, "1");
@@ -432,8 +439,17 @@ int IniGetValue(const char *fileName, char *strSearch){
             }
             else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
                 // hex
-                sprintf(strSearch, "%s",strIN);
-                r = 5;
+                // remove all non-numeric trailing characters
+                IniTrimNonNumeric(strIN);
+                lNum = strtol(&strIN[2], &pEnd, 16);
+                sprintf(strSearch, "%ld", lNum);
+                if (*pEnd != '\0'){
+                    // No hex found
+                    r = -5;
+                }
+                else{
+                    r = 5;
+                }   
             }
             else{
                 // Number
@@ -446,12 +462,24 @@ int IniGetValue(const char *fileName, char *strSearch){
                     *pComma = '.';
                 }
                 // Is there a dot ?
-                pComma = strchr(strIN, '.');
-                if (pComma != NULL){
+                if (strchr(strIN, '.') != NULL){
                     r++;
                 }
-
-                sprintf(strSearch, "%s",strIN);
+                // Int or Float
+                if (r == 4){
+                    // float
+                    dNum = strtod(strIN, &pEnd);
+                    sprintf(strSearch, "%.6f", dNum);
+                }
+                else{
+                    // int
+                    lNum = strtol(strIN, &pEnd, 10);
+                    sprintf(strSearch, "%ld", lNum);
+                }                
+                if (*pEnd != '\0'){
+                    // No numeric found
+                    r = -r;
+                }
             }                    
         }   
     }
