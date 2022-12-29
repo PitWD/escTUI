@@ -436,10 +436,15 @@ int IniGetValue(const char *fileName, char *strSearch){
                 IniTrimNonNumeric(strIN);
                 // Make 1st comma to dot...
                 char *pComma = strchr(strIN, ',');
-                if (pComma != NULL) {
-                    r++;
+                if (pComma != NULL){
                     *pComma = '.';
                 }
+                // Is there a dot ?
+                pComma = strchr(strIN, '.');
+                if (pComma != NULL){
+                    r++;
+                }
+
                 sprintf(strSearch, "%s",strIN);
             }                    
         }   
