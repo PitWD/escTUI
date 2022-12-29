@@ -547,14 +547,11 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
     IniTrimRemark(strPreVal);
     IniTrimChar_R(strPreVal, '=');
 
-    char strRemark[STR_SMALL_SIZE];
-    strcpy(strRemark, strIN);
-    IniGetRemark(strRemark);
- 
     char *pEnd;
     long lNum = 0;
     double dNum = 0;
-    long hNum = 0;
+    #define hNum lNum
+    #define bNum lNum
 
     // Check and Format strValue
     char strValNew[STR_SMALL_SIZE];
@@ -586,6 +583,32 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
         }
         sprintf(strValNew, " 0x%lX", hNum);
         break;
+    case 5:
+        // as bool
+        if(strncasecmp(strIN, "true", 4) == 0){
+            // True
+            bNum = 1;
+        }
+        else if(strncasecmp(strIN, "false", 5) == 0){
+            // False
+        }
+        else{
+            // from number
+            bNum = strtol(strValue, &pEnd, 16);
+            if (*pEnd != '\0'){
+                // No bool found
+                return -1;
+            }
+        }
+        if(bNum){
+            // True
+            sprintf(strValNew, " true");
+        }
+        else{
+            // False
+            sprintf(strValNew, " false");
+        }
+        break;
     case 4:
         // as text embedded in ""
         sprintf(strValNew, " \"%s\"", strValue);
@@ -596,6 +619,10 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
         break;
     }
 
+    char strRemark[STR_SMALL_SIZE];
+    strcpy(strRemark, strIN);
+    IniGetRemark(strRemark);
+ 
     // Check and place Remark
     if (strlen(strRemark)){
         // Line contains a remark
