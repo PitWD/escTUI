@@ -372,6 +372,7 @@ int IniGetValue(const char *fileName, char *strSearch){
     //          2 = Value is a bool
     //          3 = Value is an int
     //          4 = Value is a float
+    //          5 = Value is a hex
     //
     // strSearch, returns from a line like:
     // "          Value = 123,456  # MyRemark"
@@ -428,6 +429,11 @@ int IniGetValue(const char *fileName, char *strSearch){
                 // False
                 sprintf(strSearch, "0");
                 r = 2;
+            }
+            else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
+                // hex
+                sprintf(strSearch, "%s",strIN);
+                r = 5;
             }
             else{
                 // Number
