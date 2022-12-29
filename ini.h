@@ -373,7 +373,7 @@ int IniGetValue(const char *fileName, char *strSearch){
     //          3 = Value is an int
     //          4 = Value is a float
     //
-    // strReturn, returns from a line like:
+    // strSearch, returns from a line like:
     // "          Value = 123,456  # MyRemark"
     // just the Value:
     // "123.456"
@@ -385,9 +385,7 @@ int IniGetValue(const char *fileName, char *strSearch){
     if (cntLine > 0){
         // File and Search exist
 
-        int i = 0;
         char strIN[STR_SMALL_SIZE];
-
         sprintf(strIN, "%s", strSearch);
 
         // Remove remarks
