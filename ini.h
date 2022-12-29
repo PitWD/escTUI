@@ -282,9 +282,15 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
     // for the 4th Line... containing the searched value...
 
     // Returns  0 = Value does not exist
+    //              strSearch contains ("" encapsulated)
+    //                  index of invalid token
     //         -1 = File Error
     //         -2 = Broken Token
+    //              strSearch contains ("" encapsulated and ':' separated)
+    //                  index of invalid token
+    //                  index of broken line in file
     //         >0 = Line with Value
+    //              strSearch contains the raw line
 
     FILE *file = fopen(fileName, "r");
     if (file == NULL) {
@@ -293,7 +299,6 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
     }
 
     int r = 0;
-    int i = 0;
     int cntLine = 0;
 
     // Tokens
@@ -307,21 +312,25 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
 
         cntLine++;
 
-        // Trim Left & Right Whitespaces
+        // Save original line for return
+        sprintf(strSearch, "%s", strIN);
+
+        // Trim Left Whitespaces
         IniTrimWS_L(strIN);
 
-        // Check if line is above actual token-level
+        // Check if line is below actual token-level
         if (strIN[0] == '['){
             if (actToken){
                 if (strIN[actToken] != '.'){
                     // Broken Token
                     r = -2;
+                    sprintf(strSearch, "\"%d:%d\"", actToken, cntLine);
                     break;
                 }
             }         
         }
-        
-        i = strlen(strTokens[actToken]);
+
+        int i = strlen(strTokens[actToken]);
 
         // Check if line starts with actual token
         if(strncasecmp(strIN, strTokens[actToken], i) == 0){
@@ -342,6 +351,10 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
         }
     }
 
+    if (!r){
+        sprintf(strSearch, "\"%d\"", actToken);
+    }
+    
     fclose(file);
     for (actToken = 0; actToken <= cntTokens; actToken++){
         free(strTokens[actToken]);

@@ -3,7 +3,8 @@
 
 int main(){
 
-    char strOut[] = "   1X- jhk\"#\"jhhkh#jhkjhhgfhgfhfhfhgfjhkjh -X0           ";
+    char strOut[255];
+    sprintf(strOut, "   1X- jhk\"#\"jhhkh#jhkjhhgfhgfhfhfhgfjhkjh -X0           ");
     printf("\nSTART->%s<-END\n\n",strOut);
 
     IniTrimWS_L(strOut);
