@@ -61,9 +61,9 @@ int main(){
     
     printf("\n");
 
-    char strReturn[255];
+    //char strReturn[255];
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", strReturn, strOut);
+    i = IniGetValue("desktops.ini", strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -94,9 +94,9 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n", strReturn);
+    printf("%s<-\n", strOut);
     strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", strReturn, strOut);
+    i = IniGetValue("desktops.ini", strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -127,7 +127,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strReturn);
+    printf("%s<-\n\n", strOut);
 
     strcpy(strOut,"1234 1234567890 1234");
     IniTrimCharsLR(strOut,' ',1,1);
@@ -141,7 +141,7 @@ int main(){
     IniReplaceLine("desktops.ini",strOut,52);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", strReturn, strOut);
+    i = IniGetValue("desktops.ini", strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -172,13 +172,13 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strReturn);    
+    printf("%s<-\n\n", strOut);    
 
 //return 0;
     strcpy(strOut, "                    CaptionText = \"FixedTop\"");
     IniReplaceLine("desktops.ini",strOut,52);
     strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", strReturn, strOut);
+    i = IniGetValue("desktops.ini", strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -209,10 +209,10 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strReturn);    
+    printf("%s<-\n\n", strOut);    
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", strReturn, strOut);
+    i = IniGetValue("desktops.ini", strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -243,7 +243,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strReturn);
+    printf("%s<-\n\n", strOut);
 
     strcpy(strOut, "Value = 1234          # My Remark");
     i = IniGetRemark(strOut);    

@@ -266,7 +266,7 @@ void IniLcaseLen(char strIN[], int len) {
 }
 #define IniLcase(strIN) IniLcaseLen(strIN, strlen(strIN))
 
-int IniFindValueLineNr(char *fileName, char *strSearch){
+int IniFindValueLineNr(const char *fileName, char *strSearch){
 
     //  [Global]
     //      [.Sub1]
@@ -363,7 +363,7 @@ int IniFindValueLineNr(char *fileName, char *strSearch){
     return r;
 } 
 
-int IniGetValue(char *fileName, char *strReturn, char *strSearch){
+int IniGetValue(const char *fileName, char *strSearch){
 
     // Returns  0 = Value does not exist
     //         -1 = File Error.
@@ -388,17 +388,7 @@ int IniGetValue(char *fileName, char *strReturn, char *strSearch){
         int i = 0;
         char strIN[STR_SMALL_SIZE];
 
-        FILE *file = fopen(fileName, "r");
-        if (file == NULL) {
-            // File-Error
-            return - 1;
-        }
-
-        // Trash Lines before our line....
-        while (cntLine > 0){
-            fgets(strIN, STR_SMALL_SIZE, file);
-            cntLine--;
-        }
+        sprintf(strIN, "%s", strSearch);
 
         // Remove remarks
         IniTrimRemark(strIN);
@@ -426,19 +416,19 @@ int IniGetValue(char *fileName, char *strReturn, char *strSearch){
                 IniTrimCnt_R(strIN,1);
             }
             
-            sprintf(strReturn, "%s",strIN);
+            sprintf(strSearch, "%s",strIN);
             r = 1;
         }
         else{
             // Value is a number or True or False
             if(strncasecmp(strIN, "true", 4) == 0){
                 // True
-                sprintf(strReturn, "1");
+                sprintf(strSearch, "1");
                 r = 2;
             }
             else if(strncasecmp(strIN, "false", 5) == 0){
                 // False
-                sprintf(strReturn, "0");
+                sprintf(strSearch, "0");
                 r = 2;
             }
             else{
@@ -452,7 +442,7 @@ int IniGetValue(char *fileName, char *strReturn, char *strSearch){
                     r++;
                     *pComma = '.';
                 }
-                sprintf(strReturn, "%s",strIN);
+                sprintf(strSearch, "%s",strIN);
             }                    
         }   
     }
