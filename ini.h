@@ -112,7 +112,7 @@ void IniTrimNonNumeric(char *strIN){
     }
 }
 
-void IniTrimWhiteSpacesLR(char *strIN, int l, int r){
+void IniTrimWhiteSpacesLR(char *strIN, const int l, const int r){
     
     // L & R are bool to remove whitespaces
     // Left and/or Right
@@ -140,7 +140,7 @@ void IniTrimWhiteSpacesLR(char *strIN, int l, int r){
 #define IniTrimWS_R(strIN) IniTrimWhiteSpacesLR(strIN,0,1)
 #define IniTrimWS(strIN) IniTrimWhiteSpacesLR(strIN,1,1)
 
-void IniTrimCharsLR(char *strIN, const char c, int l, int r){
+void IniTrimCharsLR(char *strIN, const char c, const int l, const int r){
     
     // L & R are bool to remove all chars != c
     // Left and/or Right
@@ -170,7 +170,7 @@ void IniTrimCharsLR(char *strIN, const char c, int l, int r){
 #define IniTrimChar_R(strIN, c) IniTrimCharsLR(strIN, c, 0, 1)
 #define IniTrimChar_LR(strIN, c) IniTrimCharsLR(strIN, c, 1, 1)
 
-void IniTrimCntLR(char *strIN, int l, int r){
+void IniTrimCntLR(char *strIN, const int l, const int r){
     
     // Remove l chars from the left and r from the right
 
@@ -242,7 +242,7 @@ int IniGetTokens(char *strIN, char **tokens){
     return count;
 }
 
-void IniUcaseLen(char strIN[], int len) {
+void IniUcaseLen(char *strIN, const int len) {
    
    // Convert 1st len chars to upper case
 
@@ -254,7 +254,7 @@ void IniUcaseLen(char strIN[], int len) {
 }
 #define IniUcase(strIN) IniUcaseLen(strIN, strlen(strIN))
 
-void IniLcaseLen(char strIN[], int len) {
+void IniLcaseLen(char *strIN, const int len) {
    
    // Convert 1st len chars to lower case
 
@@ -487,7 +487,7 @@ int IniGetValue(const char *fileName, char *strSearch){
     return r;     
 }
 
-int IniInsertReplaceLine (char *fileName, char *strIN, int linePos, int insert){
+int IniInsertReplaceLine (char *fileName, char *strIN, const int linePos, const int insert){
     
     // Copies fpRead Line for Line to fpWrite
     // When linePos is reached
@@ -559,7 +559,7 @@ int IniInsertReplaceLine (char *fileName, char *strIN, int linePos, int insert){
 #define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
 #define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
-int IniChangeValueLine (char *strIN, char *strValue, int valType){
+int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     // a string like:
 
@@ -719,8 +719,6 @@ int IniChangeValueLine (char *strIN, char *strValue, int valType){
         strIN[0] = '0';
         return -2;
     }
-        
-
 }
 
 /*
