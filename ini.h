@@ -70,6 +70,8 @@ int IniGetRemark (char *strIN){
         if (strIN[i] == '"')
             inQuote = !inQuote;
     }
+    // No remark in line
+    strIN[0] = '\0';
     return 0;
 }
 
@@ -212,7 +214,7 @@ int IniGetTokens(char *strIN, char **tokens){
     while (token != NULL){
 
         // Size actual Token Length + "[.]" 
-        tokens[count] = malloc(strlen(token) + 3 + count);
+        tokens[count] = malloc(strlen(token) + 4 + count);
         tokens[count][0] = '[';
         tokens[count][1] = '\0';
 
@@ -282,8 +284,9 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     // for the 4th Line... containing the searched value...
 
     // Returns  0 = Value does not exist
-    //              strSearch contains ("" encapsulated)
+    //              strSearch contains ("" encapsulated and ':' separated)
     //                  index of invalid token
+    //                  index of broken line in file (always 0)
     //         -1 = File Error
     //         -2 = Broken Token
     //              strSearch contains ("" encapsulated and ':' separated)
@@ -352,142 +355,20 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     }
 
     if (!r){
-        sprintf(strSearch, "\"%d\"", actToken);
+        sprintf(strSearch, "\"%d:0\"", actToken);
     }
     
     fclose(file);
-    for (actToken = 0; actToken <= cntTokens; actToken++){
+
+    cntTokens++;
+    for (actToken = 0; actToken < cntTokens; actToken++){
         free(strTokens[actToken]);
     }
 
     return r;
 } 
 
-int IniGetValue(const char *fileName, char *strSearch){
-
-    // Returns  0 = Value does not exist
-    //         -1 = File Error.
-    //         -2 = Broken Token
-    //         -3 = Broken int 
-    //         -4 = Broken float 
-    //         -5 = Broken hex 
-    //          1 = Value is a text
-    //          2 = Value is a bool
-    //          3 = Value is an int
-    //          4 = Value is a float
-    //          5 = Value is a hex
-    //
-    // strSearch, returns from a line like:
-    // "          Value = 123,456  # MyRemark"
-    // just the Value:
-    // "123.456"
-    // "," & "." are seen as valid decimal points
-
-    int cntLine = IniFindValueLineNr(fileName, strSearch);
-    int r = cntLine;
-
-    if (cntLine > 0){
-        // File and Search exist
-
-        long lNum = 0;
-        double dNum = 0;
-        char *pEnd;
-
-        char strIN[STR_SMALL_SIZE];
-        sprintf(strIN, "%s", strSearch);
-
-        // Remove remarks
-        IniTrimRemark(strIN);
-
-        // Remove all chars left of "="
-        IniTrimChar_L(strIN, '=');
-
-        // Remove equal
-        IniTrimCnt_L(strIN, 1);
-
-        // Trim whitespaces
-        IniTrimWS_L(strIN);
-
-        // Remove 1st and last " from Text if they're present
-        if (strIN[0] == '"'){
-            // Value is a text
-
-            // Remove leading '"'
-            IniTrimCnt_L(strIN,1);
-
-            // Remove all trailing nonsense
-            IniTrimChar_R(strIN, '"');
-            if (strIN[strlen(strIN) - 1] == '"'){
-                // Text was fully encapsulated
-                IniTrimCnt_R(strIN,1);
-            }
-            
-            sprintf(strSearch, "%s",strIN);
-            r = 1;
-        }
-        else{
-            // Value is a number or True or False or hex
-            if(strncasecmp(strIN, "true", 4) == 0){
-                // True
-                sprintf(strSearch, "1");
-                r = 2;
-            }
-            else if(strncasecmp(strIN, "false", 5) == 0){
-                // False
-                sprintf(strSearch, "0");
-                r = 2;
-            }
-            else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
-                // hex
-                // remove all non-numeric trailing characters
-                IniTrimNonNumeric(strIN);
-                lNum = strtol(&strIN[2], &pEnd, 16);
-                sprintf(strSearch, "%ld", lNum);
-                if (*pEnd != '\0'){
-                    // No hex found
-                    r = -5;
-                }
-                else{
-                    r = 5;
-                }   
-            }
-            else{
-                // Number
-                r = 3;                
-                // remove all non-numeric trailing characters
-                IniTrimNonNumeric(strIN);
-                // Make 1st comma to dot...
-                char *pComma = strchr(strIN, ',');
-                if (pComma != NULL){
-                    *pComma = '.';
-                }
-                // Is there a dot ?
-                if (strchr(strIN, '.') != NULL){
-                    r++;
-                }
-                // Int or Float
-                if (r == 4){
-                    // float
-                    dNum = strtod(strIN, &pEnd);
-                    sprintf(strSearch, "%.6f", dNum);
-                }
-                else{
-                    // int
-                    lNum = strtol(strIN, &pEnd, 10);
-                    sprintf(strSearch, "%ld", lNum);
-                }                
-                if (*pEnd != '\0'){
-                    // No numeric found
-                    r = -r;
-                }
-            }                    
-        }   
-    }
-
-    return r;     
-}
-
-int IniInsertReplaceLine (char *fileName, char *strIN, const int linePos, const int insert){
+int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, const int insert){
     
     // Copies fpRead Line for Line to fpWrite
     // When linePos is reached
@@ -550,7 +431,7 @@ int IniInsertReplaceLine (char *fileName, char *strIN, const int linePos, const 
         return -3;
     }
     // Delete Temp File
-    if (remove(buffer) != 0) {
+    if (remove(buffer) != -1) {
         return -4;
     }
 
@@ -721,130 +602,236 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     }
 }
 
-/*
-int IniFindValueFAST(char *fileName, char *strReturn, char *strSearch){
+int IniCreateMissingValue(const char *fileName, char *strSearch, const char *strValue, const int typValue, const int missingToken, int insertLine){
 
-    FILE *file = fopen(fileName, "r");
-    if (file == NULL) {
-        // File-Error
-        sprintf(strReturn, "-1");
-        return -1;
-    }
+    // We already know from IniGetValue() or IniSetValue() that
+    // strSearch (e.g. "Main.Sub.SubSub.Value") doesn't exist (fully) in file
+    // missingToken =   index of missed token (0 = main / 3 = Value)
+    // insertLine   =   where the missed stuff need to get inserted
 
-    int r = 0;
+    /*  strValue    =   the value to write
+        typValue    =   0 = as it is
+                        1 = Value is a text
+                        2 = Value is a bool
+                        3 = Value is an int
+                        4 = Value is a float
+                        5 = Value is a hex
+    */
+
+   // Returns   0 = written as it is
+   //          -1 = File Error
+   //          -2 = Temp File Error
+   //          -3 = Rename File Error
+   //          -4 = Del Temp File Error   
+   //          >0 = type of written value
+
+    int r = 1;
     int i = 0;
+    char strOut[STR_SMALL_SIZE];
 
-    sprintf(strReturn, "0");
+    // Get formatted TokenList
+    char *tokens[STR_SMALL_SIZE] = {NULL};
+    int cntToken = IniGetTokens(strSearch, tokens);
 
-    // Tokens
-    char *strTokens[255] = {NULL};  
-    int cntTokens = IniGetTokens(strSearch, strTokens) - 1;
-    int actToken = 0;
-    int isToken = 0;
+    // Is the whole token-value-chain missing?
+    if (!insertLine){
+        // Search for 1st non-empty and non-remark line
+        FILE *file = fopen(fileName, "r");
+        if (file == NULL) {
+            // File-Error
+            r = -1;
+        }
+        while (fgets(strOut, STR_SMALL_SIZE, file) != NULL){
 
-    char strIN[STR_SMALL_SIZE];
+            insertLine++;
 
-    while (fgets(strIN, STR_SMALL_SIZE, file) != NULL) {
+            // Remove Remark
+            IniTrimRemark(strOut);
+            // Remove white-spaces
+            IniTrimWS(strOut);
 
-        // Trim Left & Right Whitespaces
-        IniTrimWS_L(strIN);
-
-        // Check if line is above actual token-level
-        if (strIN[0] == '['){
-            if (actToken){
-                if (strIN[actToken] != '.'){
-                    // Broken Token
-                    r = -2;
-                    sprintf(strReturn, "-2");
-                    break;
-                }
-            }         
+            if (strlen(strOut)){
+                // Line found
+                break; 
+            }
+        }
+        fclose(file);
+    }
+    
+    if(r > 0){
+        // Run missing tokens
+        for (i = missingToken; i < cntToken - 1; i++){            
+            sprintf(strOut, "%*c%s", i * INI_TAB_LEN, ' ', tokens[i]);
+            if (!i){
+                // One trailing space too much.
+                IniTrimCnt_L(strOut, 1);
+            }
+            r = IniInsertLine(fileName, strOut, insertLine);
+            insertLine++;
         }
         
-        i = strlen(strTokens[actToken]);
-
-        // Check if line starts with actual token
-        if(strncasecmp(strIN, strTokens[actToken], i) == 0){
-
-            // Prevent that Token in File is longer (3rd case is just for [Main]-Level)
-            if ((strIN[i] == ' ')  || (strIN[i] == '=') || (strlen(strIN)-1 == i)){
-                // Token has the right length
-
-                if (actToken == cntTokens){
-                    // It's the Value-Token
-
-                    // Remove remarks
-                    IniTrimRemark(strIN);
-
-                    // Remove all chars left of "="
-                    IniTrimChar_L(strIN, '=');
-
-                    // Remove equal
-                    IniTrimCnt_L(strIN, 1);
-
-                    // Trim whitespaces
-                    IniTrimWS_L(strIN);
-
-                    // Remove 1st and last " from Text if they're present
-                    if (strIN[0] == '"'){
-                        // Value is a text
-
-                        // Remove leading '"'
-                        IniTrimCnt_L(strIN,1);
-
-                        // Remove all trailing nonsense
-                        IniTrimChar_R(strIN, '"');
-                        if (strIN[strlen(strIN) - 1] == '"'){
-                            // Text was fully encapsulated
-                            IniTrimCnt_R(strIN,1);
-                        }
-                        
-                        sprintf(strReturn, "%s",strIN);
-                        r = 1;
-                    }
-                    else{
-                        // Value is a number or True or False
-                        if(strncasecmp(strIN, "true", 4) == 0){
-                            // True
-                            sprintf(strReturn, "1");
-                            r = 2;
-                        }
-                        else if(strncasecmp(strIN, "false", 5) == 0){
-                            // False
-                            sprintf(strReturn, "0");
-                            r = 2;
-                        }
-                        else{
-                            // Number
-
-                            // Make comma to dot...
-                            char *pComma = strchr(strIN, ',');
-                            if (pComma != NULL) {
-                                *pComma = '.';
-                            }
-
-                            // remove all non-numeric trailing characters
-                            IniTrimNonNumeric(strIN);
-
-                            sprintf(strReturn, "%s",strIN);
-                            r = 3;
-                        }                    
-                    }   
-                    break;    
-                }
-                else{
-                    actToken++;
-                }                        
-            }               
+        // Finally the value
+        if (r > 0){
+            sprintf(strOut, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
+            // Check & normalize value
+            r = IniChangeValueLine(strOut, strValue, typValue);
+            if (r > -1){
+                IniInsertLine(fileName, strOut, insertLine);
+            }
         }
     }
 
-    fclose(file);
-    for (actToken = 0; actToken <= cntTokens; actToken++){
-        free(strTokens[actToken]);
+    // Free the allocated memory
+    for (i = 0; i < cntToken + 1; i++){
+        free(tokens[i]);
     }
 
     return r;
-    
+
+} 
+
+int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
+
+    // Returns  0 = doesn't exist, but got created in file
+    //         -1 = File Error.
+    //         -2 = Broken Token (cancelled - see creation)
+    //         -3 = Broken int 
+    //         -4 = Broken float 
+    //         -5 = Broken hex 
+    //          1 = Value is a text
+    //          2 = Value is a bool
+    //          3 = Value is an int
+    //          4 = Value is a float
+    //          5 = Value is a hex
+    //
+    // strSearch, returns from a line like:
+    // "          Value = 123,456  # MyRemark"
+    // just the Value:
+    // "123.456"
+    // "," & "." are seen as valid decimal points
+
+    // Copy for the case of value/token does not exist.
+    char strSearch2[strlen(strSearch) + 1];
+    sprintf(strSearch2, "%s", strSearch);
+
+    int cntLine = IniFindValueLineNr(fileName, strSearch);
+    int r = cntLine;
+    char *pEnd;
+
+    if (cntLine > 0){
+        // File and Search exist
+
+        long lNum = 0;
+        double dNum = 0;
+
+        char strIN[STR_SMALL_SIZE];
+        sprintf(strIN, "%s", strSearch);
+
+        // Remove remarks
+        IniTrimRemark(strIN);
+
+        // Remove all chars left of "="
+        IniTrimChar_L(strIN, '=');
+
+        // Remove equal
+        IniTrimCnt_L(strIN, 1);
+
+        // Trim whitespaces
+        IniTrimWS_L(strIN);
+
+        // Remove 1st and last " from Text if they're present
+        if (strIN[0] == '"'){
+            // Value is a text
+
+            // Remove leading '"'
+            IniTrimCnt_L(strIN,1);
+
+            // Remove all trailing nonsense
+            IniTrimChar_R(strIN, '"');
+            if (strIN[strlen(strIN) - 1] == '"'){
+                // Text was fully encapsulated
+                IniTrimCnt_R(strIN,1);
+            }
+            
+            sprintf(strSearch, "%s",strIN);
+            r = 1;
+        }
+        else{
+            // Value is a number or True or False or hex
+            if(strncasecmp(strIN, "true", 4) == 0){
+                // True
+                sprintf(strSearch, "1");
+                r = 2;
+            }
+            else if(strncasecmp(strIN, "false", 5) == 0){
+                // False
+                sprintf(strSearch, "0");
+                r = 2;
+            }
+            else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
+                // hex
+                // remove all non-numeric trailing characters
+                IniTrimNonNumeric(strIN);
+                lNum = strtol(&strIN[2], &pEnd, 16);
+                sprintf(strSearch, "%ld", lNum);
+                if (*pEnd != '\0'){
+                    // No hex found
+                    r = -5;
+                }
+                else{
+                    r = 5;
+                }   
+            }
+            else{
+                // Number
+                r = 3;                
+                // remove all non-numeric trailing characters
+                IniTrimNonNumeric(strIN);
+                // Make 1st comma to dot...
+                char *pComma = strchr(strIN, ',');
+                if (pComma != NULL){
+                    *pComma = '.';
+                }
+                // Is there a dot ?
+                if (strchr(strIN, '.') != NULL){
+                    r++;
+                }
+                // Int or Float
+                if (r == 4){
+                    // float
+                    dNum = strtod(strIN, &pEnd);
+                    sprintf(strSearch, "%.6f", dNum);
+                }
+                else{
+                    // int
+                    lNum = strtol(strIN, &pEnd, 10);
+                    sprintf(strSearch, "%ld", lNum);
+                }                
+                if (*pEnd != '\0'){
+                    // No numeric found
+                    r = -r;
+                }
+            }                    
+        }   
+    }
+    else if (cntLine == 0 || cntLine == -2){
+        // Value / Token does not exist
+        // strSearch contains (""-embedded and :-separated)
+        //              index of 1st missing token
+        //              index of broken line in file
+        
+        IniTrimCnt_LR(strSearch, 1, 1);
+
+        int missingToken = strtol(strSearch, &pEnd, 10);
+        int insertLine = strtol(strchr(strSearch, ':') + 1, &pEnd, 10);
+        r = IniCreateMissingValue(fileName, strSearch2, strDefault, 0, missingToken, insertLine);
+        sprintf(strSearch, "%s", strDefault);
+    }
+    else{
+        // FileError
+    }
+
+    return r;     
 }
-*/
+
+

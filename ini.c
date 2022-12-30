@@ -56,14 +56,14 @@ int main(){
     }
 
     // Free the allocated memory
-    for (i = 0; i < count; i++)
+    for (i = 0; i <= count; i++)
         free(tokens[i]);
     
     printf("\n");
 
     //char strReturn[255];
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", strOut);
+    i = IniGetValue("desktops.ini", strOut, "moff");
     switch (i){
     case -2:
         // Broken-Token
@@ -96,7 +96,7 @@ int main(){
     }
     printf("%s<-\n", strOut);
     strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", strOut);
+    i = IniGetValue("desktops.ini", strOut, "moff");
     switch (i){
     case -2:
         // Broken-Token
@@ -141,7 +141,7 @@ int main(){
     IniReplaceLine("desktops.ini",strOut,52);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", strOut);
+    i = IniGetValue("desktops.ini", strOut, "moff");
     switch (i){
     case -2:
         // Broken-Token
@@ -178,7 +178,7 @@ int main(){
     strcpy(strOut, "                    CaptionText = \"FixedTop\"");
     IniReplaceLine("desktops.ini",strOut,52);
     strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", strOut);
+    i = IniGetValue("desktops.ini", strOut, "moff");
     switch (i){
     case -2:
         // Broken-Token
@@ -212,7 +212,7 @@ int main(){
     printf("%s<-\n\n", strOut);    
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", strOut);
+    i = IniGetValue("desktops.ini", strOut, "moff");
     switch (i){
     case -2:
         // Broken-Token
@@ -375,6 +375,115 @@ int main(){
     strcpy(strVal, "1");
     IniChangeValueLine(strOut, strVal, 0);
     printf("%s\n\n", strOut);
+
+    strcpy(strOut, "global1.definitions.fixedareas.1.top.captiontext");
+    i = IniGetValue("desktops.ini", strOut, "moff1");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
+    strcpy(strOut, "global.definitions1.fixedareas.1.top.captiontext");
+    i = IniGetValue("desktops.ini", strOut, "moff2");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
+    strcpy(strOut, "global.definitions.fixedareas1.1.top.captiontext");
+    i = IniGetValue("desktops.ini", strOut, "moff3");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
+    strcpy(strOut, "global.definitions.fixedareas.11.top.captiontext");
+    i = IniGetValue("desktops.ini", strOut, "moff4");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top1.captiontext");
+    i = IniGetValue("desktops.ini", strOut, "moff5");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext1");
+    i = IniGetValue("desktops.ini", strOut, "moff6");
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case 0:
+        // no value found
+        printf("Value not found!: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("%s<-\n\n", strOut);
+
 
 return 0;
 }
