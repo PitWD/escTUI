@@ -114,6 +114,21 @@ void IniTrimNonNumeric(char *strIN){
     }
 }
 
+int IniIsNonNumeric(const char *strIN){
+
+    // With the first non "0-9", ".", "," it's non-numeric
+    char c = 0;
+
+    for (int i = strlen(strIN) - 1; i >= 0; i--){
+        c = strIN[i];
+        if ((c <= '0' || c >= '9') && (c != ',' && c != '.')){
+            return 1;
+        }
+    }
+    return 0;
+
+}
+
 void IniTrimWhiteSpacesLR(char *strIN, const int l, const int r){
     
     // L & R are bool to remove whitespaces
@@ -125,12 +140,12 @@ void IniTrimWhiteSpacesLR(char *strIN, const int l, const int r){
 
     // Traverse string from both ends until a non-space character is found
     if (l){
-        while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t'))
+        while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t') || *pLeft == '\n' || *pLeft == '\r')
             pLeft++;
     }
     
     if (r){
-        while (pRight > pLeft && (*pRight == ' ' || *pRight == '\t'))
+        while (pRight > pLeft && (*pRight == ' ' || *pRight == '\t' || *pRight == '\n' || *pRight == '\r'))
             pRight--;
     }
     
@@ -228,8 +243,9 @@ int IniGetTokens(char *strIN, char **tokens){
         strcat(tokens[count], token);
         token = strtok(NULL, ".");
 
-        tokens[count][strlen(tokens[count])] = ']';
-        tokens[count][strlen(tokens[count]) + 1] = '\0';
+        i = strlen(tokens[count]);
+        tokens[count][i] = ']';
+        tokens[count][i + 1] = '\0';
 
         count++;
     }
@@ -337,7 +353,6 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
 
         // Check if line starts with actual token
         if(strncasecmp(strIN, strTokens[actToken], i) == 0){
-            
             // Prevent that Token in File is longer (3rd case is just for [Main]-Level)
             if ((strIN[i] == ' ')  || (strIN[i] == '=') || (strlen(strIN)-1 == i)){
                 // Token has the right length
@@ -476,33 +491,31 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     // Check and Format strValue
     char strValNew[STR_SMALL_SIZE];
+    
+    // as it is, but with leading space (as substitute for failing type-conversion)
+    sprintf(strValNew, " %s", strValue);
+    
     switch (valType){
     case 1:
         // as int
         lNum = strtol(strValue, &pEnd, 10);   
-        if (*pEnd != '\0'){
-            // No int found
-            return -1;
+        if (*pEnd == '\0'){
+            sprintf(strValNew, " %ld", lNum);
         }
-        sprintf(strValNew, " %ld", lNum);
         break;
     case 2:
         // as float
         dNum = strtod(strValue, &pEnd);
-        if (*pEnd != '\0'){
-            // No float found
-            return -1;
+        if (*pEnd == '\0'){
+            sprintf(strValNew, " %.6f", dNum);
         }
-        sprintf(strValNew, " %.6f", dNum);
         break;
     case 3:
         // as hex
         hNum = strtol(strValue, &pEnd, 16);
-        if (*pEnd != '\0'){
-            // No hex found
-            return -1;
+        if (*pEnd == '\0'){
+            sprintf(strValNew, " 0x%lX", hNum);
         }
-        sprintf(strValNew, " 0x%lX", hNum);
         break;
     case 5:
         // as bool
@@ -515,11 +528,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
         }
         else{
             // from number
-            bNum = strtol(strValue, &pEnd, 16);
-            if (*pEnd != '\0'){
-                // No bool found
-                return -1;
-            }
+            bNum = strtol(strValue, &pEnd, 10);
         }
         if(bNum){
             // True
@@ -536,7 +545,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
         break;
     default:
         // as it is, but with leading space
-        sprintf(strValNew, " %s", strValue);
+        // sprintf(strValNew, " %s", strValue);
         break;
     }
 
@@ -561,23 +570,20 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
             if (lenSpaces < lenDiff){
                 // Missing space in total
-
                 // add missing spaces (Tab adjusted)
                 sprintf(strIN, "%*c%s", INI_TAB_LEN - ((lenDiff - lenSpaces) % INI_TAB_LEN), ' ', strRemark);
             }
             else if (lenSpaces > lenDiff){
                 // Enough spaces
-                
                 // Add back the needed spaces
                 sprintf(strIN, "%*c%s", lenSpaces - lenDiff, ' ', strRemark);
             }
             else{
                 // Like spaces
-
-                // Remove all spaces, but Add a 'TAB'
+                // Add a 'TAB'
                 sprintf(strIN, "%*c%s", INI_TAB_LEN, ' ', strRemark);
             } 
-       }
+        }
         else if (lenDiff < 0){
             // New Value is shorter than the old one
             // Add spaces
@@ -692,9 +698,9 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
 
 int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
 
-    // Returns  0 = doesn't exist, but got created in file
+    // Returns  0 = doesn't exist, (not anymore - jumps now into IniCreateMissingValue() )
     //         -1 = File Error.
-    //         -2 = Broken Token (cancelled - see creation)
+    //         -2 = Broken Token (not anymore - jumps now into IniCreateMissingValue() )
     //         -3 = Broken int 
     //         -4 = Broken float 
     //         -5 = Broken hex 
@@ -737,7 +743,7 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
         IniTrimCnt_L(strIN, 1);
 
         // Trim whitespaces
-        IniTrimWS_L(strIN);
+        IniTrimWS(strIN);
 
         // Remove 1st and last " from Text if they're present
         if (strIN[0] == '"'){
@@ -746,18 +752,23 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
             // Remove leading '"'
             IniTrimCnt_L(strIN,1);
 
-            // Remove all trailing nonsense
-            IniTrimChar_R(strIN, '"');
             if (strIN[strlen(strIN) - 1] == '"'){
                 // Text was fully encapsulated
                 IniTrimCnt_R(strIN,1);
+            }
+            else{
+                // Don't do this !
             }
             
             sprintf(strSearch, "%s",strIN);
             r = 1;
         }
         else{
-            // Value is a number or True or False or hex
+            // Value is a number or True or False or hex or (not embedded text - don't do this !)
+
+            // Bad formatted (not "" - embedded text) - three cases following
+            sprintf(strSearch, "%s",strIN);
+
             if(strncasecmp(strIN, "true", 4) == 0){
                 // True
                 sprintf(strSearch, "1");
@@ -773,20 +784,24 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
                 // remove all non-numeric trailing characters
                 IniTrimNonNumeric(strIN);
                 lNum = strtol(&strIN[2], &pEnd, 16);
-                sprintf(strSearch, "%ld", lNum);
                 if (*pEnd != '\0'){
-                    // No hex found
-                    r = -5;
+                    // Bad formatted (not "" - embedded text)
+                    r = 1;
                 }
                 else{
+                    sprintf(strSearch, "%ld", lNum);
                     r = 5;
                 }   
             }
+            else if (IniIsNonNumeric(strIN)){
+                // Bad formatted (not "" - embedded text)
+                r = 1;
+            }
             else{
                 // Number
+
                 r = 3;                
-                // remove all non-numeric trailing characters
-                IniTrimNonNumeric(strIN);
+
                 // Make 1st comma to dot...
                 char *pComma = strchr(strIN, ',');
                 if (pComma != NULL){
@@ -800,17 +815,23 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
                 if (r == 4){
                     // float
                     dNum = strtod(strIN, &pEnd);
-                    sprintf(strSearch, "%.6f", dNum);
+                    if (*pEnd == '\0'){
+                        sprintf(strSearch, "%.6f", dNum);
+                    }
+                    else{
+                        r =1;
+                    }
                 }
                 else{
                     // int
                     lNum = strtol(strIN, &pEnd, 10);
-                    sprintf(strSearch, "%ld", lNum);
+                    if (*pEnd == '\0'){
+                        sprintf(strSearch, "%ld", lNum);
+                    }
+                    else{
+                        r =1;
+                    }
                 }                
-                if (*pEnd != '\0'){
-                    // No numeric found
-                    r = -r;
-                }
             }                    
         }   
     }

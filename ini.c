@@ -482,7 +482,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
 
 return 0;
