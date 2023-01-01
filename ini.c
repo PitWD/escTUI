@@ -392,7 +392,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
     strcpy(strOut, "global.definitions1.fixedareas.1.top.captiontext");
     i = IniGetValue("desktops.ini", strOut, "moff2");
@@ -410,7 +410,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
     strcpy(strOut, "global.definitions.fixedareas1.1.top.captiontext");
     i = IniGetValue("desktops.ini", strOut, "moff3");
@@ -428,7 +428,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
     strcpy(strOut, "global.definitions.fixedareas.11.top.captiontext");
     i = IniGetValue("desktops.ini", strOut, "moff4");
@@ -446,7 +446,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top1.captiontext");
     i = IniGetValue("desktops.ini", strOut, "moff5");
@@ -464,7 +464,7 @@ int main(){
         printf("Unexpected!: ");
         break;
     }
-    printf("%s<-\n\n", strOut);
+    printf("%s<-:%d\n\n", strOut, i);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext1");
     i = IniGetValue("desktops.ini", strOut, "moff6");
@@ -483,6 +483,46 @@ int main(){
         break;
     }
     printf("%s<-:%d\n\n", strOut, i);
+
+
+    strcpy(strOut, "global2.definitions.fixedareas.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "moff2", 0);
+
+    strcpy(strOut, "global.definitions2.fixedareas.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "1234", 1);
+
+    strcpy(strOut, "global.definitions.fixedareas2.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "1234,5678", 2);
+
+    strcpy(strOut, "global.definitions.fixedareas.12.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "&Hff", 3);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top2.captiontext");
+    IniSetValue("desktops.ini", strOut, "moff2", 4);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext2");
+    IniSetValue("desktops.ini", strOut, "0", 5);
+
+
+    strcpy(strOut, "global3.definitions.fixedareas.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "1234", 0);
+
+    strcpy(strOut, "global.definitions3.fixedareas.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "ABCD", 1);
+
+    strcpy(strOut, "global.definitions.fixedareas3.1.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "12345678", 2);
+
+    strcpy(strOut, "global.definitions.fixedareas.13.top.captiontext");
+    IniSetValue("desktops.ini", strOut, "0xFf", 3);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top3.captiontext");
+    IniSetValue("desktops.ini", strOut, "1234", 4);
+
+    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext3");
+    IniSetValue("desktops.ini", strOut, "tRuE", 5);
+
+
 
 
 return 0;

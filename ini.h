@@ -159,7 +159,7 @@ void IniTrimWhiteSpacesLR(char *strIN, const int l, const int r){
 
 void IniTrimCharsLR(char *strIN, const char c, const int l, const int r){
     
-    // L & R are bool to remove all chars != c
+    // L & R are bool to remove all chars, until 1st is != c
     // Left and/or Right
 
     // Initialize two pointers left and right
@@ -183,9 +183,9 @@ void IniTrimCharsLR(char *strIN, const char c, const int l, const int r){
     memmove(strIN, pLeft, pRight - pLeft);
     strIN[pRight - pLeft] = '\0';
 }
-#define IniTrimChar_L(strIN, c) IniTrimCharsLR(strIN, c, 1, 0)
-#define IniTrimChar_R(strIN, c) IniTrimCharsLR(strIN, c, 0, 1)
-#define IniTrimChar_LR(strIN, c) IniTrimCharsLR(strIN, c, 1, 1)
+#define IniTrimChars_L(strIN, c) IniTrimCharsLR(strIN, c, 1, 0)
+#define IniTrimChars_R(strIN, c) IniTrimCharsLR(strIN, c, 0, 1)
+#define IniTrimChars_LR(strIN, c) IniTrimCharsLR(strIN, c, 1, 1)
 
 void IniTrimCntLR(char *strIN, const int l, const int r){
     
@@ -210,6 +210,33 @@ void IniTrimCntLR(char *strIN, const int l, const int r){
 #define IniTrimCnt_L(strIN, count) IniTrimCntLR(strIN, count, 0)
 #define IniTrimCnt_R(strIN, count) IniTrimCntLR(strIN, 0, count)
 #define IniTrimCnt_LR(strIN, left, right) IniTrimCntLR(strIN, left, right)
+
+void IniTrimACharLR(char *strIN, const char c, const int l, const int r){
+    
+    // L & R are bool to remove all chars, as long they're without a break == c
+    // Left and/or Right
+
+    // Initialize two pointers left and right
+    char *pLeft = strIN;
+    char *pRight = strIN + strlen(strIN) - 1;
+
+    if (l){
+        while (pRight > pLeft && (*pLeft == c))
+            pLeft++;
+    }
+
+    if (r){
+        while (pRight > pLeft && (*pRight == c))
+            pRight--;
+    }
+
+    pRight++;
+    memmove(strIN, pLeft, pRight - pLeft);
+    strIN[pRight - pLeft] = '\0';
+}
+#define IniTrimAChar_L(strIN, c) IniTrimACharLR(strIN, c, 1, 0)
+#define IniTrimAChar_R(strIN, c) IniTrimACharLR(strIN, c, 0, 1)
+#define IniTrimAChar_LR(strIN, c) IniTrimACharLR(strIN, c, 1, 1)
 
 int IniGetTokens(char *strIN, char **tokens){
     
@@ -455,33 +482,25 @@ int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, 
 #define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
 #define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
-int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
+int IniSetTypeToValue(char *strValue, const int valType){
 
-    // a string like:
+    // Function converts strValue into a value of valType
+    // and converts the value than back into a normalized string
+    
+    // valType  = 0     as it is
+    //          = 1     int
+    //          = 2     float
+    //          = 3     hex
+    //          = 4     as it is but embedded in ""
+    //          = 5     boolean
 
-    // "             Value = 1234     # MyRemark"
-    // gets splitted into
-    // "             Value =" (strValue)
-    // and
-    // "     # MyRemark" (strRemark)
+    // most common human and OS errors get fixed
+    // no case sensitivity
 
-    // when we replace "1234" with strVal
-    // we try to preserve the position of the "#"
-    // if strIn is too long, we place it on a tab
-    //
 
-    // Returns  -1 DataType Error
-    //          -2 Overflow return string
-    //           0 text as it is success 
-    //           4 text embedded in ""
-    //           1 int
-    //           2 float
-    //           3 hex
-
-    char strPreVal[STR_SMALL_SIZE];
-    strcpy(strPreVal, strIN);
-    IniTrimRemark(strPreVal);
-    IniTrimChar_R(strPreVal, '=');
+    // For the case float has "," instead of "." as delimiter
+    char *pComma;
+    char strValue2[strlen(strValue) + 1];
 
     char *pEnd;
     long lNum = 0;
@@ -489,41 +508,68 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     #define hNum lNum
     #define bNum lNum
 
-    // Check and Format strValue
-    char strValNew[STR_SMALL_SIZE];
-    
-    // as it is, but with leading space (as substitute for failing type-conversion)
-    sprintf(strValNew, " %s", strValue);
-    
+    int r = 0;
+
     switch (valType){
     case 1:
         // as int
         lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd == '\0'){
-            sprintf(strValNew, " %ld", lNum);
+            sprintf(strValue, "%ld", lNum);
+            r = 1;
         }
         break;
     case 2:
         // as float
-        dNum = strtod(strValue, &pEnd);
+        // Make 1st comma to dot...
+        pComma = strchr(strValue, ',');
+        if (pComma != NULL){
+            // Copy Value    
+            sprintf(strValue2, "%s", strValue);
+            // Replace ","
+            pComma = strchr(strValue2, ',');
+            *pComma = '.';
+            dNum = strtod(strValue2, &pEnd);
+        }
+        else{
+            dNum = strtod(strValue, &pEnd);
+        }    
         if (*pEnd == '\0'){
-            sprintf(strValNew, " %.6f", dNum);
+            sprintf(strValue, "%.8f", dNum);
+            
+            // Remove too much trailing zeros
+            IniTrimAChar_R(strValue, '0');
+
+            // Keep at least one zero
+            r = strlen(strValue);
+            if (strValue[r - 1] == '.'){
+                strValue[r] = '0';
+                strValue[r + 1] = '\0';
+            }
+            
+            r = 2;
         }
         break;
     case 3:
         // as hex
-        hNum = strtol(strValue, &pEnd, 16);
+        if(strncasecmp(strValue, "&h", 2) == 0){
+            hNum = strtol(&strValue[2], &pEnd, 16);
+        }
+        else{
+            hNum = strtol(strValue, &pEnd, 16);
+        }    
         if (*pEnd == '\0'){
-            sprintf(strValNew, " 0x%lX", hNum);
+            sprintf(strValue, "0x%lX", hNum);
+            r = 3;
         }
         break;
     case 5:
         // as bool
-        if(strncasecmp(strIN, "true", 4) == 0){
+        if(strncasecmp(strValue, "true", 4) == 0){
             // True
             bNum = 1;
         }
-        else if(strncasecmp(strIN, "false", 5) == 0){
+        else if(strncasecmp(strValue, "false", 5) == 0){
             // False
         }
         else{
@@ -532,28 +578,70 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
         }
         if(bNum){
             // True
-            sprintf(strValNew, " true");
+            sprintf(strValue, "true");
         }
         else{
             // False
-            sprintf(strValNew, " false");
+            sprintf(strValue, "false");
         }
+        r = 5;
         break;
     case 4:
         // as text embedded in ""
-        sprintf(strValNew, " \"%s\"", strValue);
+        sprintf(strValue2, "\"%s\"", strValue);
+        sprintf(strValue, "%s", strValue2);
+        r = 4;
         break;
     default:
-        // as it is, but with leading space
-        // sprintf(strValNew, " %s", strValue);
+        // Untouched
         break;
     }
 
+    return r;
+}
+
+int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
+
+    // a string like:
+
+    // "             Value = 1234     # MyRemark"
+    // gets splitted into
+    // "             Value =" (strPreVal)
+    // and
+    // "     # MyRemark" (strRemark)
+
+    // when we replace "1234" with strVal
+    // we try to preserve the position of the "#"
+    // if strIn is too long, we place it on a tab
+    //
+
+    // Returns  -1 Overflow return string
+    //           0 text as it is success and when type conversion failed
+    //           1 int
+    //           2 float
+    //           3 hex
+    //           4 text embedded in ""
+    //           5 bool as true/false
+
+    int r = 0;
+
+    // PreValue - part
+    char strPreVal[STR_SMALL_SIZE];
+    strcpy(strPreVal, strIN);
+    IniTrimRemark(strPreVal);
+    IniTrimChars_R(strPreVal, '=');
+
+    // Copy & Check & Format strValue
+    char strValNew[strlen(strValue) + 16];
+    sprintf(strValNew, "%s", strValue);
+    r = IniSetTypeToValue(strValNew, valType);
+    
+    // Remark - part
     char strRemark[STR_SMALL_SIZE];
     strcpy(strRemark, strIN);
     IniGetRemark(strRemark);
  
-    // Check and place Remark
+    // Check and (re)place Remark
     if (strlen(strRemark)){
         // Line contains a remark
 
@@ -598,13 +686,13 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     if ((strlen(strPreVal) + strlen(strValNew) + strlen(strRemark)) < STR_SMALL_SIZE){
         // Join them together
-        sprintf(strIN, "%s%s%s", strPreVal, strValNew, strRemark);
-        return valType;
+        sprintf(strIN, "%s %s%s", strPreVal, strValNew, strRemark);
+        return r;
     }
     else{
         // String would been longer than STR_SMALL_SIZE
-        strIN[0] = '0';
-        return -2;
+        strIN[0] = '\0';
+        return -1;
     }
 }
 
@@ -701,9 +789,6 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
     // Returns  0 = doesn't exist, (not anymore - jumps now into IniCreateMissingValue() )
     //         -1 = File Error.
     //         -2 = Broken Token (not anymore - jumps now into IniCreateMissingValue() )
-    //         -3 = Broken int 
-    //         -4 = Broken float 
-    //         -5 = Broken hex 
     //          1 = Value is a text
     //          2 = Value is a bool
     //          3 = Value is an int
@@ -737,7 +822,7 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
         IniTrimRemark(strIN);
 
         // Remove all chars left of "="
-        IniTrimChar_L(strIN, '=');
+        IniTrimChars_L(strIN, '=');
 
         // Remove equal
         IniTrimCnt_L(strIN, 1);
@@ -829,7 +914,7 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
                         sprintf(strSearch, "%ld", lNum);
                     }
                     else{
-                        r =1;
+                        r = 1;
                     }
                 }                
             }                    
@@ -837,14 +922,14 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
+
         // strSearch contains (""-embedded and :-separated)
         //              index of 1st missing token
-        //              index of broken line in file
-        
+        //              index of broken line in file        
         IniTrimCnt_LR(strSearch, 1, 1);
-
         int missingToken = strtol(strSearch, &pEnd, 10);
         int insertLine = strtol(strchr(strSearch, ':') + 1, &pEnd, 10);
+
         r = IniCreateMissingValue(fileName, strSearch2, strDefault, 0, missingToken, insertLine);
         sprintf(strSearch, "%s", strDefault);
     }
@@ -855,4 +940,45 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
     return r;     
 }
 
+int IniSetValue(const char *fileName, char *strSearch, const char *strValue, const int type){
+
+    // Copy for the case of value/token does not exist.
+    char strSearch2[strlen(strSearch) + 1];
+    sprintf(strSearch2, "%s", strSearch);
+
+    int cntLine = IniFindValueLineNr(fileName, strSearch);
+    int r = cntLine;
+    char *pEnd;
+
+    if (cntLine > 0){
+        // File & Search exist
+
+        IniChangeValueLine(strSearch, strValue, type);
+        return IniReplaceLine(fileName, strSearch, cntLine);
+    }
+    else if (cntLine == 0 || cntLine == -2){
+        // Value / Token does not exist
+
+        // strSearch contains (""-embedded and :-separated)
+        //              index of 1st missing token
+        //              index of broken line in file        
+        IniTrimCnt_LR(strSearch, 1, 1);
+        int missingToken = strtol(strSearch, &pEnd, 10);
+        int insertLine = strtol(strchr(strSearch, ':') + 1, &pEnd, 10);
+
+        // Value needs type-check/format
+        char strValue2[strlen(strValue) + 16];
+        sprintf(strValue2, "%s", strValue);
+        IniSetTypeToValue(strValue2, type);
+
+        r = IniCreateMissingValue(fileName, strSearch2, strValue2, 0, missingToken, insertLine);
+        sprintf(strSearch, "%s", strValue2);
+    }
+    else{
+        // FileError
+    }
+
+    return r;     
+
+}
 
