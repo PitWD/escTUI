@@ -1,45 +1,24 @@
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include "str.h"
 
-#define STR_SMALL_SIZE 255
-#define STR_MID_SIZE 1024
 #define INI_TAB_LEN 4
 
-#define INI_TYP_AsItIs 0
-#define INI_TYP_Int 1
-#define INI_TYP_Float 2
-#define INI_TYP_Hex 3
-#define INI_TYP_Text 4
-#define INI_TYP_Bool 5
+#define INI_TYPE_AsItIs 0
+#define INI_TYPE_Int 1
+#define INI_TYPE_Float 2
+#define INI_TYPE_Hex 3
+#define INI_TYPE_Text 4
+#define INI_TYPE_Bool 5
 
 
 void IniTrimRemark (char *strIN){
-    
     // Remove all trailing text after
     // the first non "" encapsulated #
-
-    /*
-    // From back need one int less, but is slower!
-
-    int i = strlen(strIN) - 1;
-    int inQuote = 0;
-
-
-    for (i; i >= 0; i--){
-        if (strIN[i] == '#' && !inQuote)
-            strIN[i] = '\0';
-            // Don't break to find the very first !
-        else if (strIN[i] == '"')
-            inQuote = !inQuote;
-    }
-    */
-    
-    int l = strlen(strIN) - 1; 
+  
+    int l = strlen(strIN); 
     int i = 0;
     int inQuote = 0;
 
-    for (i = 0; i <= l; i++){
+    for (i = 0; i < l; i++){
         if (strIN[i] == '#' && !inQuote){
             strIN[i] = '\0';
             break;
@@ -47,11 +26,9 @@ void IniTrimRemark (char *strIN){
         else if (strIN[i] == '"')
             inQuote = !inQuote;
     }
-
 }
 
-int IniGetRemark (char *strIN){
-    
+int IniGetRemark (char *strIN){  
     // Returns Remark with leading whitespaces
     // "Value = 1234       # MyRemark"
     // results in:
@@ -110,7 +87,6 @@ void IniTrimNonHex(char *strIN){
     // results in:
     // "Value = &h234af0"
 
-    // int i = strlen(strIN) - 1;
     char c = 0;
 
     for (int i = strlen(strIN) - 1; i >= 0; i--){
@@ -122,18 +98,9 @@ void IniTrimNonHex(char *strIN){
     }
 }
 
-void IniTrimNonNumeric(char *strIN){
-    // Trim on 1st non-numeric position
-    for (int i = 0; i < strlen(strIN); i++){
-        if ((strIN[i] < '0' || strIN[i] > '9') && strIN[i] != '.' && strIN[i] != '-'){
-            strIN[i] = '\0';
-        }
-    }
-}
-
 int IniIsNonNumeric(const char *strIN){
-
     // With the first non "0-9", ".", "," it's non-numeric
+
     char c = 0;
 
     for (int i = strlen(strIN) - 1; i >= 0; i--){
@@ -142,160 +109,6 @@ int IniIsNonNumeric(const char *strIN){
             return 1;
         }
     }
-    return 0;
-
-}
-
-void IniTrimWhiteSpacesLR(char *strIN, const int l, const int r){
-    
-    // L & R are bool to remove whitespaces
-    // Left and/or Right
-
-    // Initialize two pointers left and right
-    char *pLeft = strIN;
-    char *pRight = strIN + strlen(strIN) - 1;
-
-    // Traverse string from both ends until a non-space character is found
-    if (l){
-        while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t') || *pLeft == '\n' || *pLeft == '\r')
-            pLeft++;
-    }
-    
-    if (r){
-        while (pRight > pLeft && (*pRight == ' ' || *pRight == '\t' || *pRight == '\n' || *pRight == '\r'))
-            pRight--;
-    }
-    
-    pRight++;
-    memmove(strIN, pLeft, pRight - pLeft);
-    strIN[pRight - pLeft] = '\0';
-}
-#define IniTrimWS_L(strIN) IniTrimWhiteSpacesLR(strIN,1,0)
-#define IniTrimWS_R(strIN) IniTrimWhiteSpacesLR(strIN,0,1)
-#define IniTrimWS(strIN) IniTrimWhiteSpacesLR(strIN,1,1)
-
-void IniTrimCharsLR(char *strIN, const char c, const int l, const int r){
-    
-    // L & R are bool to remove all chars, until 1st is != c
-    // Left and/or Right
-
-    // Initialize two pointers left and right
-    char *pLeft = strIN;
-    char *pRight = strIN + strlen(strIN) - 1;
-
-    if (l){
-        // Remove all chars left of c
-        pLeft = strchr(strIN, c);
-        if (pLeft == NULL){
-            pLeft = strIN;
-        }
-    }
-
-    if (r){
-        while (pRight > pLeft && (*pRight != c))
-            pRight--;
-    }
-
-    pRight++;
-    memmove(strIN, pLeft, pRight - pLeft);
-    strIN[pRight - pLeft] = '\0';
-}
-#define IniTrimChars_L(strIN, c) IniTrimCharsLR(strIN, c, 1, 0)
-#define IniTrimChars_R(strIN, c) IniTrimCharsLR(strIN, c, 0, 1)
-#define IniTrimChars_LR(strIN, c) IniTrimCharsLR(strIN, c, 1, 1)
-
-void IniTrimCntLR(char *strIN, const int l, const int r){
-    
-    // Remove l chars from the left and r from the right
-
-    // len & pointer left 
-    int i = strlen(strIN);
-    char *pLeft = strIN;
- 
-    if (i > l){
-        pLeft += l;
-        i -= l;
-    }
-
-    if (i > r){
-        i -= r;
-    }
-    
-    memmove(strIN, pLeft, i);
-    strIN[i] = '\0';
-}
-#define IniTrimCnt_L(strIN, count) IniTrimCntLR(strIN, count, 0)
-#define IniTrimCnt_R(strIN, count) IniTrimCntLR(strIN, 0, count)
-#define IniTrimCnt_LR(strIN, left, right) IniTrimCntLR(strIN, left, right)
-
-void IniTrimACharLR(char *strIN, const char c, const int l, const int r){
-    
-    // L & R are bool to remove all chars, as long they're without a break == c
-    // Left and/or Right
-
-    // Initialize two pointers left and right
-    char *pLeft = strIN;
-    char *pRight = strIN + strlen(strIN) - 1;
-
-    if (l){
-        while (pRight > pLeft && (*pLeft == c))
-            pLeft++;
-    }
-
-    if (r){
-        while (pRight > pLeft && (*pRight == c))
-            pRight--;
-    }
-
-    pRight++;
-    memmove(strIN, pLeft, pRight - pLeft);
-    strIN[pRight - pLeft] = '\0';
-}
-#define IniTrimAChar_L(strIN, c) IniTrimACharLR(strIN, c, 1, 0)
-#define IniTrimAChar_R(strIN, c) IniTrimACharLR(strIN, c, 0, 1)
-#define IniTrimAChar_LR(strIN, c) IniTrimACharLR(strIN, c, 1, 1)
-
-int IniCommaToDot(char *strIN){
-    // Make 1st comma to dot...
-    char *pComma = strchr(strIN, ',');
-    if (pComma != NULL){
-        *pComma = '.';
-    }
-    // Is there a dot ?
-    if (strchr(strIN, '.') != NULL){
-        return 1;
-    }
-
-    return 0;
-}
-
-int IniNormDoubleString(char *strIN){
-
-    char *pEnd;
-
-    IniCommaToDot(strIN);
-    IniTrimNonNumeric(strIN);
-    
-    double dNum = strtod(strIN, &pEnd);
-
-    if (*pEnd == '\0'){
-
-        sprintf(strIN, "%.8f", dNum);
-
-        // Remove too much trailing zeros
-        IniTrimAChar_R(strIN, '0');
-
-        // Keep at least one zero
-        int len = strlen(strIN);
-        if (strIN[len - 1] == '.'){
-            strIN[len] = '0';
-            strIN[len + 1] = '\0';
-        }
-
-        return 1;
-
-    }
-
     return 0;
 }
 
@@ -341,34 +154,11 @@ int IniGetTokens(char *strIN, char **tokens){
 
     // remove "[." and "]" from the Value token
     if(count){
-        IniTrimCnt_LR(tokens[count], count + 1, 1);
+        StrTrimCnt_LR(tokens[count], count + 1, 1);
     }
     count++;
     return count;
 }
-
-void IniUcaseLen(char *strIN, const int len) { 
-   // Convert 1st len chars to upper case
-
-    if (len <= strlen(strIN)){
-        for (int c = 0; c < len; c++){
-            strIN[c] = toupper(strIN[c]);
-        }        
-    }
-}
-#define IniUcase(strIN) IniUcaseLen(strIN, strlen(strIN))
-
-void IniLcaseLen(char *strIN, const int len) {
-   
-   // Convert 1st len chars to lower case
-
-    if (len <= strlen(strIN)){
-        for (int c = 0; c < len; c++){
-            strIN[c] = tolower(strIN[c]);
-        }        
-    }
-}
-#define IniLcase(strIN) IniLcaseLen(strIN, strlen(strIN))
 
 int IniFindValueLineNr(const char *fileName, char *strSearch){
 
@@ -421,7 +211,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
         strcpy(strSearch, strIN);
 
         // Trim Left Whitespaces
-        IniTrimWS_L(strIN);
+        StrTrimWS_L(strIN);
 
         // Check if line is below actual token-level
         if (strIN[0] == '['){
@@ -542,7 +332,6 @@ int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, 
 #define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
 
 int IniSetTypeToValue(char *strValue, const int valType){
-
     // Function converts strValue into a value of valType
     // and converts the value than back into a normalized string
     
@@ -572,7 +361,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     switch (valType){
     case 1:
         // as int
-        IniTrimNonNumeric(strValue);
+        StrTrimNonNumeric(strValue);
         lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd == '\0'){
             sprintf(strValue, "%ld", lNum);
@@ -582,7 +371,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case 2:
         // as float
         // Make 1st comma to dot...
-        if(IniNormDoubleString(strValue)){
+        if(StrNormFloatString(strValue)){
             r = 2;
         }
     case 3:
@@ -653,11 +442,11 @@ int IniGetTypeFromValue(char *strValue){
         // Value is a text
 
         // Remove leading '"'
-        IniTrimCnt_L(strIN,1);
+        StrTrimCnt_L(strIN,1);
 
         if (strIN[strlen(strIN) - 1] == '"'){
             // Text was fully encapsulated
-            IniTrimCnt_R(strIN,1);
+            StrTrimCnt_R(strIN,1);
         }
         else{
             // Don't do this !
@@ -685,7 +474,7 @@ int IniGetTypeFromValue(char *strValue){
         else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
             // hex
             // remove all non-numeric trailing characters
-            IniTrimNonNumeric(strIN);
+            IniTrimNonHex(strIN);
             lNum = strtol(&strIN[2], &pEnd, 16);
             if (*pEnd == '\0'){
                 sprintf(strValue, "%ld", lNum);
@@ -701,14 +490,14 @@ int IniGetTypeFromValue(char *strValue){
             r = 3;                
 
             // Is there a dot ?
-            if (IniCommaToDot(strIN)){
+            if (StrCommaToDot(strIN)){
                 r++;
             }
 
             // Int or Float
             if (r == 4){
                 // float
-                if (!IniNormDoubleString(strIN)){
+                if (!StrNormFloatString(strIN)){
                     r = 0;
                 }
             }
@@ -756,7 +545,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     char strPreVal[STR_SMALL_SIZE];
     strcpy(strPreVal, strIN);
     IniTrimRemark(strPreVal);
-    IniTrimChars_R(strPreVal, '=');
+    StrTrimChars_R(strPreVal, '=');
 
     // Copy & Check & Format strValue
     char strValNew[strlen(strValue) + 16];
@@ -781,7 +570,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
             // Count spaces (respecting tabs)
             int lenSpaces = IniCountFrontSpaces(strRemark);
             // Remove all spaces
-            IniTrimWS(strRemark);
+            StrTrimWS(strRemark);
 
             if (lenSpaces < lenDiff){
                 // Missing space in total
@@ -870,7 +659,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             // Remove Remark
             IniTrimRemark(strWork);
             // Remove white-spaces
-            IniTrimWS(strWork);
+            StrTrimWS(strWork);
 
             if (strlen(strWork)){
                 // Line found
@@ -886,7 +675,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             sprintf(strWork, "%*c%s", i * INI_TAB_LEN, ' ', tokens[i]);
             if (!i){
                 // One trailing space too much.
-                IniTrimCnt_L(strWork, 1);
+                StrTrimCnt_L(strWork, 1);
             }
             r = IniInsertLine(fileName, strWork, insertLine);
             insertLine++;
@@ -909,7 +698,6 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
     }
 
     return r;
-
 } 
 
 int IniGetValue(const char *fileName, const char *strSearch, const char *strDefault, const int typValue, char *strReturn){
@@ -943,13 +731,13 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         IniTrimRemark(strReturn);
 
         // Remove all chars left of "="
-        IniTrimChars_L(strReturn, '=');
+        StrTrimChars_L(strReturn, '=');
 
         // Remove equal
-        IniTrimCnt_L(strReturn, 1);
+        StrTrimCnt_L(strReturn, 1);
 
         // Trim whitespaces
-        IniTrimWS(strReturn);
+        StrTrimWS(strReturn);
 
         if (typValue){
             // get type of value and normalize value
@@ -963,7 +751,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         // strReturn    contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        IniTrimCnt_LR(strReturn, 1, 1);
+        StrTrimCnt_LR(strReturn, 1, 1);
         int missingToken = strtol(strReturn, &pEnd, 10);
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
@@ -999,7 +787,7 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
         // strWork  contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        IniTrimCnt_LR(strWork, 1, 1);
+        StrTrimCnt_LR(strWork, 1, 1);
         int missingToken = strtol(strWork, &pEnd, 10);
         int insertLine = strtol(strchr(strWork, ':') + 1, &pEnd, 10);
 
@@ -1010,6 +798,5 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
     }
 
     return r;     
-
 }
 
