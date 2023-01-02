@@ -957,39 +957,33 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     return r;     
 }
 
-int IniSetValue(const char *fileName, char *strSearch, const char *strValue, const int type){
+int IniSetValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue){
 
     // Copy for the case of value/token does not exist.
-    char strSearch2[strlen(strSearch) + 1];
-    sprintf(strSearch2, "%s", strSearch);
+    char strWork[STR_SMALL_SIZE];
+    strcpy(strWork, strSearch);
 
-    int cntLine = IniFindValueLineNr(fileName, strSearch);
+    int cntLine = IniFindValueLineNr(fileName, strWork);
     int r = cntLine;
     char *pEnd;
 
     if (cntLine > 0){
         // File & Search exist
 
-        IniChangeValueLine(strSearch, strValue, type);
-        return IniReplaceLine(fileName, strSearch, cntLine);
+        IniChangeValueLine(strWork, strValue, typValue);
+        return IniReplaceLine(fileName, strWork, cntLine);
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
 
-        // strSearch contains (""-embedded and :-separated)
+        // strWork  contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        IniTrimCnt_LR(strSearch, 1, 1);
-        int missingToken = strtol(strSearch, &pEnd, 10);
-        int insertLine = strtol(strchr(strSearch, ':') + 1, &pEnd, 10);
+        IniTrimCnt_LR(strWork, 1, 1);
+        int missingToken = strtol(strWork, &pEnd, 10);
+        int insertLine = strtol(strchr(strWork, ':') + 1, &pEnd, 10);
 
-        // Value needs type-check/format
-        char strValue2[strlen(strValue) + 16];
-        sprintf(strValue2, "%s", strValue);
-        IniSetTypeToValue(strValue2, type);
-
-        r = IniCreateMissingValue(fileName, strSearch2, strValue2, 0, missingToken, insertLine);
-        sprintf(strSearch, "%s", strValue2);
+        r = IniCreateMissingValue(fileName, strSearch, strValue, typValue, missingToken, insertLine);
     }
     else{
         // FileError
