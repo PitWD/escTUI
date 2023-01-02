@@ -771,7 +771,7 @@ long IniGetLong(const char *fileName, const char *strSearch, const long defLong)
     char strValue[STR_SMALL_SIZE];
     char *pEnd;
 
-    sprintf(strValue, "%l", defLong);
+    sprintf(strValue, "%ld", defLong);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Int, strValue);
     long valLong = strtol(strValue, &pEnd, 10);
     if (*pEnd == '\0'){
@@ -803,7 +803,7 @@ long IniGetLongHex(const char *fileName, const char *strSearch, const long defLo
     char strValue[STR_SMALL_SIZE];
     char *pEnd;
 
-    sprintf(strValue, "0x%dX", defLong);
+    sprintf(strValue, "0x%ldX", defLong);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strValue);
     long valLong = strtol(strValue, &pEnd, 16);
     if (*pEnd == '\0'){
@@ -872,4 +872,39 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
 
     return r;     
 }
-
+#define IniSet(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs)
+#define IniSetStr(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_Text)
+int IniSetLong(const char *fileName, const char *strSearch, const long lngValue){
+    char strValue[STR_SMALL_SIZE];
+    sprintf(strValue, "%ld", lngValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Int);
+}
+int IniSetInt(const char *fileName, const char *strSearch, const int intValue){
+    return IniSetLong(fileName, strSearch, (long)intValue);
+}
+int IniSetDouble(const char *fileName, const char *strSearch, double dblValue){
+    char strValue[STR_SMALL_SIZE];
+    sprintf(strValue, "%.8f", dblValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Float);
+}
+int IniSetFloat(const char *fileName, const char *strSearch, float fltValue){
+    return IniSetDouble(fileName, strSearch, (double)fltValue);
+}
+int IniSetBool(const char *fileName, const char *strSearch, const int boolValue){
+    char strValue[STR_SMALL_SIZE];
+    if (boolValue){
+        strcpy(strValue, "true");
+    }
+    else{
+        strcpy(strValue, "false");
+    }
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
+}
+int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
+    char strValue[STR_SMALL_SIZE];
+    sprintf(strValue, "0x%ldX", hexValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
+}
+int IniSetHex(const char *fileName, const char *strSearch, const int hexValue){
+    return IniSetLongHex(fileName, strSearch, (long)hexValue);
+}
