@@ -402,7 +402,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
         cntLine++;
 
         // Save original line for return
-        sprintf(strSearch, "%s", strIN);
+        strcpy(strSearch, strIN);
 
         // Trim Left Whitespaces
         IniTrimWS_L(strIN);
@@ -608,7 +608,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case 4:
         // as text embedded in ""
         sprintf(strValue2, "\"%s\"", strValue);
-        sprintf(strValue, "%s", strValue2);
+        strcpy(strValue, strValue2);
         r = 4;
         break;
     default:
@@ -627,7 +627,7 @@ int IniGetTypeFromValue(char *strValue){
     double dNum = 0;
 
     char strIN[strlen(strValue) + 16];
-    sprintf(strIN, "%s", strValue);
+    strcpy(strIN, strValue);
 
     int r = 0;
 
@@ -646,14 +646,14 @@ int IniGetTypeFromValue(char *strValue){
             // Don't do this !
         }
         
-        sprintf(strValue, "%s",strIN);
+        strcpy(strValue, strIN);
         r = 4;
     }
     else{
         // Value is a number or True or False or hex or (not embedded text - don't do this !)
 
         // as return for bad formatted (not "" - embedded text) - three cases following
-        sprintf(strValue, "%s",strIN);
+        strcpy(strValue, strIN);
 
         if(strncasecmp(strIN, "true", 4) == 0){
             // True
@@ -742,7 +742,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     // Copy & Check & Format strValue
     char strValNew[strlen(strValue) + 16];
-    sprintf(strValNew, "%s", strValue);
+    strcpy(strValNew, strValue);
     r = IniSetTypeToValue(strValNew, valType);
     
     // Remark - part
@@ -788,9 +788,9 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
         }
         else{
             // Same length
-            sprintf(strIN, "%s", strRemark);                
+            strcpy(strIN, strRemark);
         }
-        sprintf(strRemark, "%s", strIN);                
+        strcpy(strRemark, strIN);
     }
 
     if ((strlen(strPreVal) + strlen(strValNew) + strlen(strRemark)) < STR_SMALL_SIZE){
@@ -912,7 +912,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     // "," & "." are seen as valid decimal points
 
     // Working string
-    sprintf(strReturn, "%s", strSearch);
+    strcpy(strReturn, strSearch);
 
     int cntLine = IniFindValueLineNr(fileName, strReturn);
     int r = 0;
@@ -948,7 +948,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
         r = IniCreateMissingValue(fileName, strSearch, strDefault, 0, missingToken, insertLine);
-        sprintf(strReturn, "%s", strDefault);
+        strcpy(strReturn, strDefault);
     }
     else{
         // FileError
