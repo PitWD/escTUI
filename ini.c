@@ -63,7 +63,7 @@ int main(){
 
     //char strReturn[255];
     // strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "moff", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "moff", INI_TYP_AsItIs, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -97,7 +97,7 @@ int main(){
     printf("%s<-\n", strOut);
 
     // strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "moff", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "moff", INI_TYP_Text, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -142,7 +142,7 @@ int main(){
     IniReplaceLine("desktops.ini",strOut,52);
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "moff", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "&habcdef", INI_TYP_Hex, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -179,7 +179,7 @@ int main(){
     strcpy(strOut, "                    CaptionText = \"FixedTop\"");
     IniReplaceLine("desktops.ini",strOut,52);
     //strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "moff", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "1,234moff", INI_TYP_Float, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -213,7 +213,7 @@ int main(){
     printf("%s<-\n\n", strOut);    
 
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext", "moff", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext", "moff1234", INI_TYP_Float, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -378,7 +378,7 @@ int main(){
     printf("%s\n\n", strOut);
 
     strcpy(strOut, "global1.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global1.definitions.fixedareas.1.top.captiontext", "moff1", strOut);
+    i = IniGetValue("desktops.ini", "global1.definitions.fixedareas.1.top.captiontext", "1moff1", INI_TYP_Int, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -395,8 +395,7 @@ int main(){
     }
     printf("%s<-:%d\n\n", strOut, i);
 
-    strcpy(strOut, "global.definitions1.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions1.fixedareas.1.top.captiontext", "moff2", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions1.fixedareas.1.top.captiontext", "12moff2", INI_TYP_Bool, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -413,8 +412,7 @@ int main(){
     }
     printf("%s<-:%d\n\n", strOut, i);
 
-    strcpy(strOut, "global.definitions.fixedareas1.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas1.1.top.captiontext", "moff3", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas1.1.top.captiontext", "0moff3", INI_TYP_Bool, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -431,8 +429,7 @@ int main(){
     }
     printf("%s<-:%d\n\n", strOut, i);
 
-    strcpy(strOut, "global.definitions.fixedareas.11.top.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.11.top.captiontext", "moff4", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.11.top.captiontext", "TrUemoff4", INI_TYP_Bool, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -449,8 +446,7 @@ int main(){
     }
     printf("%s<-:%d\n\n", strOut, i);
 
-    strcpy(strOut, "global.definitions.fixedareas.1.top1.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top1.captiontext", "moff5", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top1.captiontext", "moff5", INI_TYP_Bool, strOut);
     switch (i){
     case -2:
         // Broken-Token
@@ -467,8 +463,7 @@ int main(){
     }
     printf("%s<-:%d\n\n", strOut, i);
 
-    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext1");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext1", "moff6", strOut);
+    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext1", "12,34moff6", INI_TYP_Float, strOut);
     switch (i){
     case -2:
         // Broken-Token

@@ -6,6 +6,14 @@
 #define STR_MID_SIZE 1024
 #define INI_TAB_LEN 4
 
+#define INI_TYP_AsItIs 0
+#define INI_TYP_Int 1
+#define INI_TYP_Float 2
+#define INI_TYP_Hex 3
+#define INI_TYP_Text 4
+#define INI_TYP_Bool 5
+
+
 void IniTrimRemark (char *strIN){
     
     // Remove all trailing text after
@@ -94,7 +102,7 @@ int IniCountFrontSpaces (char *strIN){
     return r;
 }
 
-void IniTrimNonNumeric(char *strIN){
+void IniTrimNonHex(char *strIN){
 
     // Removes from Right all non-numeric and non-hex characters until the first
     // decimal or hex is found
@@ -111,6 +119,15 @@ void IniTrimNonNumeric(char *strIN){
             break;
         else
             strIN[i] = '\0';
+    }
+}
+
+void IniTrimNonNumeric(char *strIN){
+    // Trim on 1st non-numeric position
+    for (int i = 0; i < strlen(strIN); i++){
+        if ((strIN[i] < '0' || strIN[i] > '9') && strIN[i] != '.' && strIN[i] != '-'){
+            strIN[i] = '\0';
+        }
     }
 }
 
@@ -250,13 +267,15 @@ int IniCommaToDot(char *strIN){
     }
 
     return 0;
-
 }
 
 int IniNormDoubleString(char *strIN){
 
     char *pEnd;
 
+    IniCommaToDot(strIN);
+    IniTrimNonNumeric(strIN);
+    
     double dNum = strtod(strIN, &pEnd);
 
     if (*pEnd == '\0'){
@@ -276,13 +295,11 @@ int IniNormDoubleString(char *strIN){
         return 1;
 
     }
-    
-    return 0;
 
+    return 0;
 }
 
 int IniGetTokens(char *strIN, char **tokens){
-    
     // Split string like "Main.Sub1.Sub1.Value" into **tokens
     // like:    [Main]
     //          [.Sub1]
@@ -330,8 +347,7 @@ int IniGetTokens(char *strIN, char **tokens){
     return count;
 }
 
-void IniUcaseLen(char *strIN, const int len) {
-   
+void IniUcaseLen(char *strIN, const int len) { 
    // Convert 1st len chars to upper case
 
     if (len <= strlen(strIN)){
@@ -556,6 +572,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     switch (valType){
     case 1:
         // as int
+        IniTrimNonNumeric(strValue);
         lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd == '\0'){
             sprintf(strValue, "%ld", lNum);
@@ -565,12 +582,12 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case 2:
         // as float
         // Make 1st comma to dot...
-        IniCommaToDot(strValue);
         if(IniNormDoubleString(strValue)){
             r = 2;
         }
     case 3:
         // as hex
+        IniTrimNonHex(strValue);
         if(strncasecmp(strValue, "&h", 2) == 0){
             hNum = strtol(&strValue[2], &pEnd, 16);
         }
@@ -895,7 +912,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
 
 } 
 
-int IniGetValue(const char *fileName, const char *strSearch, const char *strDefault, char *strReturn){
+int IniGetValue(const char *fileName, const char *strSearch, const char *strDefault, const int typValue, char *strReturn){
 
     // Returns  0 = Value is "as it is"
     //         -1 = File Error.
@@ -934,9 +951,11 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         // Trim whitespaces
         IniTrimWS(strReturn);
 
-        // get type of value and normalize value
-        r = IniGetTypeFromValue(strReturn);
-
+        if (typValue){
+            // get type of value and normalize value
+            r = IniGetTypeFromValue(strReturn);
+        }
+        
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
@@ -948,7 +967,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         int missingToken = strtol(strReturn, &pEnd, 10);
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
-        r = IniCreateMissingValue(fileName, strSearch, strDefault, 0, missingToken, insertLine);
+        r = IniCreateMissingValue(fileName, strSearch, strDefault, typValue, missingToken, insertLine);
         strcpy(strReturn, strDefault);
     }
     else{
@@ -972,7 +991,7 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
         // File & Search exist
 
         IniChangeValueLine(strWork, strValue, typValue);
-        return IniReplaceLine(fileName, strWork, cntLine);
+        r = IniReplaceLine(fileName, strWork, cntLine);
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
