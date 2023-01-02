@@ -805,7 +805,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     }
 }
 
-int IniCreateMissingValue(const char *fileName, char *strSearch, const char *strValue, const int typValue, const int missingToken, int insertLine){
+int IniCreateMissingValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue, const int missingToken, int insertLine){
 
     // We already know from IniGetValue() or IniSetValue() that
     // strSearch (e.g. "Main.Sub.SubSub.Value") doesn't exist (fully) in file
@@ -830,11 +830,12 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
 
     int r = 1;
     int i = 0;
-    char strOut[STR_SMALL_SIZE];
+    char strWork[STR_SMALL_SIZE];
+    strcpy(strWork, strSearch);
 
     // Get formatted TokenList
     char *tokens[STR_SMALL_SIZE] = {NULL};
-    int cntToken = IniGetTokens(strSearch, tokens);
+    int cntToken = IniGetTokens(strWork, tokens);
 
     // Is the whole token-value-chain missing?
     if (!insertLine){
@@ -844,16 +845,16 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
             // File-Error
             r = -1;
         }
-        while (fgets(strOut, STR_SMALL_SIZE, file) != NULL){
+        while (fgets(strWork, STR_SMALL_SIZE, file) != NULL){
 
             insertLine++;
 
             // Remove Remark
-            IniTrimRemark(strOut);
+            IniTrimRemark(strWork);
             // Remove white-spaces
-            IniTrimWS(strOut);
+            IniTrimWS(strWork);
 
-            if (strlen(strOut)){
+            if (strlen(strWork)){
                 // Line found
                 break; 
             }
@@ -864,22 +865,22 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
     if(r > 0){
         // Run missing tokens
         for (i = missingToken; i < cntToken - 1; i++){            
-            sprintf(strOut, "%*c%s", i * INI_TAB_LEN, ' ', tokens[i]);
+            sprintf(strWork, "%*c%s", i * INI_TAB_LEN, ' ', tokens[i]);
             if (!i){
                 // One trailing space too much.
-                IniTrimCnt_L(strOut, 1);
+                IniTrimCnt_L(strWork, 1);
             }
-            r = IniInsertLine(fileName, strOut, insertLine);
+            r = IniInsertLine(fileName, strWork, insertLine);
             insertLine++;
         }
         
         // Finally the value
         if (r > 0){
-            sprintf(strOut, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
+            sprintf(strWork, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
             // Check & normalize value
-            r = IniChangeValueLine(strOut, strValue, typValue);
+            r = IniChangeValueLine(strWork, strValue, typValue);
             if (r > -1){
-                IniInsertLine(fileName, strOut, insertLine);
+                IniInsertLine(fileName, strWork, insertLine);
             }
         }
     }
@@ -893,7 +894,7 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
 
 } 
 
-int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
+int IniGetValue(const char *fileName, const char *strSearch, const char *strDefault, char *strReturn){
 
     // Returns  0 = Value is "as it is"
     //         -1 = File Error.
@@ -910,53 +911,44 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
     // "123.456"
     // "," & "." are seen as valid decimal points
 
-    // Copy for the case of value/token does not exist.
-    char strSearch2[strlen(strSearch) + 1];
-    sprintf(strSearch2, "%s", strSearch);
+    // Working string
+    sprintf(strReturn, "%s", strSearch);
 
-    int cntLine = IniFindValueLineNr(fileName, strSearch);
+    int cntLine = IniFindValueLineNr(fileName, strReturn);
     int r = 0;
     char *pEnd;
 
     if (cntLine > 0){
         // File and Search exist
 
-        long lNum = 0;
-        double dNum = 0;
-
-        char strIN[STR_SMALL_SIZE];
-        sprintf(strIN, "%s", strSearch);
-
         // Remove remarks
-        IniTrimRemark(strIN);
+        IniTrimRemark(strReturn);
 
         // Remove all chars left of "="
-        IniTrimChars_L(strIN, '=');
+        IniTrimChars_L(strReturn, '=');
 
         // Remove equal
-        IniTrimCnt_L(strIN, 1);
+        IniTrimCnt_L(strReturn, 1);
 
         // Trim whitespaces
-        IniTrimWS(strIN);
+        IniTrimWS(strReturn);
 
         // get type of value and normalize value
-        r = IniGetTypeFromValue(strIN);
-
-        sprintf(strSearch, "%s", strIN);
+        r = IniGetTypeFromValue(strReturn);
 
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
 
-        // strSearch contains (""-embedded and :-separated)
+        // strReturn    contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        IniTrimCnt_LR(strSearch, 1, 1);
-        int missingToken = strtol(strSearch, &pEnd, 10);
-        int insertLine = strtol(strchr(strSearch, ':') + 1, &pEnd, 10);
+        IniTrimCnt_LR(strReturn, 1, 1);
+        int missingToken = strtol(strReturn, &pEnd, 10);
+        int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
-        r = IniCreateMissingValue(fileName, strSearch2, strDefault, 0, missingToken, insertLine);
-        sprintf(strSearch, "%s", strDefault);
+        r = IniCreateMissingValue(fileName, strSearch, strDefault, 0, missingToken, insertLine);
+        sprintf(strReturn, "%s", strDefault);
     }
     else{
         // FileError
