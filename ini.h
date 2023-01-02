@@ -238,6 +238,49 @@ void IniTrimACharLR(char *strIN, const char c, const int l, const int r){
 #define IniTrimAChar_R(strIN, c) IniTrimACharLR(strIN, c, 0, 1)
 #define IniTrimAChar_LR(strIN, c) IniTrimACharLR(strIN, c, 1, 1)
 
+int IniCommaToDot(char *strIN){
+    // Make 1st comma to dot...
+    char *pComma = strchr(strIN, ',');
+    if (pComma != NULL){
+        *pComma = '.';
+    }
+    // Is there a dot ?
+    if (strchr(strIN, '.') != NULL){
+        return 1;
+    }
+
+    return 0;
+
+}
+
+int IniNormDoubleString(char *strIN){
+
+    char *pEnd;
+
+    double dNum = strtod(strIN, &pEnd);
+
+    if (*pEnd == '\0'){
+
+        sprintf(strIN, "%.8f", dNum);
+
+        // Remove too much trailing zeros
+        IniTrimAChar_R(strIN, '0');
+
+        // Keep at least one zero
+        int len = strlen(strIN);
+        if (strIN[len - 1] == '.'){
+            strIN[len] = '0';
+            strIN[len + 1] = '\0';
+        }
+
+        return 1;
+
+    }
+    
+    return 0;
+
+}
+
 int IniGetTokens(char *strIN, char **tokens){
     
     // Split string like "Main.Sub1.Sub1.Value" into **tokens
@@ -499,10 +542,10 @@ int IniSetTypeToValue(char *strValue, const int valType){
 
 
     // For the case float has "," instead of "." as delimiter
-    char *pComma;
     char strValue2[strlen(strValue) + 1];
 
     char *pEnd;
+
     long lNum = 0;
     double dNum = 0;
     #define hNum lNum
@@ -522,34 +565,10 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case 2:
         // as float
         // Make 1st comma to dot...
-        pComma = strchr(strValue, ',');
-        if (pComma != NULL){
-            // Copy Value    
-            sprintf(strValue2, "%s", strValue);
-            // Replace ","
-            pComma = strchr(strValue2, ',');
-            *pComma = '.';
-            dNum = strtod(strValue2, &pEnd);
-        }
-        else{
-            dNum = strtod(strValue, &pEnd);
-        }    
-        if (*pEnd == '\0'){
-            sprintf(strValue, "%.8f", dNum);
-            
-            // Remove too much trailing zeros
-            IniTrimAChar_R(strValue, '0');
-
-            // Keep at least one zero
-            r = strlen(strValue);
-            if (strValue[r - 1] == '.'){
-                strValue[r] = '0';
-                strValue[r + 1] = '\0';
-            }
-            
+        IniCommaToDot(strValue);
+        if(IniNormDoubleString(strValue)){
             r = 2;
         }
-        break;
     case 3:
         // as hex
         if(strncasecmp(strValue, "&h", 2) == 0){
@@ -600,6 +619,96 @@ int IniSetTypeToValue(char *strValue, const int valType){
     return r;
 }
 
+int IniGetTypeFromValue(char *strValue){
+
+    char *pEnd;
+
+    long lNum = 0;
+    double dNum = 0;
+
+    char strIN[strlen(strValue) + 16];
+    sprintf(strIN, "%s", strValue);
+
+    int r = 0;
+
+    // Remove 1st and last " from Text if they're present
+    if (strIN[0] == '"'){
+        // Value is a text
+
+        // Remove leading '"'
+        IniTrimCnt_L(strIN,1);
+
+        if (strIN[strlen(strIN) - 1] == '"'){
+            // Text was fully encapsulated
+            IniTrimCnt_R(strIN,1);
+        }
+        else{
+            // Don't do this !
+        }
+        
+        sprintf(strValue, "%s",strIN);
+        r = 4;
+    }
+    else{
+        // Value is a number or True or False or hex or (not embedded text - don't do this !)
+
+        // as return for bad formatted (not "" - embedded text) - three cases following
+        sprintf(strValue, "%s",strIN);
+
+        if(strncasecmp(strIN, "true", 4) == 0){
+            // True
+            sprintf(strValue, "true");
+            r = 2;
+        }
+        else if(strncasecmp(strIN, "false", 5) == 0){
+            // False
+            sprintf(strValue, "false");
+            r = 2;
+        }
+        else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
+            // hex
+            // remove all non-numeric trailing characters
+            IniTrimNonNumeric(strIN);
+            lNum = strtol(&strIN[2], &pEnd, 16);
+            if (*pEnd == '\0'){
+                sprintf(strValue, "%ld", lNum);
+                r = 5;
+            }   
+        }
+        else if (IniIsNonNumeric(strIN)){
+            // Bad formatted (not "" - embedded text)
+        }
+        else{
+            // Number
+
+            r = 3;                
+
+            // Is there a dot ?
+            if (IniCommaToDot(strIN)){
+                r++;
+            }
+
+            // Int or Float
+            if (r == 4){
+                // float
+                if (!IniNormDoubleString(strIN)){
+                    r = 0;
+                }
+            }
+            else{
+                // int
+                lNum = strtol(strIN, &pEnd, 10);
+                if (*pEnd == '\0'){
+                    sprintf(strIN, "%ld", lNum);
+                }
+                else{
+                    r = 0;
+                }
+            }                
+        }                    
+    }   
+}
+
 int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     // a string like:
@@ -645,7 +754,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     if (strlen(strRemark)){
         // Line contains a remark
 
-        int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark));
+        int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark)) + 1;
 
         if (lenDiff > 0){
             // New Value is longer than the old one
@@ -786,7 +895,7 @@ int IniCreateMissingValue(const char *fileName, char *strSearch, const char *str
 
 int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
 
-    // Returns  0 = doesn't exist, (not anymore - jumps now into IniCreateMissingValue() )
+    // Returns  0 = Value is "as it is"
     //         -1 = File Error.
     //         -2 = Broken Token (not anymore - jumps now into IniCreateMissingValue() )
     //          1 = Value is a text
@@ -806,7 +915,7 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
     sprintf(strSearch2, "%s", strSearch);
 
     int cntLine = IniFindValueLineNr(fileName, strSearch);
-    int r = cntLine;
+    int r = 0;
     char *pEnd;
 
     if (cntLine > 0){
@@ -830,95 +939,11 @@ int IniGetValue(const char *fileName, char *strSearch, const char *strDefault){
         // Trim whitespaces
         IniTrimWS(strIN);
 
-        // Remove 1st and last " from Text if they're present
-        if (strIN[0] == '"'){
-            // Value is a text
+        // get type of value and normalize value
+        r = IniGetTypeFromValue(strIN);
 
-            // Remove leading '"'
-            IniTrimCnt_L(strIN,1);
+        sprintf(strSearch, "%s", strIN);
 
-            if (strIN[strlen(strIN) - 1] == '"'){
-                // Text was fully encapsulated
-                IniTrimCnt_R(strIN,1);
-            }
-            else{
-                // Don't do this !
-            }
-            
-            sprintf(strSearch, "%s",strIN);
-            r = 1;
-        }
-        else{
-            // Value is a number or True or False or hex or (not embedded text - don't do this !)
-
-            // Bad formatted (not "" - embedded text) - three cases following
-            sprintf(strSearch, "%s",strIN);
-
-            if(strncasecmp(strIN, "true", 4) == 0){
-                // True
-                sprintf(strSearch, "1");
-                r = 2;
-            }
-            else if(strncasecmp(strIN, "false", 5) == 0){
-                // False
-                sprintf(strSearch, "0");
-                r = 2;
-            }
-            else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
-                // hex
-                // remove all non-numeric trailing characters
-                IniTrimNonNumeric(strIN);
-                lNum = strtol(&strIN[2], &pEnd, 16);
-                if (*pEnd != '\0'){
-                    // Bad formatted (not "" - embedded text)
-                    r = 1;
-                }
-                else{
-                    sprintf(strSearch, "%ld", lNum);
-                    r = 5;
-                }   
-            }
-            else if (IniIsNonNumeric(strIN)){
-                // Bad formatted (not "" - embedded text)
-                r = 1;
-            }
-            else{
-                // Number
-
-                r = 3;                
-
-                // Make 1st comma to dot...
-                char *pComma = strchr(strIN, ',');
-                if (pComma != NULL){
-                    *pComma = '.';
-                }
-                // Is there a dot ?
-                if (strchr(strIN, '.') != NULL){
-                    r++;
-                }
-                // Int or Float
-                if (r == 4){
-                    // float
-                    dNum = strtod(strIN, &pEnd);
-                    if (*pEnd == '\0'){
-                        sprintf(strSearch, "%.6f", dNum);
-                    }
-                    else{
-                        r =1;
-                    }
-                }
-                else{
-                    // int
-                    lNum = strtol(strIN, &pEnd, 10);
-                    if (*pEnd == '\0'){
-                        sprintf(strSearch, "%ld", lNum);
-                    }
-                    else{
-                        r = 1;
-                    }
-                }                
-            }                    
-        }   
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
