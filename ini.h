@@ -706,7 +706,8 @@ int IniGetTypeFromValue(char *strValue){
                 }
             }                
         }                    
-    }   
+    }
+    return r;   
 }
 
 int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
