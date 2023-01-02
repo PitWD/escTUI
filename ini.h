@@ -756,7 +756,9 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
         r = IniCreateMissingValue(fileName, strSearch, strDefault, typValue, missingToken, insertLine);
-        strcpy(strReturn, strDefault);
+
+        // ReRead as it's written...
+        r = IniGetValue(fileName, strSearch, strDefault, typValue, strReturn);
     }
     else{
         // FileError
