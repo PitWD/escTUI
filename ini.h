@@ -764,6 +764,79 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
 
     return r;     
 }
+#define IniGet(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_AsItIs, strReturn)
+#define IniGetStr(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_Text, strReturn)
+long IniGetLong(const char *fileName, const char *strSearch, const long defLong){
+    
+    char strValue[STR_SMALL_SIZE];
+    char *pEnd;
+
+    sprintf(strValue, "%l", defLong);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Int, strValue);
+    long valLong = strtol(strValue, &pEnd, 10);
+    if (*pEnd == '\0'){
+        return valLong;
+    }
+    return defLong;
+}
+int IniGetInt(const char *fileName, const char *strSearch, const int defInt){
+    return (int)IniGetLong(fileName, strSearch, (long)defInt);
+}
+double IniGetDouble(const char *fileName, const char *strSearch, const double defDouble){
+
+    char strValue[STR_SMALL_SIZE];
+    char *pEnd;
+
+    sprintf(strValue, "%.8f", defDouble);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Float, strValue);
+    double valDouble = strtod(strValue, &pEnd);
+    if (*pEnd == '\0'){
+        return valDouble;
+    }
+    return defDouble;
+}
+float IniGetFloat(const char *fileName, const char *strSearch, const float defFloat){
+    return (float)IniGetDouble(fileName, strSearch, (double)defFloat);
+}
+long IniGetLongHex(const char *fileName, const char *strSearch, const long defLong){
+    
+    char strValue[STR_SMALL_SIZE];
+    char *pEnd;
+
+    sprintf(strValue, "0x%dX", defLong);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strValue);
+    long valLong = strtol(strValue, &pEnd, 16);
+    if (*pEnd == '\0'){
+        return valLong;
+    }
+    return defLong;
+}
+int IniGetHex(const char *fileName, const char *strSearch, const int defInt){
+    return (int)IniGetLongHex(fileName, strSearch, (long)defInt);
+}
+int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
+
+    char strValue[STR_SMALL_SIZE];
+    char *pEnd;
+
+    if (defBool){
+        sprintf(strValue, "true");
+    }
+    else{
+        sprintf(strValue, "false");
+    }
+    
+    
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bool, strValue);
+
+    if(strncasecmp(strValue, "true", 4) == 0){
+        // True
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 
 int IniSetValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue){
 
