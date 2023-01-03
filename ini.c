@@ -518,8 +518,5 @@ int main(){
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext3");
     IniSetValue("desktops.ini", strOut, "tRuE", 5);
 
-
-
-
 return 0;
 }
