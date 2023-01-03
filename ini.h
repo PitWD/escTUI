@@ -9,6 +9,9 @@
 #define INI_TYPE_Text 4
 #define INI_TYPE_Bool 5
 
+#if __WIN32__ || _MSC_VER || __WIN64__
+    #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
+#endif
 
 void IniTrimRemark (char *strIN){
     // Remove all trailing text after
@@ -316,14 +319,14 @@ int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, 
     fclose(fpRead);
     fclose(fpWrite);
 
+    #if __WIN32__ || _MSC_VER || __WIN64__
+        remove(fileName);
+    #endif
+    
     // Replace the original file with the temporary file
-   sprintf(buffer, "%s.tmp", fileName);
+    sprintf(buffer, "%s.tmp", fileName);
     if (rename(buffer, fileName) != 0) {
         return -3;
-    }
-    // Delete Temp File
-    if (remove(buffer) != -1) {
-        return -4;
     }
 
     return actLine;
@@ -347,7 +350,11 @@ int IniSetTypeToValue(char *strValue, const int valType){
 
 
     // For the case float has "," instead of "." as delimiter
-    char strValue2[strlen(strValue) + 1];
+    #if __WIN32__ || _MSC_VER || __WIN64__
+        char strValue2[STR_SMALL_SIZE];
+    #else
+        char strValue2[strlen(strValue) + 1];
+    #endif
 
     char *pEnd;
 
@@ -432,7 +439,11 @@ int IniGetTypeFromValue(char *strValue){
     long lNum = 0;
     double dNum = 0;
 
-    char strIN[strlen(strValue) + 16];
+    #if __WIN32__ || _MSC_VER || __WIN64__
+        char strIN[STR_SMALL_SIZE];
+    #else
+        char strIN[strlen(strValue) + 16];
+    #endif
     strcpy(strIN, strValue);
 
     int r = 0;
@@ -548,7 +559,12 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     StrTrimChars_R(strPreVal, '=');
 
     // Copy & Check & Format strValue
-    char strValNew[strlen(strValue) + 16];
+    #if __WIN32__ || _MSC_VER || __WIN64__
+        char strValNew[STR_SMALL_SIZE];
+    #else
+        char strValNew[strlen(strValue) + 16];
+    #endif
+    
     strcpy(strValNew, strValue);
     r = IniSetTypeToValue(strValNew, valType);
     
@@ -721,6 +737,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     strcpy(strReturn, strSearch);
 
     int cntLine = IniFindValueLineNr(fileName, strReturn);
+
     int r = 0;
     char *pEnd;
 
