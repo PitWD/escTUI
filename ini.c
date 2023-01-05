@@ -518,5 +518,41 @@ int main(){
     strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext3");
     IniSetValue("desktops.ini", strOut, "tRuE", 5);
 
+    IniSet("desktops.ini", "global1.definitions.fixedareas.1.top.AsItIs", "AsItIs");
+    IniSetStr("desktops.ini", "global1.definitions.fixedareas.1.top.AsSTR", "AsSTR");
+    IniSetLong("desktops.ini", "global1.definitions.fixedareas.1.top.AsLong", 1234);
+    IniSetInt("desktops.ini", "global1.definitions.fixedareas.1.top.AsInt", 5678);
+    IniSetDouble("desktops.ini", "global1.definitions.fixedareas.1.top.AsDouble", 1.234);
+    IniSetFloat("desktops.ini", "global1.definitions.fixedareas.1.top.AsFloat", 5.678);
+    IniSetBool("desktops.ini", "global1.definitions.fixedareas.1.top.AsBoolTrue", 1);
+    IniSetBool("desktops.ini", "global1.definitions.fixedareas.1.top.AsBoolFalse", 0);
+    IniSetLongHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongHex", 255255);
+    IniSetHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsHex", 255);
+
+long l = 0;
+double d = 0;
+float f = 0;
+
+    IniGet("desktops.ini", "global1.definitions.fixedareas.1.top.AsItIs", "NOPE", strOut);
+    printf("AsItIs = %s\n", strOut);
+    IniGetStr("desktops.ini", "global1.definitions.fixedareas.1.top.AsSTR", "NOPE", strOut);
+    printf("AsSTR = %s\n", strOut);
+    l = IniGetLong("desktops.ini", "global1.definitions.fixedareas.1.top.AsLong", 234);
+    printf("AsLong = %ld\n", l);
+    i = IniGetInt("desktops.ini", "global1.definitions.fixedareas.1.top.AsInt", 678);
+    printf("AsInt = %d\n", i);
+    d = IniGetDouble("desktops.ini", "global1.definitions.fixedareas.1.top.AsDouble", 2.34);
+    printf("AsDouble = %f\n", d);
+    f = IniGetFloat("desktops.ini", "global1.definitions.fixedareas.1.top.AsFloat", 6.78);
+    printf("AsFloat = %f\n", f);
+    i = IniGetBool("desktops.ini", "global1.definitions.fixedareas.1.top.AsBoolTrue", 0);
+    printf("AsBoolTrue = %i\n", i);
+    i = IniGetBool("desktops.ini", "global1.definitions.fixedareas.1.top.AsBoolFalse", 1);
+    printf("AsBoolFalse = %i\n", i);
+    l = IniGetLongHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongHex", 16);
+    printf("AsLongHex = %ld\n", l);
+    i = IniGetHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsHex", 32);
+    printf("AsHex = %i\n", i);
+
 return 0;
 }

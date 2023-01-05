@@ -50,7 +50,7 @@ int IniGetRemark (char *strIN){
                 strIN[l - nonSpace] = '\0';
                 return 1;
             }
-            else if (strIN[i] != ' ' && strIN[i] != '\t'){
+            else if (strIN[i] != ' ' && strIN[i] != '\t' && strIN[i] != '\n' && strIN[i] != '\r'){
                 // Last Non-Whitespace
                 nonSpace = i;
             }  
@@ -391,7 +391,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
             hNum = strtol(strValue, &pEnd, 16);
         }    
         if (*pEnd == '\0'){
-            sprintf(strValue, "0x%lX", hNum);
+            sprintf(strValue, "%#lx", hNum);
             r = 3;
         }
         break;
@@ -488,7 +488,7 @@ int IniGetTypeFromValue(char *strValue){
             IniTrimNonHex(strIN);
             lNum = strtol(&strIN[2], &pEnd, 16);
             if (*pEnd == '\0'){
-                sprintf(strValue, "%ld", lNum);
+                sprintf(strValue, "%#lx", lNum);
                 r = 5;
             }   
         }
@@ -552,6 +552,8 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     int r = 0;
 
+    StrTrimWS_R(strIN);
+
     // PreValue - part
     char strPreVal[STR_SMALL_SIZE];
     strcpy(strPreVal, strIN);
@@ -577,7 +579,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     if (strlen(strRemark)){
         // Line contains a remark
 
-        int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark)) + 1;
+        int lenDiff = strlen(strValNew) - (strlen(strIN) - strlen(strPreVal) - strlen(strRemark) - 1);
 
         if (lenDiff > 0){
             // New Value is longer than the old one
@@ -822,7 +824,7 @@ long IniGetLongHex(const char *fileName, const char *strSearch, const long defLo
     char strValue[STR_SMALL_SIZE];
     char *pEnd;
 
-    sprintf(strValue, "0x%ldX", defLong);
+    sprintf(strValue, "%#lx", defLong);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strValue);
     long valLong = strtol(strValue, &pEnd, 16);
     if (*pEnd == '\0'){
@@ -921,8 +923,8 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
 }
 int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
     char strValue[STR_SMALL_SIZE];
-    sprintf(strValue, "0x%ldX", hexValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
+    sprintf(strValue, "%#lx", hexValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs);
 }
 int IniSetHex(const char *fileName, const char *strSearch, const int hexValue){
     return IniSetLongHex(fileName, strSearch, (long)hexValue);
