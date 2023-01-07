@@ -219,7 +219,7 @@ long StrBinToLong(const char *strValue, const int bits){
     printf("maxBits: %d\n", maxBits);
     printf("Value: %ld\n", lValue);
 */
-void StrLongToBinAlt(const long lValue, char *strResult, const int bits){
+void StrLongToBin(const long lValue, char *strResult, const int bits){
   
     int maxBits = 8 * sizeof(long) - 1;
 
@@ -273,7 +273,7 @@ void StrLongToBin3(const long lValue, char *strResult, const int bits)
 
     strResult[maxBits + 3] = '\0';
 }
-void StrLongToBin(const long lValue, char *strResult, const int bits)
+void StrLongToBin4(const long lValue, char *strResult, const int bits)
 {
     int maxBits = 8 * sizeof(long) - 1;
 

@@ -418,14 +418,11 @@ int IniSetTypeToValue(char *strValue, const int valType){
         break;
     case INI_TYPE_Bin:
         // as Bin
-printf("PreClean: %s\n", strValue);
         IniCleanBin(strValue);
-printf("PreBin2Long: %s\n", strValue);
         lNum = StrBin2Long(strValue);
-printf("PreLong2Bin: %s = %ld\n", strValue, lNum);
         StrLong2Bin(lNum, strValue);
-printf("Final: %s\n", strValue);
         r = INI_TYPE_Bin;
+        break;
     case INI_TYPE_Bool:
         // as bool
         if(strncasecmp(strValue, "true", 4) == 0){
@@ -531,11 +528,13 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     #if __WIN32__ || _MSC_VER || __WIN64__
         char strValNew[STR_SMALL_SIZE];
     #else
-        char strValNew[strlen(strValue) + 16];
+        char strValNew[strlen(strValue) + 64];
     #endif
     
     strcpy(strValNew, strValue);
+    printf("PreTypeTo: %s:%d\n", strValNew, valType);
     r = IniSetTypeToValue(strValNew, valType);
+    printf("AfterTypeTo: %s\n", strValNew);
     
     // Remark - part
     char strRemark[STR_SMALL_SIZE];
@@ -670,7 +669,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
         if (r > 0){
             sprintf(strWork, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
             // Check & normalize value
-            r = IniChangeValueLine(strWork, strValue, typValue);
+            //r = IniChangeValueLine(strWork, strValue, typValue);
             if (r > -1){
                 IniInsertLine(fileName, strWork, insertLine);
             }
