@@ -187,3 +187,48 @@ void StrLcaseLen(char *strIN, const int len) {
     }
 }
 #define StrLcase(strIN) StrLcaseLen(strIN, strlen(strIN))
+
+long StrBinToLong(const char *strValue, const int bits){
+  
+    int len = strlen(strValue) - 1;
+
+    int maxBits = 8 * sizeof(long);
+    if (bits && bits < maxBits){
+        maxBits = bits;
+    }
+
+    int preFix = 0;
+    if(strncasecmp(strValue, "0b", 2) == 0 || strncasecmp(strValue, "&b", 2) == 0){
+        preFix = 2;
+    }
+
+    long r = 0;
+
+    for(int i = len; i >= preFix && len - i < maxBits; i--){
+        r += (strValue[i] - '0') << (len - i);
+    }
+
+    return r;
+}
+#define StrBin2Long(strValue) StrBinToLong(strValue, 0)
+#define StrBin2Int(strValue) (int)StrBinToLong(strValue, 8 * sizeof(int))
+#define StrBin2Byte(strValue) (unsigned char)StrBinToLong(strValue, 8)
+
+void StrLongToBin(const long lValue, char *strResult, const int bits){
+  
+    int maxBits = 8 * sizeof(long) - 1;
+    if (bits && bits < maxBits){
+        maxBits = bits - 1;
+    }
+
+    strcpy(strResult, "0b");
+
+    for(int i = maxBits; i >= 0; i--){
+        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
+    }
+    
+    strResult[maxBits + 3] = '\0';
+}
+#define StrLong2Bin(lValue, strResult) StrLongToBin(lValue, strResult, 0)
+#define StrInt2Bin(iValue, strResult) StrLongToBin((int)iValue, strResult, 8 * sizeof(int))
+#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned char)iValue, strResult, 8)

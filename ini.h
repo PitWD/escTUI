@@ -8,6 +8,7 @@
 #define INI_TYPE_Hex 3
 #define INI_TYPE_Text 4
 #define INI_TYPE_Bool 5
+#define INI_TYPE_Bin 6
 
 #if __WIN32__ || _MSC_VER || __WIN64__
     #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
@@ -82,22 +83,37 @@ int IniCountFrontSpaces (char *strIN){
     return r;
 }
 
-void IniTrimNonHex(char *strIN){
+void IniCleanBin(char *strIN){
 
-    // Removes from Right all non-numeric and non-hex characters until the first
-    // decimal or hex is found
-    // "Value = &h234af0 some BS"
-    // results in:
-    // "Value = &h234af0"
+    // Make all 'i' & 'I' to 1
+    // All 'o' and 'O' to 0
+    // 'B' on 2nd pos to 'b'
 
     char c = 0;
+    int l = strlen(strIN);
 
-    for (int i = strlen(strIN) - 1; i >= 0; i--){
+    for (int i = 0; i < l; i++){
         c = strIN[i];
-        if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))
-            break;
-        else
+        if (c == 'o' || c == 'O'){
+            strIN[i] = '0';
+        }
+        else if (c == 'i' || c == 'I'){
+            strIN[i] = '1';
+        }
+        else if (c == 'B' && i == 1){
+            strIN[1] = 'b';
+        }
+        else if (c == '&' && i == 0){
+            strIN[0] = '0';
+        }
+        else if (c == '1' || c == '0'){
+            // Fine...
+        }
+        else {
+            // Messy Char
             strIN[i] = '\0';
+            break;
+        }
     }
 }
 
@@ -344,6 +360,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     //          = 3     hex
     //          = 4     as it is but embedded in ""
     //          = 5     boolean
+    //          = 6     Binary
 
     // most common human and OS errors get fixed
     // no case sensitivity
@@ -363,27 +380,26 @@ int IniSetTypeToValue(char *strValue, const int valType){
     #define hNum lNum
     #define bNum lNum
 
-    int r = 0;
+    int r = INI_TYPE_AsItIs;
 
     switch (valType){
-    case 1:
+    case INI_TYPE_Int:
         // as int
         StrTrimNonNumeric(strValue);
         lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd == '\0'){
             sprintf(strValue, "%ld", lNum);
-            r = 1;
+            r = INI_TYPE_Int;
         }
         break;
-    case 2:
+    case INI_TYPE_Float:
         // as float
         // Make 1st comma to dot...
         if(StrNormFloatString(strValue)){
-            r = 2;
+            r = INI_TYPE_Float;
         }
-    case 3:
+    case INI_TYPE_Hex:
         // as hex
-        IniTrimNonHex(strValue);
         if(strncasecmp(strValue, "&h", 2) == 0){
             hNum = strtol(&strValue[2], &pEnd, 16);
         }
@@ -391,11 +407,22 @@ int IniSetTypeToValue(char *strValue, const int valType){
             hNum = strtol(strValue, &pEnd, 16);
         }    
         if (*pEnd == '\0'){
-            sprintf(strValue, "%#lx", hNum);
-            r = 3;
+            if (hNum){
+                sprintf(strValue, "%#lx", hNum);
+            }
+            else{
+                strcpy(strValue, "0x0");
+            }
+            r = INI_TYPE_Hex;
         }
         break;
-    case 5:
+    case INI_TYPE_Bin:
+        // as Bin
+        IniCleanBin(strValue);
+        lNum = StrBin2Long(strValue);
+        StrLong2Bin(lNum, strValue);
+        r = INI_TYPE_Bin;
+    case INI_TYPE_Bool:
         // as bool
         if(strncasecmp(strValue, "true", 4) == 0){
             // True
@@ -410,118 +437,54 @@ int IniSetTypeToValue(char *strValue, const int valType){
         }
         if(bNum){
             // True
-            sprintf(strValue, "true");
+            strcpy(strValue, "true");
         }
         else{
             // False
-            sprintf(strValue, "false");
+            strcpy(strValue, "false");
         }
-        r = 5;
+        r = INI_TYPE_Bool;
         break;
-    case 4:
+    case INI_TYPE_Text:
         // as text embedded in ""
         sprintf(strValue2, "\"%s\"", strValue);
         strcpy(strValue, strValue2);
-        r = 4;
+        r = INI_TYPE_Text;
         break;
     default:
-        // Untouched
+        // Untouched (INI_TYPE_AsItIs)
         break;
     }
 
     return r;
 }
 
-int IniGetTypeFromValue(char *strValue){
+int IniGetTypeFromValue(const char *strValue){
 
-    char *pEnd;
+    int r = INI_TYPE_AsItIs;
 
-    long lNum = 0;
-    double dNum = 0;
-
-    #if __WIN32__ || _MSC_VER || __WIN64__
-        char strIN[STR_SMALL_SIZE];
-    #else
-        char strIN[strlen(strValue) + 16];
-    #endif
-    strcpy(strIN, strValue);
-
-    int r = 0;
-
-    // Remove 1st and last " from Text if they're present
-    if (strIN[0] == '"'){
-        // Value is a text
-
-        // Remove leading '"'
-        StrTrimCnt_L(strIN,1);
-
-        if (strIN[strlen(strIN) - 1] == '"'){
-            // Text was fully encapsulated
-            StrTrimCnt_R(strIN,1);
-        }
-        else{
-            // Don't do this !
-        }
-        
-        strcpy(strValue, strIN);
-        r = 4;
+    if (strValue[0] == '"'){
+        r = INI_TYPE_Text;
     }
     else{
-        // Value is a number or True or False or hex or (not embedded text - don't do this !)
-
-        // as return for bad formatted (not "" - embedded text) - three cases following
-        strcpy(strValue, strIN);
-
-        if(strncasecmp(strIN, "true", 4) == 0){
-            // True
-            sprintf(strValue, "true");
-            r = 2;
+        if(strncasecmp(strValue, "true", 4) == 0 || strncasecmp(strValue, "false", 5) == 0){
+            r = INI_TYPE_Bool;
         }
-        else if(strncasecmp(strIN, "false", 5) == 0){
-            // False
-            sprintf(strValue, "false");
-            r = 2;
+        else if(strncasecmp(strValue, "0x", 2) == 0 || strncasecmp(strValue, "&h", 2) == 0){
+            r = INI_TYPE_Hex;
         }
-        else if(strncasecmp(strIN, "0x", 2) == 0 || strncasecmp(strIN, "&h", 2) == 0){
-            // hex
-            // remove all non-numeric trailing characters
-            IniTrimNonHex(strIN);
-            lNum = strtol(&strIN[2], &pEnd, 16);
-            if (*pEnd == '\0'){
-                sprintf(strValue, "%#lx", lNum);
-                r = 5;
-            }   
+        else if(strncasecmp(strValue, "0b", 2) == 0 || strncasecmp(strValue, "ob", 2) == 0 || strncasecmp(strValue, "&b", 2) == 0){
+            r = INI_TYPE_Bin;
         }
-        else if (IniIsNonNumeric(strIN)){
+        else if (IniIsNonNumeric(strValue)){
             // Bad formatted (not "" - embedded text)
         }
         else{
-            // Number
-
-            r = 3;                
-
+            r = INI_TYPE_Int;                
             // Is there a dot ?
-            if (StrCommaToDot(strIN)){
+            if (strchr(strValue, ',') != NULL || strchr(strValue, '.') != NULL){
                 r++;
             }
-
-            // Int or Float
-            if (r == 4){
-                // float
-                if (!StrNormFloatString(strIN)){
-                    r = 0;
-                }
-            }
-            else{
-                // int
-                lNum = strtol(strIN, &pEnd, 10);
-                if (*pEnd == '\0'){
-                    sprintf(strIN, "%ld", lNum);
-                }
-                else{
-                    r = 0;
-                }
-            }                
         }                    
     }
     return r;   
@@ -735,13 +698,16 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     // "123.456"
     // "," & "." are seen as valid decimal points
 
+    // Protection from endless loop, if creation and/or re-read of created value fails. 
+    static int imInside = 0;
+
     // Working string
     strcpy(strReturn, strSearch);
 
     int cntLine = IniFindValueLineNr(fileName, strReturn);
 
-    int r = 0;
     char *pEnd;
+    int r = 0;
 
     if (cntLine > 0){
         // File and Search exist
@@ -760,9 +726,78 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
 
         if (typValue){
             // get type of value and normalize value
+            
             r = IniGetTypeFromValue(strReturn);
-        }
-        
+            if(r == INI_TYPE_Text){
+                // Remove leading '"'
+                StrTrimCnt_L(strReturn, 1);
+
+                if (strReturn[strlen(strReturn) - 1] == '"'){
+                    // Text was fully encapsulated
+                    StrTrimCnt_R(strReturn,1);
+                }
+            } 
+
+            if (r != typValue){
+                // Type in file is not the type we're expecting
+                
+                double dVal = 0;
+                if (typValue == INI_TYPE_Text){
+                    // nothing to do
+                }
+                else{
+                    // convert str as good as possible into double
+                    switch (r){
+                    case INI_TYPE_Text:
+                        StrCommaToDot(strReturn);
+                        dVal = strtod(strReturn, &pEnd);
+                        break;
+                    case INI_TYPE_Bin:
+                        IniCleanBin(strReturn);
+                        dVal = (double)StrBin2Long(strReturn);
+                        break;
+                    case INI_TYPE_Hex:
+                        dVal = (double)strtol(strReturn, &pEnd, 16);
+                        break;
+                    case INI_TYPE_Int:
+                        dVal = (double)strtol(strReturn, &pEnd, 10);
+                        break;
+                    case INI_TYPE_Bool:
+                        if (strncasecmp(strReturn, "true", 4) == 0){
+                            dVal = 1;
+                        }
+                        break;
+                    }
+                    // convert the double "rough" into expected type
+                    switch (typValue){
+                    case INI_TYPE_Bin:
+                        StrLong2Bin((long)dVal, strReturn);
+                        break;
+                    case INI_TYPE_Hex:
+                        sprintf(strReturn, "%#lx", (long)dVal);
+                        break;
+                    case INI_TYPE_Float:
+                        sprintf(strReturn, "%.8f", dVal);
+                        break;
+                    case INI_TYPE_Int:
+                        sprintf(strReturn, "%ld", (long)dVal);
+                        break;
+                    case INI_TYPE_Bool:
+                        if (dVal != 0){
+                            strcpy(strReturn, "true");
+                        } 
+                        else{
+                            strcpy(strReturn, "false");
+                        }
+                        break;
+                    }
+                }            
+            }
+            if(typValue != INI_TYPE_Text){
+                // normalize...
+                IniSetTypeToValue(strReturn, typValue);
+            }
+        }  
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
@@ -774,10 +809,18 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         int missingToken = strtol(strReturn, &pEnd, 10);
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
-        r = IniCreateMissingValue(fileName, strSearch, strDefault, typValue, missingToken, insertLine);
-
-        // ReRead as it's written...
-        r = IniGetValue(fileName, strSearch, strDefault, typValue, strReturn);
+        if (!imInside){
+            imInside = 1;
+            r = IniCreateMissingValue(fileName, strSearch, strDefault, typValue, missingToken, insertLine);
+            // ReRead as it's written...
+            r = IniGetValue(fileName, strSearch, strDefault, typValue, strReturn);
+        }
+        else{
+            // WTF - kind of a File-Error ?!?!
+            strcpy(strReturn, strSearch);
+            r = -1;
+        }
+        imInside = 0;
     }
     else{
         // FileError
@@ -800,9 +843,7 @@ long IniGetLong(const char *fileName, const char *strSearch, const long defLong)
     }
     return defLong;
 }
-int IniGetInt(const char *fileName, const char *strSearch, const int defInt){
-    return (int)IniGetLong(fileName, strSearch, (long)defInt);
-}
+#define IniGetInt(fileName, strSearch, defInt) (int)IniGetLong(fileName, strSearch, (long)defInt)
 double IniGetDouble(const char *fileName, const char *strSearch, const double defDouble){
 
     char strValue[STR_SMALL_SIZE];
@@ -816,9 +857,7 @@ double IniGetDouble(const char *fileName, const char *strSearch, const double de
     }
     return defDouble;
 }
-float IniGetFloat(const char *fileName, const char *strSearch, const float defFloat){
-    return (float)IniGetDouble(fileName, strSearch, (double)defFloat);
-}
+#define IniGetFloat(fileName, strSearch, defFloat) (float)IniGetDouble(fileName, strSearch, (double)defFloat)
 long IniGetLongHex(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
@@ -832,9 +871,7 @@ long IniGetLongHex(const char *fileName, const char *strSearch, const long defLo
     }
     return defLong;
 }
-int IniGetHex(const char *fileName, const char *strSearch, const int defInt){
-    return (int)IniGetLongHex(fileName, strSearch, (long)defInt);
-}
+#define IniGetHex(fileName, strSearch, defInt) (int)IniGetLongHex(fileName, strSearch, (long)defInt)
 int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
 
     char strValue[STR_SMALL_SIZE];
@@ -900,17 +937,19 @@ int IniSetLong(const char *fileName, const char *strSearch, const long lngValue)
     sprintf(strValue, "%ld", lngValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Int);
 }
-int IniSetInt(const char *fileName, const char *strSearch, const int intValue){
-    return IniSetLong(fileName, strSearch, (long)intValue);
-}
-int IniSetDouble(const char *fileName, const char *strSearch, double dblValue){
+#define IniSetInt(fileName, strSearch, intValue) IniSetLong(fileName, strSearch, (long)intValue)
+int IniSetDouble(const char *fileName, const char *strSearch, const double dblValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%.8f", dblValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Float);
 }
-int IniSetFloat(const char *fileName, const char *strSearch, float fltValue){
-    return IniSetDouble(fileName, strSearch, (double)fltValue);
+#define IniSetFloat(fileName, strSearch, fltValue) IniSetDouble(fileName, strSearch, (double)fltValue)
+int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
+    char strValue[STR_SMALL_SIZE];
+    sprintf(strValue, "%#lx", hexValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs);
 }
+#define IniSetHex(fileName, strSearch, hexValue) (int)IniSetLongHex(fileName, strSearch, (long)hexValue)
 int IniSetBool(const char *fileName, const char *strSearch, const int boolValue){
     char strValue[STR_SMALL_SIZE];
     if (boolValue){
@@ -921,11 +960,4 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
     }
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
 }
-int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
-    char strValue[STR_SMALL_SIZE];
-    sprintf(strValue, "%#lx", hexValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs);
-}
-int IniSetHex(const char *fileName, const char *strSearch, const int hexValue){
-    return IniSetLongHex(fileName, strSearch, (long)hexValue);
-}
+

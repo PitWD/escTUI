@@ -1,6 +1,58 @@
 #include <stdio.h>
 #include "ini.h"
 
+void Print_IniGetValue( const char *strSearch, const char *strDefault, const int type){
+
+    char strOut[STR_SMALL_SIZE];
+
+    int i = IniGetValue("desktops.ini", strSearch, strDefault, type, strOut);
+    switch (i){
+    case -2:
+        // Broken-Token
+        printf("Broken Token!: ");
+        break;
+    case -1:
+        // File Error
+        printf("FileError!: ");
+        break;
+    case INI_TYPE_Text:
+        // text value found
+        printf("Text: ");
+        break;
+    case INI_TYPE_Bool:
+        // false/true value found
+        printf("True/False: ");
+        break;
+    case INI_TYPE_Int:
+        // number value found
+        printf("Int_Value: ");
+        break;
+    case INI_TYPE_Float:
+        // number value found
+        printf("Float_Value: ");
+        break;
+    case INI_TYPE_Hex:
+        // number value found
+        printf("Hex_Value: ");
+        break;
+    case INI_TYPE_Bin:
+        // number value found
+        printf("Bin_Value: ");
+        break;
+    case INI_TYPE_AsItIs:
+        // number value found
+        printf("AsItIs: ");
+        break;
+    default:
+        // unexpected found
+        printf("Unexpected!: ");
+        break;
+    }
+    printf("->%s<-:%d\n", strOut, i);
+
+}
+
+
 int main(){
 
     char strOut[255];
@@ -61,74 +113,13 @@ int main(){
     
     printf("\n");
 
-    //char strReturn[255];
-    // strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "moff", INI_TYPE_AsItIs, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case -1:
-        // File Error
-        printf("FileError!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    case 1:
-        // text value found
-        printf("Text: ");
-        break;
-    case 2:
-        // false/true value found
-        printf("True/False: ");
-        break;
-    case 3:
-        // number value found
-        printf("Value: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-\n", strOut);
 
-    // strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "moff", INI_TYPE_Text, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case -1:
-        // File Error
-        printf("FileError!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    case 1:
-        // text value found
-        printf("Text: ");
-        break;
-    case 2:
-        // false/true value found
-        printf("True/False: ");
-        break;
-    case 3:
-        // number value found
-        printf("Value: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-\n\n", strOut);
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captionTEXT", "moff", INI_TYPE_Text);
+
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captioncolorid", "moff", INI_TYPE_Text);
+    printf("\n");
+
+//return 0;
 
     strcpy(strOut,"1234 1234567890 1234");
     StrTrimCharsLR(strOut,' ',1,1);
@@ -138,113 +129,18 @@ int main(){
     StrTrimCnt_LR(strOut,4,4);
     printf("->%s<-\n\n", strOut);
 
-    strcpy(strOut, "                    CaptionText = \"FixedTopNeuerVersuch\"");
-    IniReplaceLine("desktops.ini",strOut,52);
 
-    strcpy(strOut, "global.definitions.fixedareas.1.top.captionTEXT");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captionTEXT", "&habcdef", INI_TYPE_Hex, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case -1:
-        // File Error
-        printf("FileError!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    case 1:
-        // text value found
-        printf("Text: ");
-        break;
-    case 2:
-        // false/true value found
-        printf("True/False: ");
-        break;
-    case 3:
-        // number value found
-        printf("Value: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-\n\n", strOut);    
 
-//return 0;
-    strcpy(strOut, "                    CaptionText = \"FixedTop\"");
-    IniReplaceLine("desktops.ini",strOut,52);
-    //strcpy(strOut, "global.definitions.fixedareas.1.top.captioncolorid");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captioncolorid", "1,234moff", INI_TYPE_Float, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case -1:
-        // File Error
-        printf("FileError!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    case 1:
-        // text value found
-        printf("Text: ");
-        break;
-    case 2:
-        // false/true value found
-        printf("True/False: ");
-        break;
-    case 3:
-        // number value found
-        printf("Value: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-\n\n", strOut);    
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captionTEXT", "&habcdef", INI_TYPE_Hex);
+    printf("\n");    
 
-    strcpy(strOut, "global.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext", "moff1234", INI_TYPE_Float, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case -1:
-        // File Error
-        printf("FileError!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    case 1:
-        // text value found
-        printf("Text: ");
-        break;
-    case 2:
-        // false/true value found
-        printf("True/False: ");
-        break;
-    case 3:
-        // number value found
-        printf("Value: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-\n\n", strOut);
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captioncolorid", "1,234moff", INI_TYPE_Float);
+    printf("\n");    
+
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captiontext", "moff1234", INI_TYPE_Float);
+    printf("\n");
+
+
 
     strcpy(strOut, "Value = 1234          # My Remark");
     i = IniGetRemark(strOut);    
@@ -377,108 +273,23 @@ int main(){
     IniChangeValueLine(strOut, strVal, 0);
     printf("%s\n\n", strOut);
 
-    strcpy(strOut, "global1.definitions.fixedareas.1.top.captiontext");
-    i = IniGetValue("desktops.ini", "global1.definitions.fixedareas.1.top.captiontext", "1moff1", INI_TYPE_Int, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global1.definitions.fixedareas.1.top.captiontext", "1moff1", INI_TYPE_Int);
+    printf("\n");
 
-    i = IniGetValue("desktops.ini", "global.definitions1.fixedareas.1.top.captiontext", "12moff2", INI_TYPE_Bool, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global.definitions1.fixedareas.1.top.captiontext", "12moff2", INI_TYPE_Bool);
+    printf("\n");
 
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas1.1.top.captiontext", "0moff3", INI_TYPE_Bool, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global.definitions.fixedareas1.1.top.captiontext", "0moff3", INI_TYPE_Bool);
+    printf("\n");
 
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.11.top.captiontext", "TrUemoff4", INI_TYPE_Bool, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global.definitions.fixedareas.11.top.captiontext", "TrUemoff4", INI_TYPE_Bool);
+    printf("\n");
 
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top1.captiontext", "moff5", INI_TYPE_Bool, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global.definitions.fixedareas.1.top1.captiontext", "moff5", INI_TYPE_Bool);
+    printf("\n");
 
-    i = IniGetValue("desktops.ini", "global.definitions.fixedareas.1.top.captiontext1", "12,34moff6", INI_TYPE_Float, strOut);
-    switch (i){
-    case -2:
-        // Broken-Token
-        printf("Broken Token!: ");
-        break;
-    case 0:
-        // no value found
-        printf("Value not found!: ");
-        break;
-    default:
-        // unexpected found
-        printf("Unexpected!: ");
-        break;
-    }
-    printf("%s<-:%d\n\n", strOut, i);
+    Print_IniGetValue("global.definitions.fixedareas.1.top.captiontext1", "12,34moff6", INI_TYPE_Float);
+    printf("\n");
 
 
     strcpy(strOut, "global2.definitions.fixedareas.1.top.captiontext");
