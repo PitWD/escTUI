@@ -5,6 +5,10 @@
 #define STR_SMALL_SIZE 255
 #define STR_MID_SIZE 1024
 
+#if __WIN32__ || _MSC_VER || __WIN64__
+    #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
+#endif
+
 void StrTrimWhiteSpacesLR(char *strIN, const int l, const int r){
     
     // L & R are bool to remove whitespaces

@@ -10,10 +10,6 @@
 #define INI_TYPE_Bool 5
 #define INI_TYPE_Bin 6
 
-#if __WIN32__ || _MSC_VER || __WIN64__
-    #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
-#endif
-
 void IniTrimRemark (char *strIN){
     // Remove all trailing text after
     // the first non "" encapsulated #

@@ -340,8 +340,8 @@ int main(){
     IniSetLongHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongHex", 255255);
     IniSetHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsHex", 255);
 
-    IniSetLongBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongBIN", 198);
-    IniSetIntBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsIntBIN", 198);
+    IniSetLongBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongBIN", 198198198);
+    IniSetIntBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsIntBIN", 198198);
     IniSetByteBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsByteBIN", 198);
 
 long l = 0;
