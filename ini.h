@@ -100,13 +100,13 @@ void IniCleanBin(char *strIN){
         else if (c == 'i' || c == 'I'){
             strIN[i] = '1';
         }
-        else if (c == 'B' && i == 1){
+        else if ((c == 'B' || c == 'h' || c == 'H') && i == 1){
             strIN[1] = 'b';
         }
         else if (c == '&' && i == 0){
             strIN[0] = '0';
         }
-        else if (c == '1' || c == '0'){
+        else if (c == '1' || c == '0' || (c == 'b' && i == 1)){
             // Fine...
         }
         else {
@@ -418,9 +418,13 @@ int IniSetTypeToValue(char *strValue, const int valType){
         break;
     case INI_TYPE_Bin:
         // as Bin
+printf("PreClean: %s\n", strValue);
         IniCleanBin(strValue);
+printf("PreBin2Long: %s\n", strValue);
         lNum = StrBin2Long(strValue);
+printf("PreLong2Bin: %s = %ld\n", strValue, lNum);
         StrLong2Bin(lNum, strValue);
+printf("Final: %s\n", strValue);
         r = INI_TYPE_Bin;
     case INI_TYPE_Bool:
         // as bool
@@ -895,6 +899,33 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
         return 0;
     }
 }
+long IniGetLongBin(const char *fileName, const char *strSearch, const long defLong){
+    
+    char strValue[STR_SMALL_SIZE];
+
+    StrLong2Bin(defLong, strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
+    return StrBin2Long(strValue);
+    
+}
+int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
+    
+    char strValue[STR_SMALL_SIZE];
+
+    StrInt2Bin(defInt, strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
+    return StrBin2Int(strValue);
+    
+}
+unsigned char IniGetByteBin(const char *fileName, const char *strSearch, unsigned char defByte){
+    
+    char strValue[STR_SMALL_SIZE];
+
+    StrByte2Bin(defByte, strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
+    return StrBin2Byte(strValue);
+    
+}
 
 int IniSetValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue){
 
@@ -947,7 +978,7 @@ int IniSetDouble(const char *fileName, const char *strSearch, const double dblVa
 int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%#lx", hexValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
 }
 #define IniSetHex(fileName, strSearch, hexValue) (int)IniSetLongHex(fileName, strSearch, (long)hexValue)
 int IniSetBool(const char *fileName, const char *strSearch, const int boolValue){
@@ -960,4 +991,18 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
     }
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
 }
-
+int IniSetLongBin(const char *fileName, const char *strSearch, const long lValue){
+    char strValue[STR_SMALL_SIZE];
+    StrLong2Bin(lValue, strValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+}
+int IniSetIntBin(const char *fileName, const char *strSearch, const int iValue){
+    char strValue[STR_SMALL_SIZE];
+    StrInt2Bin(iValue, strValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+}
+int IniSetByteBin(const char *fileName, const char *strSearch, const unsigned char bValue){
+    char strValue[STR_SMALL_SIZE];
+    StrByte2Bin(bValue, strValue);
+    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+}

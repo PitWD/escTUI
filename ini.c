@@ -340,9 +340,14 @@ int main(){
     IniSetLongHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongHex", 255255);
     IniSetHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsHex", 255);
 
+    IniSetLongBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongBIN", 198);
+    IniSetIntBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsIntBIN", 198);
+    IniSetByteBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsByteBIN", 198);
+
 long l = 0;
 double d = 0;
 float f = 0;
+unsigned char c;
 
     IniGet("desktops.ini", "global1.definitions.fixedareas.1.top.AsItIs", "NOPE", strOut);
     printf("AsItIs = %s\n", strOut);
@@ -364,6 +369,13 @@ float f = 0;
     printf("AsLongHex = %ld\n", l);
     i = IniGetHex("desktops.ini", "global1.definitions.fixedareas.1.top.AsHex", 32);
     printf("AsHex = %i\n", i);
+
+    l = IniGetLongBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsLongBIN", 123123123);
+    printf("AsLongBIN = %ld\n", l);
+    i = IniGetIntBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsIntBIN", 123123);
+    printf("AsIntBIN = %d\n", i);
+    c = IniGetByteBin("desktops.ini", "global1.definitions.fixedareas.1.top.AsByteBIN", 123);
+    printf("AsByteBIN = %d\n", c);
 
 return 0;
 }

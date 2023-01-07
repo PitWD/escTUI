@@ -214,10 +214,16 @@ long StrBinToLong(const char *strValue, const int bits){
 #define StrBin2Int(strValue) (int)StrBinToLong(strValue, 8 * sizeof(int))
 #define StrBin2Byte(strValue) (unsigned char)StrBinToLong(strValue, 8)
 
-void StrLongToBin(const long lValue, char *strResult, const int bits){
+/*
+    printf("bits: %d\n", bits);
+    printf("maxBits: %d\n", maxBits);
+    printf("Value: %ld\n", lValue);
+*/
+void StrLongToBinAlt(const long lValue, char *strResult, const int bits){
   
     int maxBits = 8 * sizeof(long) - 1;
-    if (bits && bits < maxBits){
+
+    if (bits && (bits < maxBits)){
         maxBits = bits - 1;
     }
 
@@ -229,6 +235,63 @@ void StrLongToBin(const long lValue, char *strResult, const int bits){
     
     strResult[maxBits + 3] = '\0';
 }
+void StrLongToBin2(const long lValue, char *strResult, const int bits)
+{
+    int maxBits = 8 * sizeof(long) - 1;
+
+    if (bits && (bits < maxBits))
+    {
+        maxBits = bits - 1;
+    }
+
+    strcpy(strResult, "0b");
+
+    strResult[2] = (lValue & (1 << 0)) ? '1' : '0';
+
+    for (int i = 1; i <= maxBits; i++)
+    {
+        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
+    }
+
+    strResult[maxBits + 3] = '\0';
+}
+void StrLongToBin3(const long lValue, char *strResult, const int bits)
+{
+    int maxBits = 8 * sizeof(long) - 1;
+
+    if (bits && (bits < maxBits))
+    {
+        maxBits = bits - 1;
+    }
+
+    strcpy(strResult, "0b");
+
+    for (int i = 0; i <= maxBits; i++)
+    {
+        strResult[i + 2] = (lValue & (1 << i)) ? '1' : '0';
+    }
+
+    strResult[maxBits + 3] = '\0';
+}
+void StrLongToBin(const long lValue, char *strResult, const int bits)
+{
+    int maxBits = 8 * sizeof(long) - 1;
+
+    if (bits && (bits < maxBits))
+    {
+        maxBits = bits - 1;
+    }
+
+    strcpy(strResult, "0b");
+
+    for (int i = maxBits; i >= 0; i--)
+    {
+        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
+    }
+
+    strResult[maxBits + 3] = '\0';
+}
+
 #define StrLong2Bin(lValue, strResult) StrLongToBin(lValue, strResult, 0)
 #define StrInt2Bin(iValue, strResult) StrLongToBin((int)iValue, strResult, 8 * sizeof(int))
-#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned char)iValue, strResult, 8)
+#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned char)bValue, strResult, 8)
