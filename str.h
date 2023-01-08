@@ -193,11 +193,12 @@ void StrLcaseLen(char *strIN, const int len) {
 #define StrLcase(strIN) StrLcaseLen(strIN, strlen(strIN))
 
 long StrBinToLong(const char *strValue, const int bits){
-  
+ 
     int len = strlen(strValue) - 1;
 
     int maxBits = 8 * sizeof(long);
-    if (bits && bits < maxBits){
+
+    if (bits && (bits < maxBits)){
         maxBits = bits;
     }
 
@@ -209,7 +210,7 @@ long StrBinToLong(const char *strValue, const int bits){
     long r = 0;
 
     for(int i = len; i >= preFix && len - i < maxBits; i--){
-        r += (strValue[i] - '0') << (len - i);
+        r += (long)(strValue[i] - '0') << (long)(len - i);
     }
 
     return r;
@@ -218,15 +219,10 @@ long StrBinToLong(const char *strValue, const int bits){
 #define StrBin2Int(strValue) (int)StrBinToLong(strValue, 8 * sizeof(int))
 #define StrBin2Byte(strValue) (unsigned char)StrBinToLong(strValue, 8)
 
-/*
-    printf("bits: %d\n", bits);
-    printf("maxBits: %d\n", maxBits);
-    printf("Value: %ld\n", lValue);
-*/
 void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
-  
+
     // MaxBits by OS
-    int maxBits = 8 * sizeof(long) - 1;
+    int maxBits = 8 * sizeof(unsigned long) - 1;
 
     if (bits){
         if ((bits < maxBits)){
@@ -240,9 +236,9 @@ void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
         }
         else{
             int minBytes = 0;
-            unsigned int value = lValue;
-            while (value != 0) {
-                value = value >> 8;
+            unsigned long value = lValue;
+            while (value != 0ul) {
+                value = value >> 8ul;
                 minBytes++;
             }
             maxBits = minBytes * 8 -1;
@@ -252,12 +248,12 @@ void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
     strcpy(strResult, "0b");
 
     for(int i = maxBits; i >= 0; i--){
-        strResult[maxBits - i + 2] = (lValue & (1ll << i)) ? '1' : '0';
+        strResult[maxBits - i + 2] = (lValue & (1ul << i)) ? '1' : '0';
     }
     
     strResult[maxBits + 3] = '\0';
-}
 
-#define StrLong2Bin(lValue, strResult) StrLongToBin(lValue, strResult, 0)
-#define StrInt2Bin(iValue, strResult) StrLongToBin((long)iValue, strResult, 8 * sizeof(int))
-#define StrByte2Bin(bValue, strResult) StrLongToBin((long)bValue, strResult, 8)
+}
+#define StrLong2Bin(lValue, strResult) StrLongToBin((unsigned long)lValue, strResult, 0)
+#define StrInt2Bin(iValue, strResult) StrLongToBin((unsigned long)iValue, strResult, 8 * sizeof(int))
+#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned long)bValue, strResult, 8)
