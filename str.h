@@ -223,79 +223,41 @@ long StrBinToLong(const char *strValue, const int bits){
     printf("maxBits: %d\n", maxBits);
     printf("Value: %ld\n", lValue);
 */
-void StrLongToBin(const long lValue, char *strResult, const int bits){
+void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
   
+    // MaxBits by OS
     int maxBits = 8 * sizeof(long) - 1;
 
-    if (bits && (bits < maxBits)){
-        maxBits = bits - 1;
+    if (bits){
+        if ((bits < maxBits)){
+            maxBits = bits - 1;
+        }        
     }
+    else{
+        // Reduce Bits to least needed Bytes
+        if (lValue == 0){
+            maxBits = 7;
+        }
+        else{
+            int minBytes = 0;
+            unsigned int value = lValue;
+            while (value != 0) {
+                value = value >> 8;
+                minBytes++;
+            }
+            maxBits = minBytes * 8 -1;
+        }    
+    }    
 
     strcpy(strResult, "0b");
 
     for(int i = maxBits; i >= 0; i--){
-        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
+        strResult[maxBits - i + 2] = (lValue & (1ll << i)) ? '1' : '0';
     }
     
     strResult[maxBits + 3] = '\0';
 }
-void StrLongToBin2(const long lValue, char *strResult, const int bits)
-{
-    int maxBits = 8 * sizeof(long) - 1;
-
-    if (bits && (bits < maxBits))
-    {
-        maxBits = bits - 1;
-    }
-
-    strcpy(strResult, "0b");
-
-    strResult[2] = (lValue & (1 << 0)) ? '1' : '0';
-
-    for (int i = 1; i <= maxBits; i++)
-    {
-        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
-    }
-
-    strResult[maxBits + 3] = '\0';
-}
-void StrLongToBin3(const long lValue, char *strResult, const int bits)
-{
-    int maxBits = 8 * sizeof(long) - 1;
-
-    if (bits && (bits < maxBits))
-    {
-        maxBits = bits - 1;
-    }
-
-    strcpy(strResult, "0b");
-
-    for (int i = 0; i <= maxBits; i++)
-    {
-        strResult[i + 2] = (lValue & (1 << i)) ? '1' : '0';
-    }
-
-    strResult[maxBits + 3] = '\0';
-}
-void StrLongToBin4(const long lValue, char *strResult, const int bits)
-{
-    int maxBits = 8 * sizeof(long) - 1;
-
-    if (bits && (bits < maxBits))
-    {
-        maxBits = bits - 1;
-    }
-
-    strcpy(strResult, "0b");
-
-    for (int i = maxBits; i >= 0; i--)
-    {
-        strResult[maxBits - i + 2] = (lValue & (1 << i)) ? '1' : '0';
-    }
-
-    strResult[maxBits + 3] = '\0';
-}
 
 #define StrLong2Bin(lValue, strResult) StrLongToBin(lValue, strResult, 0)
-#define StrInt2Bin(iValue, strResult) StrLongToBin((int)iValue, strResult, 8 * sizeof(int))
-#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned char)bValue, strResult, 8)
+#define StrInt2Bin(iValue, strResult) StrLongToBin((long)iValue, strResult, 8 * sizeof(int))
+#define StrByte2Bin(bValue, strResult) StrLongToBin((long)bValue, strResult, 8)

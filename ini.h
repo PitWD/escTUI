@@ -366,7 +366,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     #if __WIN32__ || _MSC_VER || __WIN64__
         char strValue2[STR_SMALL_SIZE];
     #else
-        char strValue2[strlen(strValue) + 1];
+        char strValue2[strlen(strValue) + 64];
     #endif
 
     char *pEnd;
@@ -528,9 +528,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     #endif
     
     strcpy(strValNew, strValue);
-    printf("PreTypeTo: %s:%d\n", strValNew, valType);
     r = IniSetTypeToValue(strValNew, valType);
-    printf("AfterTypeTo: %s\n", strValNew);
     
     // Remark - part
     char strRemark[STR_SMALL_SIZE];
@@ -665,7 +663,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
         if (r > 0){
             sprintf(strWork, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
             // Check & normalize value
-            //r = IniChangeValueLine(strWork, strValue, typValue);
+            r = IniChangeValueLine(strWork, strValue, typValue);
             if (r > -1){
                 IniInsertLine(fileName, strWork, insertLine);
             }
