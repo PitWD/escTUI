@@ -361,13 +361,14 @@ int IniSetTypeToValue(char *strValue, const int valType){
     // most common human and OS errors get fixed
     // no case sensitivity
 
-
+    /*
     // For the case float has "," instead of "." as delimiter
     #if __WIN32__ || _MSC_VER || __WIN64__
         char strValue2[STR_SMALL_SIZE];
     #else
         char strValue2[strlen(strValue) + 64];
     #endif
+    */
 
     char *pEnd;
 
@@ -444,8 +445,18 @@ int IniSetTypeToValue(char *strValue, const int valType){
         break;
     case INI_TYPE_Text:
         // as text embedded in ""
+        
+        /*
         sprintf(strValue2, "\"%s\"", strValue);
         strcpy(strValue, strValue2);
+        */
+
+        r = strlen(strValue);
+        memmove(&strValue[1], strValue, r);
+        strValue[0] = '"';
+        strValue[r + 1] = '"';
+        strValue[r + 2] = '\0';
+        
         r = INI_TYPE_Text;
         break;
     default:
@@ -524,7 +535,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     #if __WIN32__ || _MSC_VER || __WIN64__
         char strValNew[STR_SMALL_SIZE];
     #else
-        char strValNew[strlen(strValue) + 64];
+        char strValNew[strlen(strValue) + 66];
     #endif
     
     strcpy(strValNew, strValue);
