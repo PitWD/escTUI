@@ -83,27 +83,34 @@ void IniCleanBin(char *strIN){
 
     // Make all 'i' & 'I' to 1
     // All 'o' and 'O' to 0
-    // 'B' on 2nd pos to 'b'
+    // 'B' on 2nd or last pos to 'b'
+    // '&' on 1st pos to 0
 
     char c = 0;
     int l = strlen(strIN);
 
     for (int i = 0; i < l; i++){
         c = strIN[i];
-        if (c == 'o' || c == 'O'){
+        if (c == '1' || c == '0' || (c == 'b' && (i == 1 || i == l - 1))){
+            // Fine...
+        }        
+        else if (c == 'o' || c == 'O'){
             strIN[i] = '0';
         }
         else if (c == 'i' || c == 'I'){
             strIN[i] = '1';
         }
-        else if ((c == 'B' || c == 'h' || c == 'H') && i == 1){
-            strIN[1] = 'b';
+        else if (c == 'B' && (i == 1 || i == l - 1)){
+            strIN[i] = 'b';
         }
         else if (c == '&' && i == 0){
-            strIN[0] = '0';
+            strIN[i] = '0';
         }
-        else if (c == '1' || c == '0' || (c == 'b' && i == 1)){
-            // Fine...
+        else if(c == ' '){
+            // Remove space
+            memmove(&strIN[i], &strIN[i + 1], l - i);
+            l--;
+            i--;
         }
         else {
             // Messy Char
@@ -111,6 +118,33 @@ void IniCleanBin(char *strIN){
             break;
         }
     }
+}
+
+int IniIsBin(const char *strIN){
+    char c = 0;
+    int l = strlen(strIN);
+
+    for (int i = 0; i < l; i++){
+        c = strIN[i];
+        if (c == '1' || c == '0' || (c == 'b' && (i == 1 || i == l - 1))){
+            // Fine...
+        }        
+        else if (c == 'o' || c == 'O'){
+        }
+        else if (c == 'i' || c == 'I'){
+        }
+        else if (c == 'B' && (i == 1 || i == l - 1)){
+        }
+        else if (c == '&' && i == 0){
+        }
+        else if(c == ' '){
+        }
+        else {
+            // Messy Char
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int IniIsNonNumeric(const char *strIN){
@@ -483,6 +517,11 @@ int IniGetTypeFromValue(const char *strValue){
         }
         else if(strncasecmp(strValue, "0b", 2) == 0 || strncasecmp(strValue, "ob", 2) == 0 || strncasecmp(strValue, "&b", 2) == 0){
             r = INI_TYPE_Bin;
+        }
+        else if (strncasecmp(&strValue[strlen(strValue) - 1], "b", 1) == 0){
+            if (IniIsBin(strValue)){
+                r = INI_TYPE_Bin;
+            }
         }
         else if (IniIsNonNumeric(strValue)){
             // Bad formatted (not "" - embedded text)

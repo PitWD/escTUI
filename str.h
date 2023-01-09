@@ -206,6 +206,10 @@ long StrBinToLong(const char *strValue, const int bits){
     if(strncasecmp(strValue, "0b", 2) == 0 || strncasecmp(strValue, "&b", 2) == 0){
         preFix = 2;
     }
+    // suffix
+    if(strncasecmp(&strValue[len], "b", 1) == 0){
+        len--;
+    }
 
     long r = 0;
 
