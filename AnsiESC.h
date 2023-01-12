@@ -467,7 +467,7 @@ void CursorLeft(int x) {
 	printf("\x1B[%dD", x);
 }
 void GetAnsiCursorPos(void){
-	gCursorWaitFor = 1;
+	TERM_CursorWaitFor = 1;
 	printf("\x1B[6n");
 }
 

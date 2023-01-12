@@ -4,7 +4,7 @@
 //				  (see related declarations/functions and at the EOF)
 // This is a  ! p_o_o_r !  Header by (c) Pit Demmer. (PIT-Licensed 01.04.2022 -           )
 
-const char TerminalVersion [] = "1.00pa";
+#define TerminalVersion "1.00pa"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,59 +26,60 @@ const char TerminalVersion [] = "1.00pa";
 char gStreamInESC27[ESC27_STREAM_IN_SIZE];
 
 // Screen
-int gScreenWidth = 0;
-int gScreenHeight = 0;
-int gScreenWidthPrev = 0;
-int gScreenHeightPrev = 0;
-int gScreenSizeInCursorPos = 0;
+int TERM_ScreenWidth = 0;
+int TERM_ScreenHeight = 0;
+int TERM_ScreenWidthPrev = 0;
+int TERM_ScreenHeightPrev = 0;
+int TERM_ScreenSizeInCursorPos = 0;
 
 // Keyboard
-int gCursorPosX = 0;
-int gCursorPosY = 0;
-int gCursorSelX = 0;                     // 1st point of selection rectangle
-int gCursorSelY = 0;                     // or same as CursorPosX&Y = No selection
-int gCursorWaitFor = 0;					// Shift OR Alt OR Ctrl + F3 
+int TERM_CursorPosX = 0;
+int TERM_CursorPosY = 0;
+int TERM_CursorSelX = 0;                     // 1st point of selection rectangle
+int TERM_CursorSelY = 0;                     // or same as CursorPosX&Y = No selection
+int TERM_CursorWaitFor = 0;					// Shift OR Alt OR Ctrl + F3 
 										// Has 7 overlapping Settings with CursorPos
 										// Set cursorIsAsked true when asking 'manually' for the cursor position !!
-int gCursorIsSelecting = 0;             // (Moving with Shift)
-int gKeyShift = 0;
-int gKeyAlt = 0;
-int gKeyCtrl = 0;
-int gKeyMeta = 0;
+int TERM_CursorIsSelecting = 0;             // (Moving with Shift)
+
+int TERM_KeyShift = 0;
+int TERM_KeyAlt = 0;
+int TERM_KeyCtrl = 0;
+int TERM_KeyMeta = 0;
 
 // Mouse
-int gMousePosX = 0;
-int gMousePosY = 0;
-int gMouseSelX = 0;                     // 1st point of selection rectangle
-int gMouseSelY = 0;                     // or same as MousePosX&Y = No selection
-int gMouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
+int TERM_MousePosX = 0;
+int TERM_MousePosY = 0;
+int TERM_MouseSelX = 0;                     // 1st point of selection rectangle
+int TERM_MouseSelY = 0;                     // or same as MousePosX&Y = No selection
+int TERM_MouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 
 // ESC27 Reading
-_Bool isWaitingForESC27 = 0;
+_Bool TermIsWaitingForESC27 = 0;
 
 // Signals
-int gSignalCtrlC = 0;
-int gSignalTerminalSize = 0;
-int gSignalInterval = 0;
+int TERM_SignalCtrlC = 0;
+int TERM_SignalTerminalSize = 0;
+int TERM_SignalInterval = 0;
 
 /**
  * @brief Declaration FUNCTIONS
  */
-int SetVT(int set);
-int InKey(void);
-void FlushInKey(void);
-int ClearScreen(int set);
-int GetTerminalSize(int set);
-int ScreenSizeChanged(void);
-int GetESC27 (int c);
+int TermSetVT(int set);
+int TermInKey(void);
+void TermFlushInKey(void);
+int TermClearScreen(int set);
+int TermGetSize(int set);
+int TermSizeChanged(void);
+int TermGetESC27 (int c);
 static int GetESC27_CheckOnF112Key(int r, int posInStream);
 static int GetESC27_CheckOnF512(void);
-int WaitForESC27(char *pStrExchange, int waitForID, float timeOut);
-void SignalHandler(int sig);
-void TrapMouse(int set);
-void TrapFocus(int set);
+int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut);
+void TermSignalHandler(int sig);
+void TermTrapMouse(int set);
+void TermTrapFocus(int set);
 
-int SetVT(int set){
+int TermSetVT(int set){
 /**
  * @brief 	Set/Reset output mode to handle virtual terminal sequences
  * 			and for (LINUX/Mac) to (re)set c_break mode
@@ -201,7 +202,7 @@ int SetVT(int set){
 	#endif
 }	
 
-int InKey(void){
+int TermInKey(void){
 /**
  * @brief	Non-Blocking GetChar
  * 
@@ -249,7 +250,7 @@ int InKey(void){
 	#endif
 }
 
-void FlushInKey(void){
+void TermFlushInKey(void){
 /**
  * @brief 	Flush buffer the "hard (and all time successful) way"
  */
@@ -267,7 +268,7 @@ void FlushInKey(void){
 	#define DoEvents() usleep(DoEventsTime);
 #endif 
 
-int ClearScreen(int set){
+int TermClearScreen(int set){
 /**
  * @brief 	Clear Screen - ESC & OS
  * 
@@ -311,7 +312,7 @@ int ClearScreen(int set){
 	return isSet;
 }
 
-int GetTerminalSize(int set){
+int TermGetSize(int set){
 /**
  * @brief	Get Terminal Size - ESC & OS
  * 
@@ -353,25 +354,25 @@ int GetTerminalSize(int set){
 		break;
 	case 2:
 		// Dumb
-		gScreenSizeInCursorPos = 1;
+		TERM_ScreenSizeInCursorPos = 1;
 		printf("\0337\x1B[999;9999H\x1B[6n\0338");
 		break;
 	case 0:
 		// 1st run
 		r = WaitForESC27("\x1B[18t",177,0.5);
-		if (gScreenWidth > 0 && gScreenHeight > 0){
+		if (TERM_ScreenWidth > 0 && TERM_ScreenHeight > 0){
 			isSet = 1;
-			gScreenWidthPrev = gScreenWidth;
-			gScreenHeightPrev = gScreenHeight;
+			TERM_ScreenWidthPrev = TERM_ScreenWidth;
+			TERM_ScreenHeightPrev = TERM_ScreenHeight;
 			break;
 		}
-		gScreenSizeInCursorPos = 1;
+		TERM_ScreenSizeInCursorPos = 1;
 		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",180,0.5);
-		gScreenSizeInCursorPos = 0;
-		if (gScreenWidth > 0 && gScreenHeight > 0){
+		TERM_ScreenSizeInCursorPos = 0;
+		if (TERM_ScreenWidth > 0 && TERM_ScreenHeight > 0){
 			isSet = 2;
-			gScreenWidthPrev = gScreenWidth;
-			gScreenHeightPrev = gScreenHeight;
+			TERM_ScreenWidthPrev = TERM_ScreenWidth;
+			TERM_ScreenHeightPrev = TERM_ScreenHeight;
 			break;
 		}
 	case 3:
@@ -380,19 +381,19 @@ int GetTerminalSize(int set){
 	        /* Billy OS */
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-            gScreenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
-            gScreenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+            TERM_ScreenWidth = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
+            TERM_ScreenHeight = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
         #else 
 			/* Mac & Linux */
             ioctl(fileno(stdout), TIOCGWINSZ, &w);
-            gScreenWidth = (int)(w.ws_col);
-            gScreenHeight = (int)(w.ws_row);
+            TERM_ScreenWidth = (int)(w.ws_col);
+            TERM_ScreenHeight = (int)(w.ws_row);
         #endif
 		if (!isSet){
-			if (gScreenWidth > 0 && gScreenHeight > 0){
+			if (TERM_ScreenWidth > 0 && TERM_ScreenHeight > 0){
 				isSet = 3;
-				gScreenWidthPrev = gScreenWidth;
-				gScreenHeightPrev = gScreenHeight;
+				TERM_ScreenWidthPrev = TERM_ScreenWidth;
+				TERM_ScreenHeightPrev = TERM_ScreenHeight;
 				break;
 			}
 			else {
@@ -412,7 +413,7 @@ int GetTerminalSize(int set){
 	
 }
 
-int ScreenSizeChanged(void){
+int TermSizeChanged(void){
 /**
  * @brief 	Check On If ScreenSize Has Changed
  * 
@@ -420,15 +421,15 @@ int ScreenSizeChanged(void){
  * 				0 = Not Changed
  */
 
-	if ((gScreenWidth != gScreenWidthPrev) || (gScreenHeight != gScreenHeightPrev)){
-		gScreenHeightPrev = gScreenHeight;
-		gScreenWidthPrev = gScreenWidth;
+	if ((TERM_ScreenWidth != TERM_ScreenWidthPrev) || (TERM_ScreenHeight != TERM_ScreenHeightPrev)){
+		TERM_ScreenHeightPrev = TERM_ScreenHeight;
+		TERM_ScreenWidthPrev = TERM_ScreenWidth;
 		return 1;
 	}
 	return 0;
 }
 
-int GetESC27 (int c){
+int TermGetESC27 (int c){
 /**
  * @brief 	Analyze stream (char by char) on ESC-Sequences
  * 
@@ -506,7 +507,7 @@ int GetESC27 (int c){
 		r = c;
 		if (isValid){
 			// Alt-Back
-			gKeyAlt = 1;
+			TERM_KeyAlt = 1;
 		}
 	}
 	else if (c < 32){
@@ -549,7 +550,7 @@ int GetESC27 (int c){
 			break;
 		case -2:
 			// ShiftAlt-O (conflicting with F1-F4) recognized
-			gKeyAlt = 1; gKeyShift = 1;
+			TERM_KeyAlt = 1; TERM_KeyShift = 1;
 			r = 79;
 			break;
 		default:
@@ -615,7 +616,7 @@ int GetESC27 (int c){
 			case 1:
 				if (c > 96 && c < 123){
 					// Alt + a-z
-					gKeyAlt = 1;
+					TERM_KeyAlt = 1;
 					r = c - 32;
 				}
 				else if (c == 79){
@@ -626,14 +627,14 @@ int GetESC27 (int c){
 				else if (c > 64 && c < 91){
 					// (Shift)Alt + A-Z
 					// Except ShiftAlt + O, could expand to F1-F4
-					gKeyAlt = 1;
-					gKeyShift = 1;
+					TERM_KeyAlt = 1;
+					TERM_KeyShift = 1;
 					r = c;
 				}
 				break;
 			case 2:
 				if (gStreamInESC27[1] == 79){
-					gKeyAlt = 0; gKeyShift = 0;		// Could be False-True cause of overlapping ShiftAlt-O and F1-F4
+					TERM_KeyAlt = 0; TERM_KeyShift = 0;		// Could be False-True cause of overlapping ShiftAlt-O and F1-F4
 					if (c > 79 && c < 84){
 						// F1 - F4
 						r = c + 48;
@@ -653,7 +654,7 @@ int GetESC27 (int c){
 						switch (c){
 						case 90:
 							// Shift-TAB
-							gKeyShift = 1;
+							TERM_KeyShift = 1;
 							r = 9;
 						case 60:
 							// Mouse Trapping Start
@@ -705,10 +706,10 @@ int GetESC27 (int c){
 					// Mouse in ByteMode...
 					// ByteMode is dangerous! XY-Positions > 223 may crash the Terminal ! 
 					// But ByteMode has just ~40% of the data volume....
-					gMousePosX = 0; gMousePosY = 0;
+					TERM_MousePosX = 0; TERM_MousePosY = 0;
 					if (gStreamInESC27[4]>32 && gStreamInESC27[5]>32){
-						gMousePosX = gStreamInESC27[4] - 32;
-						gMousePosY = gStreamInESC27[5] - 32;
+						TERM_MousePosX = gStreamInESC27[4] - 32;
+						TERM_MousePosY = gStreamInESC27[5] - 32;
 					}
 					else{
 						// Mouse Out Of Range
@@ -727,8 +728,8 @@ int GetESC27 (int c){
 						// WheelDown
 					case 34:
 						// RightDown
-						gMouseButton = 1 << (r - 32);
-						gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
+						TERM_MouseButton = 1 << (r - 32);
+						TERM_MouseSelX = TERM_MousePosX; TERM_MouseSelY = TERM_MousePosY;
 						r += 130;
 						break;
 					case 35:
@@ -776,7 +777,7 @@ int GetESC27 (int c){
 					// 	CSI 1;7 R  -  AltCtrl
 					// 	CSI 1;8 R  -  ShiftAltCtrl
 					// Previous 7 Combinations Are CursorPositions, too... WTF !
-					if (!(c == 82 && gScreenSizeInCursorPos || gCursorWaitFor)){
+					if (!(c == 82 && TERM_ScreenSizeInCursorPos || TERM_CursorWaitFor)){
 						// Not F3 while waiting for CursorPos
 						r = GetESC27_CheckOnF112Key(c + 48, 4);
 					}
@@ -787,13 +788,13 @@ int GetESC27 (int c){
 					r = c + 79;
 					switch(gStreamInESC27[4]){
 					case 53:
-						gKeyCtrl = 1;
+						TERM_KeyCtrl = 1;
 						break;
 					case 51:
-						gKeyAlt = 1;
+						TERM_KeyAlt = 1;
 						break;
 					default:
-						gKeyShift = 1;
+						TERM_KeyShift = 1;
 					}
 				}
 				else if (c == 126){
@@ -804,10 +805,10 @@ int GetESC27 (int c){
 						// Ins - just WIN ?
 						r += 102;
 						if (gStreamInESC27[4] == 50){
-							gKeyShift = 1;
+							TERM_KeyShift = 1;
 						}
 						else{
-							gKeyCtrl = 1;
+							TERM_KeyCtrl = 1;
 						}
 					}
 				}
@@ -856,17 +857,17 @@ int GetESC27 (int c){
 					switch (c){
 					case 82:
 						// Actual Cursor Position
-						if (gScreenSizeInCursorPos){
+						if (TERM_ScreenSizeInCursorPos){
 							// but as TerminalSize substitute
-							gScreenWidth = atoi(pNumPos[2]);
-							gScreenHeight = atoi(pNumPos[1]);
-							gScreenSizeInCursorPos = 0;
+							TERM_ScreenWidth = atoi(pNumPos[2]);
+							TERM_ScreenHeight = atoi(pNumPos[1]);
+							TERM_ScreenSizeInCursorPos = 0;
 							r = 177;
 						}
 						else{
-							gCursorPosY = atoi(pNumPos[1]);
-							gCursorPosX = atoi(pNumPos[2]);
-							gCursorWaitFor = 0;
+							TERM_CursorPosY = atoi(pNumPos[1]);
+							TERM_CursorPosX = atoi(pNumPos[2]);
+							TERM_CursorWaitFor = 0;
 							r = 190;
 						}
 						break;				
@@ -875,8 +876,8 @@ int GetESC27 (int c){
 					case 109:
 						// Mouse Up / Wheel Up
 						if  (isMouse){
-							gMousePosX = atoi(pNumPos[2]);
-							gMousePosY = atoi(pNumPos[3]);
+							TERM_MousePosX = atoi(pNumPos[2]);
+							TERM_MousePosY = atoi(pNumPos[3]);
 							r = (atoi(pNumPos[1]));
 							// Switch off Shift / Alt / Ctrl
 							r &= ~((1 << 2) | (1 << 3) | (1 << 4));
@@ -910,8 +911,8 @@ int GetESC27 (int c){
 									// Wheel Down
 								case 2:
 									// Right Button Down
-									gMouseButton = 1 << r;
-									gMouseSelX = gMousePosX; gMouseSelY = gMousePosY;
+									TERM_MouseButton = 1 << r;
+									TERM_MouseSelX = TERM_MousePosX; TERM_MouseSelY = TERM_MousePosY;
 									r += 162;
 									break;
 								case 33:
@@ -942,8 +943,8 @@ int GetESC27 (int c){
 						switch (atoi(pNumPos[1])){
 						case 8:
 							// ScreenSize
-							gScreenHeight = atoi(pNumPos[2]);
-							gScreenWidth = atoi(pNumPos[3]);
+							TERM_ScreenHeight = atoi(pNumPos[2]);
+							TERM_ScreenWidth = atoi(pNumPos[3]);
 							r = 177;						
 							break;
 						
@@ -965,10 +966,10 @@ int GetESC27 (int c){
 	if (r < -1 && r != -6){
 		// more or less fucked up - or valid Start
 		gStreamInESC27[0] = 0;
-		gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
+		TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyMeta = 0; TERM_KeyShift = 0;
 		gStreamInESC27[1] = 0;
 		isCSI = 0; isOSC = 0; allowTxt = 0; numCnt = 0; waitForEOT = 0;
-		isMouse = 0; isByteMouse = 0; gScreenSizeInCursorPos = 0; gCursorWaitFor = 0;
+		isMouse = 0; isByteMouse = 0; TERM_ScreenSizeInCursorPos = 0; TERM_CursorWaitFor = 0;
 		streamPos = 0;
 		if (r == -27){
 			isValid = 1;
@@ -1040,31 +1041,31 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
  * 
  * @param	posInStream	Position of to switch char
  * 
- * @return	int			r 	= 	success ( and gKeyXYZ get set)
+ * @return	int			r 	= 	success ( and TERM_KeyXYZ get set)
  * 						-1	=	Fail 
  */
 
 	switch (gStreamInESC27[posInStream]){
 	case 50:
-		gKeyShift = 1;
+		TERM_KeyShift = 1;
 		break;
 	case 51:
-		gKeyAlt = 1;
+		TERM_KeyAlt = 1;
 		break;
 	case 53:
-		gKeyCtrl = 1;
+		TERM_KeyCtrl = 1;
 		break;
 	case 54:
-		gKeyShift = 1; gKeyCtrl = 1;
+		TERM_KeyShift = 1; TERM_KeyCtrl = 1;
 		break;
 	case 52:
-		gKeyShift = 1; gKeyAlt = 1;
+		TERM_KeyShift = 1; TERM_KeyAlt = 1;
 		break;
 	case 55:
-		gKeyAlt = 1; gKeyCtrl = 1;
+		TERM_KeyAlt = 1; TERM_KeyCtrl = 1;
 		break;
 	case 56:
-		gKeyShift = 1; gKeyAlt = 1; gKeyCtrl = 1;
+		TERM_KeyShift = 1; TERM_KeyAlt = 1; TERM_KeyCtrl = 1;
 		break;
 	default:
 		r= 0;
@@ -1074,7 +1075,7 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
 }
 
 
-int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
+int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 /**
  * @brief Send command to Terminal and wait for an answer
  * 
@@ -1146,7 +1147,7 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
     }
 }
 
-void SignalHandler(int sig){
+void TermSignalHandler(int sig){
 /**
  * @brief Signal-Handler for signal()
  * 
@@ -1155,7 +1156,7 @@ void SignalHandler(int sig){
 
 	if (SIGINT == sig){
 		// Ctrl-C pressed
-		gSignalCtrlC = 1;
+		TERM_SignalCtrlC = 1;
 		#if __WIN32__ || _MSC_VER || __WIN64__
 			// Catch Ctrl-C again...
 			signal(SIGINT, SignalHandler);
@@ -1165,11 +1166,11 @@ void SignalHandler(int sig){
 	#else	
 		else if (SIGWINCH == sig){
 			// Terminal-Size Changed
-			gSignalTerminalSize = 1;
+			TERM_SignalTerminalSize = 1;
 		}
 		else if (SIGALRM == sig){
 			// 31/3 Interval
-			gSignalInterval = 1;
+			TERM_SignalInterval = 1;
 		}
 	#endif
 	/*else if (SIGURG == sig){
@@ -1178,7 +1179,7 @@ void SignalHandler(int sig){
 	}*/
 }
 
-void TrapMouse(int set){
+void TermTrapMouse(int set){
 /**
  * @brief Enable / Disable Mouse Trapping
  * 
@@ -1197,7 +1198,7 @@ void TrapMouse(int set){
 	printf("\x1B[?1002%c\x1B[?1006%c", c, c);
 }
 
-void TrapFocus(int set){
+void TermTrapFocus(int set){
 /**
  * @brief Enable / Disable TerminalFocus Trapping
  * 

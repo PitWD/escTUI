@@ -155,19 +155,19 @@ int EventESC27 (int event){
 	int r = 0;		// Return Value
 	
 	// Modification Keys
-	int keyState = (gKeyShift) + (gKeyAlt * 2) + (gKeyCtrl * 4);
+	int keyState = (TERM_KeyShift) + (TERM_KeyAlt * 2) + (TERM_KeyCtrl * 4);
 
-	if (gKeyShift){
+	if (TERM_KeyShift){
 		#if IS_TERMINAL_EVENT_DEBUG
 			printf("Shift-");
 		#endif
 	}
-	if (gKeyAlt){
+	if (TERM_KeyAlt){
 		#if IS_TERMINAL_EVENT_DEBUG
 			printf("Alt-");
 		#endif
 	}
-	if (gKeyCtrl){
+	if (TERM_KeyCtrl){
 		#if IS_TERMINAL_EVENT_DEBUG
 			printf("Ctrl-");
 		#endif
@@ -286,7 +286,7 @@ int EventESC27 (int event){
 				printf("Back");
 			#endif
 			// Back
-			if (gKeyAlt){
+			if (TERM_KeyAlt){
 				/* code */
 			}
 			else{
@@ -367,7 +367,7 @@ int EventESC27 (int event){
 		switch(event){
 		case 65:
 			// A
-			if (gKeyShift){
+			if (TERM_KeyShift){
 				// Shift-Alt
 			}
 			else{
@@ -485,7 +485,7 @@ int EventESC27 (int event){
 			break;
 		case 9:
 			// TAB
-			if (gKeyShift){
+			if (TERM_KeyShift){
 				// Shift-Tab
 			}
 			else{
@@ -610,7 +610,7 @@ int EventESC27 (int event){
 			break;
 		case 165:
 			// MouseUp
-			switch (gMouseButton){
+			switch (TERM_MouseButton){
 			case 1:
 				// Left
 				#if IS_TERMINAL_EVENT_DEBUG
@@ -696,7 +696,7 @@ int EventESC27 (int event){
 	else if (event > 199 && event < 203){
 		// 2nd Level (From Loop()) Mouse-Events
 		
-		switch (gMouseButton){
+		switch (TERM_MouseButton){
 		case 1:
 			// Left
 			#if IS_TERMINAL_EVENT_DEBUG
@@ -729,7 +729,7 @@ int EventESC27 (int event){
 			#if IS_TERMINAL_EVENT_DEBUG
 				printf("Click");
 			#endif
-			switch (gMouseButton){
+			switch (TERM_MouseButton){
 			case 1:
 				// Left
 				break;
@@ -807,7 +807,7 @@ int EventESC27 (int event){
 			break;
 		}
 	}
-	gKeyAlt = 0; gKeyCtrl = 0; gKeyMeta = 0; gKeyShift = 0;
+	TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyMeta = 0; TERM_KeyShift = 0;
 
 	if (event > 31){
 		#if IS_TERMINAL_EVENT_DEBUG

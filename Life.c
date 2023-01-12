@@ -213,10 +213,10 @@ void CoreLoop(void){
 			isOnUsrESC27 = 0;
 		}
 
-		if (gSignalCtrlC){
+		if (TERM_SignalCtrlC){
 			// Ctrl-C
 			i = 3;
-			gSignalCtrlC = 0;
+			TERM_SignalCtrlC = 0;
 		}
 			
 	// Loop Minimum
@@ -270,7 +270,7 @@ void CoreLoop(void){
 				EventESC27(165);
 				isOnESC27 = 0;
 				r = 0;
-				if ((gMouseSelX == gMousePosX) && (gMouseSelY == gMousePosY)){
+				if ((TERM_MouseSelX == TERM_MousePosX) && (TERM_MouseSelY == TERM_MousePosY)){
 					// it's a (dbl)click
 					if (isOnClick && clock() < timeOnClick){
 						// dblClick
@@ -334,7 +334,7 @@ void CoreLoop(void){
 			#if __WIN32__ || _MSC_VER || __WIN64__
 				CheckOnTimeChange();
 			#else
-				if (gSignalInterval){
+				if (TERM_SignalInterval){
 					CheckOnTimeChange();
 				}
 			#endif
@@ -369,17 +369,17 @@ void CoreLoop(void){
 					DoEvents();
 				}	
 			#else
-				if (gSignalInterval){
-					if (gSignalTerminalSize){
+				if (TERM_SignalInterval){
+					if (TERM_SignalTerminalSize){
 						GetTerminalSize(3);
 						EventESC27(177);
-						gSignalTerminalSize = 0;
+						TERM_SignalTerminalSize = 0;
 					}
-					gSignalInterval = 0;
+					TERM_SignalInterval = 0;
 				}
 				else {
 					DoEvents();
-					//gKeyAlt = 0; gKeyCtrl = 0; gKeyShift = 0; gKeyMeta = 0;
+					//TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyShift = 0; TERM_KeyMeta = 0;
 				}	
 			#endif
 		}
@@ -436,15 +436,15 @@ int main() {
 	#if __WIN32__ || _MSC_VER || __WIN64__
 		printf("Billy-OS: Screen Size Changes Get Polled...Sorry.\n");
 	#else
-		signal(SIGWINCH, SignalHandler);
+		signal(SIGWINCH, TermSignalHandler);
 		printf("PosiX-OS: Screen Size Changes Get Signaled.\n");
 	#endif
-	printf("Width: %d  Height: %d\n\n", gScreenWidth, gScreenHeight);
+	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
 
 	printf("Synchronize CLS-Mode With Size-Mode...\n");
 	r = ClearScreen(r);
 	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n",r);
-	printf("Width: %d  Height: %d\n\n", gScreenWidth, gScreenHeight);
+	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
 
 	printf("Enable Trap Mouse Mode... ");
 	TrapMouse(1);
@@ -455,13 +455,13 @@ int main() {
 	printf("(probably) OK\n\n");
 
 	printf("Catch Ctrl-C... ");
-	signal(SIGINT, SignalHandler);
+	signal(SIGINT, TermSignalHandler);
 	printf("OK\n\n");
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 		printf("Billy-OS: Check On Real-Time Changes Get Polled...Sorry.\n\n");
 	#else
-		signal(SIGALRM, SignalHandler);
+		signal(SIGALRM, TermSignalHandler);
 		ualarm(333333,333333);
 		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n\n");
 	#endif
