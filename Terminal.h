@@ -78,6 +78,7 @@ void SignalHandler(int sig);
 void TrapMouse(int set);
 void TrapFocus(int set);
 
+int SetVT(int set){
 /**
  * @brief 	Set/Reset output mode to handle virtual terminal sequences
  * 			and for (LINUX/Mac) to (re)set c_break mode
@@ -90,8 +91,6 @@ void TrapFocus(int set);
  * 			1 = Success
  * 			0 = Failed
  */
-
-int SetVT(int set){
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 
@@ -202,6 +201,7 @@ int SetVT(int set){
 	#endif
 }	
 
+int InKey(void){
 /**
  * @brief	Non-Blocking GetChar
  * 
@@ -209,10 +209,6 @@ int SetVT(int set){
  * 			1-255 	= char 
  * 			0		= there was no char in buffer
  */
-int InKey(void){
-
-	// Returns next char in stdin
-	// or zero.
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 
@@ -253,10 +249,10 @@ int InKey(void){
 	#endif
 }
 
+void FlushInKey(void){
 /**
  * @brief 	Flush buffer the "hard (and all time successful) way"
  */
-void FlushInKey(void){
 	while (InKey()){
 		// Flush
 	}
@@ -271,6 +267,7 @@ void FlushInKey(void){
 	#define DoEvents() usleep(DoEventsTime);
 #endif 
 
+int ClearScreen(int set){
 /**
  * @brief 	Clear Screen - ESC & OS
  * 
@@ -285,7 +282,6 @@ void FlushInKey(void){
  * 
  * @return	int 1-3 = used way to CLS
  */
-int ClearScreen(int set){
 	
 	static int isSet = 3;
 	
@@ -315,6 +311,7 @@ int ClearScreen(int set){
 	return isSet;
 }
 
+int GetTerminalSize(int set){
 /**
  * @brief	Get Terminal Size - ESC & OS
  * 
@@ -330,7 +327,6 @@ int ClearScreen(int set){
  * @return	int 1-3 = used way to GetTerminalSize
  * 			      0 = unable to GetTerminalSize
  */
-int GetTerminalSize(int set){
 
 	static int isSet = 0;
 
@@ -416,13 +412,14 @@ int GetTerminalSize(int set){
 	
 }
 
+int ScreenSizeChanged(void){
 /**
  * @brief 	Check On If ScreenSize Has Changed
  * 
  * @return	int	1 = Changed
  * 				0 = Not Changed
  */
-int ScreenSizeChanged(void){
+
 	if ((gScreenWidth != gScreenWidthPrev) || (gScreenHeight != gScreenHeightPrev)){
 		gScreenHeightPrev = gScreenHeight;
 		gScreenWidthPrev = gScreenWidth;
@@ -431,6 +428,7 @@ int ScreenSizeChanged(void){
 	return 0;
 }
 
+int GetESC27 (int c){
 /**
  * @brief 	Analyze stream (char by char) on ESC-Sequences
  * 
@@ -487,7 +485,6 @@ int ScreenSizeChanged(void){
 				 0	= Valid, but waiting for more Bytes to identify/finish sequence
 				 n	= The ESC-Sequence (see related enum's)
  */
-int GetESC27 (int c){
 
 	static int isValid = 0;
 	static int isCSI = 0;
@@ -998,13 +995,13 @@ int GetESC27 (int c){
 	return r;
 }
 
+static int GetESC27_CheckOnF512(void){
 /**
  * @brief Extract F5 - F12 from gStreamInESC27[]
  * 
  * @return int 			132 - 139 	F5 - F8
  * 						-1			Error
  */
-static int GetESC27_CheckOnF512(void){
 
 	int r = gStreamInESC27[3];
 	switch (r){
@@ -1035,6 +1032,7 @@ static int GetESC27_CheckOnF512(void){
 	return r;
 }
 
+static int GetESC27_CheckOnF112Key(int r, int posInStream){
 /**
  * @brief Extract Shift/Alt/Ctrl from gStreamInESC27[]
  * 
@@ -1045,7 +1043,7 @@ static int GetESC27_CheckOnF512(void){
  * @return	int			r 	= 	success ( and gKeyXYZ get set)
  * 						-1	=	Fail 
  */
-static int GetESC27_CheckOnF112Key(int r, int posInStream){
+
 	switch (gStreamInESC27[posInStream]){
 	case 50:
 		gKeyShift = 1;
@@ -1076,6 +1074,7 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
 }
 
 
+int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 /**
  * @brief Send command to Terminal and wait for an answer
  * 
@@ -1100,7 +1099,6 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
  * @return	int 		n = received sequence (see GetESC27-return)
 						0 = TimeOut (without chars) or wrong answer
  */
-int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 
     int r = 0;
     int i = 0;
@@ -1148,12 +1146,13 @@ int WaitForESC27(char *pStrExchange, int waitForID, float timeOut){
     }
 }
 
+void SignalHandler(int sig){
 /**
  * @brief Signal-Handler for signal()
  * 
  * @param sig (int)
  */
-void SignalHandler(int sig){
+
 	if (SIGINT == sig){
 		// Ctrl-C pressed
 		gSignalCtrlC = 1;
@@ -1179,6 +1178,7 @@ void SignalHandler(int sig){
 	}*/
 }
 
+void TrapMouse(int set){
 /**
  * @brief Enable / Disable Mouse Trapping
  * 
@@ -1187,7 +1187,6 @@ void SignalHandler(int sig){
  * 
  * @private c (char)		helper for set
  */
-void TrapMouse(int set){
 
 	char c = 'l';
 	if (set){
@@ -1198,6 +1197,7 @@ void TrapMouse(int set){
 	printf("\x1B[?1002%c\x1B[?1006%c", c, c);
 }
 
+void TrapFocus(int set){
 /**
  * @brief Enable / Disable TerminalFocus Trapping
  * 
@@ -1206,7 +1206,6 @@ void TrapMouse(int set){
  * 
  * @private c (char)		helper for set
  */
-void TrapFocus(int set){
 
 	char c = 'l';
 	if (set){

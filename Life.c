@@ -171,7 +171,8 @@ void CoreLoop(void){
 		int terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
 
 	// Loop Minimum
-	while (i != 10 && i != 13){
+	// while (i != 10 && i != 13){
+	while (TUI_RunCoreLoop){
 		
 		i = InKey();
 

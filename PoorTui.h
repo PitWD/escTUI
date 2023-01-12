@@ -18,6 +18,9 @@
 
 #include "AnsiESC.h"
 
+int TUI_RunCoreLoop = 1;
+
+/*
 typedef struct TabStyleSTRUCT {
     unsigned char Left;                                     // unscaled / unmoved start of Tab
     unsigned char Width;
@@ -56,18 +59,18 @@ typedef struct {
 struct AreaSTRUCT {
 	// at least xx (xx) Byte
 
-	struct AreaSTRUCT *pParentArea;								// (Null = Terminal)
-															/* If PopUp has Width = 0 Then
-																	FullScreen
-																else
-																	Centered
-															*/
+	struct AreaSTRUCT *pParentArea;							// (Null = Terminal)
 	
-	unsigned char TopBot, LeftRight, Height, Width;			/* Virtual(vectorial) Position and Dimensions
-															   Safest way is to do the virtial screen design 
-															   in the smallest to exepect real-size.
-															   So, 255 x 255 is far enough for the Definition
-															   */
+															// If PopUp has Width = 0 Then
+															//		FullScreen
+															// else
+															// Centered
+
+	unsigned char TopBot, LeftRight, Height, Width;			// Virtual(vectorial) Position and Dimensions
+															// Safest way is to do the virtial screen design 
+															// in the smallest to exepect real-size.
+															// So, 255 x 255 is far enough for the Definition
+															   
 	unsigned char MinHeight, MinWidth;						// If reality gets smaller - use scroll-bars
 
 // Frame
@@ -88,14 +91,13 @@ struct AreaSTRUCT {
 	unsigned char AlignBottom :1;
 
 // Options / Properties (8 Byte)
-	unsigned char HotKey :6;								/* To make Area the active area
-																see list in AnsiESC.h
-																*/
-	unsigned char HotKeyShow :2;							/*  0		= Don't show
-																1 		= Left
-																2		= Center
-																3		= Right
-																*/
+	unsigned char HotKey :6;								// To make Area the active area
+															//	see list in AnsiESC.h
+															
+	unsigned char HotKeyShow :2;							//  0		= Don't show
+															//	1 		= Left
+															//	2		= Center
+															//	3		= Right
 
 // ScrollBars to Draw:
 	unsigned char ScrollX :2;								// 0 = Never | 1 = Automatic | 2 = Ever
@@ -121,24 +123,31 @@ typedef struct {
 	unsigned char TxtCnt;                                   // Lines to print (0 = All (if more than 255))
 	unsigned char *pArea;									// Parent area
 	unsigned char *pTxtStyle;
-	unsigned char VerticalAlign :4;							/*	0 = On Frame
-																1 = 1st Line
-																2 = 2nd Line
-																3 = Pre Last Line
-																4 = Last Line
-																5 = Center
-																6 = Next
-																7 = Next (with space-line in front)
-															*/
-	unsigned char HorizontalAlign :4;						/*	0 = On Frame
-																1 = Left 
-																2 = Left (with space in front)
-																3 = Right (on Frame)
-																4 = Right
-																5 = Right (with added space)
-																6 = (Next) Tab
-																*/
+	unsigned char VerticalAlign :4;							//	0 = On Frame
+															//	1 = 1st Line
+															//	2 = 2nd Line
+															//	3 = Pre Last Line
+															//	4 = Last Line
+															//	5 = Center
+															//	6 = Next
+															//	7 = Next (with space-line in front)
+															
+	unsigned char HorizontalAlign :4;						//	0 = On Frame
+															//	1 = Left 
+															//	2 = Left (with space in front)
+															//	3 = Right (on Frame)
+															//	4 = Right
+															//	5 = Right (with added space)
+															//	6 = (Next) Tab
 } TextLineSTRUCT; 
+
+
+*/
+
+static void PT_Ctrl_A(){
+
+}
+
 
 // User EVENTS
 int EventESC27 (int event){
