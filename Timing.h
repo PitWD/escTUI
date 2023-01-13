@@ -31,41 +31,8 @@ char gStrDate[] = "01.01.1970";
 char gStrTime[] = "00:00:00      ";     // Trailing Spaces To Prevent Mac-Sleep-Overflow
 
 // Events
-int gSecondChanged = 0;  // A Second Is Over
-int gMinuteChanged = 0;  // A Minute
-int gHourChanged = 0;    // A Hour 
-int gDayChanged = 0;     // A Day
 
-int gSec2Changed = 0;    // All 2 seconds...
-int gSec3Changed = 0;
-int gSec4Changed = 0;
-int gSec5Changed = 0;
-int gSec6Changed = 0;
-int gSec10Changed = 0;
-int gSec12Changed = 0;
-int gSec15Changed = 0;
-int gSec20Changed = 0;
-int gSec30Changed = 0;
-
-int gMin2Changed = 0;    // All 2 minutes...
-int gMin3Changed = 0;
-int gMin4Changed = 0;
-int gMin5Changed = 0;
-int gMin6Changed = 0;
-int gMin10Changed = 0;
-int gMin12Changed = 0;
-int gMin15Changed = 0;
-int gMin20Changed = 0;
-int gMin30Changed = 0;
-
-int gHour2Changed = 0;   // All 2 hours...
-int gHour3Changed = 0;
-int gHour4Changed = 0;
-int gHour6Changed = 0;
-int gHour8Changed = 0;
-int gHour12Changed = 0;
-
-// Counter
+// Runtime Counter
 time_t gRunTime = 0;
 int gRunTimeSec = 0;
 int gRunTimeMin = 0;
@@ -84,9 +51,48 @@ clock_t gMouseClickTimeout;  // = 0.25 * 45000;
  * @brief Declaration FUNCTIONS in Timing.h
  */
 void InitTiming(void);
-void EraseTimeChange(void);
 void CheckOnTimeChange(void);
 
+// Events
+static void TimeDummyEvent(){
+    volatile int i;
+}
+
+void (*TimeSecChanged)(void) = TimeDummyEvent;
+void (*TimeMinChanged)(void) = TimeDummyEvent;
+void (*TimeHourChanged)(void) = TimeDummyEvent;
+void (*TimeDayChanged)(void) = TimeDummyEvent;
+
+void (*TimeSec2Changed)(void) = TimeDummyEvent;
+void (*TimeSec3Changed)(void) = TimeDummyEvent;
+void (*TimeSec4Changed)(void) = TimeDummyEvent;
+void (*TimeSec5Changed)(void) = TimeDummyEvent;
+void (*TimeSec6Changed)(void) = TimeDummyEvent;
+void (*TimeSec10Changed)(void) = TimeDummyEvent;
+void (*TimeSec12Changed)(void) = TimeDummyEvent;
+void (*TimeSec15Changed)(void) = TimeDummyEvent;
+void (*TimeSec20Changed)(void) = TimeDummyEvent;
+void (*TimeSec30Changed)(void) = TimeDummyEvent;
+
+void (*TimeMin2Changed)(void) = TimeDummyEvent;
+void (*TimeMin3Changed)(void) = TimeDummyEvent;
+void (*TimeMin4Changed)(void) = TimeDummyEvent;
+void (*TimeMin5Changed)(void) = TimeDummyEvent;
+void (*TimeMin6Changed)(void) = TimeDummyEvent;
+void (*TimeMin10Changed)(void) = TimeDummyEvent;
+void (*TimeMin12Changed)(void) = TimeDummyEvent;
+void (*TimeMin15Changed)(void) = TimeDummyEvent;
+void (*TimeMin20Changed)(void) = TimeDummyEvent;
+void (*TimeMin30Changed)(void) = TimeDummyEvent;
+
+void (*TimeHour2Changed)(void) = TimeDummyEvent;
+void (*TimeHour3Changed)(void) = TimeDummyEvent;
+void (*TimeHour4Changed)(void) = TimeDummyEvent;
+void (*TimeHour6Changed)(void) = TimeDummyEvent;
+void (*TimeHour8Changed)(void) = TimeDummyEvent;
+void (*TimeHour12Changed)(void) = TimeDummyEvent;
+
+void TimeInitTime(void){
 /**
  * @brief   Setup Timing Constants / Variables / Settings
  *          Elementary to get called before using
@@ -104,7 +110,6 @@ void CheckOnTimeChange(void);
  * 
  * @public  gClocksPerSecond, gUserEscTimeOut, gMouseClickTimeOut
 */
-void InitTiming(void){
 
     struct tm *pLocalTime;
 
@@ -139,42 +144,7 @@ void InitTiming(void){
     gMouseClickTimeout = 0.25 * gClocksPerSecond;
 }
 
-/**
- * @brief   Reset Global TimeEventFlags
- */
-void EraseTimeChange(void){
-    gSecondChanged = 0;  // A Second Is Over
-    gMinuteChanged = 0;  // A Minute
-    gHourChanged = 0;    // A Hour 
-    gDayChanged = 0;     // A Day
-    gSec2Changed = 0;    // All 2 seconds...
-    gSec3Changed = 0;
-    gSec4Changed = 0;
-    gSec5Changed = 0;
-    gSec6Changed = 0;
-    gSec10Changed = 0;
-    gSec12Changed = 0;
-    gSec15Changed = 0;
-    gSec20Changed = 0;
-    gSec30Changed = 0;
-    gMin2Changed = 0;    // All 2 minutes...
-    gMin3Changed = 0;
-    gMin4Changed = 0;
-    gMin5Changed = 0;
-    gMin6Changed = 0;
-    gMin10Changed = 0;
-    gMin12Changed = 0;
-    gMin15Changed = 0;
-    gMin20Changed = 0;
-    gMin30Changed = 0;
-    gHour2Changed = 0;   // All 2 hours...
-    gHour3Changed = 0;
-    gHour4Changed = 0;
-    gHour6Changed = 0;
-    gHour8Changed = 0;
-    gHour12Changed = 0;
-}
-
+void TimeCheckOnChange(void){
 /**
  * @brief   (Re)Calculate gClocksPerSecond depending on CPU-Power
  *          to then (Re)Calculate User-ESC & MouseClick TimeOut
@@ -207,7 +177,6 @@ void EraseTimeChange(void){
  * @public  gSecondChanged, gDayChanged + all gMin*Changed, gHour*Changed
  *  
  */
-void CheckOnTimeChange(void){
 
     int sec00Overflow = 0;
     double timeDiff = 0;
@@ -247,7 +216,7 @@ void CheckOnTimeChange(void){
         }
 
         lTimeLast = lTimeNow;
-        gSecondChanged = 1;
+        TimeSecChanged();
 
         //System Runtime
         gRunTimeSec += timeDiff;
@@ -273,44 +242,43 @@ void CheckOnTimeChange(void){
         
         // Real-Time Events
         if (gSec == 0 || sec00Overflow){
-            gSec2Changed = 1;
-            gSec3Changed = 1;
-            gSec4Changed = 1;
-            gSec5Changed = 1;
-            gSec6Changed = 1;
-            gSec10Changed = 1;
-            gSec12Changed = 1;
-            gSec15Changed = 1;
-            gSec20Changed = 1;
-            gSec30Changed = 1;
+            TimeSec2Changed();
+            TimeSec3Changed();
+            TimeSec4Changed();
+            TimeSec5Changed();
+            TimeSec6Changed();
+            TimeSec10Changed();
+            TimeSec12Changed();
+            TimeSec15Changed();
+            TimeSec20Changed();
+            TimeSec30Changed();
 
-            gMinuteChanged = 1;
+            TimeMinChanged();
             gMin = pLocalTime->tm_min;
             
             if (gMin == 0){
-                gMin2Changed = 1;
-                gMin3Changed = 1;
-                gMin4Changed = 1;
-                gMin5Changed = 1;
-                gMin6Changed = 1;
-                gMin10Changed = 1;
-                gMin12Changed = 1;
-                gMin15Changed = 1;
-                gMin20Changed = 1;
-                gMin30Changed = 1;
+                TimeMin2Changed();
+                TimeMin3Changed();
+                TimeMin4Changed();
+                TimeMin5Changed();
+                TimeMin6Changed();
+                TimeMin10Changed();
+                TimeMin12Changed();
+                TimeMin15Changed();
+                TimeMin20Changed();
+                TimeMin30Changed();
 
-                gHourChanged = 1;
-                gHour = pLocalTime->tm_hour;
+                TimeHourChanged();
 
                 if (gHour == 0){
-                    gHour2Changed = 1;
-                    gHour3Changed = 1;
-                    gHour4Changed = 1;
-                    gHour6Changed = 1;
-                    gHour8Changed = 1;
-                    gHour12Changed = 1;
+                    TimeHour2Changed();
+                    TimeHour3Changed();
+                    TimeHour4Changed();
+                    TimeHour6Changed();
+                    TimeHour8Changed();
+                    TimeHour12Changed();
 
-                    gDayChanged = 1;
+                    TimeDayChanged();
 
                     gDay = pLocalTime->tm_mday;
                     gMonth = pLocalTime->tm_mon + 1;
@@ -319,20 +287,20 @@ void CheckOnTimeChange(void){
                 }
                 else{
                     if (!(gHour % 2)){
-                        gHour2Changed = 1;
+                        TimeHour2Changed();
                         if (!(gHour % 4)){
-                            gHour4Changed = 1;
+                            TimeHour4Changed();
                             if (!(gHour % 8)){
-                                gHour8Changed = 1;
+                                TimeHour8Changed();
                             }
                         }
                     }
                     if (!(gHour % 3)){
-                        gHour3Changed = 1;
+                        TimeHour3Changed();
                         if (!(gHour % 6)){
-                            gHour6Changed = 1;
+                            TimeHour6Changed();
                             if (!(gHour % 12)){
-                                gHour12Changed = 1;
+                                TimeHour12Changed();
                             }                  
                         }
                     }
@@ -340,32 +308,32 @@ void CheckOnTimeChange(void){
             }
             else{
                 if (!(gMin % 2)){
-                    gMin2Changed = 1;
+                    TimeMin2Changed();
                     if (!(gMin % 4)){
-                        gMin4Changed = 1;
+                        TimeMin4Changed();
                     }
                 }
                 if (!(gMin % 3)){
-                    gMin3Changed = 1;
+                    TimeMin3Changed();
                     if (!(gMin % 6)){
-                        gMin6Changed = 1;
+                        TimeMin6Changed();
                         if (!(gMin % 12)){
-                            gMin12Changed = 1;
+                            TimeMin12Changed();
                         }
                     }
                 }
                 if (!(gMin % 5)){
-                    gMin5Changed = 1;
+                    TimeMin5Changed();
                     if (!(gMin % 10)){
-                        gMin10Changed = 1;
+                        TimeMin10Changed();
                         if (!(gMin % 20)){
-                            gMin20Changed = 1;
+                            TimeMin20Changed();
                         }
                     }
                     if (!(gMin % 15)){
-                        gMin15Changed = 1;
+                        TimeMin15Changed();
                         if (!(gMin % 30)){
-                            gMin30Changed = 1;
+                            TimeMin30Changed();
                         }
                     }
                 }
@@ -373,32 +341,32 @@ void CheckOnTimeChange(void){
         } 
         else{
             if (!(gSec % 2)){
-                gSec2Changed = 1;
+                TimeSec2Changed();
                 if (!(gSec % 4)){
-                    gSec4Changed = 1;
+                    TimeSec4Changed();
                 }
             }
             if (!(gSec % 3)){
-                gSec3Changed = 1;
+                TimeSec3Changed();
                 if (!(gSec % 6)){
-                    gSec6Changed = 1;
+                    TimeSec6Changed();
                     if (!(gSec % 12)){
-                        gSec12Changed = 1;
+                        TimeSec12Changed();
                     }
                 }
             }
             if (!(gSec % 5)){
-                gSec5Changed = 1;
+                TimeSec5Changed();
                 if (!(gSec % 10)){
-                    gSec10Changed = 1;
+                    TimeSec10Changed();
                     if (!(gSec % 20)){
-                        gSec20Changed = 1;
+                        TimeSec20Changed();
                     }
                 }
                 if (!(gSec % 15)){
-                    gSec15Changed = 1;
+                    TimeSec15Changed();
                     if (!(gSec % 30)){
-                        gSec30Changed = 1;
+                        TimeSec30Changed();
                     }
                 }
             }

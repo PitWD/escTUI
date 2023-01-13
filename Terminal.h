@@ -254,7 +254,7 @@ void TermFlushInKey(void){
 /**
  * @brief 	Flush buffer the "hard (and all time successful) way"
  */
-	while (InKey()){
+	while (TermInKey()){
 		// Flush
 	}
 }
@@ -359,7 +359,7 @@ int TermGetSize(int set){
 		break;
 	case 0:
 		// 1st run
-		r = WaitForESC27("\x1B[18t",177,0.5);
+		r = TermWaitForESC27("\x1B[18t",177,0.5);
 		if (TERM_ScreenWidth > 0 && TERM_ScreenHeight > 0){
 			isSet = 1;
 			TERM_ScreenWidthPrev = TERM_ScreenWidth;
@@ -367,7 +367,7 @@ int TermGetSize(int set){
 			break;
 		}
 		TERM_ScreenSizeInCursorPos = 1;
-		r = WaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",180,0.5);
+		r = TermWaitForESC27("\0337\x1B[999;9999H\x1B[6n\0338",180,0.5);
 		TERM_ScreenSizeInCursorPos = 0;
 		if (TERM_ScreenWidth > 0 && TERM_ScreenHeight > 0){
 			isSet = 2;
@@ -977,7 +977,7 @@ int TermGetESC27 (int c){
 		}
 		else{
 			isValid = 0;
-			FlushInKey();
+			TermFlushInKey();
 		}
 	}
 	else if (r > 0){
@@ -1074,7 +1074,6 @@ static int GetESC27_CheckOnF112Key(int r, int posInStream){
 	return r;
 }
 
-
 int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 /**
  * @brief Send command to Terminal and wait for an answer
@@ -1107,7 +1106,7 @@ int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 	clock_t timeExit;
 
 	fflush(stdin);
-	FlushInKey();
+	TermFlushInKey();
     printf("%s",pStrExchange);
 	fflush(stdout);
 
@@ -1115,28 +1114,28 @@ int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut){
 
     while (clock() < timeExit){
 		
-		i = InKey();
+		i = TermInKey();
 
         if (i > 0){
 			gotChar = 1;
-            r = GetESC27(i);
+            r = TermGetESC27(i);
             if (r > 0){
 				if ((r == waitForID) || (waitForID == 0)){
 					// Valid
-					FlushInKey();				
+					TermFlushInKey();				
 					return r;
 				}
             }
 			else if (r < 0){
 				// Error
-                FlushInKey();
+                TermFlushInKey();
 				return r;
 			}
         }
     }
 
     // TimeOut
-	FlushInKey();
+	TermFlushInKey();
 	if (gotChar){
         // With char(s) received
         return -3;
@@ -1214,6 +1213,7 @@ void TermTrapFocus(int set){
 	}
 	printf("\x1B[?1004%c", c);
 }
+
 
 /*
 										EOF - Detailed Description

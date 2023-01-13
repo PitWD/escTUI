@@ -562,7 +562,7 @@ int EventESC27 (int event){
 			#if IS_TERMINAL_EVENT_DEBUG
 				printf("ScreenSize");
 			#endif
-			if (ScreenSizeChanged()){
+			if (TermSizeChanged()){
 				#if IS_TERMINAL_EVENT_DEBUG
 					printf(" (Changed)");
 				#endif
@@ -839,158 +839,240 @@ int EventESC27 (int event){
 	return r;
 }
 
-void EventDayChange(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("    DayChange: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
+void TuiCoreLoop(void(*UserLoop)()){
 
-void EventHourChange(void){	
-	#if IS_TIME_EVENT_DEBUG
-		printf("   HourChange: %s - %s\n",gStrRunTime, gStrTime);
-	#endif		
-}
-void EventHour2Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Hour2Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventHour3Change(void){
-	#if IS_TIME_EVENT_DEBUG	
-		printf("  Hour3Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventHour4Change(void){
-	#if IS_TIME_EVENT_DEBUG	
-		printf("  Hour4Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventHour6Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Hour6Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventHour8Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Hour8Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventHour12Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf(" Hour12Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
+	int i = 0;		// Input From stdin
+	int r = 0;		// Result From GetESC27
+	char c = 0;
 
-void EventMinuteChange(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("    MinChange: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute2Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Min2Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute3Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Min3Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute4Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Min4Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute5Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Min5Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute6Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Min6Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute10Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Min10Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute12Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Min12Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute15Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Min15Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute20Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Min20Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventMinute30Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Min30Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
+	// Recognize manual ESC
+		int isOnUsrESC27 = 0;
+		clock_t timeOnUsrEsc;
+	// Recognize broken Sequences by timeout
+		int isOnESC27 = 0;
+		clock_t timeOnEsc;
+	// Recognize Click & DblClick / Area-Selection
+		int isOnClick = 0;
+		clock_t timeOnClick;
+		int posXonClick = 0;
+		int posYonClick = 0;
+	
+	// Poll for TerminalSizeChange
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			#define Terminal_Size_Change_Trigger 10
+			int terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
+		#endif
 
-void EventSecondChange(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("    SecChange: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond2Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Sec2Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond3Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Sec3Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond4Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Sec4Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond5Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Sec5Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond6Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("   Sec6Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond10Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Sec10Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond12Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Sec12Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond15Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Sec15Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond20Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Sec20Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
-}
-void EventSecond30Change(void){
-	#if IS_TIME_EVENT_DEBUG
-		printf("  Sec30Change: %s - %s\n",gStrRunTime, gStrTime);
-	#endif
+	// Loop Minimum
+	// while (i != 10 && i != 13){
+	while (TUI_RunCoreLoop){
+		
+		i = TermInKey();
+
+		// Recognize manual ESC
+		if (isOnUsrESC27 && !i){
+			if (clock() > timeOnUsrEsc){
+				// UsrESC
+				i = 27;
+			}
+		}
+
+		// Recognize timeout while receiving ESC
+		else if (isOnESC27 && (!isOnUsrESC27 && !i)){
+			// The !isOnUsrESC27 signals, that we already got more chars than just the 1st ESC
+			if (clock() > timeOnEsc){
+				isOnESC27 = 0;
+				if (r == -6){
+					// ShiftAlt-O (overlapping with F1-F4)
+					i = -2;
+				}
+				else{
+					// Broken, or valid and unknown, Sequence
+					#if IS_TERMINAL_EVENT_DEBUG
+						printf("TimeOutCase");
+					#endif
+					i = -1;
+				}				
+			}		
+		}
+		else if (i == 27){
+			// Enter (User)ESC-Sequences recognition
+			isOnUsrESC27 = 1; isOnESC27= 1;
+			timeOnUsrEsc = clock() + gUserEscTimeout;
+			// timeout for broken sequence twice as regular UserESC
+			timeOnEsc = timeOnUsrEsc + gUserEscTimeout;
+		}
+		else{
+			// any char after 1st ESC immediately disables possibility on UserESC
+			isOnUsrESC27 = 0;
+		}
+
+		if (TERM_SignalCtrlC){
+			// Ctrl-C
+			i = 3;
+			TERM_SignalCtrlC = 0;
+		}
+			
+	// Loop Minimum
+	
+	// Loop Minimum
+		if (i){
+	// Loop Minimum
+			#if IS_REVERSE_DEBUG
+				if (i > 0){
+					TxtItalic(1);
+					SetFg16(fgRed);
+					printf("%d", i);
+					TxtItalic(0);
+					SetFg16(0);
+					if (i > 31){// && i < 128){
+						c = i;
+						printf(": %c",c);
+					}
+					else if (i == 27){
+						TxtBold(1);
+						printf(": ESC");
+						TxtBold(0);
+					}
+					
+					printf("\n");
+					fflush(stdout);
+				}
+			#endif
+			// Loop Minimum
+			
+			r = TermGetESC27(i);
+
+			switch (r){
+			case 0:
+				// Nothing (waiting for more...)
+				break;
+			case -1:
+				// Regular Key - No ESC-Sequence/SpecialKey related stuff
+				break;
+			case 162:
+			case 163:
+			case 164:
+				// Mouse Down
+				if (isOnClick){
+					// refresh timeout for MAC dblClick issues...
+					timeOnClick = clock() + gMouseClickTimeout;
+				}
+				break;					
+			case 165:
+				// Mouse UP (Left / Wheel / Right)
+				EventESC27(165);
+				isOnESC27 = 0;
+				r = 0;
+				if ((TERM_MouseSelX == TERM_MousePosX) && (TERM_MouseSelY == TERM_MousePosY)){
+					// it's a (dbl)click
+					if (isOnClick && clock() < timeOnClick){
+						// dblClick
+						EventESC27(201);
+						isOnClick = 0;
+					}
+					else{
+						// 1st Click
+						isOnClick = 1;
+						timeOnClick = clock() + gMouseClickTimeout;
+					}							
+				}
+				else{
+					// it's an area
+					if (isOnClick && clock() < timeOnClick){
+						// but nobody can define an area that fast,
+						// so we decide for dblClick
+						EventESC27(201);
+						isOnClick = 0;
+					}
+					else{
+						// finally area
+						EventESC27(202);
+						isOnClick = 0;
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			
+			if (r && r != -6){
+				// Disable timeouts
+				isOnUsrESC27 = 0; isOnESC27 = 0;
+				EventESC27(r);
+				r = 0;
+			}
+			else if(r == -6){
+				// The case that F1-F4 and ShiftAlt-O are overlapping...
+				// So, we push the Event when TimeOut occurs (see above)
+			}
+				
+				
+				
+			// Loop Minimum
+			
+
+	// Loop Minimum
+		}
+
+		// Recognize Single Click
+		if (isOnClick && (clock() > timeOnClick)){
+			// click
+			EventESC27(200);
+			isOnClick = 0;
+		}
+
+		if (!i){
+			// We did not received anything
+			// Time to check for RealTime things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				CheckOnTimeChange();
+			#else
+				if (TERM_SignalInterval){
+					TimeCheckOnChange();
+				}
+			#endif
+		}				
+
+		
+		// DO USER STUFF HERE START
+		UserLoop();
+		// DO USER STUFF HERE STOP
+
+		
+		if (!i){
+			// We did not received anything
+			// Time to do 2nd Time idle-time things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				terminalSizeChangeCnt--;
+				if (!terminalSizeChangeCnt){
+					// Every xx idle-times check on ScreenSize
+					terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
+					GetTerminalSize(3);
+					EventESC27(177);
+				}
+				else {
+					DoEvents();
+				}	
+			#else
+				if (TERM_SignalInterval){
+					if (TERM_SignalTerminalSize){
+						TermGetSize(3);
+						EventESC27(177);
+						TERM_SignalTerminalSize = 0;
+					}
+					TERM_SignalInterval = 0;
+				}
+				else {
+					DoEvents();
+					//TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyShift = 0; TERM_KeyMeta = 0;
+				}	
+			#endif
+		}
+	}
+	
+	// Loop Minimum
+
 }
 
 
