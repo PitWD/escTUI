@@ -18,13 +18,20 @@
 #include "PoorTui.h"	
 
 
-
-
-void UserLoop(void){
-
-	printf("EXIT\n");
+void SecondChanged(){
+	static int i = 0;
+	i++;
 	TUI_RunCoreLoop = 0;
+	if (i < 4){
+		printf("Second\n");
+		TUI_RunCoreLoop = 1;
+	}
+}
 
+void UserLoop(){
+	static int i = 0;
+	i++;
+	printf("Loop: %d\n", i);
 }
 
 int main() {
@@ -49,7 +56,7 @@ int main() {
 	if (!TermSetVT(1)){
 		printf("ERROR!\n");
 		printf("STOP PROJECT\n");
-		return 0;
+		return -1;
 	}
 	printf("OK\n\n");
 
@@ -59,7 +66,7 @@ int main() {
 		// Can't happen....
 		printf("Clear Screen... ERROR!\n");
 		printf("STOP PROJECT\n");
-		return 0;
+		return -1;
 	}
 	printf("Clear Screen... OK, CLS-Mode: %d\n\n",r);
 
@@ -68,22 +75,21 @@ int main() {
 	if (!r){
 		printf("ERROR!\n");
 		printf("STOP PROJECT\n");
-		return 0;
+		return -1;
 	}
 	printf("OK, Size-Mode: %d\n",r);
 	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("Billy-OS: Screen Size Changes Get Polled...Sorry.\n");
+		printf("BillyOS: Screen Size Changes Will Be Polled...Sorry.\n");
 	#else
 		signal(SIGWINCH, TermSignalHandler);
-		printf("PosiX-OS: Screen Size Changes Get Signaled.\n");
+		printf("PosiX-OS: Screen Size Changes Getting Signaled.\n");
 	#endif
 	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
 
 	printf("Synchronize CLS-Mode With Size-Mode...\n");
 	r = TermClearScreen(r);
-	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n",r);
-	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
-
+	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n\n",r);
+	
 	printf("Enable Trap Mouse Mode... ");
 	TermTrapMouse(1);
 	printf("(probably) OK\n\n");
@@ -94,21 +100,46 @@ int main() {
 
 	printf("Catch Ctrl-C... ");
 	signal(SIGINT, TermSignalHandler);
-	printf("OK\n\n");
+	printf("(probably) OK\n\n");
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("Billy-OS: Check On Real-Time Changes Get Polled...Sorry.\n\n");
+		printf("BillyOS: Check On Real-Time Changes Get Polled...\n");
+		printf("         The whole timer stuff is kind a fixed... Sorry... not.\n\n");
 	#else
 		signal(SIGALRM, TermSignalHandler);
+		
+		// 333333 == we'll hit THE second in between +0,0 to +0,65 sec. after RealTime...
+		// but (little depending on Time_EventsTime) from one SecondEvent to the next SecondEvent, we're within a mS tolerance!
+		// lower value to raise precision
 		ualarm(333333,333333);
-		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n\n");
+		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n");
+
+		// Lower = more "UserLoops" vs. Higher = less CPU-time...
+		TIME_EventsTime = 10000;
+		printf("PosiX-OS: TIME_DoEventsTime is set.\n\n");
+
 	#endif
 	
 	InitEscSeq();
 	InitColors();
 	
 	// *************************************************************
-	TuiCoreLoop(UserLoop);
+
+		// If You Wanna Change Defaults (see BlaBlaInit())
+			// ualarm(333333,333333);
+			// TIME_EventsTime = 10000;
+			// TermTrapMouse(0);	// Disable 1st !
+			// TermTrapMouse(1);	// Then Set New...
+		
+		// set tui event(s) on your own function(s)
+		TimeSecChanged = SecondChanged;
+		
+		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
+		// Use a dummy if your app is fully event-driven 
+		TuiCoreLoop(UserLoop);
+
+		// Set TUI_RunCoreLoop = 0 to reach this point
+
 	// *************************************************************
 
 	TermClearScreen(0);
@@ -129,7 +160,6 @@ int main() {
 
 	printf("%s - %s\n", gStrDate, gStrTime);
 	printf("Runtime: %s\n\n", gStrRunTime);
-
 
 	return 0;
 

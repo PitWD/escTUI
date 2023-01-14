@@ -265,7 +265,7 @@ void TermFlushInKey(void){
 #if __WIN32__ || _MSC_VER || __WIN64__
 	#define DoEvents() Sleep(1);
 #else
-	#define DoEvents() usleep(DoEventsTime);
+	#define DoEvents() usleep(TIME_EventsTime);
 #endif 
 
 int TermClearScreen(int set){
@@ -1188,13 +1188,21 @@ void TermTrapMouse(int set){
  * @private c (char)		helper for set
  */
 
+	static int trapMode = 1002;
+
 	char c = 'l';
 	if (set){
 		c = 'h';
+		if (set == 2){
+			trapMode = 1003;
+		}
+		else{
+			trapMode = 1002;
+		}
 	}
 	// Any Event (1003) / Decimal Values (1006)
 	// 1002 instead of 1003 reports position only if Mouse Button is pressed
-	printf("\x1B[?1002%c\x1B[?1006%c", c, c);
+	printf("\x1B[?%d%c\x1B[?1006%c", trapMode, c, c);
 }
 
 void TermTrapFocus(int set){

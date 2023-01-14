@@ -20,6 +20,81 @@
 
 int TUI_RunCoreLoop = 1;
 
+// Dummy_Events
+static void TuiDummyEvent(){
+	volatile int i;
+}
+static void TuiDummyEventChar(char c){
+    volatile int i;
+}
+static void TuiDummyEventInt(int i){
+    volatile int a;
+}
+
+void (*TuiGotChar)(char c) = TuiDummyEventChar;
+
+#define TUI_NavUp 0
+#define TUI_NavDown 1
+#define TUI_NavRight 2
+#define TUI_NavLeft 3
+#define TUI_NavCenter 4
+#define TUI_NavEnd 5
+#define TUI_NavUnknown 6
+#define TUI_NavPos1 7
+#define TUI_NavIns 8
+#define TUI_NavDel 9
+#define TUI_NavPgUp 10
+#define TUI_NavPgDown 11
+#define TUI_NavBack 12
+#define TUI_NavTab 13
+void (*TuiNavPress[14])(int shiftAltCtrl) = {TuiDummyEventInt};
+
+#define TUI_F1 0
+#define TUI_F2 1
+#define TUI_F3 2
+#define TUI_F4 3
+#define TUI_F5 4
+#define TUI_F6 5
+#define TUI_F7 6
+#define TUI_F8 7
+#define TUI_F9 8
+#define TUI_F10 9
+#define TUI_F11 10
+#define TUI_F12 11
+void (*TuiFkeyPress[12])(int shiftAltCtrl) = {TuiDummyEventInt};
+
+#define TUI_A 0
+#define TUI_B 1
+#define TUI_C 2
+#define TUI_D 3
+#define TUI_E 4
+#define TUI_F 5
+#define TUI_G 6
+#define TUI_H 7
+#define TUI_I 8
+#define TUI_J 9
+#define TUI_K 10
+#define TUI_L 11
+#define TUI_M 12
+#define TUI_N 13
+#define TUI_O 14
+#define TUI_P 15
+#define TUI_Q 16
+#define TUI_R 17
+#define TUI_S 18
+#define TUI_T 19
+#define TUI_U 20
+#define TUI_V 21
+#define TUI_W 22
+#define TUI_X 23
+#define TUI_Y 24
+#define TUI_Z 25
+void (*TuiAltPress[26])(int shift) = {TuiDummyEventInt};
+
+void (*TuiEscPress)() = TuiDummyEvent;
+
+void (*TuiCtrlPress[26])() = {TuiDummyEvent};
+
 /*
 typedef struct TabStyleSTRUCT {
     unsigned char Left;                                     // unscaled / unmoved start of Tab
@@ -144,9 +219,6 @@ typedef struct {
 
 */
 
-static void PT_Ctrl_A(){
-
-}
 
 
 // User EVENTS
@@ -157,23 +229,51 @@ int EventESC27 (int event){
 	// Modification Keys
 	int keyState = (TERM_KeyShift) + (TERM_KeyAlt * 2) + (TERM_KeyCtrl * 4);
 
-	if (TERM_KeyShift){
-		#if IS_TERMINAL_EVENT_DEBUG
-			printf("Shift-");
-		#endif
+	if (event == -1){
+		// Received (part) of regular char
+		TuiGotChar(gStreamInESC27[0]);
 	}
-	if (TERM_KeyAlt){
-		#if IS_TERMINAL_EVENT_DEBUG
-			printf("Alt-");
-		#endif
+	else if (event == 9){
+		// (shift) Tab
+		TuiNavPress[TUI_NavTab](TERM_KeyShift);
 	}
-	if (TERM_KeyCtrl){
-		#if IS_TERMINAL_EVENT_DEBUG
-			printf("Ctrl-");
-		#endif
+	else if (event == 27){
+		// ESC
+		TuiEscPress();
 	}
-	
+	else if (event > 143 && event < 157){
+		// Navigation Keys
+		TuiNavPress[event - 144](keyState);
+	}
+	else if (event == 127){
+		// Back
+		TuiNavPress[TUI_NavBack](TERM_KeyAlt);
+	}
+	else if (event > 127 && event < 140){
+		// F1 - F12
+		TuiFkeyPress[event - 128](keyState);	
+	}
+	else if (event > 64 && event < 91){
+		// (Shift)ALT-A - (Shift)ALT-Z
+		TuiAltPress[event - 65](TERM_KeyShift);
+	}
+	else if (event > 0 && event < 27){
+		// Ctrl-A - Ctrl-Z
+		TuiCtrlPress[event - 1];
+	}
+
+
+
 	#if IS_TERMINAL_EVENT_DEBUG
+		if (TERM_KeyShift){
+			printf("Shift-");
+		}
+		if (TERM_KeyAlt){
+			printf("Alt-");
+		}
+		if (TERM_KeyCtrl){
+			printf("Ctrl-");
+		}		
 		TxtBold(1);
 	#endif
 
@@ -182,274 +282,248 @@ int EventESC27 (int event){
 	}
 	else if (event > 143 && event < 157){
 		// Navigation Keys
-		switch (event){
-		case 144:
-			// Up
-			#if IS_TERMINAL_EVENT_DEBUG
+		#if IS_TERMINAL_EVENT_DEBUG
+			switch (event){
+			case 144:
+				// Up
 				printf("Up");
-			#endif
-			switch (keyState){
-			case 1:
-				// Shift
+				switch (keyState){
+				case 1:
+					// Shift
+					break;
+				case 2:
+					// Alt
+					break;
+				case 4:
+					// Ctrl
+					break;
+				default:
+					// Just the Key
+					break;
+				}
 				break;
-			case 2:
-				// Alt
+			case 145:
+				// Down
+				printf("Down");
 				break;
-			case 4:
-				// Ctrl
+			case 146:
+				// Right
+				printf("Right");
 				break;
-			default:
-				// Just the Key
+			case 147:
+				// Left
+				printf("Left");
+				break;
+			case 148:
+				// Center
+				printf("Center");
+				break;
+			case 149:
+				// End
+				printf("End");
+				break;
+			case 150:
+				// Unknown
+				printf("150");
+				break;
+			case 151:
+				// Pos1
+				printf("Pos1");
+				break;
+			case 152:
+				// Ins
+				printf("Ins");
+				break;
+			case 153:
+				// Del
+				printf("Del");
+				break;
+			case 155:
+				// PgUp
+				printf("PgUp");
+				break;
+			case 156:
+				// PgDown
+				printf("PgDown");
 				break;
 			}
-			break;
-		case 145:
-			// Down
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Down");
-			#endif
-			break;
-		case 146:
-			// Right
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Right");
-			#endif
-			break;
-		case 147:
-			// Left
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Left");
-			#endif
-			break;
-		case 148:
-			// Center
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Center");
-			#endif
-			break;
-		case 149:
-			// End
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("End");
-			#endif
-			break;
-		case 150:
-			// Unknown
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("150");
-			#endif
-			break;
-		case 151:
-			// Pos1
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Pos1");
-			#endif
-			break;
-		case 152:
-			// Ins
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Ins");
-			#endif
-			break;
-		case 153:
-			// Del
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Del");
-			#endif
-			break;
-		case 155:
-			// PgUp
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("PgUp");
-			#endif
-			break;
-		case 156:
-			// PgDown
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("PgDown");
-			#endif
-			break;
-		}
+		#endif
 	}
 	else if (event > 126 && event < 140){
-		// Delete & F1 - F12
-		
+		// Back & F1 - F12
 		#if IS_TERMINAL_EVENT_DEBUG
 			if (event != 127){
 				printf("F%d", event - 127);
 			}
-		#endif
-		
-		switch (event){
-		case 127:
-			#if IS_TERMINAL_EVENT_DEBUG
+			switch (event){
+			case 127:
 				printf("Back");
-			#endif
-			// Back
-			if (TERM_KeyAlt){
-				/* code */
+				// Back
+				if (TERM_KeyAlt){
+					/* code */
+				}
+				else{
+					/* code */
+				}	
+				break;	
+			case 128:
+				// F1
+				switch (keyState){
+				case 0:
+					// Just the Key
+					break;
+				case 1:
+					// Shift
+					break;
+				case 2:
+					// Ctrl
+					break;
+				case 3:
+					// Shift-Ctrl
+					break;
+				case 4:
+					// Alt
+					break;
+				case 5:
+					// Shift-Alt
+					break;
+				case 6:
+					// Alt-Ctrl
+					break;
+				case 7:
+					// Shift-Alt-Ctrl
+					break;
+				default:
+					break;
+				}
+				break;
+			case 129:
+				// F2
+				break;
+			case 130:
+				// F3
+				break;
+			case 131:
+				// F4
+				break;
+			case 132:
+				// F5
+				break;
+			case 133:
+				// F6
+				break;
+			case 134:
+				// F7
+				break;
+			case 135:
+				// F8
+				break;
+			case 136:
+				// F9
+				break;
+			case 137:
+				// F10
+				break;
+			case 138:
+				// F11
+				break;
+			case 139:
+				// F12
+				break;
 			}
-			else{
-				/* code */
-			}	
-			break;	
-		case 128:
-			// F1
-			switch (keyState){
-			case 0:
-				// Just the Key
-				break;
-			case 1:
-				// Shift
-				break;
-			case 2:
-				// Ctrl
-				break;
-			case 3:
-				// Shift-Ctrl
-				break;
-			case 4:
-				// Alt
-				break;
-			case 5:
-				// Shift-Alt
-				break;
-			case 6:
-				// Alt-Ctrl
-				break;
-			case 7:
-				// Shift-Alt-Ctrl
-				break;
-			default:
-				break;
-			}
-			break;
-		case 129:
-			// F2
-			break;
-		case 130:
-			// F3
-			break;
-		case 131:
-			// F4
-			break;
-		case 132:
-			// F5
-			break;
-		case 133:
-			// F6
-			break;
-		case 134:
-			// F7
-			break;
-		case 135:
-			// F8
-			break;
-		case 136:
-			// F9
-			break;
-		case 137:
-			// F10
-			break;
-		case 138:
-			// F11
-			break;
-		case 139:
-			// F12
-			break;
-		}
+		#endif
 	}
 	else if (event > 64 && event < 91){
 		// (Shift)ALT-A - (Shift)ALT-Z
 		#if IS_TERMINAL_EVENT_DEBUG
 			printf("%c", (char)event);
+			switch(event){
+			case 65:
+				// A
+				if (TERM_KeyShift){
+					// Shift-Alt
+				}
+				else{
+					// Alt
+				}
+				break;
+			case 66:
+				// B
+				break;
+			case 67:
+				// C
+				break;
+			case 68:
+				// D
+				break;
+			case 69:
+				// E
+				break;
+			case 70:
+				// F
+				break;
+			case 71:
+				// G
+				break;
+			case 72:
+				// H
+				break;
+			case 73:
+				// I
+				break;
+			case 74:
+				// J
+				break;
+			case 75:
+				// K
+				break;
+			case 76:
+				// L
+				break;
+			case 77:
+				// M
+				break;
+			case 78:
+				// N
+				break;
+			case 79:
+				// O
+				break;
+			case 80:
+				// P
+				break;
+			case 81:
+				// Q
+				break;
+			case 82:
+				// R
+				break;
+			case 83:
+				// S
+				break;
+			case 84:
+				// T
+				break;
+			case 85:
+				// U
+				break;
+			case 86:
+				// V
+				break;
+			case 87:
+				// W
+				break;
+			case 88:
+				// X
+				break;
+			case 89:
+				// Y
+				break;
+			case 90:
+				// Z
+				break;
+			}
 		#endif
-		switch(event){
-		case 65:
-			// A
-			if (TERM_KeyShift){
-				// Shift-Alt
-			}
-			else{
-				// Alt
-			}
-			break;
-		case 66:
-			// B
-			break;
-		case 67:
-			// C
-			break;
-		case 68:
-			// D
-			break;
-		case 69:
-			// E
-			break;
-		case 70:
-			// F
-			break;
-		case 71:
-			// G
-			break;
-		case 72:
-			// H
-			break;
-		case 73:
-			// I
-			break;
-		case 74:
-			// J
-			break;
-		case 75:
-			// K
-			break;
-		case 76:
-			// L
-			break;
-		case 77:
-			// M
-			break;
-		case 78:
-			// N
-			break;
-		case 79:
-			// O
-			break;
-		case 80:
-			// P
-			break;
-		case 81:
-			// Q
-			break;
-		case 82:
-			// R
-			break;
-		case 83:
-			// S
-			break;
-		case 84:
-			// T
-			break;
-		case 85:
-			// U
-			break;
-		case 86:
-			// V
-			break;
-		case 87:
-			// W
-			break;
-		case 88:
-			// X
-			break;
-		case 89:
-			// Y
-			break;
-		case 90:
-			// Z
-			break;
-		}
 	}
 	else if (event > 0 && event < 28){
 		// Ctrl-A - Ctrl-Z
@@ -457,307 +531,259 @@ int EventESC27 (int event){
 		//  a lot are also not supported on all OSs)
 		#if IS_TERMINAL_EVENT_DEBUG
 			printf("CC: %c", (char)event+64);
+			switch(event){
+			case 1:
+				// Ctrl-A
+				break;
+			case 2:
+				// Ctrl-B
+				break;
+			case 3:
+				// Ctrl-C
+				break;
+			case 4:
+				// Ctrl-D
+				break;
+			case 5:
+				// Ctrl-E
+				break;
+			case 6:
+				// Ctrl-F
+				break;
+			case 7:
+				// Ctrl-G
+				break;
+			case 8:
+				// Ctrl-H
+				break;
+			case 9:
+				// TAB
+				if (TERM_KeyShift){
+					// Shift-Tab
+				}
+				else{
+					// Tab
+				}
+				break;
+			case 10:
+				// LF
+				break;
+			case 11:
+				// Ctrl-K
+				break;
+			case 12:
+				// Ctrl-L
+				break;
+			case 13:
+				// CR
+				break;
+			case 14:
+				// Ctrl-N
+				break;
+			case 15:
+				// Ctrl-O
+				break;
+			case 16:
+				// Ctrl-P
+				break;
+			case 17:
+				// Ctrl-Q
+				break;
+			case 18:
+				// Ctrl-R
+				break;
+			case 19:
+				// Ctrl-S
+				break;
+			case 20:
+				// Ctrl-T
+				break;
+			case 21:
+				// Ctrl-U
+				break;
+			case 22:
+				// Ctrl-V
+				break;
+			case 23:
+				// Ctrl-W
+				break;
+			case 24:
+				// Ctrl-X
+				break;
+			case 25:
+				// Ctrl-Y
+				break;
+			case 26:
+				// Ctrl-Z
+				break;
+			case 27:
+				// ESC
+				break;
+			}
 		#endif
-		switch(event){
-		case 1:
-			// Ctrl-A
-			break;
-		case 2:
-			// Ctrl-B
-			break;
-		case 3:
-			// Ctrl-C
-			break;
-		case 4:
-			// Ctrl-D
-			break;
-		case 5:
-			// Ctrl-E
-			break;
-		case 6:
-			// Ctrl-F
-			break;
-		case 7:
-			// Ctrl-G
-			break;
-		case 8:
-			// Ctrl-H
-			break;
-		case 9:
-			// TAB
-			if (TERM_KeyShift){
-				// Shift-Tab
-			}
-			else{
-				// Tab
-			}
-			break;
-		case 10:
-			// LF
-			break;
-		case 11:
-			// Ctrl-K
-			break;
-		case 12:
-			// Ctrl-L
-			break;
-		case 13:
-			// CR
-			break;
-		case 14:
-			// Ctrl-N
-			break;
-		case 15:
-			// Ctrl-O
-			break;
-		case 16:
-			// Ctrl-P
-			break;
-		case 17:
-			// Ctrl-Q
-			break;
-		case 18:
-			// Ctrl-R
-			break;
-		case 19:
-			// Ctrl-S
-			break;
-		case 20:
-			// Ctrl-T
-			break;
-		case 21:
-			// Ctrl-U
-			break;
-		case 22:
-			// Ctrl-V
-			break;
-		case 23:
-			// Ctrl-W
-			break;
-		case 24:
-			// Ctrl-X
-			break;
-		case 25:
-			// Ctrl-Y
-			break;
-		case 26:
-			// Ctrl-Z
-			break;
-		case 27:
-			// ESC
-			break;
-		}
 	}
 	else if (event > 159 && event < 181){
 		// Mouse and Terminal-Answers
-		switch(event){
-		case 190:
-			// Cursor Position
-			#if IS_TERMINAL_EVENT_DEBUG
+		#if IS_TERMINAL_EVENT_DEBUG
+			switch(event){
+			case 190:
+				// Cursor Position
 				printf("CursorPos");
-			#endif
-			break;
-		case 177:
-			// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
-			#if IS_TERMINAL_EVENT_DEBUG
+				break;
+			case 177:
+				// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
 				printf("ScreenSize");
-			#endif
-			if (TermSizeChanged()){
-				#if IS_TERMINAL_EVENT_DEBUG
+				if (TermSizeChanged()){
 					printf(" (Changed)");
-				#endif
-			}
-			break;
-		case 179:
-			// Terminal Icon Label
-			#if IS_TERMINAL_EVENT_DEBUG
+				}
+				break;
+			case 179:
+				// Terminal Icon Label
 				printf("IconLabel");
-			#endif
-			break;
-		case 178:
-			// Terminal Name
-			#if IS_TERMINAL_EVENT_DEBUG
+				break;
+			case 178:
+				// Terminal Name
 				printf("TerminalName");
-			#endif
-			break;
-		case 176:
-			// Unknown Terminal Info Object
-			#if IS_TERMINAL_EVENT_DEBUG
+				break;
+			case 176:
+				// Unknown Terminal Info Object
 				printf("UTO");
-			#endif
-			break;
+				break;
 
-		// Terminal GotFocus / LostFocus
-		case 160:
-			// Got
-			#if IS_TERMINAL_EVENT_DEBUG
+			// Terminal GotFocus / LostFocus
+			case 160:
+				// Got
 				printf("GotFocus");
-			#endif
-			break;
-		case 161:
-			// Lost
-			#if IS_TERMINAL_EVENT_DEBUG
+				break;
+			case 161:
+				// Lost
 				printf("LostFocus");
-			#endif
-			break;
+				break;
 
-		// 1st Level (From GetESC27()) Mouse-Events
-		case 166:
-			// Mouse Move
-			#if IS_TERMINAL_EVENT_DEBUG
+			// 1st Level (From GetESC27()) Mouse-Events
+			case 166:
+				// Mouse Move
 				printf("MouseMove");
-			#endif
-			break;
-		case 165:
-			// MouseUp
-			switch (TERM_MouseButton){
-			case 1:
-				// Left
-				#if IS_TERMINAL_EVENT_DEBUG
+				break;
+			case 165:
+				// MouseUp
+				switch (TERM_MouseButton){
+				case 1:
+					// Left
 					printf("MouseLeftUp");
-				#endif
-				break;
-			case 4:
-				// Right
-				#if IS_TERMINAL_EVENT_DEBUG
+					break;
+				case 4:
+					// Right
 					printf("MouseRightUp");
-				#endif
-				break;
-			case 2:
-				// Wheel
-				#if IS_TERMINAL_EVENT_DEBUG
+					break;
+				case 2:
+					// Wheel
 					printf("MouseWheelUp");
-				#endif
-				break;
-			default:
-				// MultiKey (never seen in reality)
-				#if IS_TERMINAL_EVENT_DEBUG
+					break;
+				default:
+					// MultiKey (never seen in reality)
 					printf("MouseMultiKeyUp");
-				#endif
+					break;
+				}
+				break;
+			case 162:
+				// Left Mouse Down
+				printf("MouseLeftDown");
+				break;
+			case 167:
+				// Left Down Mouse Move
+				printf("MouseLeftDownMove");
+				break;
+			case 164:
+				// Right Mouse Down
+				printf("MouseRightDown");
+				break;
+			case 169:
+				// Right Down Mouse Move
+				printf("MouseRightDownMove");
+				break;
+			case 163:
+				// Wheel Mouse Down
+				printf("MouseWheelDown");
+				break;
+			case 168:
+				// Wheel Down Mouse Move
+				printf("MouseWheelDownMove");
+				break;
+			case 170:
+				// WheelScrollUp
+				printf("MouseWheelScrollUp");
+				break;
+			case 171:
+				// WheelScrollDown
+				printf("MouseWheelScrollDown");
+				break;
+			case 172:
+				// Unknown Mouse Object
+				printf("UMO");
 				break;
 			}
-			break;
-		case 162:
-			// Left Mouse Down
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseLeftDown");
-			#endif
-			break;
-		case 167:
-			// Left Down Mouse Move
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseLeftDownMove");
-			#endif
-			break;
-		case 164:
-			// Right Mouse Down
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseRightDown");
-			#endif
-			break;
-		case 169:
-			// Right Down Mouse Move
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseRightDownMove");
-			#endif
-			break;
-		case 163:
-			// Wheel Mouse Down
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseWheelDown");
-			#endif
-			break;
-		case 168:
-			// Wheel Down Mouse Move
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseWheelDownMove");
-			#endif
-			break;
-		case 170:
-			// WheelScrollUp
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseWheelScrollUp");
-			#endif
-			break;
-		case 171:
-			// WheelScrollDown
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("MouseWheelScrollDown");
-			#endif
-			break;
-		case 172:
-			// Unknown Mouse Object
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("UMO");
-			#endif
-			break;
-		}
+		#endif
 	}
 	else if (event > 199 && event < 203){
 		// 2nd Level (From Loop()) Mouse-Events
-		
-		switch (TERM_MouseButton){
-		case 1:
-			// Left
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Left-");
-			#endif
-			break;
-		case 4:
-			// Right
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Right-");
-			#endif
-			break;
-		case 2:
-			// Wheel
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Wheel-");
-			#endif
-			break;
-		default:
-			// MultiKey (never seen in reality)
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Multi-");
-			#endif
-			break;
-		}
-
-		switch(event){
-		case 200:
-			// Click
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Click");
-			#endif
+		#if IS_TERMINAL_EVENT_DEBUG
 			switch (TERM_MouseButton){
 			case 1:
 				// Left
+				printf("Left-");
 				break;
 			case 4:
 				// Right
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("Right-");
+				#endif
 				break;
 			case 2:
 				// Wheel
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("Wheel-");
+				#endif
 				break;
 			default:
 				// MultiKey (never seen in reality)
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("Multi-");
+				#endif
 				break;
 			}
-			break;
-		case 201:
-			// DblClick
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("DblClick");
-			#endif
-			break;
-		case 202:
-			// Area
-			#if IS_TERMINAL_EVENT_DEBUG
-				printf("Area");
-			#endif
-			break;
 
-		}
+			switch(event){
+			case 200:
+				// Click
+				#if IS_TERMINAL_EVENT_DEBUG
+					printf("Click");
+				#endif
+				switch (TERM_MouseButton){
+				case 1:
+					// Left
+					break;
+				case 4:
+					// Right
+					break;
+				case 2:
+					// Wheel
+					break;
+				default:
+					// MultiKey (never seen in reality)
+					break;
+				}
+				break;
+			case 201:
+				// DblClick
+				printf("DblClick");
+				break;
+			case 202:
+				// Area
+				printf("Area");
+				break;
+			}
+		#endif
 	}
 	else{
 		// Errors

@@ -13,28 +13,23 @@ const char AnsiESCVersion [] = "1.00pa";
 // #include "UTFconst.h"
 
 typedef struct {
-	// 12 unsigned char
-	/*		Actual State in [0]
-			Default in [1]
-			[2] - [n] free for user
-	*/
 	unsigned char mode;			// 0 = 16, 1 = 255, 2 = RGB
 	union ColorFG {
-		unsigned long Color;	// !! 32 bit !!
+		uint32_t Color;	// !! 32 bit !!
 		unsigned char dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
 		unsigned char R;
 		unsigned char G;
 		unsigned char B;
 	}fg;						// ForeGround (16 & 255 on fg.R)
 	union ColorBG {
-		unsigned long Color;
+		uint32_t Color;
 		unsigned char dummy;					
 		unsigned char R;
 		unsigned char G;
 		unsigned char B;
 	}bg;						// BackGround
 	union ColorUL {
-		unsigned long Color;	// UL - color just relevant in modes 1 & 2 (in mode '0': 'ul' == 'fg')
+		uint32_t Color;	// UL - color just relevant in modes 1 & 2 (in mode '0': 'ul' == 'fg')
 		unsigned char dummy;
 		unsigned char R;					
 		unsigned char G;
@@ -143,6 +138,9 @@ void InitColors(void) {
 		p++;
 		cGrey[p] = t;
 	}
+
+	// Default ColorStyle
+	ActTxtStyle.pColor = &ActTxtColor;
 
 }
 
@@ -568,7 +566,7 @@ void ResUl(void) {
 void ResFB(void) {
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49;
 	ActTxtColor.mode = 0; ActTxtStyle.pColor = 0;
-	printf("\x1B[39;49;59m");
+	printf("\x1B[39;49");
 }
 void ResFBU(void) {
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49; ActTxtColor.ul.R = 59;
@@ -578,15 +576,15 @@ void ResFBU(void) {
 
 // Set 24 bit Color
 void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b; ActTxtColor.mode = 2;
+	ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[38;2;%d;%d;%dm", r, g, b);
 }
 void SetBgRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtColor.bg.R = r; ActTxtColor.bg.G = g; ActTxtColor.bg.B = b; ActTxtColor.mode = 2;
+	ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[48;2;%d;%d;%dm", r, g, b);
 }
 void SetUlRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtColor.ul.R = r; ActTxtColor.ul.G = g; ActTxtColor.ul.B = b; ActTxtColor.mode = 2;
+	ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[58;2;%d;%d;%dm", r, g, b);
 }
 void SetFBrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB) {
@@ -601,15 +599,15 @@ void SetFBUrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned
 
 // Set 256 Colors
 void SetFg255(unsigned char c) {
-	ActTxtColor.fg.R = c; ActTxtColor.mode = 1;
+	ActTxtStyle.pColor->fg.R = c; ActTxtStyle.pColor->mode = 1;
 	printf("\x1B[38;5;%dm", c);
 }
 void SetBg255(unsigned char c) {
-	ActTxtColor.bg.R = c; ActTxtColor.mode = 1;
+	ActTxtStyle.pColor->bg.R = c; ActTxtStyle.pColor->mode = 1;
 	printf("\x1B[48;5;%dm", c);
 }
 void SetUl255(unsigned char c) {
-	ActTxtColor.ul.R = c; ActTxtColor.mode = 1;
+	ActTxtStyle.pColor->ul.R = c; ActTxtStyle.pColor->mode = 1;
 	printf("\x1B[58;5;%dm", c);
 }
 void SetFB255(unsigned char fg, unsigned char bg) {
@@ -629,7 +627,7 @@ void SetFg16(unsigned char c){
 		ResFg();
 	}
 	else{
-		ActTxtColor.fg.R = c; ActTxtColor.mode = 0;
+		ActTxtStyle.pColor->fg.R = c; ActTxtStyle.pColor->mode = 0;
 		printf("\x1B[%dm", c);
 	}	
 }
@@ -639,7 +637,7 @@ void SetBg16(unsigned char c) {
 		ResBg();
 	}
 	else{
-		ActTxtColor.bg.R = c; ActTxtColor.mode = 0;
+		ActTxtStyle.pColor->bg.R = c; ActTxtStyle.pColor->mode = 0;
 		printf("\x1B[%dm", c);
 	}
 }
@@ -848,7 +846,7 @@ void TxtStrike(int set) {
 		printf("\x1B[29m");
 	}
 }
-void TxtResetSscript(void){
+void TxtResetScript(void){
 	printf("\x1B[75m");
 }
 void TxtSuperscript(int set) {
@@ -860,7 +858,7 @@ void TxtSuperscript(int set) {
 	}
 	else {
 		// Reset
-		TxtResetSscript();
+		TxtResetScript();
 	}
 }
 void TxtSubscript(int set) {
@@ -872,7 +870,7 @@ void TxtSubscript(int set) {
 	}
 	else {
 		// Reset
-		TxtResetSscript();
+		TxtResetScript();
 	}
 }
 void TxtProportional(int set){

@@ -45,7 +45,7 @@ clock_t gUserEscTimeout; // = 0.1 * 45000;
 // TimeIn / TimeOut to recognize MouseClick as a single Click (not part of a DoubleClick)
 clock_t gMouseClickTimeout;  // = 0.25 * 45000;
 // DoEventsTime for usleep() (Linux & Mac)
-#define DoEventsTime 10000
+int TIME_EventsTime = 10000;
 
 /**
  * @brief Declaration FUNCTIONS in Timing.h
