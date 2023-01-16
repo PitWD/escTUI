@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "Timing.h"
 #include <signal.h>
 
@@ -19,6 +20,129 @@
     #include <unistd.h>
     #include <sys/ioctl.h>
 #endif
+
+
+int TERM_RunCoreLoop = 1;
+
+// Dummy_Events
+static void TermDummyEvent(){
+	volatile static int i;
+}
+static void TermDummyEventChar(char c){
+    volatile static int i;
+}
+static void TermDummyEventInt(int i){
+    volatile static int a;
+}
+static void TermDummyEventIntInt(int x, int y){
+    volatile static int a;
+}
+static void TermDummyEventIntIntInt(int x, int y, int button){
+    volatile static int a;
+}
+static void TermDummyEventIntIntIntIntInt(int x1, int y1, int x2, int y2, int button){
+    volatile static int a;
+}
+static void TermDummyEventStr(char *strIN){
+	volatile static int i;
+}
+
+
+void (*TermGotChar)(char c) = TermDummyEventChar;
+
+#define TERM_Event_NavUp 0
+#define TERM_Event_NavDown 1
+#define TERM_Event_NavRight 2
+#define TERM_Event_NavLeft 3
+#define TERM_Event_NavCenter 4
+#define TERM_Event_NavEnd 5
+#define TERM_Event_NavUnknown 6
+#define TERM_Event_NavPos1 7
+#define TERM_Event_NavIns 8
+#define TERM_Event_NavDel 9
+#define TERM_Event_NavPgUp 10
+#define TERM_Event_NavPgDown 11
+#define TERM_Event_NavBack 12
+#define TERM_Event_NavTab 13
+void (*TermNavPress[14])(int shiftAltCtrl) = {TermDummyEventInt};
+
+#define TERM_Event_F1 0
+#define TERM_Event_F2 1
+#define TERM_Event_F3 2
+#define TERM_Event_F4 3
+#define TERM_Event_F5 4
+#define TERM_Event_F6 5
+#define TERM_Event_F7 6
+#define TERM_Event_F8 7
+#define TERM_Event_F9 8
+#define TERM_Event_F10 9
+#define TERM_Event_F11 10
+#define TERM_Event_F12 11
+void (*TermFkeyPress[12])(int shiftAltCtrl) = {TermDummyEventInt};
+
+#define TERM_Event_A 0
+#define TERM_Event_B 1
+#define TERM_Event_C 2
+#define TERM_Event_D 3
+#define TERM_Event_E 4
+#define TERM_Event_F 5
+#define TERM_Event_G 6
+#define TERM_Event_H 7
+#define TERM_Event_I 8
+#define TERM_Event_J 9
+#define TERM_Event_K 10
+#define TERM_Event_L 11
+#define TERM_Event_M 12
+#define TERM_Event_N 13
+#define TERM_Event_O 14
+#define TERM_Event_P 15
+#define TERM_Event_Q 16
+#define TERM_Event_R 17
+#define TERM_Event_S 18
+#define TERM_Event_T 19
+#define TERM_Event_U 20
+#define TERM_Event_V 21
+#define TERM_Event_W 22
+#define TERM_Event_X 23
+#define TERM_Event_Y 24
+#define TERM_Event_Z 25
+void (*TermAltPress[26])(int shift) = {TermDummyEventInt};
+
+void (*TermEscPress)() = TermDummyEvent;
+
+#define TERM_Event_GotFocus 0
+#define TERM_Event_LostFocus 1
+void (*TermFocus[2])() = {TermDummyEvent, TermDummyEvent};
+
+void (*TermCtrlPress[26])() = {TermDummyEvent};
+
+#define TERM_Event_RawMouseLeftDown 0
+#define TERM_Event_RawMouseWheelDown 1
+#define TERM_Event_RawMouseRightDown 2
+#define TERM_Event_RawMouseUp 3
+#define TERM_Event_RawMouseMove 4
+#define TERM_Event_RawMouseMoveLeft 5
+#define TERM_Event_RawMouseMoveWheel 6
+#define TERM_Event_RawMouseMoveRight 7
+#define TERM_Event_RawMouseScrollUp 8
+#define TERM_Event_RawMouseScrollDown 9
+#define TERM_Event_RawMouseUnknown 10
+void (*TermRawMouse[11])(int x, int y) = {TermDummyEventIntInt};
+
+#define TERM_Event_MouseClick 0
+#define TERM_Event_MouseDblClick 1
+void (*TermMouseClicks[2])(int x, int y, int button) = {TermDummyEventIntIntInt, TermDummyEventIntIntInt};
+
+void (*TermMouseArea)(int x1, int y1, int x2, int y2, int button) = TermDummyEventIntIntIntIntInt;
+
+void(*TermSizeChanged)(int x, int y) = TermDummyEventIntInt;
+
+#define TERM_Event_InfoName 0
+#define TERM_Event_InfoIcon 1
+#define TERM_Event_InfoUnknown 2
+void(*TermInfo[3])(char *strIN) = {TermDummyEventStr, TermDummyEventStr, TermDummyEventStr};
+
+
 
 #define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
 #define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
@@ -70,7 +194,7 @@ int TermInKey(void);
 void TermFlushInKey(void);
 int TermClearScreen(int set);
 int TermGetSize(int set);
-int TermSizeChanged(void);
+int TermSizeIsChanged(void);
 int TermGetESC27 (int c);
 static int GetESC27_CheckOnF112Key(int r, int posInStream);
 static int GetESC27_CheckOnF512(void);
@@ -78,6 +202,24 @@ int TermWaitForESC27(char *pStrExchange, int waitForID, float timeOut);
 void TermSignalHandler(int sig);
 void TermTrapMouse(int set);
 void TermTrapFocus(int set);
+
+void TermInitEvents(){
+	int i = 0;
+
+	for (i = 0; i < 14; i++) {
+		TermNavPress[i] = TermDummyEventInt;
+	}
+	for (i = 0; i < 12; i++) {
+		TermFkeyPress[i] = TermDummyEventInt;
+	}
+	for (i = 0; i < 26; i++) {
+		TermAltPress[i] = TermDummyEventInt;
+		TermCtrlPress[i] = TermDummyEvent;
+	}
+	for (i = 0; i < 11; i++) {
+		TermRawMouse[i] = TermDummyEventIntInt;
+	}
+}
 
 int TermSetVT(int set){
 /**
@@ -413,7 +555,7 @@ int TermGetSize(int set){
 	
 }
 
-int TermSizeChanged(void){
+int TermSizeIsChanged(void){
 /**
  * @brief 	Check On If ScreenSize Has Changed
  * 
@@ -430,6 +572,7 @@ int TermSizeChanged(void){
 }
 
 int TermGetESC27 (int c){
+
 /**
  * @brief 	Analyze stream (char by char) on ESC-Sequences
  * 
@@ -1220,6 +1363,878 @@ void TermTrapFocus(int set){
 		c = 'h';
 	}
 	printf("\x1B[?1004%c", c);
+}
+
+// EVENTS
+int TermEventESC27 (int event){
+	
+	int r = 0;		// Return Value
+	
+	// Modification Keys
+	int keyState = 0;
+
+	switch (event){
+	case -1:
+		// Received (part) of regular char
+		TermGotChar(gStreamInESC27[0]);
+		break;
+	case 9:
+		// (shift) Tab
+		TermNavPress[TERM_Event_NavTab](TERM_KeyShift);
+		break;
+	case 27:
+		// ESC
+		TermEscPress();
+		break;
+	case 127:
+		// Back
+		TermNavPress[TERM_Event_NavBack](TERM_KeyAlt);
+		break;
+	case 202:
+		// Mouse Area
+		TermMouseArea(TERM_MouseSelX, TERM_MouseSelY, TERM_MousePosX, TERM_MousePosY, TERM_MouseButton);
+		break;
+	case 177:
+		// Terminal Size received
+		if (TermSizeIsChanged()){
+			TermSizeChanged(TERM_ScreenWidth, TERM_ScreenHeight);
+		}
+		break;
+	case 176:
+		// Unknown Terminal-Info
+		TermInfo[TERM_Event_InfoUnknown](gStreamInESC27);
+		break;
+	default:
+		keyState = (TERM_KeyShift) + (TERM_KeyAlt * 2) + (TERM_KeyCtrl * 4);
+		if (event > 143 && event < 157){
+			// Navigation Keys
+			TermNavPress[event - 144](keyState);
+		}
+		else if (event > 127 && event < 140){
+			// F1 - F12
+			TermFkeyPress[event - 128](keyState);	
+		}
+		else if (event > 64 && event < 91){
+			// (Shift)ALT-A - (Shift)ALT-Z
+			TermAltPress[event - 65](TERM_KeyShift);
+		}
+		else if (event > 0 && event < 27){
+			// Ctrl-A - Ctrl-Z
+			TermCtrlPress[event - 1];
+		}
+		else if (event > 161 && event < 173){
+			// Raw Mouse
+			TermRawMouse[event - 162](TERM_MousePosX, TERM_MousePosY);
+		}
+		else if (event > 199 && event < 202){
+			// Mouse Click & DblClick
+			TermMouseClicks[event - 200](TERM_MousePosX, TERM_MousePosY, TERM_MouseButton);
+		}
+		else if (event > 159 && event < 162){
+			// Got 'n' Lost Focus
+			TermCtrlPress[event - 160];
+		}
+		else if (event > 177 && event < 180){
+			// Terminal Name and Label
+			TermInfo[event - 178](gStreamInESC27);
+		}
+		break;
+	}
+
+	#if IS_TERMINAL_EVENT_DEBUG
+		if (TERM_KeyShift){
+			printf("Shift-");
+		}
+		if (TERM_KeyAlt){
+			printf("Alt-");
+		}
+		if (TERM_KeyCtrl){
+			printf("Ctrl-");
+		}		
+		TxtBold(1);
+
+		if (event == -1){
+			// A regular Key got pressed
+		}
+		else if (event > 143 && event < 157){
+			// Navigation Keys
+			switch (event){
+			case 144:
+				// Up
+				printf("Up");
+				switch (keyState){
+				case 1:
+					// Shift
+					break;
+				case 2:
+					// Alt
+					break;
+				case 4:
+					// Ctrl
+					break;
+				default:
+					// Just the Key
+					break;
+				}
+				break;
+			case 145:
+				// Down
+				printf("Down");
+				break;
+			case 146:
+				// Right
+				printf("Right");
+				break;
+			case 147:
+				// Left
+				printf("Left");
+				break;
+			case 148:
+				// Center
+				printf("Center");
+				break;
+			case 149:
+				// End
+				printf("End");
+				break;
+			case 150:
+				// Unknown
+				printf("150");
+				break;
+			case 151:
+				// Pos1
+				printf("Pos1");
+				break;
+			case 152:
+				// Ins
+				printf("Ins");
+				break;
+			case 153:
+				// Del
+				printf("Del");
+				break;
+			case 155:
+				// PgUp
+				printf("PgUp");
+				break;
+			case 156:
+				// PgDown
+				printf("PgDown");
+				break;
+			}
+		}
+		else if (event > 126 && event < 140){
+			// Back & F1 - F12
+			if (event != 127){
+				printf("F%d", event - 127);
+			}
+			switch (event){
+			case 127:
+				printf("Back");
+				// Back
+				if (TERM_KeyAlt){
+					/* code */
+				}
+				else{
+					/* code */
+				}	
+				break;	
+			case 128:
+				// F1
+				switch (keyState){
+				case 0:
+					// Just the Key
+					break;
+				case 1:
+					// Shift
+					break;
+				case 2:
+					// Ctrl
+					break;
+				case 3:
+					// Shift-Ctrl
+					break;
+				case 4:
+					// Alt
+					break;
+				case 5:
+					// Shift-Alt
+					break;
+				case 6:
+					// Alt-Ctrl
+					break;
+				case 7:
+					// Shift-Alt-Ctrl
+					break;
+				default:
+					break;
+				}
+				break;
+			case 129:
+				// F2
+				break;
+			case 130:
+				// F3
+				break;
+			case 131:
+				// F4
+				break;
+			case 132:
+				// F5
+				break;
+			case 133:
+				// F6
+				break;
+			case 134:
+				// F7
+				break;
+			case 135:
+				// F8
+				break;
+			case 136:
+				// F9
+				break;
+			case 137:
+				// F10
+				break;
+			case 138:
+				// F11
+				break;
+			case 139:
+				// F12
+				break;
+			}
+		}
+		else if (event > 64 && event < 91){
+			// (Shift)ALT-A - (Shift)ALT-Z
+			printf("%c", (char)event);
+			switch(event){
+			case 65:
+				// A
+				if (TERM_KeyShift){
+					// Shift-Alt
+				}
+				else{
+					// Alt
+				}
+				break;
+			case 66:
+				// B
+				break;
+			case 67:
+				// C
+				break;
+			case 68:
+				// D
+				break;
+			case 69:
+				// E
+				break;
+			case 70:
+				// F
+				break;
+			case 71:
+				// G
+				break;
+			case 72:
+				// H
+				break;
+			case 73:
+				// I
+				break;
+			case 74:
+				// J
+				break;
+			case 75:
+				// K
+				break;
+			case 76:
+				// L
+				break;
+			case 77:
+				// M
+				break;
+			case 78:
+				// N
+				break;
+			case 79:
+				// O
+				break;
+			case 80:
+				// P
+				break;
+			case 81:
+				// Q
+				break;
+			case 82:
+				// R
+				break;
+			case 83:
+				// S
+				break;
+			case 84:
+				// T
+				break;
+			case 85:
+				// U
+				break;
+			case 86:
+				// V
+				break;
+			case 87:
+				// W
+				break;
+			case 88:
+				// X
+				break;
+			case 89:
+				// Y
+				break;
+			case 90:
+				// Z
+				break;
+			}
+		}
+		else if (event > 0 && event < 28){
+			// Ctrl-A - Ctrl-Z
+			// (but a lot are special - see cases above
+			//  a lot are also not supported on all OSs)
+			printf("CC: %c", (char)event+64);
+			switch(event){
+			case 1:
+				// Ctrl-A
+				break;
+			case 2:
+				// Ctrl-B
+				break;
+			case 3:
+				// Ctrl-C
+				break;
+			case 4:
+				// Ctrl-D
+				break;
+			case 5:
+				// Ctrl-E
+				break;
+			case 6:
+				// Ctrl-F
+				break;
+			case 7:
+				// Ctrl-G
+				break;
+			case 8:
+				// Ctrl-H
+				break;
+			case 9:
+				// TAB
+				if (TERM_KeyShift){
+					// Shift-Tab
+				}
+				else{
+					// Tab
+				}
+				break;
+			case 10:
+				// LF
+				break;
+			case 11:
+				// Ctrl-K
+				break;
+			case 12:
+				// Ctrl-L
+				break;
+			case 13:
+				// CR
+				break;
+			case 14:
+				// Ctrl-N
+				break;
+			case 15:
+				// Ctrl-O
+				break;
+			case 16:
+				// Ctrl-P
+				break;
+			case 17:
+				// Ctrl-Q
+				break;
+			case 18:
+				// Ctrl-R
+				break;
+			case 19:
+				// Ctrl-S
+				break;
+			case 20:
+				// Ctrl-T
+				break;
+			case 21:
+				// Ctrl-U
+				break;
+			case 22:
+				// Ctrl-V
+				break;
+			case 23:
+				// Ctrl-W
+				break;
+			case 24:
+				// Ctrl-X
+				break;
+			case 25:
+				// Ctrl-Y
+				break;
+			case 26:
+				// Ctrl-Z
+				break;
+			case 27:
+				// ESC
+				break;
+			}
+		}
+		else if (event > 159 && event < 181){
+			// Mouse and Terminal-Answers
+			switch(event){
+			case 190:
+				// Cursor Position
+				printf("CursorPos");
+				break;
+			case 177:
+				// Terminal Size received (ESC-Sequence) /polled (WIN) / signaled (Mac/Linux)
+				printf("ScreenSize");
+				if (TermSizeChanged()){
+					printf(" (Changed)");
+				}
+				break;
+			case 179:
+				// Terminal Icon Label
+				printf("IconLabel");
+				break;
+			case 178:
+				// Terminal Name
+				printf("TerminalName");
+				break;
+			case 176:
+				// Unknown Terminal Info Object
+				printf("UTO");
+				break;
+
+			// Terminal GotFocus / LostFocus
+			case 160:
+				// Got
+				printf("GotFocus");
+				break;
+			case 161:
+				// Lost
+				printf("LostFocus");
+				break;
+
+			// 1st Level (From GetESC27()) Mouse-Events
+			case 166:
+				// Mouse Move
+				printf("MouseMove");
+				break;
+			case 165:
+				// MouseUp
+				switch (TERM_MouseButton){
+				case 1:
+					// Left
+					printf("MouseLeftUp");
+					break;
+				case 4:
+					// Right
+					printf("MouseRightUp");
+					break;
+				case 2:
+					// Wheel
+					printf("MouseWheelUp");
+					break;
+				default:
+					// MultiKey (never seen in reality)
+					printf("MouseMultiKeyUp");
+					break;
+				}
+				break;
+			case 162:
+				// Left Mouse Down
+				printf("MouseLeftDown");
+				break;
+			case 167:
+				// Left Down Mouse Move
+				printf("MouseLeftDownMove");
+				break;
+			case 164:
+				// Right Mouse Down
+				printf("MouseRightDown");
+				break;
+			case 169:
+				// Right Down Mouse Move
+				printf("MouseRightDownMove");
+				break;
+			case 163:
+				// Wheel Mouse Down
+				printf("MouseWheelDown");
+				break;
+			case 168:
+				// Wheel Down Mouse Move
+				printf("MouseWheelDownMove");
+				break;
+			case 170:
+				// WheelScrollUp
+				printf("MouseWheelScrollUp");
+				break;
+			case 171:
+				// WheelScrollDown
+				printf("MouseWheelScrollDown");
+				break;
+			case 172:
+				// Unknown Mouse Object
+				printf("UMO");
+				break;
+			}
+		}
+		else if (event > 199 && event < 203){
+			// 2nd Level (From Loop()) Mouse-Events
+			switch (TERM_MouseButton){
+			case 1:
+				// Left
+				printf("Left-");
+				break;
+			case 4:
+				// Right
+				printf("Right-");
+				break;
+			case 2:
+				// Wheel
+				printf("Wheel-");
+				break;
+			default:
+				// MultiKey (never seen in reality)
+				printf("Multi-");
+				break;
+			}
+
+			switch(event){
+			case 200:
+				// Click
+				printf("Click");
+				switch (TERM_MouseButton){
+				case 1:
+					// Left
+					break;
+				case 4:
+					// Right
+					break;
+				case 2:
+					// Wheel
+					break;
+				default:
+					// MultiKey (never seen in reality)
+					break;
+				}
+				break;
+			case 201:
+				// DblClick
+				printf("DblClick");
+				break;
+			case 202:
+				// Area
+				printf("Area");
+				break;
+			}
+		}
+		else{
+			// Errors
+			switch(event){
+			case -3:
+				// TimeOut of a broken, or valid but unknown sequence
+				printf("ERR -3 TimeOut");
+				break;
+			case -2:
+				// Unknown Termination/Identification Char
+				printf("ERR -2 Termination/Identification");
+				break;
+			case -4:
+				// Overflow, Too Long
+				printf("ERR -4 Overflow");
+				break;
+			case -5:
+				// Unexpected End Of Text
+				printf("ERR -5 UnexpectedEOT");
+				break;
+			case -6:
+				// Overlapping Sequence - already done in CoreLoop
+				printf("ERR -6 Overlapping");
+				break;
+			case -7:
+				// ByteMouse Out Of Range
+				printf("ERR -7 ByteMouse");
+				break;
+
+			default:
+				// Unexpected...
+				printf("ERR - WTF");
+				break;
+			}
+		}
+
+		if (event > 31){
+			printf("  : %s\n", &gStreamInESC27[1]);
+		}
+		else{
+			printf("\n");
+		}
+
+		// To prevent Debug-PrintOut irritations under WIN
+		// (while ScreenSize - Polling)
+		gStreamInESC27[1] = 0;
+
+		if (event != -1){
+			/* code */
+			printf("Event: %d", event);
+			printf("\n\n\n");
+		}
+
+		TxtBold(0);					
+
+	#endif
+
+	TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyMeta = 0; TERM_KeyShift = 0;
+	return r;
+}
+
+void TermCoreLoop(void(*UserLoop)()){
+
+	int i = 0;		// Input From stdin
+	int r = 0;		// Result From GetESC27
+	char c = 0;
+
+	// Recognize manual ESC
+		int isOnUsrESC27 = 0;
+		clock_t timeOnUsrEsc;
+	// Recognize broken Sequences by timeout
+		int isOnESC27 = 0;
+		clock_t timeOnEsc;
+	// Recognize Click & DblClick / Area-Selection
+		int isOnClick = 0;
+		clock_t timeOnClick;
+		int posXonClick = 0;
+		int posYonClick = 0;
+	
+	// Poll for TerminalSizeChange
+		#if __WIN32__ || _MSC_VER || __WIN64__
+			#define Terminal_Size_Change_Trigger 10
+			int terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
+		#endif
+
+	// Loop Minimum
+	// while (i != 10 && i != 13){
+	while (TERM_RunCoreLoop){
+		
+		i = TermInKey();
+
+		// Recognize manual ESC
+		if (isOnUsrESC27 && !i){
+			if (clock() > timeOnUsrEsc){
+				// UsrESC
+				i = 27;
+			}
+		}
+
+		// Recognize timeout while receiving ESC
+		else if (isOnESC27 && (!isOnUsrESC27 && !i)){
+			// The !isOnUsrESC27 signals, that we already got more chars than just the 1st ESC
+			if (clock() > timeOnEsc){
+				isOnESC27 = 0;
+				if (r == -6){
+					// ShiftAlt-O (overlapping with F1-F4)
+					i = -2;
+				}
+				else{
+					// Broken, or valid and unknown, Sequence
+					#if IS_TERMINAL_EVENT_DEBUG
+						printf("TimeOutCase");
+					#endif
+					i = -1;
+				}				
+			}		
+		}
+		else if (i == 27){
+			// Enter (User)ESC-Sequences recognition
+			isOnUsrESC27 = 1; isOnESC27= 1;
+			timeOnUsrEsc = clock() + gUserEscTimeout;
+			// timeout for broken sequence twice as regular UserESC
+			timeOnEsc = timeOnUsrEsc + gUserEscTimeout;
+		}
+		else{
+			// any char after 1st ESC immediately disables possibility on UserESC
+			isOnUsrESC27 = 0;
+		}
+
+		if (TERM_SignalCtrlC){
+			// Ctrl-C
+			i = 3;
+			TERM_SignalCtrlC = 0;
+		}
+			
+	// Loop Minimum
+	
+	// Loop Minimum
+		if (i){
+	// Loop Minimum
+			#if IS_REVERSE_DEBUG
+				if (i > 0){
+					TxtItalic(1);
+					SetFg16(fgRed);
+					printf("%d", i);
+					TxtItalic(0);
+					SetFg16(0);
+					if (i > 31){// && i < 128){
+						c = i;
+						printf(": %c",c);
+					}
+					else if (i == 27){
+						TxtBold(1);
+						printf(": ESC");
+						TxtBold(0);
+					}
+					
+					printf("\n");
+					fflush(stdout);
+				}
+			#endif
+			// Loop Minimum
+			
+			r = TermGetESC27(i);
+
+			switch (r){
+			case 0:
+				// Nothing (waiting for more...)
+				break;
+			case -1:
+				// Regular Key - No ESC-Sequence/SpecialKey related stuff
+				break;
+			case 162:
+			case 163:
+			case 164:
+				// Mouse Down
+				if (isOnClick){
+					// refresh timeout for MAC dblClick issues...
+					timeOnClick = clock() + gMouseClickTimeout;
+				}
+				break;					
+			case 165:
+				// Mouse UP (Left / Wheel / Right)
+				TermEventESC27(165);
+				isOnESC27 = 0;
+				r = 0;
+				if ((TERM_MouseSelX == TERM_MousePosX) && (TERM_MouseSelY == TERM_MousePosY)){
+					// it's a (dbl)click
+					if (isOnClick && clock() < timeOnClick){
+						// dblClick
+						TermEventESC27(201);
+						isOnClick = 0;
+					}
+					else{
+						// 1st Click
+						isOnClick = 1;
+						timeOnClick = clock() + gMouseClickTimeout;
+					}							
+				}
+				else{
+					// it's an area
+					if (isOnClick && clock() < timeOnClick){
+						// but nobody can define an area that fast,
+						// so we decide for dblClick
+						TermEventESC27(201);
+						isOnClick = 0;
+					}
+					else{
+						// finally area
+						TermEventESC27(202);
+						isOnClick = 0;
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			
+			if (r && r != -6){
+				// Disable timeouts
+				isOnUsrESC27 = 0; isOnESC27 = 0;
+				TermEventESC27(r);
+				r = 0;
+			}
+			else if(r == -6){
+				// The case that F1-F4 and ShiftAlt-O are overlapping...
+				// So, we push the Event when TimeOut occurs (see above)
+			}
+				
+				
+				
+			// Loop Minimum
+			
+
+	// Loop Minimum
+		}
+
+		// Recognize Single Click
+		if (isOnClick && (clock() > timeOnClick)){
+			// click
+			TermEventESC27(200);
+			isOnClick = 0;
+		}
+
+		if (!i){
+			// We did not received anything
+			// Time to check for RealTime things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				CheckOnTimeChange();
+			#else
+				if (TERM_SignalInterval){
+					TimeCheckOnChange();
+				}
+			#endif
+		}				
+
+		
+		// DO USER STUFF HERE START
+		UserLoop();
+		// DO USER STUFF HERE STOP
+
+		
+		if (!i){
+			// We did not received anything
+			// Time to do 2nd Time idle-time things
+			#if __WIN32__ || _MSC_VER || __WIN64__
+				terminalSizeChangeCnt--;
+				if (!terminalSizeChangeCnt){
+					// Every xx idle-times check on ScreenSize
+					terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
+					GetTerminalSize(3);
+					TermEventESC27(177);
+				}
+				else {
+					DoEvents();
+				}	
+			#else
+				if (TERM_SignalInterval){
+					if (TERM_SignalTerminalSize){
+						TermGetSize(3);
+						TermEventESC27(177);
+						TERM_SignalTerminalSize = 0;
+					}
+					TERM_SignalInterval = 0;
+				}
+				else {
+					DoEvents();
+					//TERM_KeyAlt = 0; TERM_KeyCtrl = 0; TERM_KeyShift = 0; TERM_KeyMeta = 0;
+				}	
+			#endif
+		}
+	}
+	
+	// Loop Minimum
+
 }
 
 

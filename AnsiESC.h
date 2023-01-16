@@ -7,8 +7,10 @@
 const char AnsiESCVersion [] = "1.00pa";
 
 // WIN & Linux
-#include "Terminal.h"
+// #include "Terminal.h"
 #include <string.h>
+#include <ctype.h>
+#include <stdint.h>
 
 // #include "UTFconst.h"
 

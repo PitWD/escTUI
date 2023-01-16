@@ -15,16 +15,17 @@
 
 #define LifeVersion "1.00pa"
 
-#include "PoorTui.h"	
+#include "Terminal.h"	
+#include "AnsiESC.h"	
 
 
-void SecondChanged(){
+void UserSecondChanged(){
 	static int i = 0;
 	i++;
-	TUI_RunCoreLoop = 0;
+	TERM_RunCoreLoop = 0;
 	if (i < 4){
 		printf("Second\n");
-		TUI_RunCoreLoop = 1;
+		TERM_RunCoreLoop = 1;
 	}
 }
 
@@ -32,6 +33,11 @@ void UserLoop(){
 	static int i = 0;
 	i++;
 	printf("Loop: %d\n", i);
+}
+
+void UserDblClick(int x, int y, int button){
+	TERM_RunCoreLoop = 0;
+	printf("DblClick: %d,%d,%d\n",x ,y, button);
 }
 
 int main() {
@@ -122,6 +128,9 @@ int main() {
 	
 	InitEscSeq();
 	InitColors();
+
+	TermInitEvents();
+
 	
 	// *************************************************************
 
@@ -131,12 +140,15 @@ int main() {
 			// TermTrapMouse(0);	// Disable 1st !
 			// TermTrapMouse(1);	// Then Set New...
 		
-		// set tui event(s) on your own function(s)
-		TimeSecChanged = SecondChanged;
+		// set Timer event(s) on your own function(s)
+		TimeSecChanged = UserSecondChanged;
 		
+		// set Terminal event(s) on your own function(s)
+		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
+
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
-		TuiCoreLoop(UserLoop);
+		TermCoreLoop(UserLoop);
 
 		// Set TUI_RunCoreLoop = 0 to reach this point
 
