@@ -1529,7 +1529,7 @@ int TermEventESC27 (int event){
 		}
 		else if (event > 0 && event < 27){
 			// Ctrl-A - Ctrl-Z
-			TermCtrlPress[event - 1];
+			TermCtrlPress[event - 1]();
 		}
 		else if (event > 161 && event < 173){
 			// Raw Mouse
@@ -1541,7 +1541,7 @@ int TermEventESC27 (int event){
 		}
 		else if (event > 159 && event < 162){
 			// Got 'n' Lost Focus
-			TermCtrlPress[event - 160];
+			TermFocus[event - 160]();
 		}
 		else if (event > 177 && event < 180){
 			// Terminal Name and Label
