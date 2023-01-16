@@ -42,96 +42,12 @@ void UserDblClick(int x, int y, int button){
 
 int main() {
 	
-	/*
-	strcpy(symbolMisc[29].str, "☜");	// \u261C	WHITE LEFT POINTING INDEX
-	strcpy(symbolMisc[30].str, "☝");	// \u261D	WHITE UP POINTING INDEX
-	strcpy(symbolMisc[31].str, "☞");	// \u261E	WHITE RIGHT POINTING INDEX
-	strcpy(symbolMisc[32].str, "☟");	// \u261F	WHITE DOWN POINTING INDEX
-	*/
-
-	int r = 0;
-
-	printf("\nHello New Project\n\n");
-
-	printf("Initializing Timing... ");
-	TimeInitTime();
-	printf("OK\n");
-	printf("%s - %s\n\n", gStrDate, gStrTime);
-
-	printf("Try To Enable Video Terminal Mode... ");
-	if (!TermSetVT(1)){
-		printf("ERROR!\n");
-		printf("STOP PROJECT\n");
+	if (!TermInit()){
 		return -1;
 	}
-	printf("OK\n\n");
-
-	printf("Try To Clear Screen...\n");
-	r = TermClearScreen(0);
-	if (!r){
-		// Can't happen....
-		printf("Clear Screen... ERROR!\n");
-		printf("STOP PROJECT\n");
-		return -1;
-	}
-	printf("Clear Screen... OK, CLS-Mode: %d\n\n",r);
-
-	printf("Try To Fetch Terminal Size... ");
-	r = TermGetSize(0);
-	if (!r){
-		printf("ERROR!\n");
-		printf("STOP PROJECT\n");
-		return -1;
-	}
-	printf("OK, Size-Mode: %d\n",r);
-	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("BillyOS: Screen Size Changes Will Be Polled...Sorry.\n");
-	#else
-		signal(SIGWINCH, TermSignalHandler);
-		printf("PosiX-OS: Screen Size Changes Getting Signaled.\n");
-	#endif
-	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
-
-	printf("Synchronize CLS-Mode With Size-Mode...\n");
-	r = TermClearScreen(r);
-	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n\n",r);
 	
-	printf("Enable Trap Mouse Mode... ");
-	TermTrapMouse(1);
-	printf("(probably) OK\n\n");
+	ESCinit();
 
-	printf("Enable Trap Focus Change... ");
-	TermTrapFocus(1);
-	printf("(probably) OK\n\n");
-
-	printf("Catch Ctrl-C... ");
-	signal(SIGINT, TermSignalHandler);
-	printf("(probably) OK\n\n");
-
-	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("BillyOS: Check On Real-Time Changes Get Polled...\n");
-		printf("         The whole timer stuff is kind a fixed... Sorry... not.\n\n");
-	#else
-		signal(SIGALRM, TermSignalHandler);
-		
-		// 333333 == we'll hit THE second in between +0,0 to +0,65 sec. after RealTime...
-		// but (little depending on Time_EventsTime) from one SecondEvent to the next SecondEvent, we're within a mS tolerance!
-		// lower value to raise precision
-		ualarm(333333,333333);
-		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n");
-
-		// Lower = more "UserLoops" vs. Higher = less CPU-time...
-		TIME_EventsTime = 10000;
-		printf("PosiX-OS: TIME_DoEventsTime is set.\n\n");
-
-	#endif
-	
-	InitEscSeq();
-	InitColors();
-
-	TermInitEvents();
-
-	
 	// *************************************************************
 
 		// If You Wanna Change Defaults (see BlaBlaInit())
@@ -154,25 +70,10 @@ int main() {
 
 	// *************************************************************
 
-	TermClearScreen(0);
-	printf("Disable Trap Mouse Mode... ");
-	TermTrapMouse(0);
-	printf("OK\n\n");
-
-	printf("Disable Trap Focus Change... ");
-	TermTrapFocus(0);
-	printf("OK\n\n");
-
-	printf("Try To Set Back Terminal From Video Mode... ");
-	if (!TermSetVT(0)){
-		printf("ERROR!\n");
+	if (!TermExit()){
 		return -1;
 	}
-	printf("OK\n\n");
-
-	printf("%s - %s\n", gStrDate, gStrTime);
-	printf("Runtime: %s\n\n", gStrRunTime);
-
+	
 	return 0;
 
 };
