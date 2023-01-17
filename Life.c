@@ -23,7 +23,7 @@ void UserSecondChanged(){
 	static int i = 0;
 	i++;
 	TERM_RunCoreLoop = 0;
-	if (i < 4){
+	if (i < 1){
 		printf("Second\n");
 		TERM_RunCoreLoop = 1;
 	}
@@ -61,6 +61,8 @@ int main() {
 		
 		// set Terminal event(s) on your own function(s)
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
+
+		// 
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 

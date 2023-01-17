@@ -4,97 +4,89 @@
 //				  (see related declarations/functions and at the EOF)
 // This is a  ! p_o_o_r !  Header by (c) Pit Demmer. (PIT-Licensed 01.04.2022 -           )
 
-const char AnsiESCVersion [] = "1.00pa";
+#define AnsiESCVersion "1.00pa"
 
 // WIN & Linux
 // #include "Terminal.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-
-// #include "UTFconst.h"
+#include "ini.h"
 
 typedef struct {
-	unsigned char mode;			// 0 = 16, 1 = 255, 2 = RGB
+	int mode;			// 0 = B/W, 1 = 16, 2 = 255, 3 = RGB
 	union ColorFG {
 		uint32_t Color;	// !! 32 bit !!
-		unsigned char dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
-		unsigned char R;
-		unsigned char G;
-		unsigned char B;
+		int dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
+		int R;
+		int G;
+		int B;
 	}fg;						// ForeGround (16 & 255 on fg.R)
 	union ColorBG {
 		uint32_t Color;
-		unsigned char dummy;					
-		unsigned char R;
-		unsigned char G;
-		unsigned char B;
+		int dummy;					
+		int R;
+		int G;
+		int B;
 	}bg;						// BackGround
 	union ColorUL {
 		uint32_t Color;	// UL - color just relevant in modes 1 & 2 (in mode '0': 'ul' == 'fg')
-		unsigned char dummy;
-		unsigned char R;					
-		unsigned char G;
-		unsigned char B;
+		int dummy;
+		int R;					
+		int G;
+		int B;
 	}ul;						// Underline
-} TxtColorSTRUCT;
-
+} EscColorSTRUCT;
 
 typedef struct {
 	/*		Actual State in [0]
 			Default in [1]
 			[2] - [n] free for user
 	*/
-	// 5 unsigned char
-	unsigned char bold				:1;
-	unsigned char faint				:1;
-	unsigned char italic			:1;
-	unsigned char blink				:1;
-	unsigned char fast				:1;
-	unsigned char reverse			:1;
-	unsigned char invisible			:1;
-	unsigned char strike			:1;
+	// 5 int
+	int bold				:1;
+	int faint				:1;
+	int italic			:1;
+	int blink				:1;
+	int fast				:1;
+	int reverse			:1;
+	int invisible			:1;
+	int strike			:1;
 
-	unsigned char superscript		:1;
-	unsigned char subscript			:1;
-	unsigned char proportional		:1;
-	unsigned char framed			:1;
-	unsigned char encircled			:1;
-	unsigned char overline			:1;
-	unsigned char ideo_right		:1;		// CSI60m (Ideogram 'rarely supported')
-	unsigned char ideo_dbl_right	:1;		// CSI61m ( "    "    "   "   "     "  )
+	int superscript		:1;
+	int subscript			:1;
+	int proportional		:1;
+	int framed			:1;
+	int encircled			:1;
+	int overline			:1;
+	int ideo_right		:1;		// CSI60m (Ideogram 'rarely supported')
+	int ideo_dbl_right	:1;		// CSI61m ( "    "    "   "   "     "  )
 	
-	unsigned char ideo_left			:1;		// CSI62m ( "    "    "   "   "     "  )
-	unsigned char ideo_dbl_left		:1;		// CSI63m ( "    "    "   "   "     "  )
-	unsigned char ideo_stress		:1;		// CSI64m ( "    "    "   "   "     "  )
-	unsigned char dbl_width			:1;
-	unsigned char dbl_height		:1;
-	unsigned char dummy1			:1;		// Fill the 3rd unsigned char
-	unsigned char dummy2			:1;		// ( "   "   "   " ) 
-	unsigned char dummy3			:1;		// ( "   "   "   " )
+	int ideo_left			:1;		// CSI62m ( "    "    "   "   "     "  )
+	int ideo_dbl_left		:1;		// CSI63m ( "    "    "   "   "     "  )
+	int ideo_stress		:1;		// CSI64m ( "    "    "   "   "     "  )
+	int dbl_width			:1;
+	int dbl_height		:1;
+	int dummy1			:1;		// Fill the 3rd int
+	int dummy2			:1;		// ( "   "   "   " ) 
+	int dummy3			:1;		// ( "   "   "   " )
 	
-	unsigned char font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
-	unsigned char underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
+	int font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
+	int underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
 											// 6 = dashdot, 7 = dbl_curl, 8 = dbl_dot, 9 = dbl_dash
-	TxtColorSTRUCT *pColor;
-} TxtStyleSTRUCT; 
+	EscColorSTRUCT *pColor;
+} EscStyleSTRUCT; 
 
-
-// Standard ESC Sequences
-char CSI[] = "\x1B[";			
+// Standard, but optional, ESC Sequences
 char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0" 
-char FP3[] = "\x1B#";			// 3Fp (private-use) used for text width / height
-char OSC[] = "\x1B]";
 
 // Actual Settings / States
-TxtStyleSTRUCT ActTxtStyle;
-TxtColorSTRUCT ActTxtColor;
+static EscStyleSTRUCT ActTxtStyle;
+static EscColorSTRUCT ActTxtColor;
 
 void ResFBU(void);
-
-void InitEscSeq(void) {
-
-}
+void SetColorStyle(EscColorSTRUCT *pColor, int set);
+void LocateX(int x);
 
 // 'VGA'16-Pallet - colors
 enum {
@@ -111,7 +103,7 @@ enum {
 };
 
 // 256 Grey's White -> Black 
-unsigned char cGrey[27];		// initialization in InitColors
+int ESC_Grey[27];		// initialization in InitColors
 
 // Solarized Colors from Ethan Schoonover : 	github.com/altercation/solarized
 // D(ark) & B(right) versions from Pit
@@ -135,16 +127,67 @@ enum {
 void ESCinit(void) {
 
 	// The 24 Greys (+ Black/White) from 256 Palette	
-	cGrey[1] = 15; cGrey[26] = 0;
+	ESC_Grey[1] = 15; ESC_Grey[26] = 0;
 	int p = 1;
 	for (int t = 255; t > 231; t--) {
 		p++;
-		cGrey[p] = t;
+		ESC_Grey[p] = t;
 	}
 
 	// Default ColorStyle
 	ActTxtStyle.pColor = &ActTxtColor;
 
+	// Users Colors
+	char strSearch[STR_SMALL_SIZE];
+	char strGroupName[STR_SMALL_SIZE];
+	char strColorName[STR_SMALL_SIZE];
+
+	char strFile[] = "desktops.ini";
+	int colorsGroupsCount = IniGetInt(strFile, "global.colors.GroupCount", 0);
+	int colorsModel = IniGetInt(strFile, "global.colors.ColorModel", 0);
+	int colorsCount[colorsGroupsCount];
+	int colorsCountSum = 0;
+
+	for (int i = 0; i < colorsGroupsCount; i++){
+		sprintf(strSearch, "global.colors.group%d.Count", i + 1);
+		colorsCount[i] = IniGetInt(strFile, strSearch, 0);
+		colorsCountSum += colorsCount[i];
+	}
+	
+	EscColorSTRUCT UserColor[colorsCountSum];
+	colorsCountSum = 0;
+
+	for (int i = 0; i < colorsGroupsCount; i++){
+		sprintf(strSearch, "global.colors.group%d.Name", i + 1);
+		IniGetStr(strFile, strSearch, "NoGroupName", strGroupName);
+		for (int j = 0; j < colorsCount[i]; j++){
+
+			sprintf(strSearch, "global.colors.group%d.%d.Name", i + 1, j + 1);
+			IniGetStr(strFile, strSearch, "NoColorName", strColorName);
+
+			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
+			UserColor[colorsCountSum].fg.Color = (int)IniGetInt(strFile, strSearch, 15);
+			sprintf(strSearch, "global.colors.group%d.%d.BackGround", i + 1, j + 1);
+			UserColor[colorsCountSum].bg.Color = (int)IniGetInt(strFile, strSearch, 0);
+			sprintf(strSearch, "global.colors.group%d.%d.UnderLine", i + 1, j + 1);
+			UserColor[colorsCountSum].ul.Color = (int)IniGetInt(strFile, strSearch, 15);
+			
+			UserColor[colorsCountSum].mode = colorsModel;
+
+			colorsCountSum++;
+
+			
+			printf("%04d. %s_%s: ",colorsCountSum, strGroupName, strColorName);
+			LocateX(30);
+			SetColorStyle(&UserColor[colorsCountSum - 1], 1);
+			//printf("Res - Done\n");
+			//return;
+			printf("->   Some obligatory text :-)   <-");
+			ResFBU();
+			printf("\n");
+		}
+		printf("\n");
+	}
 }
 
 
@@ -262,102 +305,102 @@ void ClrScrR(void) {
 
 // Reset To Default Colors
 void ResFg(void) {
-	ActTxtColor.fg.R = 39; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
+	ActTxtColor.fg.Color = 39; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[39m");
 }
 void ResBg(void) {
-	ActTxtColor.bg.R = 49; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
+	ActTxtColor.bg.Color = 49; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[49m");
 }
 void ResUl(void) {
-	ActTxtColor.ul.R = 59; ActTxtColor.mode = 0; ActTxtStyle.pColor = NULL;
+	ActTxtColor.ul.Color = 59; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[59m");
 }
 void ResFB(void) {
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49;
-	ActTxtColor.mode = 0; ActTxtStyle.pColor = 0;
+	ActTxtColor.mode = 0; ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[39;49");
 }
 void ResFBU(void) {
 	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49; ActTxtColor.ul.R = 59;
-	ActTxtColor.mode = 0; ActTxtStyle.pColor = 0;
+	ActTxtColor.mode = 0; ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[39;49;59m");
 }
 
 // Set 24 bit Color
-void SetFgRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 2;
+void SetFgRGB(int r, int g, int b) {
+	ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 3;
 	printf("\x1B[38;2;%d;%d;%dm", r, g, b);
 }
-void SetBgRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 2;
+void SetBgRGB(int r, int g, int b) {
+	ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 3;
 	printf("\x1B[48;2;%d;%d;%dm", r, g, b);
 }
-void SetUlRGB(unsigned char r, unsigned char g, unsigned char b) {
-	ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 2;
+void SetUlRGB(int r, int g, int b) {
+	ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 3;
 	printf("\x1B[58;2;%d;%d;%dm", r, g, b);
 }
-void SetFBrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB) {
+void SetFBrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB) {
 	SetFgRGB(fgR, fgG, fgB);
 	SetBgRGB(bgR, bgG, bgB);
 }
-void SetFBUrgb(unsigned char fgR, unsigned char fgG, unsigned char fgB, unsigned char bgR, unsigned char bgG, unsigned char bgB, unsigned char ulR, unsigned char ulG, unsigned char ulB) {
+void SetFBUrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, int ulG, int ulB) {
 	SetFgRGB(fgR, fgG, fgB);
 	SetBgRGB(bgR, bgG, bgB);
 	SetUlRGB(ulR, ulG, ulB);
 }
 
 // Set 256 Colors
-void SetFg255(unsigned char c) {
-	ActTxtStyle.pColor->fg.R = c; ActTxtStyle.pColor->mode = 1;
+void SetFg255(int c) {
+	ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[38;5;%dm", c);
 }
-void SetBg255(unsigned char c) {
-	ActTxtStyle.pColor->bg.R = c; ActTxtStyle.pColor->mode = 1;
+void SetBg255(int c) {
+	ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[48;5;%dm", c);
 }
-void SetUl255(unsigned char c) {
-	ActTxtStyle.pColor->ul.R = c; ActTxtStyle.pColor->mode = 1;
+void SetUl255(int c) {
+	ActTxtStyle.pColor->ul.Color = c; ActTxtStyle.pColor->mode = 2;
 	printf("\x1B[58;5;%dm", c);
 }
-void SetFB255(unsigned char fg, unsigned char bg) {
+void SetFB255(int fg, int bg) {
 	SetFg255(fg);
 	SetBg255(bg);
 }
-void SetFBU255(unsigned char fg, unsigned char bg, unsigned char ul) {
+void SetFBU255(int fg, int bg, int ul) {
 	SetFg255(fg);
 	SetBg255(bg);
 	SetUl255(ul);
 }
 
 //Set 16 Colors
-void SetFg16(unsigned char c){
+void SetFg16(int c){
 	// ForeGround	
 	if (!((c > 29 && c < 38) || (c > 89 && c < 98))){
 		ResFg();
 	}
 	else{
-		ActTxtStyle.pColor->fg.R = c; ActTxtStyle.pColor->mode = 0;
+		ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 0;
 		printf("\x1B[%dm", c);
 	}	
 }
-void SetBg16(unsigned char c) {	
+void SetBg16(int c) {	
 	// BackGround
 	if (!((c > 39 && c < 48) || (c > 99 && c < 108))){
 		ResBg();
 	}
 	else{
-		ActTxtStyle.pColor->bg.R = c; ActTxtStyle.pColor->mode = 0;
+		ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 0;
 		printf("\x1B[%dm", c);
 	}
 }
-void SetFB16(unsigned char fg, unsigned char bg) {
+void SetFB16(int fg, int bg) {
 	SetFg16(fg);
 	SetBg16(bg);
 }
 
 // TXT Styles - single commands
-void TxtBold(unsigned char set) {
+void TxtBold(int set) {
 	ActTxtStyle.bold = set;
 	ActTxtStyle.faint = 0;
 	if (set) {
@@ -739,11 +782,67 @@ void TxtFont(int fnt) {
 	}
 	
 	ActTxtStyle.font = fnt;
-	printf("%s%dm", CSI, fnt + 10);
+	printf("\x1B[%dm", fnt + 10);
+}
+
+void SetColorStyle(EscColorSTRUCT *pColor, int set){
+
+	if (set){
+		switch (pColor->mode) {
+		case 1:		// 16 (has no UnderLineColor)
+			if (pColor->fg.Color != ActTxtColor.fg.Color) {
+				if (!((pColor->fg.Color > 29 && pColor->fg.Color < 38) || (pColor->fg.Color > 89 && pColor->fg.Color < 98))){
+					pColor->fg.Color = 39;
+					ResFg();
+				}
+				else{
+					SetFg16(pColor->fg.Color);
+				}
+			}
+			if (pColor->bg.Color != ActTxtColor.bg.Color) {
+				if (!((pColor->bg.Color > 39 && pColor->bg.Color < 48) || (pColor->bg.Color > 99 && pColor->bg.Color < 108))){
+					pColor->bg.Color = 49;
+					ResBg();
+				}
+				else{
+					SetBg16(pColor->bg.Color);
+				}
+			}
+			break;
+		
+		case 2:		// 255
+			if (pColor->fg.Color != ActTxtColor.fg.Color) {
+				SetFg255(pColor->fg.Color);
+			}
+			if (pColor->bg.Color != ActTxtColor.bg.Color) {
+				SetBg255(pColor->bg.Color);
+			}
+			if (pColor->ul.Color != ActTxtColor.ul.Color) {
+				//SetUl255(pColor->ul.Color);
+			}
+			break;
+		
+		case 3:		// RGB
+			if (pColor->fg.Color != ActTxtColor.fg.Color) {
+				SetFgRGB(pColor->fg.R, pColor->fg.G, pColor->fg.B);
+			}
+			if (pColor->bg.Color != ActTxtColor.bg.Color) {
+				SetBgRGB(pColor->bg.R, pColor->bg.G, pColor->bg.B);
+			}
+			if (pColor->ul.Color != ActTxtColor.ul.Color) {
+				SetUlRGB(pColor->ul.R, pColor->ul.G, pColor->ul.B);
+			}
+			break;
+		}
+	}
+	else{
+		memset(&ActTxtColor, 0, sizeof(ActTxtColor));
+		ResFBU();
+	}
 }
 
 // TXT Style - combined from Structure
-void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, int set) {
+void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 
 	// set == False -> Reset all to default
 
@@ -874,59 +973,15 @@ void SetTxtStyle(TxtStyleSTRUCT *pTxtStyle, int set) {
 			}
 			TxtFont(pTxtStyle->font);
 		}
+
+		SetColorStyle(pTxtStyle->pColor, 1);
 		
-		switch (pTxtStyle->pColor->mode) {
-		case 0:		// 16 (has no UnderLineColor)
-			if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
-				if (!((pTxtStyle->pColor->fg.R > 29 && pTxtStyle->pColor->fg.R < 38) || (pTxtStyle->pColor->fg.R > 89 && pTxtStyle->pColor->fg.R < 98))){
-					pTxtStyle->pColor->fg.R = 39;
-					ResFg();
-				}
-				else{
-					SetFg16(pTxtStyle->pColor->fg.R);
-				}
-			}
-			if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
-				if (!((pTxtStyle->pColor->bg.R > 39 && pTxtStyle->pColor->bg.R < 48) || (pTxtStyle->pColor->bg.R > 99 && pTxtStyle->pColor->bg.R < 108))){
-					pTxtStyle->pColor->bg.R = 49;
-					ResBg();
-				}
-				else{
-					SetBg16(pTxtStyle->pColor->bg.R);
-				}
-			}
-			break;
-		
-		case 1:		// 255
-			if (pTxtStyle->pColor->fg.R != ActTxtColor.fg.R) {
-				SetFg255(pTxtStyle->pColor->fg.R);
-			}
-			if (pTxtStyle->pColor->bg.R != ActTxtColor.bg.R) {
-				SetBg255(pTxtStyle->pColor->bg.R);
-			}
-			if (pTxtStyle->pColor->ul.R != ActTxtColor.ul.R) {
-				SetUl255(pTxtStyle->pColor->ul.R);
-			}
-			break;
-		
-		case 2:		// RGB
-			if (pTxtStyle->pColor->fg.Color != ActTxtColor.fg.Color) {
-				SetFgRGB(pTxtStyle->pColor->fg.R, pTxtStyle->pColor->fg.G, pTxtStyle->pColor->fg.B);
-			}
-			if (pTxtStyle->pColor->bg.Color != ActTxtColor.bg.Color) {
-				SetBgRGB(pTxtStyle->pColor->bg.R, pTxtStyle->pColor->bg.G, pTxtStyle->pColor->bg.B);
-			}
-			if (pTxtStyle->pColor->ul.Color != ActTxtColor.ul.Color) {
-				SetUlRGB(pTxtStyle->pColor->ul.R, pTxtStyle->pColor->ul.G, pTxtStyle->pColor->ul.B);
-			}
-			break;
-		}
 	}
 	else {
 		// Reset colors, fonts and styles to their defaults
 		memset(&ActTxtStyle, 0, sizeof(ActTxtStyle));
 		memset(&ActTxtColor, 0, sizeof(ActTxtColor));
-		printf("%s10;0;39;49;59m", CSI);
+		printf("\x1B[10;0;39;49;59m");
 	}
 }
 
