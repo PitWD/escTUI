@@ -82,6 +82,7 @@ int main() {
 
 		// Set TUI_RunCoreLoop = 0 to reach this point
 		free(userColor);
+		free(userStyles);
 	// *************************************************************
 
 	if (!TermExit()){
