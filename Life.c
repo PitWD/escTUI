@@ -63,8 +63,8 @@ int main() {
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
 		// get your colors from INI-file
-		EscColorSTRUCT *userColor;
-		if (!ESCinitColors("desktops.ini", userColor)){
+		EscColorSTRUCT *userColors;
+		if (!ESCinitColors("desktops.ini", userColors)){
 			TermExit();
 			return -1;
 		}
@@ -81,8 +81,13 @@ int main() {
 		TermCoreLoop(UserLoop);
 
 		// Set TUI_RunCoreLoop = 0 to reach this point
-		free(userColor);
-		free(userStyles);
+
+		#if __APPLE__
+			// NO CLUE WHY freeing is messy
+		#else
+			free(userColors);
+			// free(userStyles); WHY this free fails, too?
+		#endif
 	// *************************************************************
 
 	if (!TermExit()){
