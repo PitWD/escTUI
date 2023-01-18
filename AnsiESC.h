@@ -307,9 +307,10 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 					printf("->TEST<-");
 					printf("\n");
 					TxtDblBot(1);
+					TxtDblWidth(1);
 				}
 				printf("->TEST<-");				
-				TxtDblWidth(0);
+				//TxtDblWidth(0);
 				//printf("\n");
 			}
 			else if (userTxtStyles[stylesCountSum - 1].dbl_height){
