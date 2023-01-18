@@ -44,35 +44,35 @@ typedef struct {
 			[2] - [n] free for user
 	*/
 	// 5 int
-	int bold				:1;
-	int faint				:1;
-	int italic			:1;
-	int blink				:1;
-	int fast				:1;
-	int reverse			:1;
-	int invisible			:1;
-	int strike			:1;
+	uint32_t bold				:1;
+	uint32_t faint				:1;
+	uint32_t italic			:1;
+	uint32_t blink				:1;
+	uint32_t fast				:1;
+	uint32_t reverse			:1;
+	uint32_t invisible			:1;
+	uint32_t strike			:1;
 
-	int superscript		:1;
-	int subscript			:1;
-	int proportional		:1;
-	int framed			:1;
-	int encircled			:1;
-	int overline			:1;
-	int ideo_right		:1;		// CSI60m (Ideogram 'rarely supported')
-	int ideo_dbl_right	:1;		// CSI61m ( "    "    "   "   "     "  )
+	uint32_t superscript		:1;
+	uint32_t subscript			:1;
+	uint32_t proportional		:1;
+	uint32_t framed			:1;
+	uint32_t encircled			:1;
+	uint32_t overline			:1;
+	uint32_t ideo_right		:1;		// CSI60m (Ideogram 'rarely supported')
+	uint32_t ideo_dbl_right	:1;		// CSI61m ( "    "    "   "   "     "  )
 	
-	int ideo_left			:1;		// CSI62m ( "    "    "   "   "     "  )
-	int ideo_dbl_left		:1;		// CSI63m ( "    "    "   "   "     "  )
-	int ideo_stress		:1;		// CSI64m ( "    "    "   "   "     "  )
-	int dbl_width			:1;
-	int dbl_height		:1;
-	int dummy1			:1;		// Fill the 3rd int
-	int dummy2			:1;		// ( "   "   "   " ) 
-	int dummy3			:1;		// ( "   "   "   " )
+	uint32_t ideo_left			:1;		// CSI62m ( "    "    "   "   "     "  )
+	uint32_t ideo_dbl_left		:1;		// CSI63m ( "    "    "   "   "     "  )
+	uint32_t ideo_stress		:1;		// CSI64m ( "    "    "   "   "     "  )
+	uint32_t dbl_width			:1;
+	uint32_t dbl_height		:1;
+	uint32_t dummy1			:1;		// Fill the 3rd int
+	uint32_t dummy2			:1;		// ( "   "   "   " ) 
+	uint32_t dummy3			:1;		// ( "   "   "   " )
 	
-	int font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
-	int underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
+	uint32_t font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
+	uint32_t underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
 											// 6 = dashdot, 7 = dbl_curl, 8 = dbl_dot, 9 = dbl_dash
 	EscColorSTRUCT *pColor;
 } EscStyleSTRUCT; 
@@ -184,10 +184,13 @@ void ESCinit(void) {
 			//printf("Res - Done\n");
 			//return;
 			printf("->   Some obligatory text :-)   <-");
+			fflush(stdout);
 			ResFBU();
 			printf("\n");
+			fflush(stdout);
 		}
-		printf("\n");		
+		printf("\n");
+		fflush(stdout);		
 	}
 	return;
 	for (int i = 0; i < 256; i++)
