@@ -299,26 +299,17 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
 			LocateX(37);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
-			if (userTxtStyles[stylesCountSum - 1].dbl_width){
-				printf("\n");
-				TxtDblWidth(1);
-				if (userTxtStyles[stylesCountSum - 1].dbl_height){
-					TxtDblTop(1);
-					printf("->TEST<-");
-					printf("\n");
-					TxtDblBot(1);
-					TxtDblWidth(1);
-				}
-				printf("->TEST<-");				
-				//TxtDblWidth(0);
-				//printf("\n");
-			}
-			else if (userTxtStyles[stylesCountSum - 1].dbl_height){
+			if (userTxtStyles[stylesCountSum - 1].dbl_height){
 				printf("\n");
 				TxtDblTop(1);
 				printf("->   ( TEST )   <-\n");
 				TxtDblBot(1);
 				printf("->   ( TEST )   <-");
+			}
+			else if (userTxtStyles[stylesCountSum - 1].dbl_width){
+				printf("\n");
+				TxtDblWidth(1);
+				printf("->   ( TEST )   <-");				
 			}
 			else{
 				printf("->   ( TEST )   <-");
