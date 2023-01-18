@@ -154,7 +154,7 @@ int IniIsNonNumeric(const char *strIN){
 
     for (int i = strlen(strIN) - 1; i >= 0; i--){
         c = strIN[i];
-        if ((c <= '0' || c >= '9') && (c != ',' && c != '.')){
+        if ((c < '0' || c > '9') && (c != ',' && c != '.')){
             return 1;
         }
     }

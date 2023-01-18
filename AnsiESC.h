@@ -21,7 +21,7 @@ typedef struct {
 		int R;
 		int G;
 		int B;
-	}fg;						// ForeGround (16 & 255 on fg.R)
+	}fg;						// ForeGround
 	union ColorBG {
 		uint32_t Color;
 		int dummy;					
@@ -87,6 +87,8 @@ static EscColorSTRUCT ActTxtColor;
 void ResFBU(void);
 void SetColorStyle(EscColorSTRUCT *pColor, int set);
 void LocateX(int x);
+void SetFg255(int c);
+void SetBg255(int c);
 
 // 'VGA'16-Pallet - colors
 enum {
@@ -166,19 +168,18 @@ void ESCinit(void) {
 			IniGetStr(strFile, strSearch, "NoColorName", strColorName);
 
 			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
-			UserColor[colorsCountSum].fg.Color = (int)IniGetInt(strFile, strSearch, 15);
+			UserColor[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
 			sprintf(strSearch, "global.colors.group%d.%d.BackGround", i + 1, j + 1);
-			UserColor[colorsCountSum].bg.Color = (int)IniGetInt(strFile, strSearch, 0);
+			UserColor[colorsCountSum].bg.Color = IniGetInt(strFile, strSearch, 0);
 			sprintf(strSearch, "global.colors.group%d.%d.UnderLine", i + 1, j + 1);
-			UserColor[colorsCountSum].ul.Color = (int)IniGetInt(strFile, strSearch, 15);
+			UserColor[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
 			
 			UserColor[colorsCountSum].mode = colorsModel;
 
 			colorsCountSum++;
-
 			
-			printf("%04d. %s_%s: ",colorsCountSum, strGroupName, strColorName);
-			LocateX(30);
+			printf("%04d. %s_%s (%03d:%03d): ",colorsCountSum, strGroupName, strColorName,UserColor[colorsCountSum - 1].fg.Color, UserColor[colorsCountSum - 1].bg.Color);
+			LocateX(40);
 			SetColorStyle(&UserColor[colorsCountSum - 1], 1);
 			//printf("Res - Done\n");
 			//return;
@@ -186,6 +187,17 @@ void ESCinit(void) {
 			ResFBU();
 			printf("\n");
 		}
+		printf("\n");		
+	}
+	return;
+	for (int i = 0; i < 256; i++)
+	{
+		printf("%04d.",i);
+		SetFg255(i);
+		printf("->   Some obligatory text :-)   <-");
+		SetBg255(255 - i);
+		printf("-> %04d <-", 255 - i);
+		ResFBU();
 		printf("\n");
 	}
 }
@@ -317,14 +329,13 @@ void ResUl(void) {
 	printf("\x1B[59m");
 }
 void ResFB(void) {
-	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49;
-	ActTxtColor.mode = 0; ActTxtStyle.pColor = &ActTxtColor;
-	printf("\x1B[39;49");
+	ResFg();
+	ResBg();
 }
 void ResFBU(void) {
-	ActTxtColor.fg.R = 39; ActTxtColor.bg.R = 49; ActTxtColor.ul.R = 59;
-	ActTxtColor.mode = 0; ActTxtStyle.pColor = &ActTxtColor;
-	printf("\x1B[39;49;59m");
+	ResFg();
+	ResBg();
+	ResUl();
 }
 
 // Set 24 bit Color
