@@ -86,6 +86,7 @@ static EscColorSTRUCT ActTxtColor;
 
 void ResFBU(void);
 void SetColorStyle(EscColorSTRUCT *pColor, int set);
+void SetTxtStyle(EscStyleSTRUCT *pStyle, int set);
 void LocateX(int x);
 void SetFg255(int c);
 void SetBg255(int c);
@@ -120,6 +121,7 @@ void ESCinit(void) {
 	// Default ColorStyle
 	ActTxtStyle.pColor = &ActTxtColor;
 }
+
 int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 
 	// Users Colors
@@ -166,7 +168,7 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 			colorsCountSum++;
 			
 			printf("%04d. %s_%s: ",colorsCountSum, strGroupName, strColorName);
-			LocateX(30);
+			LocateX(36);
 			SetColorStyle(&userColor[colorsCountSum - 1], 1);
 			//printf("Res - Done\n");
 			//return;
@@ -287,10 +289,12 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			sprintf(strSearch, "global.txtStyles.group%d.%d.underline", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].underline = IniGetInt(strFile, strSearch, 0);
 
+			userTxtStyles[stylesCountSum].pColor = &ActTxtColor;
+
 			stylesCountSum++;
 			
 			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
-			LocateX(40);
+			LocateX(37);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
 			printf("->   ( TEST )   <-");
 			fflush(stdout);

@@ -70,7 +70,11 @@ int main() {
 		}
 
 		// get your text-styles from INI-file
-		
+		EscStyleSTRUCT *userStyles;
+		if (!ESCinitTxtStyles("desktops.ini", userStyles)){
+			TermExit();
+			return -1;
+		}
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
