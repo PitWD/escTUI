@@ -23,8 +23,8 @@ void UserSecondChanged(void){
 	static int i = 0;
 	i++;
 	TERM_RunCoreLoop = 0;
-	if (i < 4){
-		printf("Second\n");
+	if (i < 15){
+		//printf("Second\n");
 		TERM_RunCoreLoop = 1;
 	}
 }
@@ -32,7 +32,7 @@ void UserSecondChanged(void){
 void UserLoop(void){
 	static int i = 0;
 	i++;
-	printf("Loop: %d\n", i);
+	//printf("Loop: %d\n", i);
 }
 
 void UserDblClick(int x, int y, int button){
