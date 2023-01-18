@@ -185,6 +185,127 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 	return colorsCountSum;
 }
 
+int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
+
+	// Users Colors
+	char strSearch[STR_SMALL_SIZE];
+	char strGroupName[STR_SMALL_SIZE];
+	char strStyleName[STR_SMALL_SIZE];
+
+	//char strFile[] = "desktops.ini";
+	int stylesGroupsCount = IniGetInt(strFile, "global.txtStyles.GroupCount", 0);
+	
+	int *stylesCount;
+	stylesCount = (int*)malloc(stylesGroupsCount * sizeof(int));
+	
+	int stylesCountSum = 0;
+
+	for (int i = 0; i < stylesGroupsCount; i++){
+		sprintf(strSearch, "global.txtStyles.group%d.Count", i + 1);
+		stylesCount[i] = IniGetInt(strFile, strSearch, 0);
+		stylesCountSum += stylesCount[i];
+	}
+	
+	userTxtStyles = (EscStyleSTRUCT*)malloc(stylesCountSum * sizeof(EscStyleSTRUCT));
+	
+	stylesCountSum = 0;
+
+	for (int i = 0; i < stylesGroupsCount; i++){
+		sprintf(strSearch, "global.txtStyles.group%d.Name", i + 1);
+		IniGetStr(strFile, strSearch, "NoGroupName", strGroupName);
+		for (int j = 0; j < stylesCount[i]; j++){
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.Name", i + 1, j + 1);
+			IniGetStr(strFile, strSearch, "NoFontName", strStyleName);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.bold", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].bold = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.faint", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].faint = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.italic", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].italic = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.blink", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].blink = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.fastblink", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].fast = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.reverse", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].reverse = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.invisible", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].invisible = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.strikethrough", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].strike = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.superscript", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].superscript = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.subscript", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].subscript = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.proportional", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].proportional = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.framed", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].framed = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.encircled", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].encircled = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.overline", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].overline = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.ideoright", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].ideo_right = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.ideoleft", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].ideo_left = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.ideodblright", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].ideo_dbl_right = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.ideodblleft", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].ideo_dbl_left = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.ideostress", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].ideo_stress = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.dblwidth", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].dbl_width = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.dblheight", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].dbl_height = IniGetBool(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.font", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].font = IniGetInt(strFile, strSearch, 0);
+
+			sprintf(strSearch, "global.txtStyles.group%d.%d.underline", i + 1, j + 1);
+			userTxtStyles[stylesCountSum].underline = IniGetInt(strFile, strSearch, 0);
+
+			stylesCountSum++;
+			
+			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
+			LocateX(40);
+			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
+			printf("->   ( TEST )   <-");
+			fflush(stdout);
+			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 0);
+			printf("\n");
+			fflush(stdout);
+		}
+		printf("\n");
+		fflush(stdout);		
+	}
+
+	free(stylesCount);
+	
+	return stylesCountSum;
+}
 
 // Cursor Positions
 void Locate(int x, int y) {
