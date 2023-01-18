@@ -85,7 +85,7 @@ int main() {
 		#if __APPLE__
 			// NO CLUE WHY freeing is messy
 		#else
-			free(userColors);
+			// free(userColors);
 			// free(userStyles); WHY this free fails, too?
 		#endif
 	// *************************************************************

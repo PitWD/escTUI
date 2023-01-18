@@ -90,6 +90,9 @@ void SetTxtStyle(EscStyleSTRUCT *pStyle, int set);
 void LocateX(int x);
 void SetFg255(int c);
 void SetBg255(int c);
+void TxtDblWidth(int set);
+void TxtDblTop(int set);
+void TxtDblBot(int set);
 
 // 'VGA'16-Pallet - colors
 enum {
@@ -296,7 +299,29 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
 			LocateX(37);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
-			printf("->   ( TEST )   <-");
+			if (userTxtStyles[stylesCountSum - 1].dbl_width){
+				printf("\n");
+				TxtDblWidth(1);
+				if (userTxtStyles[stylesCountSum - 1].dbl_height){
+					TxtDblTop(1);
+					printf("->TEST<-");
+					printf("\n");
+					TxtDblBot(1);
+				}
+				printf("->TEST<-");				
+				TxtDblWidth(0);
+				//printf("\n");
+			}
+			else if (userTxtStyles[stylesCountSum - 1].dbl_height){
+				printf("\n");
+				TxtDblTop(1);
+				printf("->   ( TEST )   <-\n");
+				TxtDblBot(1);
+				printf("->   ( TEST )   <-");
+			}
+			else{
+				printf("->   ( TEST )   <-");
+			}					
 			fflush(stdout);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 0);
 			printf("\n");
@@ -845,12 +870,13 @@ void TxtIdeoStress(int set) {
 }
 
 void TxtResetDblTBW(void){
+	ActTxtStyle.dbl_width = 0;
+	ActTxtStyle.dbl_height = 0;
 	printf("\x1B#5");
 }
 void TxtDblTop(int set) {
 	// DoubleHeight + DoubleWidth Top-Part
 	ActTxtStyle.dbl_height = set;
-	ActTxtStyle.dbl_width = 0;
 	if (set) {
 		// Set
 		printf("\x1B#3");
@@ -863,7 +889,6 @@ void TxtDblTop(int set) {
 void TxtDblBot(int set) {
 	// DoubleHeight + DoubleWidth Bottom-Part
 	ActTxtStyle.dbl_height = set;
-	ActTxtStyle.dbl_width = 0;
 	if (set) {
 		// Set
 		printf("\x1B#4");
@@ -876,7 +901,6 @@ void TxtDblBot(int set) {
 void TxtDblWidth(int set) {
 	// DoubleWidth 
 	ActTxtStyle.dbl_width = set;
-	ActTxtStyle.dbl_height = 0;
 	if (set) {
 		// Set
 		printf("\x1B#6");
