@@ -17,24 +17,24 @@ typedef struct {
 	int mode;			// 0 = B/W, 1 = 16, 2 = 255, 3 = RGB
 	union ColorFG {
 		uint32_t Color;	// !! 32 bit !!
-		int dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
-		int R;
-		int G;
-		int B;
+		uint8_t dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
+		uint8_t R;
+		uint8_t G;
+		uint8_t B;
 	}fg;						// ForeGround
 	union ColorBG {
 		uint32_t Color;
-		int dummy;					
-		int R;
-		int G;
-		int B;
+		uint8_t dummy;					
+		uint8_t R;
+		uint8_t G;
+		uint8_t B;
 	}bg;						// BackGround
 	union ColorUL {
 		uint32_t Color;	// UL - color just relevant in modes 1 & 2 (in mode '0': 'ul' == 'fg')
-		int dummy;
-		int R;					
-		int G;
-		int B;
+		uint8_t dummy;
+		uint8_t R;					
+		uint8_t G;
+		uint8_t B;
 	}ul;						// Underline
 } EscColorSTRUCT;
 
@@ -107,25 +107,6 @@ enum {
 // 256 Grey's White -> Black 
 int ESC_Grey[27];		// initialization in InitColors
 
-// Solarized Colors from Ethan Schoonover : 	github.com/altercation/solarized
-// D(ark) & B(right) versions from Pit
-// As 256 Palette
-enum {
-	scBase03 = 234, scBase02 = 235, scBase01 = 240, scBase00 = 241, scBase0 = 244, scBase1 = 245, scBase2 = 254, scBase3 = 230
-};
-
-enum {
-	scYellow = 136, scOrange = 166, scRed = 160, scMagenta = 125, scViolet = 61, scBlue = 33, scCyan = 37, scGreen = 64
-};
-// darker 
-enum {
-	scYellowD = 64, scOrangeD = 94, scRedD = 88, scMagentaD = 53, scVioletD = 56, scBlueD = 26, scCyanD = 30, scGreenD = 58
-};
-// brighter
-enum {
-	scYellowB = 208, scOrangeB = 202, scRedB = 196, scMagentaB = 197, scVioletB = 133, scBlueB = 39, scCyanB = 43, scGreenB = 70
-};
-
 void ESCinit(void) {
 
 	// The 24 Greys (+ Black/White) from 256 Palette	
@@ -138,13 +119,15 @@ void ESCinit(void) {
 
 	// Default ColorStyle
 	ActTxtStyle.pColor = &ActTxtColor;
+}
+int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 
 	// Users Colors
 	char strSearch[STR_SMALL_SIZE];
 	char strGroupName[STR_SMALL_SIZE];
 	char strColorName[STR_SMALL_SIZE];
 
-	char strFile[] = "desktops.ini";
+	//char strFile[] = "desktops.ini";
 	int colorsGroupsCount = IniGetInt(strFile, "global.colors.GroupCount", 0);
 	int colorsModel = IniGetInt(strFile, "global.colors.ColorModel", 0);
 	
@@ -159,8 +142,7 @@ void ESCinit(void) {
 		colorsCountSum += colorsCount[i];
 	}
 	
-	EscColorSTRUCT *UserColor;
-	UserColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
+	userColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
 	
 	colorsCountSum = 0;
 
@@ -173,22 +155,22 @@ void ESCinit(void) {
 			IniGetStr(strFile, strSearch, "NoColorName", strColorName);
 
 			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
-			UserColor[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
+			userColor[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
 			sprintf(strSearch, "global.colors.group%d.%d.BackGround", i + 1, j + 1);
-			UserColor[colorsCountSum].bg.Color = IniGetInt(strFile, strSearch, 0);
+			userColor[colorsCountSum].bg.Color = IniGetInt(strFile, strSearch, 0);
 			sprintf(strSearch, "global.colors.group%d.%d.UnderLine", i + 1, j + 1);
-			UserColor[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
+			userColor[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
 			
-			UserColor[colorsCountSum].mode = colorsModel;
+			userColor[colorsCountSum].mode = colorsModel;
 
 			colorsCountSum++;
 			
-			printf("%04d. %s_%s (%03d:%03d): ",colorsCountSum, strGroupName, strColorName,UserColor[colorsCountSum - 1].fg.Color, UserColor[colorsCountSum - 1].bg.Color);
-			LocateX(40);
-			SetColorStyle(&UserColor[colorsCountSum - 1], 1);
+			printf("%04d. %s_%s: ",colorsCountSum, strGroupName, strColorName);
+			LocateX(30);
+			SetColorStyle(&userColor[colorsCountSum - 1], 1);
 			//printf("Res - Done\n");
 			//return;
-			printf("->   Some obligatory text :-)   <-");
+			printf("->   (%03d:%03d)   <-", userColor[colorsCountSum - 1].fg.Color, userColor[colorsCountSum - 1].bg.Color);
 			fflush(stdout);
 			ResFBU();
 			printf("\n");
@@ -199,19 +181,8 @@ void ESCinit(void) {
 	}
 
 	free(colorsCount);
-	free(UserColor);
 	
-	return;
-	for (int i = 0; i < 256; i++)
-	{
-		printf("%04d.",i);
-		SetFg255(i);
-		printf("->   Some obligatory text :-)   <-");
-		SetBg255(255 - i);
-		printf("-> %04d <-", 255 - i);
-		ResFBU();
-		printf("\n");
-	}
+	return colorsCountSum;
 }
 
 

@@ -62,14 +62,22 @@ int main() {
 		// set Terminal event(s) on your own function(s)
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
-		// 
+		// get your colors from INI-file
+		EscColorSTRUCT *userColor;
+		if (!ESCinitColors("desktops.ini", userColor)){
+			TermExit();
+			return -1;
+		}
+
+		// get your text-styles from INI-file
+		
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
 		TermCoreLoop(UserLoop);
 
 		// Set TUI_RunCoreLoop = 0 to reach this point
-
+		free(userColor);
 	// *************************************************************
 
 	if (!TermExit()){
