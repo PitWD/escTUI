@@ -19,17 +19,17 @@
 #include "AnsiESC.h"	
 
 
-void UserSecondChanged(){
+void UserSecondChanged(void){
 	static int i = 0;
 	i++;
 	TERM_RunCoreLoop = 0;
-	if (i < 1){
+	if (i < 4){
 		printf("Second\n");
 		TERM_RunCoreLoop = 1;
 	}
 }
 
-void UserLoop(){
+void UserLoop(void){
 	static int i = 0;
 	i++;
 	printf("Loop: %d\n", i);

@@ -147,7 +147,10 @@ void ESCinit(void) {
 	char strFile[] = "desktops.ini";
 	int colorsGroupsCount = IniGetInt(strFile, "global.colors.GroupCount", 0);
 	int colorsModel = IniGetInt(strFile, "global.colors.ColorModel", 0);
-	int colorsCount[colorsGroupsCount];
+	
+	int *colorsCount;
+	colorsCount = (int*)malloc(colorsGroupsCount * sizeof(int));
+	
 	int colorsCountSum = 0;
 
 	for (int i = 0; i < colorsGroupsCount; i++){
@@ -156,7 +159,9 @@ void ESCinit(void) {
 		colorsCountSum += colorsCount[i];
 	}
 	
-	EscColorSTRUCT UserColor[colorsCountSum];
+	EscColorSTRUCT *UserColor;
+	UserColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
+	
 	colorsCountSum = 0;
 
 	for (int i = 0; i < colorsGroupsCount; i++){
@@ -192,6 +197,10 @@ void ESCinit(void) {
 		printf("\n");
 		fflush(stdout);		
 	}
+
+	free(colorsCount);
+	free(UserColor);
+	
 	return;
 	for (int i = 0; i < 256; i++)
 	{

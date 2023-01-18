@@ -179,7 +179,7 @@ int TERM_MouseSelY = 0;                     // or same as MousePosX&Y = No selec
 int TERM_MouseButton = 0;				   // 1 = left, 2 = wheel, 4 = right
 
 // ESC27 Reading
-_Bool TermIsWaitingForESC27 = 0;
+int TermIsWaitingForESC27 = 0;
 
 // Signals
 int TERM_SignalCtrlC = 0;
@@ -1410,7 +1410,7 @@ void TermSignalHandler(int sig){
 		TERM_SignalCtrlC = 1;
 		#if __WIN32__ || _MSC_VER || __WIN64__
 			// Catch Ctrl-C again...
-			signal(SIGINT, SignalHandler);
+			signal(SIGINT, TermSignalHandler);
 		#endif
 	}
 	#if __WIN32__ || _MSC_VER || __WIN64__
@@ -2297,7 +2297,7 @@ void TermCoreLoop(void(*UserLoop)()){
 			// We did not received anything
 			// Time to check for RealTime things
 			#if __WIN32__ || _MSC_VER || __WIN64__
-				CheckOnTimeChange();
+				TimeCheckOnChange();
 			#else
 				if (TERM_SignalInterval){
 					TimeCheckOnChange();
@@ -2319,7 +2319,7 @@ void TermCoreLoop(void(*UserLoop)()){
 				if (!terminalSizeChangeCnt){
 					// Every xx idle-times check on ScreenSize
 					terminalSizeChangeCnt = Terminal_Size_Change_Trigger;
-					GetTerminalSize(3);
+					TermGetSize(3);
 					TermEventESC27(177);
 				}
 				else {

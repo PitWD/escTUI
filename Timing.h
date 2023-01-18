@@ -54,7 +54,7 @@ void InitTiming(void);
 void CheckOnTimeChange(void);
 
 // Events
-static void TimeDummyEvent(){
+static void TimeDummyEvent(void){
     volatile int i;
 }
 
