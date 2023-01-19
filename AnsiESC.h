@@ -265,6 +265,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			sprintf(strSearch, "global.txtStyles.group%d.%d.overline", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].overline = IniGetBool(strFile, strSearch, 0);
 
+			/*
 			sprintf(strSearch, "global.txtStyles.group%d.%d.ideoright", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].ideo_right = IniGetBool(strFile, strSearch, 0);
 
@@ -279,6 +280,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.ideostress", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].ideo_stress = IniGetBool(strFile, strSearch, 0);
+			*/
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.dblwidth", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].dbl_width = IniGetBool(strFile, strSearch, 0);
@@ -1077,6 +1079,7 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 			TxtOverline(pTxtStyle->overline);
 		}
 
+		/*
 		if ((pTxtStyle->ideo_right != ActTxtStyle.ideo_right) ||
 			(pTxtStyle->ideo_dbl_right != ActTxtStyle.ideo_dbl_right) ||
 			(pTxtStyle->ideo_left != ActTxtStyle.ideo_left) ||
@@ -1101,6 +1104,7 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 				TxtIdeoStress(1);
 			}
 		}
+		*/
 
 		if (pTxtStyle->font != ActTxtStyle.font) {
 			if (pTxtStyle->font > 10) {
