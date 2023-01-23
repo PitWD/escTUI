@@ -62,7 +62,14 @@ typedef struct TuiSizeSTRUCT{
 	int height;
 }TuiSizeSTRUCT;
 
-typedef struct TuiFrameStyleSTRUCT{
+typedef struct TuiAreaCaptionSTRUCT{
+	char *strCaption;
+	EscColorSTRUCT *color;
+	EscStyleSTRUCT *style;
+	int alignment;
+}TuiAreaCaptionSTRUCT;
+
+typedef struct TuiFrameSTRUCT{
 	// Frames-Lines
 	union Elemets{
 		uint8_t top 		:1;
@@ -91,19 +98,55 @@ typedef struct TuiFrameStyleSTRUCT{
 		uint8_t right 	:2;
 	}drawStyle;
 	
-};
+}TuiFrameSTRUCT;
 
 typedef struct TuiFlexAreaSTRUCT{
-	char *strCaption;
-	EscColorSTRUCT *colorCaption;
-	EscStyleSTRUCT *styleCaption;
-	int locationCaption;
+	TuiAreaCaptionSTRUCT caption;
 	TuiSizeSTRUCT size;
 
-	TuiFrameStyleSTRUCT
+	TuiFrameSTRUCT frameDef;
+
 };
 
-typedef struct TuiFixedAreasSTRUCT{
+typedef struct TuiFixedAreaSTRUCT{
+	// Which Areas are the dominant ones in the edges of the screen?
+	// 0 = the horizontal one
+	// 1 = the vertical one
+	int dominantTopLeft;
+	int dominantTopRight;
+	int dominantBottomRight;
+	int dominantBottomLeft;
+	// does the dominant one overlap the other, or just touch?
+	int overlapTopLeft;
+	int overlapTopRight;
+	int overlapBottomRight;
+	int overlapBottomLeft;
+
+	// Heights and Widths (0 disables the areas)
+	int heightTop;
+	int heightBottom;
+	int widthLeft;
+	int widthRight;
+	// Height of Top and Bottom Areas can grow when terminal-size shrinks below
+	// definition size to keep count of chars >= definition size.
+	int heightMaxTop;
+	int heightMaxBottom;
+	int charsMinTop;		// Not part of INI, get's calculated on INI read.
+	int charsMinBottom;		// Not part of INI, get's calculated on INI read.
+
+	TuiAreaCaptionSTRUCT captionTop;
+	TuiAreaCaptionSTRUCT captionBottom;
+	TuiAreaCaptionSTRUCT captionLeft;
+	TuiAreaCaptionSTRUCT captionRight;
+
+	TuiFrameSTRUCT frameTop;
+	TuiFrameSTRUCT frameTBottom;
+	TuiFrameSTRUCT frameLeft;
+	TuiFrameSTRUCT frameRight;
+	
+}TuiFixedAreaSTRUCT;
+
+typedef struct TuiFixedAreasSTRUCT_OLD{
 	// Area-Captions
 	char *strCaptionTop;
 	char *strCaptionBottom;
