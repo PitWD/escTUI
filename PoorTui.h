@@ -18,8 +18,174 @@
 
 #include "AnsiESC.h"
 
+/*
+DEC char to BoxDraw:
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(0"); // enable BoxDraw
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(B"); // disable BoxDraw
+		a b c d e f g h i j k l m n o p q r s t u v w x y z
+		▒ ␉ ␌ ␍ ␊ ° ± ␤ ␋ ┘ ┐ ┌ └ ┼ ⎺ ⎻ ─ ⎼ ⎽ ├ ┤ ┴ ┬ │ ≤ ≥
+
+If frames are overlapping, it's just a simple bitwise OR to get the
+right char for displaying the crossing point right.
+
+(00)  = n/a					(Top)
+(01)  = n/a					(Right)
+(02)  = n/a					(Bottom)
+(03) └ = Top-Right
+(04)  = n/a					(Left)
+(05) │ = Top-Bottom
+(06) ┌ = Bottom-Right
+(07) ├ = Top-Right-Bottom
+(08)  = n/a
+(09) ┘ = Top-Left
+(10) ─ = Right-Left
+(11) ┴ = Top-Left-Right
+(12) ┐ = Bottom-Left
+(13) ┤ = Top-Left-Bottom
+(14) ┬ = Bottom-Left-Right
+(15) ┼ = Top-Right-Bottom-Left
+*/
+	static char TuiDecBoxDraw[16][2] = {" ", " ", " ", "m", " ", "x",
+										"l", "t", " ", "j", "q", "v",
+										"k", "u", "w", "n" };
+
+typedef struct TuiSizeSTRUCT{
+	int leftDef;
+	int topDef;
+	int widthDef;
+	int heightDef;
+	int left;
+	int top;
+	int width;
+	int height;
+}TuiSizeSTRUCT;
+
+typedef struct TuiFrameStyleSTRUCT{
+	// Frames-Lines
+	union Elemets{
+		uint8_t top 		:1;
+		uint8_t bottom 		:1;
+		uint8_t left 		:1;
+		uint8_t right 		:1;
+		uint8_t topLeft 	:1;
+		uint8_t topRight 	:1;
+		uint8_t bottomLeft 	:1;
+		uint8_t bottomRight :1;
+	}elements;
+	EscColorSTRUCT *color;
+	EscStyleSTRUCT *style;
+	EscColorSTRUCT *innerColor;
+	EscStyleSTRUCT *innerStyle;
+	
+	// In overlapping cases
+		// 0 = we get ignored
+		// 1 = we're transparent
+		// 2 = we "bitwise OR"
+		// 3 = we "space" the frame with style of inner area
+	union DrawSTYLE{
+		uint8_t top 	:2;
+		uint8_t bottom 	:2;
+		uint8_t left 	:2;
+		uint8_t right 	:2;
+	}drawStyle;
+	
+};
+
+typedef struct TuiFlexAreaSTRUCT{
+	char *strCaption;
+	EscColorSTRUCT *colorCaption;
+	EscStyleSTRUCT *styleCaption;
+	int locationCaption;
+	TuiSizeSTRUCT size;
+
+	TuiFrameStyleSTRUCT
+};
+
+typedef struct TuiFixedAreasSTRUCT{
+	// Area-Captions
+	char *strCaptionTop;
+	char *strCaptionBottom;
+	char *strCaptionLeft;
+	char *strCaptionRight;
+	EscColorSTRUCT *colorTopCaption;
+	EscColorSTRUCT *colorBottomCaption;
+	EscColorSTRUCT *colorLeftCaption;
+	EscColorSTRUCT *colorRightCaption;
+	EscStyleSTRUCT *styleTopCaption;
+	EscStyleSTRUCT *styleBottomCaption;
+	EscStyleSTRUCT *styleLeftCaption;
+	EscStyleSTRUCT *styleRightCaption;
+	// 0 = don't, 1 = Left, 2 = Center, 3 = Right
+	int locationTopCaption;
+	int locationBottomCaption;
+	int locationLeftCaption;
+	int locationRightCaption;
+	
+	// Heights and Widths (0 disables the areas)
+	int heightTop;
+	int heightBottom;
+	int widthLeft;
+	int widthRight;
+	// Height of Top and Bottom Areas can grow when terminal-size shrinks below
+	// definition size to keep count of chars >= definition size.
+	int heightMaxTop;
+	int heightMaxBottom;
+	int charsMinTop;		// Not part of INI, get's calculated on INI read.
+	int charsMinBottom;		// Not part of INI, get's calculated on INI read.
+	
+	// Which Areas are the dominant ones in the edges of the screen?
+	// 0 = the horizontal one
+	// 1 = the vertical one
+	int dominantTopLeft;
+	int dominantTopRight;
+	int dominantBottomRight;
+	int dominantBottomLeft;
+	// does the dominant one overlap the other, or just touch?
+	int overlapTopLeft;
+	int overlapTopRight;
+	int overlapBottomRight;
+	int overlapBottomLeft;
+	
+	// Frames-Lines
+	// 0 = None, 1 = Top, 2 = Bottom, 4 = Left, 8 = Right
+	int linesTop;
+	int linesBottom;
+	int linesLeft;
+	int linesRight;
+	// Frames-Edges
+	// 0 = None, 1 = TopLeft, 2 = TopRight, 4 = BottomRight, 8 BottomLeft
+	int edgesTop;
+	int edgesBottom;
+	int edgesLeft;
+	int edgesRight;
+	
+	// Frames-Colors
+	EscColorSTRUCT *colorTop;
+	EscColorSTRUCT *colorBottom;
+	EscColorSTRUCT *colorLeft;
+	EscColorSTRUCT *colorRight;
+	// Frames-txtStyle
+	EscStyleSTRUCT *styleTop;
+	EscStyleSTRUCT *styleBottom;
+	EscStyleSTRUCT *styleLeft;
+	EscStyleSTRUCT *styleRight;
+	// Areas Inner-Color
+	EscColorSTRUCT *innerColorTop;
+	EscColorSTRUCT *innerColorBottom;
+	EscColorSTRUCT *innerColorLeft;
+	EscColorSTRUCT *innerColorRight;
+	// Areas Inner-Style
+	EscStyleSTRUCT *innerStyleTop;
+	EscStyleSTRUCT *innerStyleBottom;
+	EscStyleSTRUCT *innerStyleLeft;
+	EscStyleSTRUCT *innerStyleRight;
+	
+};
 
 /*
+
 typedef struct TabStyleSTRUCT {
     unsigned char Left;                                     // unscaled / unmoved start of Tab
     unsigned char Width;

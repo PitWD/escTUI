@@ -2681,5 +2681,18 @@ void InitUtf8(void) {
 }
 	
 
+struct UTFconst{
+	union directions{
+		// 1st Bit = single, 2nd = double, 3rd = bold
+		u_int32_t north	:3;		// 1 / 2 / 4
+		u_int32_t east 	:3;		// 8 / 16 / 32
+		u_int32_t south :3;		// 64 / 128 / 256
+		u_int32_t west 	:3;		// 512 / 1024 / 2048
+	};	
+};
 
+char TuiDecBoxDraw[16][2] = {" ", " ", " ", "m", " ", "x",
+							"l", "t", " ", "j", "q", "v",
+							"k", "u", "w", "n" };
 
+// []

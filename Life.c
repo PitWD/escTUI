@@ -76,6 +76,11 @@ int main() {
 			return -1;
 		}
 
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(0");
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(B");
+
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
 		TermCoreLoop(UserLoop);
