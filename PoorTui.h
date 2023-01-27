@@ -112,15 +112,21 @@ typedef struct TuiFixedAreaSTRUCT{
 	// Which Areas are the dominant ones in the edges of the screen?
 	// 0 = the horizontal one
 	// 1 = the vertical one
-	int dominantTopLeft;
-	int dominantTopRight;
-	int dominantBottomRight;
-	int dominantBottomLeft;
+	union Dominant{
+		uint8_t TopLeft		:1;
+		uint8_t TopRight	:1;
+		uint8_t BottomRight	:1;
+		uint8_t BottomLeft	:1;
+	}dominant;
+	
 	// does the dominant one overlap the other, or just touch?
-	int overlapTopLeft;
-	int overlapTopRight;
-	int overlapBottomRight;
-	int overlapBottomLeft;
+	union Overlap{
+		uint8_t overlapTopLeft		:1;
+		uint8_t overlapTopRight		:1;
+		uint8_t overlapBottomRight	:1;
+		uint8_t overlapBottomLeft	:1;
+	}overlap;
+	
 
 	// Heights and Widths (0 disables the areas)
 	int heightTop;
