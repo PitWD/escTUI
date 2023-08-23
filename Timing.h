@@ -92,6 +92,9 @@ void (*TimeHour6Changed)(void) = TimeDummyEvent;
 void (*TimeHour8Changed)(void) = TimeDummyEvent;
 void (*TimeHour12Changed)(void) = TimeDummyEvent;
 
+void (*TimeDiffChecked)(void) = TimeDummyEvent;
+void (*TimeDiffChanged)(void) = TimeDummyEvent;
+
 void TimeInitTime(void){
 /**
  * @brief   Setup Timing Constants / Variables / Settings
@@ -186,9 +189,13 @@ void TimeCheckOnChange(void){
     time(&lTimeNow);
     timeDiff = difftime(lTimeNow,lTimeLast);
 
+    TimeDiffChecked();
+
     // A Second (ore more) is over
     if (timeDiff){
 
+        TimeDiffChanged();
+        
         // THE Serial Time
         gTime = lTimeNow - lTimeShift;
 
