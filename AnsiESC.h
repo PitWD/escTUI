@@ -127,26 +127,30 @@ void ESCinit(void) {
 
 int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 
-	// Users Colors
+	// Users Colors - Helper
 	char strSearch[STR_SMALL_SIZE];
 	char strGroupName[STR_SMALL_SIZE];
 	char strColorName[STR_SMALL_SIZE];
 
-	//char strFile[] = "desktops.ini";
+	// count of color groups
 	int colorsGroupsCount = IniGetInt(strFile, "global.colors.GroupCount", 0);
+	// groups color model
 	int colorsModel = IniGetInt(strFile, "global.colors.ColorModel", 0);
 	
+	// memory to store count of colors in each group
 	int *colorsCount;
 	colorsCount = (int*)malloc(colorsGroupsCount * sizeof(int));
 	
 	int colorsCountSum = 0;
 
+	// read counts of colors and calc sum
 	for (int i = 0; i < colorsGroupsCount; i++){
 		sprintf(strSearch, "global.colors.group%d.Count", i + 1);
 		colorsCount[i] = IniGetInt(strFile, strSearch, 0);
 		colorsCountSum += colorsCount[i];
 	}
 	
+	// memory to store all colors
 	userColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
 	
 	colorsCountSum = 0;
@@ -299,7 +303,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			stylesCountSum++;
 			
 			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
-			LocateX(37);
+			LocateX(45);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
 			if (userTxtStyles[stylesCountSum - 1].dbl_height){
 				printf("\n");
