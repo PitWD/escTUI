@@ -15,6 +15,10 @@
 
 typedef struct {
 	int mode;			// 0 = B/W, 1 = 16, 2 = 255, 3 = RGB
+	char *groupName;
+	char *colorName;
+	int groupID;
+	int colorID;
 	union ColorFG {
 		uint32_t Color;	// !! 32 bit !!
 		uint8_t dummy;	// ZERO - Then direct int32 -> Hex will work for RGB
@@ -44,6 +48,10 @@ typedef struct {
 			[2] - [n] free for user
 	*/
 	// 5 int
+	char *fontName;
+	char *styleName;
+	int fontID;
+	int styleID;
 	uint32_t bold				:1;
 	uint32_t faint				:1;
 	uint32_t italic			:1;
@@ -77,12 +85,121 @@ typedef struct {
 	EscColorSTRUCT *pColor;
 } EscStyleSTRUCT; 
 
+// Collector for all strings of EscColor and EscStyle
+
 // Standard, but optional, ESC Sequences
 char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0" 
 
 // Actual Settings / States
 static EscStyleSTRUCT ActTxtStyle;
 static EscColorSTRUCT ActTxtColor;
+
+char *ESCstrToMem_ONE(const char *strIN, int reset){
+	// Add strIN to strArray
+	// return pointer on embedded strIN
+
+	static size_t lenArray = 0;
+	static char *strArray = NULL;
+	static size_t cnt = 0;
+	static char **strPointer = NULL;
+
+	if (reset){
+		// free memory
+		if (strArray){
+			free(strArray);
+			free(strPointer);
+			strArray = NULL;
+			strPointer = NULL;
+			lenArray = 0;
+			cnt = 0;
+		}
+	}
+	else{
+		// Put string to memory
+		size_t lenIN = strlen(strIN) + 1;
+		if (!lenArray){
+			// 1st call
+			lenArray = lenIN;
+			strArray = malloc(lenArray * sizeof(char));
+			strPointer = malloc(sizeof(strPointer));
+		}
+		else{
+			// another call
+
+
+
+			lenArray += lenIN;
+			strArray = realloc(strArray, lenArray * sizeof(char));
+			strPointer = realloc(strPointer, sizeof(strPointer) * cnt + 1);
+		}
+		strcpy(&strArray[lenArray - lenIN], strIN);
+		strPointer[cnt++] = &strArray[lenArray - lenIN];
+
+		printf("%s:", strIN);
+		printf("%s\n", strPointer[cnt - 1]);
+
+		//return &strArray[lenArray - lenIN];
+		return strPointer[cnt - 1];
+	}
+
+	printf("NULL\n");
+	return NULL;
+	
+}
+
+char *ESCstrToMem(const char *strIN, int reset){
+	// Add strIN to strArray
+	// return pointer on embedded strIN
+
+	static size_t lenArray = 0;
+	static char *strArray = NULL;
+	
+	// static size_t cnt = 0;
+	// static char **strPointer = NULL;
+
+	if (reset){
+		// free memory
+		if (strArray){
+			free(strArray);
+			// free(strPointer);
+			strArray = NULL;
+			// strPointer = NULL;
+			lenArray = 0;
+			// cnt = 0;
+		}
+	}
+	else{
+		// Put string to memory
+		size_t lenIN = strlen(strIN) + 1;
+		if (!lenArray){
+			// 1st call
+			lenArray = lenIN;
+			strArray = malloc(lenArray);
+			// strPointer = malloc(sizeof(strPointer));
+		}
+		else{
+			// another call
+
+
+
+			lenArray += lenIN;
+			strArray = realloc(strArray, lenArray);
+			// strPointer = realloc(strPointer, sizeof(strPointer) * cnt + 1);
+		}
+		strcpy(&strArray[lenArray - lenIN], strIN);
+		// strPointer[cnt++] = strArray[lenArray - lenIN];
+
+		printf("%s:", strIN);
+		printf("%s\n", &strArray[lenArray - lenIN]);
+
+		return &strArray[lenArray - lenIN];
+		//return strPointer[cnt - 1];
+	}
+
+	printf("NULL\n");
+	return NULL;
+	
+}
 
 void ResFBU(void);
 void SetColorStyle(EscColorSTRUCT *pColor, int set);
@@ -131,6 +248,7 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 	char strSearch[STR_SMALL_SIZE];
 	char strGroupName[STR_SMALL_SIZE];
 	char strColorName[STR_SMALL_SIZE];
+	char strHLP[STR_SMALL_SIZE];
 
 	// count of color groups
 	int colorsGroupsCount = IniGetInt(strFile, "global.colors.GroupCount", 0);
@@ -157,11 +275,18 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 
 	for (int i = 0; i < colorsGroupsCount; i++){
 		sprintf(strSearch, "global.colors.group%d.Name", i + 1);
-		IniGetStr(strFile, strSearch, "NoGroupName", strGroupName);
+		sprintf(strHLP, "Group%d", i + 1);
+		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < colorsCount[i]; j++){
 
+			userColor[colorsCountSum].groupName = ESCstrToMem(strGroupName, 0);
+			userColor[colorsCountSum].groupID = i + 1;
+
 			sprintf(strSearch, "global.colors.group%d.%d.Name", i + 1, j + 1);
-			IniGetStr(strFile, strSearch, "NoColorName", strColorName);
+			sprintf(strHLP, "Color%d", j + 1);
+			IniGetStr(strFile, strSearch, strHLP, strColorName);
+			userColor[colorsCountSum].colorName = ESCstrToMem(strColorName, 0);
+			userColor[colorsCountSum].colorID = j + 1;
 
 			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
 			userColor[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
@@ -171,10 +296,12 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 			userColor[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
 			
 			userColor[colorsCountSum].mode = colorsModel;
+			
+			printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
+			printf("%04d. %s_%s: ", colorsCountSum + 1, userColor[colorsCountSum].groupName, userColor[colorsCountSum].colorName);
 
 			colorsCountSum++;
-			
-			printf("%04d. %s_%s: ",colorsCountSum, strGroupName, strColorName);
+
 			LocateX(36);
 			SetColorStyle(&userColor[colorsCountSum - 1], 1);
 			//printf("Res - Done\n");
