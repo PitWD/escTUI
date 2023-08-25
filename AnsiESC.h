@@ -94,119 +94,48 @@ char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0"
 static EscStyleSTRUCT ActTxtStyle;
 static EscColorSTRUCT ActTxtColor;
 
-char *ESCstrToMem_ONE(const char *strIN, int reset){
-	// Add strIN to strArray
-	// return pointer on embedded strIN
-
-	static size_t lenArray = 0;
-	static char *strArray = NULL;
-	static size_t cnt = 0;
-	static char **strPointer = NULL;
-
-	if (reset){
-		// free memory
-		if (strArray){
-			free(strArray);
-			free(strPointer);
-			strArray = NULL;
-			strPointer = NULL;
-			lenArray = 0;
-			cnt = 0;
-		}
-	}
-	else{
-		// Put string to memory
-		size_t lenIN = strlen(strIN) + 1;
-		if (!lenArray){
-			// 1st call
-			lenArray = lenIN;
-			strArray = malloc(lenArray * sizeof(char));
-			strPointer = malloc(sizeof(strPointer));
-		}
-		else{
-			// another call
-
-
-
-			lenArray += lenIN;
-			strArray = realloc(strArray, lenArray * sizeof(char));
-			strPointer = realloc(strPointer, sizeof(strPointer) * cnt + 1);
-		}
-		strcpy(&strArray[lenArray - lenIN], strIN);
-		strPointer[cnt++] = &strArray[lenArray - lenIN];
-
-		printf("%s:", strIN);
-		printf("%s\n", strPointer[cnt - 1]);
-
-		//return &strArray[lenArray - lenIN];
-		return strPointer[cnt - 1];
-	}
-
-	printf("NULL\n");
-	return NULL;
-	
-}
 
 char *ESCstrToMem(const char *strIN, int reset){
 	// Add strIN to strArray
 	// return pointer on embedded strIN
 
-	static size_t lenArray = 0;
 	static char **strArray = NULL;
 	static size_t cnt = 0;
-	// static char **strPointer = NULL;
-
-	cnt++;
-	strArray = (char**)realloc(strArray, cnt * sizeof(char*));
-	strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
-	strcpy(strArray[cnt-1], strIN);
 	
-	return strArray[cnt-1];
-/*
 	if (reset){
-		// free memory
+		// free memory		
 		if (strArray){
+			for (size_t i = 0; i < cnt - 1; i++){
+				free(strArray[i]);
+				strArray[i] = NULL;
+			}
 			free(strArray);
-			// free(strPointer);
 			strArray = NULL;
-			// strPointer = NULL;
-			lenArray = 0;
-			// cnt = 0;
 		}
 	}
 	else{
 		// Put string to memory
-		size_t lenIN = strlen(strIN) + 1;
-		if (!cnt){
-			// 1st call
-			lenArray = lenIN;
-			strArray = malloc(lenArray);
-			// strcpy(strArray, strIN);
-			// strPointer = malloc(sizeof(strPointer));
+
+		if (cnt){
+			// look, if the string already exist...
+			for (size_t i = 0; i < cnt; i++){
+				if (!strcmp(strIN, strArray[i])){
+					// exist
+					return strArray[i];
+				}
+			}
 		}
-		else{
-			// another call
+		
 
+		cnt++;
+		strArray = (char**)realloc(strArray, cnt * sizeof(char*));
+		strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
+		strcpy(strArray[cnt-1], strIN);
+		return strArray[cnt-1];
 
-
-			lenArray += lenIN;
-			strArray = realloc(strArray, lenArray);
-			strcat(strArray, strIN);
-			// strPointer = realloc(strPointer, sizeof(strPointer) * cnt + 1);
-		}
-		strcpy(&strArray[lenArray - lenIN], strIN);
-		// strPointer[cnt++] = strArray[lenArray - lenIN];
-
-		printf("%s:", strIN);
-		printf("%s\n", strArray[lenArray - lenIN]);
-
-		return &strArray[lenArray - lenIN];
-		//return strPointer[cnt - 1];
 	}
 
-	printf("NULL\n");
 	return NULL;
-*/	
 }
 
 void ResFBU(void);
@@ -305,7 +234,7 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 			
 			userColor[colorsCountSum].mode = colorsModel;
 			
-			printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
+			// printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
 			printf("%04d. %s_%s: ", colorsCountSum + 1, userColor[colorsCountSum].groupName, userColor[colorsCountSum].colorName);
 
 			colorsCountSum++;
@@ -325,7 +254,6 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 	}
 
 	free(colorsCount);
-	
 	return colorsCountSum;
 }
 
@@ -335,6 +263,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 	char strSearch[STR_SMALL_SIZE];
 	char strGroupName[STR_SMALL_SIZE];
 	char strStyleName[STR_SMALL_SIZE];
+	char strHLP[STR_SMALL_SIZE];
 
 	//char strFile[] = "desktops.ini";
 	int stylesGroupsCount = IniGetInt(strFile, "global.txtStyles.GroupCount", 0);
@@ -356,11 +285,18 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 
 	for (int i = 0; i < stylesGroupsCount; i++){
 		sprintf(strSearch, "global.txtStyles.group%d.Name", i + 1);
-		IniGetStr(strFile, strSearch, "NoGroupName", strGroupName);
+		sprintf(strHLP, "Font%d", i + 1);
+		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < stylesCount[i]; j++){
 
+			userTxtStyles[stylesCountSum].fontName = ESCstrToMem(strGroupName, 0);
+			userTxtStyles[stylesCountSum].fontID = i + 1;
+
 			sprintf(strSearch, "global.txtStyles.group%d.%d.Name", i + 1, j + 1);
-			IniGetStr(strFile, strSearch, "NoFontName", strStyleName);
+			sprintf(strHLP, "Style%d", j + 1);
+			IniGetStr(strFile, strSearch, strHLP, strStyleName);
+			userTxtStyles[stylesCountSum].styleName = ESCstrToMem(strStyleName, 0);
+			userTxtStyles[stylesCountSum].styleID = j + 1;
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.bold", i + 1, j + 1);
 			userTxtStyles[stylesCountSum].bold = IniGetBool(strFile, strSearch, 0);
@@ -435,9 +371,10 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 
 			userTxtStyles[stylesCountSum].pColor = &ActTxtColor;
 
+			printf("%04d. %s_%s: ",stylesCountSum + 1, userTxtStyles[stylesCountSum].fontName, userTxtStyles[stylesCountSum].styleName);
+
 			stylesCountSum++;
-			
-			printf("%04d. %s_%s: ",stylesCountSum, strGroupName, strStyleName);
+
 			LocateX(45);
 			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
 			if (userTxtStyles[stylesCountSum - 1].dbl_height){

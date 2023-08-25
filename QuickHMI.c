@@ -95,6 +95,12 @@ int main() {
 		#endif
 	// *************************************************************
 
+	// Free stuff...
+	free(userColors);
+	free(userStyles);
+	// Free strings
+	ESCstrToMem("",1);
+
 	if (!TermExit()){
 		return -1;
 	}
