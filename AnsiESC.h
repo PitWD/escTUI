@@ -152,11 +152,17 @@ char *ESCstrToMem(const char *strIN, int reset){
 	// return pointer on embedded strIN
 
 	static size_t lenArray = 0;
-	static char *strArray = NULL;
-	
-	// static size_t cnt = 0;
+	static char **strArray = NULL;
+	static size_t cnt = 0;
 	// static char **strPointer = NULL;
 
+	cnt++;
+	strArray = (char**)realloc(strArray, cnt * sizeof(char*));
+	strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
+	strcpy(strArray[cnt-1], strIN);
+	
+	return strArray[cnt-1];
+/*
 	if (reset){
 		// free memory
 		if (strArray){
@@ -171,10 +177,11 @@ char *ESCstrToMem(const char *strIN, int reset){
 	else{
 		// Put string to memory
 		size_t lenIN = strlen(strIN) + 1;
-		if (!lenArray){
+		if (!cnt){
 			// 1st call
 			lenArray = lenIN;
 			strArray = malloc(lenArray);
+			// strcpy(strArray, strIN);
 			// strPointer = malloc(sizeof(strPointer));
 		}
 		else{
@@ -184,13 +191,14 @@ char *ESCstrToMem(const char *strIN, int reset){
 
 			lenArray += lenIN;
 			strArray = realloc(strArray, lenArray);
+			strcat(strArray, strIN);
 			// strPointer = realloc(strPointer, sizeof(strPointer) * cnt + 1);
 		}
 		strcpy(&strArray[lenArray - lenIN], strIN);
 		// strPointer[cnt++] = strArray[lenArray - lenIN];
 
 		printf("%s:", strIN);
-		printf("%s\n", &strArray[lenArray - lenIN]);
+		printf("%s\n", strArray[lenArray - lenIN]);
 
 		return &strArray[lenArray - lenIN];
 		//return strPointer[cnt - 1];
@@ -198,7 +206,7 @@ char *ESCstrToMem(const char *strIN, int reset){
 
 	printf("NULL\n");
 	return NULL;
-	
+*/	
 }
 
 void ResFBU(void);
