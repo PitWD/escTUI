@@ -63,18 +63,36 @@ int main() {
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
 		// get your colors from INI-file
-		EscColorSTRUCT *userColors;
-		if (!ESCinitColors("desktops.ini", userColors)){
+		EscColorSTRUCT *userColors = NULL;
+		int userColorsCnt = ESCinitColors("desktops.ini", &userColors);
+		if (!userColorsCnt){
 			TermExit();
 			return -1;
 		}
+		/*
+		for (size_t i = 0; i < userColorsCnt; i++){
+			SetColorStyle(&userColors[i], 1);
+			printf("%04d. %s.%s\n",i, userColors[i].groupName, userColors[i].colorName);
+		}
+		*/
+		
 
 		// get your text-styles from INI-file
-		EscStyleSTRUCT *userStyles;
-		if (!ESCinitTxtStyles("desktops.ini", userStyles)){
+		EscStyleSTRUCT *userStyles = NULL;
+		int userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
+		if (!userStylesCnt){
 			TermExit();
 			return -1;
 		}
+		/*
+		for (size_t i = 0; i < userStylesCnt; i++){
+			SetTxtStyle(&userStyles[i], 1);
+			printf("%04d. %s_%s\n", i, userStyles[i].fontName, userStyles[i].styleName );
+			SetTxtStyle(&userStyles[i], 0);
+		}
+		*/
+		
+		
 
 		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
 		printf("\x1B(0");
@@ -87,19 +105,16 @@ int main() {
 
 		// Set TUI_RunCoreLoop = 0 to reach this point
 
+		// Free color & font strings
+		ESCstrToMem("",1);
 		#if __APPLE__
 			// NO CLUE WHY freeing is messy
 		#else
-			// free(userColors);
-			// free(userStyles); WHY this free fails, too?
+			free(userColors);
+			free(userStyles);
 		#endif
 	// *************************************************************
 
-	// Free stuff...
-	free(userColors);
-	free(userStyles);
-	// Free strings
-	ESCstrToMem("",1);
 
 	if (!TermExit()){
 		return -1;

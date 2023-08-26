@@ -179,7 +179,7 @@ void ESCinit(void) {
 	ActTxtStyle.pColor = &ActTxtColor;
 }
 
-int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
+int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 
 	// Users Colors - Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -206,8 +206,8 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 	}
 	
 	// memory to store all colors
-	userColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
-	
+	*userColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
+
 	colorsCountSum = 0;
 
 	for (int i = 0; i < colorsGroupsCount; i++){
@@ -216,34 +216,34 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < colorsCount[i]; j++){
 
-			userColor[colorsCountSum].groupName = ESCstrToMem(strGroupName, 0);
-			userColor[colorsCountSum].groupID = i + 1;
+			(*userColor)[colorsCountSum].groupName = ESCstrToMem(strGroupName, 0);
+			(*userColor)[colorsCountSum].groupID = i + 1;
 
 			sprintf(strSearch, "global.colors.group%d.%d.Name", i + 1, j + 1);
 			sprintf(strHLP, "Color%d", j + 1);
 			IniGetStr(strFile, strSearch, strHLP, strColorName);
-			userColor[colorsCountSum].colorName = ESCstrToMem(strColorName, 0);
-			userColor[colorsCountSum].colorID = j + 1;
+			(*userColor)[colorsCountSum].colorName = ESCstrToMem(strColorName, 0);
+			(*userColor)[colorsCountSum].colorID = j + 1;
 
 			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
-			userColor[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
+			(*userColor)[colorsCountSum].fg.Color = IniGetInt(strFile, strSearch, 15);
 			sprintf(strSearch, "global.colors.group%d.%d.BackGround", i + 1, j + 1);
-			userColor[colorsCountSum].bg.Color = IniGetInt(strFile, strSearch, 0);
+			(*userColor)[colorsCountSum].bg.Color = IniGetInt(strFile, strSearch, 0);
 			sprintf(strSearch, "global.colors.group%d.%d.UnderLine", i + 1, j + 1);
-			userColor[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
+			(*userColor)[colorsCountSum].ul.Color = IniGetInt(strFile, strSearch, 15);
 			
-			userColor[colorsCountSum].mode = colorsModel;
+			(*userColor)[colorsCountSum].mode = colorsModel;
 			
 			// printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
-			printf("%04d. %s_%s: ", colorsCountSum + 1, userColor[colorsCountSum].groupName, userColor[colorsCountSum].colorName);
+			printf("%04d. %s_%s: ", colorsCountSum + 1, (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
 
 			colorsCountSum++;
 
 			LocateX(36);
-			SetColorStyle(&userColor[colorsCountSum - 1], 1);
+			SetColorStyle(&(*userColor)[colorsCountSum - 1], 1);
 			//printf("Res - Done\n");
 			//return;
-			printf("->   (%03d:%03d)   <-", userColor[colorsCountSum - 1].fg.Color, userColor[colorsCountSum - 1].bg.Color);
+			printf("->   (%03d:%03d)   <-", (*userColor)[colorsCountSum - 1].fg.Color, (*userColor)[colorsCountSum - 1].bg.Color);
 			fflush(stdout);
 			ResFBU();
 			printf("\n");
@@ -253,11 +253,19 @@ int ESCinitColors(char *strFile, EscColorSTRUCT *userColor){
 		fflush(stdout);		
 	}
 
+	/*
+	for (size_t i = 0; i < colorsCountSum; i++)
+	{
+		SetColorStyle(&(*userColor)[i], 1);
+		printf("%04d. %s.%s\n", i, (*userColor)[i].groupName, (*userColor)[i].colorName);
+	}
+	*/
+
 	free(colorsCount);
 	return colorsCountSum;
 }
 
-int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
+int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 
 	// Users Colors
 	char strSearch[STR_SMALL_SIZE];
@@ -279,7 +287,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 		stylesCountSum += stylesCount[i];
 	}
 	
-	userTxtStyles = (EscStyleSTRUCT*)malloc(stylesCountSum * sizeof(EscStyleSTRUCT));
+	*userTxtStyles = (EscStyleSTRUCT*)malloc(stylesCountSum * sizeof(EscStyleSTRUCT));
 	
 	stylesCountSum = 0;
 
@@ -289,56 +297,56 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < stylesCount[i]; j++){
 
-			userTxtStyles[stylesCountSum].fontName = ESCstrToMem(strGroupName, 0);
-			userTxtStyles[stylesCountSum].fontID = i + 1;
+			(*userTxtStyles)[stylesCountSum].fontName = ESCstrToMem(strGroupName, 0);
+			(*userTxtStyles)[stylesCountSum].fontID = i + 1;
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.Name", i + 1, j + 1);
 			sprintf(strHLP, "Style%d", j + 1);
 			IniGetStr(strFile, strSearch, strHLP, strStyleName);
-			userTxtStyles[stylesCountSum].styleName = ESCstrToMem(strStyleName, 0);
-			userTxtStyles[stylesCountSum].styleID = j + 1;
+			(*userTxtStyles)[stylesCountSum].styleName = ESCstrToMem(strStyleName, 0);
+			(*userTxtStyles)[stylesCountSum].styleID = j + 1;
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.bold", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].bold = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].bold = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.faint", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].faint = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].faint = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.italic", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].italic = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].italic = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.blink", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].blink = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].blink = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.fastblink", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].fast = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].fast = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.reverse", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].reverse = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].reverse = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.invisible", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].invisible = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].invisible = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.strikethrough", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].strike = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].strike = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.superscript", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].superscript = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].superscript = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.subscript", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].subscript = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].subscript = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.proportional", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].proportional = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].proportional = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.framed", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].framed = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].framed = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.encircled", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].encircled = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].encircled = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.overline", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].overline = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].overline = IniGetBool(strFile, strSearch, 0);
 
 			/*
 			sprintf(strSearch, "global.txtStyles.group%d.%d.ideoright", i + 1, j + 1);
@@ -358,33 +366,33 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 			*/
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.dblwidth", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].dbl_width = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].dbl_width = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.dblheight", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].dbl_height = IniGetBool(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].dbl_height = IniGetBool(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.font", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].font = IniGetInt(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].font = IniGetInt(strFile, strSearch, 0);
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.underline", i + 1, j + 1);
-			userTxtStyles[stylesCountSum].underline = IniGetInt(strFile, strSearch, 0);
+			(*userTxtStyles)[stylesCountSum].underline = IniGetInt(strFile, strSearch, 0);
 
-			userTxtStyles[stylesCountSum].pColor = &ActTxtColor;
+			(*userTxtStyles)[stylesCountSum].pColor = &ActTxtColor;
 
-			printf("%04d. %s_%s: ",stylesCountSum + 1, userTxtStyles[stylesCountSum].fontName, userTxtStyles[stylesCountSum].styleName);
+			printf("%04d. %s_%s: ",stylesCountSum + 1, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
 
 			stylesCountSum++;
 
 			LocateX(45);
-			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 1);
-			if (userTxtStyles[stylesCountSum - 1].dbl_height){
+			SetTxtStyle(&(*userTxtStyles)[stylesCountSum - 1], 1);
+			if ((*userTxtStyles)[stylesCountSum - 1].dbl_height){
 				printf("\n");
 				TxtDblTop(1);
 				printf("->   ( TEST )   <-\n");
 				TxtDblBot(1);
 				printf("->   ( TEST )   <-");
 			}
-			else if (userTxtStyles[stylesCountSum - 1].dbl_width){
+			else if ((*userTxtStyles)[stylesCountSum - 1].dbl_width){
 				printf("\n");
 				TxtDblWidth(1);
 				printf("->   ( TEST )   <-");				
@@ -393,7 +401,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT *userTxtStyles){
 				printf("->   ( TEST )   <-");
 			}					
 			fflush(stdout);
-			SetTxtStyle(&userTxtStyles[stylesCountSum - 1], 0);
+			SetTxtStyle(&(*userTxtStyles)[stylesCountSum - 1], 0);
 			printf("\n");
 			fflush(stdout);
 		}
