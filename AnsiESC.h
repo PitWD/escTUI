@@ -82,7 +82,7 @@ typedef struct {
 	uint32_t font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
 	uint32_t underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
 											// 6 = dashdot, 7 = dbl_curl, 8 = dbl_dot, 9 = dbl_dash
-	EscColorSTRUCT *pColor;
+	// EscColorSTRUCT *pColor;
 } EscStyleSTRUCT; 
 
 // Collector for all strings of EscColor and EscStyle
@@ -94,49 +94,9 @@ char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0"
 static EscStyleSTRUCT ActTxtStyle;
 static EscColorSTRUCT ActTxtColor;
 
-
-char *ESCstrToMem(const char *strIN, int reset){
-	// Add strIN to strArray
-	// return pointer on embedded strIN
-
-	static char **strArray = NULL;
-	static size_t cnt = 0;
-	
-	if (reset){
-		// free memory		
-		if (strArray){
-			for (size_t i = 0; i < cnt - 1; i++){
-				free(strArray[i]);
-				strArray[i] = NULL;
-			}
-			free(strArray);
-			strArray = NULL;
-		}
-	}
-	else{
-		// Put string to memory
-
-		if (cnt){
-			// look, if the string already exist...
-			for (size_t i = 0; i < cnt; i++){
-				if (!strcmp(strIN, strArray[i])){
-					// exist
-					return strArray[i];
-				}
-			}
-		}
-		
-
-		cnt++;
-		strArray = (char**)realloc(strArray, cnt * sizeof(char*));
-		strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
-		strcpy(strArray[cnt-1], strIN);
-		return strArray[cnt-1];
-
-	}
-
-	return NULL;
-}
+// global access on colors and styles
+EscColorSTRUCT *userColors = NULL;
+EscStyleSTRUCT *userStyles = NULL;
 
 void ResFBU(void);
 void SetColorStyle(EscColorSTRUCT *pColor, int set);
@@ -176,7 +136,7 @@ void ESCinit(void) {
 	}
 
 	// Default ColorStyle
-	ActTxtStyle.pColor = &ActTxtColor;
+	// ActTxtStyle.pColor = &ActTxtColor;
 }
 
 int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
@@ -216,13 +176,13 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < colorsCount[i]; j++){
 
-			(*userColor)[colorsCountSum].groupName = ESCstrToMem(strGroupName, 0);
+			(*userColor)[colorsCountSum].groupName = IniStrToMem(strGroupName, 0);
 			(*userColor)[colorsCountSum].groupID = i + 1;
 
 			sprintf(strSearch, "global.colors.group%d.%d.Name", i + 1, j + 1);
 			sprintf(strHLP, "Color%d", j + 1);
 			IniGetStr(strFile, strSearch, strHLP, strColorName);
-			(*userColor)[colorsCountSum].colorName = ESCstrToMem(strColorName, 0);
+			(*userColor)[colorsCountSum].colorName = IniStrToMem(strColorName, 0);
 			(*userColor)[colorsCountSum].colorID = j + 1;
 
 			sprintf(strSearch, "global.colors.group%d.%d.ForeGround", i + 1, j + 1);
@@ -235,7 +195,7 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 			(*userColor)[colorsCountSum].mode = colorsModel;
 			
 			// printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
-			printf("%04d. %s_%s: ", colorsCountSum + 1, (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
+			printf("%04d. %s_%s: ", colorsCountSum , (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
 
 			colorsCountSum++;
 
@@ -297,13 +257,13 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 		IniGetStr(strFile, strSearch, strHLP, strGroupName);
 		for (int j = 0; j < stylesCount[i]; j++){
 
-			(*userTxtStyles)[stylesCountSum].fontName = ESCstrToMem(strGroupName, 0);
+			(*userTxtStyles)[stylesCountSum].fontName = IniStrToMem(strGroupName, 0);
 			(*userTxtStyles)[stylesCountSum].fontID = i + 1;
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.Name", i + 1, j + 1);
 			sprintf(strHLP, "Style%d", j + 1);
 			IniGetStr(strFile, strSearch, strHLP, strStyleName);
-			(*userTxtStyles)[stylesCountSum].styleName = ESCstrToMem(strStyleName, 0);
+			(*userTxtStyles)[stylesCountSum].styleName = IniStrToMem(strStyleName, 0);
 			(*userTxtStyles)[stylesCountSum].styleID = j + 1;
 
 			sprintf(strSearch, "global.txtStyles.group%d.%d.bold", i + 1, j + 1);
@@ -377,7 +337,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 			sprintf(strSearch, "global.txtStyles.group%d.%d.underline", i + 1, j + 1);
 			(*userTxtStyles)[stylesCountSum].underline = IniGetInt(strFile, strSearch, 0);
 
-			(*userTxtStyles)[stylesCountSum].pColor = &ActTxtColor;
+		    // *userTxtStyles)[stylesCountSum].pColor = &ActTxtColor;
 
 			printf("%04d. %s_%s: ",stylesCountSum + 1, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
 
@@ -528,15 +488,15 @@ void ClrScrR(void) {
 
 // Reset To Default Colors
 void ResFg(void) {
-	ActTxtColor.fg.Color = 39; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
+	ActTxtColor.fg.Color = 39; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[39m");
 }
 void ResBg(void) {
-	ActTxtColor.bg.Color = 49; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
+	ActTxtColor.bg.Color = 49; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[49m");
 }
 void ResUl(void) {
-	ActTxtColor.ul.Color = 59; ActTxtColor.mode = 1; ActTxtStyle.pColor = &ActTxtColor;
+	ActTxtColor.ul.Color = 59; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
 	printf("\x1B[59m");
 }
 void ResFB(void) {
@@ -551,15 +511,18 @@ void ResFBU(void) {
 
 // Set 24 bit Color
 void SetFgRGB(int r, int g, int b) {
-	ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 3;
+	// ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 3;
+	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b;  ActTxtColor.mode = 3;
 	printf("\x1B[38;2;%d;%d;%dm", r, g, b);
 }
 void SetBgRGB(int r, int g, int b) {
-	ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 3;
+	// ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 3;
+	ActTxtColor.bg.R = r; ActTxtColor.bg.G = g; ActTxtColor.bg.B = b;  ActTxtColor.mode = 3;
 	printf("\x1B[48;2;%d;%d;%dm", r, g, b);
 }
 void SetUlRGB(int r, int g, int b) {
-	ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 3;
+	// ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 3;
+	ActTxtColor.ul.R = r; ActTxtColor.ul.G = g; ActTxtColor.ul.B = b; ActTxtColor.mode = 3;
 	printf("\x1B[58;2;%d;%d;%dm", r, g, b);
 }
 void SetFBrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB) {
@@ -574,15 +537,18 @@ void SetFBUrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, in
 
 // Set 256 Colors
 void SetFg255(int c) {
-	ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 2;
+	// ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 2;
+	ActTxtColor.fg.Color = c; ActTxtColor.mode = 2;
 	printf("\x1B[38;5;%dm", c);
 }
 void SetBg255(int c) {
-	ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 2;
+	// ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 2;
+	ActTxtColor.bg.Color = c; ActTxtColor.mode = 2;
 	printf("\x1B[48;5;%dm", c);
 }
 void SetUl255(int c) {
-	ActTxtStyle.pColor->ul.Color = c; ActTxtStyle.pColor->mode = 2;
+	// ActTxtStyle.pColor->ul.Color = c; ActTxtStyle.pColor->mode = 2;
+	ActTxtColor.ul.Color = c; ActTxtColor.mode = 2;
 	printf("\x1B[58;5;%dm", c);
 }
 void SetFB255(int fg, int bg) {
@@ -602,7 +568,8 @@ void SetFg16(int c){
 		ResFg();
 	}
 	else{
-		ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 0;
+		// ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 0;
+		ActTxtColor.fg.Color = c; ActTxtColor.mode = 0;
 		printf("\x1B[%dm", c);
 	}	
 }
@@ -612,7 +579,8 @@ void SetBg16(int c) {
 		ResBg();
 	}
 	else{
-		ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 0;
+		// ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 0;
+		ActTxtColor.bg.Color = c; ActTxtColor.mode = 0;
 		printf("\x1B[%dm", c);
 	}
 }
@@ -1197,7 +1165,7 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 			TxtFont(pTxtStyle->font);
 		}
 
-		SetColorStyle(pTxtStyle->pColor, 1);
+		// SetColorStyle(pTxtStyle->pColor, 1);
 		
 	}
 	else {

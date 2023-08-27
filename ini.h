@@ -10,6 +10,49 @@
 #define INI_TYPE_Bool 5
 #define INI_TYPE_Bin 6
 
+char *IniStrToMem(const char *strIN, int reset){
+	// Add strIN to strArray
+	// return pointer on embedded strIN
+
+	static char **strArray = NULL;
+	static size_t cnt = 0;
+	
+	if (reset){
+		// free memory		
+		if (strArray){
+			for (size_t i = 0; i < cnt - 1; i++){
+				free(strArray[i]);
+				strArray[i] = NULL;
+			}
+			free(strArray);
+			strArray = NULL;
+		}
+	}
+	else{
+		// Put string to memory
+
+		if (cnt){
+			// look, if the string already exist...
+			for (size_t i = 0; i < cnt; i++){
+				if (!strcmp(strIN, strArray[i])){
+					// exist
+					return strArray[i];
+				}
+			}
+		}
+		
+
+		cnt++;
+		strArray = (char**)realloc(strArray, cnt * sizeof(char*));
+		strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
+		strcpy(strArray[cnt-1], strIN);
+		return strArray[cnt-1];
+
+	}
+
+	return NULL;
+}
+
 void IniTrimRemark (char *strIN){
     // Remove all trailing text after
     // the first non "" encapsulated #

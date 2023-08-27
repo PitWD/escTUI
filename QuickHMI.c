@@ -15,9 +15,10 @@
 
 #define LifeVersion "1.00pa"
 
-#include "Terminal.h"	
-#include "AnsiESC.h"	
+// #include "Terminal.h"	
+// #include "AnsiESC.h"	
 
+#include "PoorTui.h"
 
 void UserSecondChanged(void){
 	static int i = 0;
@@ -63,7 +64,6 @@ int main() {
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
 		// get your colors from INI-file
-		EscColorSTRUCT *userColors = NULL;
 		int userColorsCnt = ESCinitColors("desktops.ini", &userColors);
 		if (!userColorsCnt){
 			TermExit();
@@ -76,9 +76,7 @@ int main() {
 		}
 		*/
 		
-
-		// get your text-styles from INI-file
-		EscStyleSTRUCT *userStyles = NULL;
+		// get your styles from INI-file
 		int userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
 		if (!userStylesCnt){
 			TermExit();
@@ -92,6 +90,9 @@ int main() {
 		}
 		*/
 		
+		StrTrimWS_R(gStrRunTime);
+		StrTrimWS_R(gStrTime);
+		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
 		
 
 		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
@@ -106,12 +107,13 @@ int main() {
 		// Set TUI_RunCoreLoop = 0 to reach this point
 
 		// Free color & font strings
-		ESCstrToMem("",1);
+		IniStrToMem("",1);
 		#if __APPLE__
 			// NO CLUE WHY freeing is messy
 		#else
 			free(userColors);
 			free(userStyles);
+			free(userHeaders);
 		#endif
 	// *************************************************************
 

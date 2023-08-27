@@ -16,6 +16,7 @@
            So, do not distribute binaries/hexdumps without being in contact with me!
 */
 
+#include "Terminal.h"
 #include "AnsiESC.h"
 
 /*
@@ -57,9 +58,13 @@ typedef struct{
 	char *caption;
 	int txtColor;
 	int txtStyle;
-	int printRunTime :1;
-	int printRealTime :1;
+	int timeColor;
+	int timeStyle;
+	uint8_t printRunTime :1;
+	uint8_t printRealTime :1;
 }TuiHeaderSTRUCT;
+// global access on headers
+TuiHeaderSTRUCT *userHeaders = NULL;
 
 typedef struct{
 	int txtColor;
@@ -68,32 +73,138 @@ typedef struct{
 	int selectStyle;
 	int disabledColor;
 	int disabledStyle;
-	int pos1st;
-	int posCnt;
-	int printRunTime :1;
-	int printRealTime :1;
+	int keyColor;
+	int keyStyle;
+	int posCnt;				// count of sub-positions
+	uint8_t printRunTime :1;
+	uint8_t printRealTime :1;
 }TuiMenuDefSTRUCT;
 
 typedef struct{
 	char *caption;
+	TuiMenuDefSTRUCT *definition;
 	int keyCode;
 	int enabled;
-	int positions;
-	int pos1st;
-	int posCnt;
+	int posCnt;						// count of sub-positions
+	int pos1st;						// id of 1st sub-position
+	uint8_t selected :1;			// if position is selected
+	uint8_t isOption :1;
+	uint8_t isCheck :1;
+	uint8_t	activated :1;			// if position is a check or option and active
 }TuiMenuPosSTRUCT;
 
 typedef struct{
 	int header :1;
 	int topMenu :1;
-	int botMenu :1;
-	int footer :1;
+	int bottomMenu :1;
 	int leftMenu :1;
 	int rightMenu :1;
-	int keyStyle;
 }TuiDesktopDefSTRUCT;
 
+void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
+	
+	// Width to render
+	if (!width){
+		width = TERM_ScreenWidth;
+		posX = 1;
+	}
+	// Where to render
+	if (posX && posY){
+		Locate(posX, posY);
+	}
+	else if (posX){
+		LocateX(posX);
+	}
+	
 
+	if (!justRefresh){
+		// Style & Color
+		SetColorStyle(&userColors[userHeaders[headerID].txtColor - 1], 1);
+		SetTxtStyle(&userStyles[userHeaders[headerID].txtStyle - 1], 1);
+		StrPrintCentered(userHeaders[headerID].caption, width);
+	}
+	else{
+		// we just refresh time(s)
+		CursorRight(width);
+	}
+
+	if (userHeaders[headerID].printRealTime || userHeaders[headerID].printRunTime){
+		// Set style & color of times
+		SetColorStyle(&userColors[userHeaders[headerID].timeColor - 1], 1);
+		SetTxtStyle(&userStyles[userHeaders[headerID].timeStyle - 1], 1);
+	}
+	
+	// Do we print the Realtime (all time right alignment)
+	if (userHeaders[headerID].printRealTime){
+		// 01.01.2023 00:00:00
+		CursorLeft(19);
+		printf("%s %s", gStrDate, gStrTime);
+		CursorRight(1);
+	}
+	// Do we print the RunTime
+	if (userHeaders[headerID].printRunTime){
+		// 00000d 00:00:00
+		if (userHeaders[headerID].printRealTime){
+			// left alignment, cause RealTime already exist
+			CursorLeft(width - 2);
+		}
+		else{
+			// right alignment
+			CursorLeft(15);
+		}
+		printf("%s", gStrRunTime);
+	}
+	
+	
+}
+
+int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
+
+	// User Header - Helper
+	char strSearch[STR_SMALL_SIZE];
+	char strHeaderCaption[STR_SMALL_SIZE];
+	char strHLP[STR_SMALL_SIZE];
+
+	// count of headers
+	int headersCount = IniGetInt(strFile, "global.header.HeaderCount", 0);
+
+	// memory to store all header
+	*userHeader = (TuiHeaderSTRUCT*)malloc(headersCount * sizeof(TuiHeaderSTRUCT));
+
+	for (size_t i = 0; i < headersCount; i++){
+		// Caption
+		sprintf(strSearch, "global.header.%d.Caption", i + 1);
+		sprintf(strHLP, "Header%d", i + 1);
+		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
+		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
+		// TextColor 
+		sprintf(strSearch, "global.header.%d.TextColor", i + 1);
+		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		// TextStyle 
+		sprintf(strSearch, "global.header.%d.TextStyle", i + 1);
+		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		// TimeColor 
+		sprintf(strSearch, "global.header.%d.TimeColor", i + 1);
+		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		// TimeStyle 
+		sprintf(strSearch, "global.header.%d.TimeStyle", i + 1);
+		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		// PrintRunTime 
+		sprintf(strSearch, "global.header.%d.PrintRunTime", i + 1);
+		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		// PrintRealTime 
+		sprintf(strSearch, "global.header.%d.PrintRealTime", i + 1);
+		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+
+		TUIrenderHeader(0,0,0,i,0);
+		ResFBU();
+		printf("\n");
+		fflush(stdout);
+
+	}
+	printf("\n");
+	
+}
 
 /*
 										EOF - Detailed Description

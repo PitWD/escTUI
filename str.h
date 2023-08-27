@@ -261,3 +261,19 @@ void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
 #define StrLong2Bin(lValue, strResult) StrLongToBin((unsigned long)lValue, strResult, 0)
 #define StrInt2Bin(iValue, strResult) StrLongToBin((unsigned long)iValue, strResult, 8 * sizeof(int))
 #define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned long)bValue, strResult, 8)
+
+void StrPrintChars(char charIN, int count){
+    while (count--){
+        printf("%c", charIN);
+    }
+}
+#define StrPrintSpaces(count) StrPrintChars(' ', count)
+
+void StrPrintCentered(char *strIN, int len){
+
+    int spaces = (len - strlen(strIN)) / 2;
+    StrPrintSpaces(spaces);
+    printf("%s", strIN);
+    StrPrintSpaces(len - strlen(strIN) - spaces);
+
+}
