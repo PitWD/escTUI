@@ -94,6 +94,8 @@ int main() {
 		StrTrimWS_R(gStrTime);
 		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
 		
+		//printf("Und hier...\n");
+		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenuDefs);
 
 		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
 		printf("\x1B(0");

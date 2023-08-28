@@ -182,7 +182,7 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 	// memory to store all header
 	*userHeader = (TuiHeaderSTRUCT*)malloc(headersCount * sizeof(TuiHeaderSTRUCT));
 
-	for (size_t i = 0; i < headersCount; i++){
+	for (int i = 0; i < headersCount; i++){
 		// Caption
 		sprintf(strSearch, "global.header.%d.Caption", i + 1);
 		sprintf(strHLP, "Header%d", i + 1);
@@ -223,7 +223,7 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiMenuDefSTRUCT *definition, int positions){
 
 	static struct TuiMenuPosSTRUCT **menuPos = NULL;
-	static size_t cnt = 0;
+	static int cnt = 0;
 
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -281,6 +281,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiM
 			sprintf(strSearch, "%s%d.", strPath, j);
 			(*menuPos)[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, (*menuPos)[pos1].posCnt);
 		}
+
+		printf("%04d %s : %s\n", cnt, strPath, (*menuPos)[pos1].caption);
 	}
 	
 
@@ -294,44 +296,48 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
 
-	sprintf(strSearch, "%s%s", strPath, "count");
+	sprintf(strSearch, "%s.%s", strPath, "Count");
 	int menusCnt = IniGetInt(strFile, strSearch, 0);
 
 	*menu = (struct TuiMenuDefSTRUCT*)malloc(menusCnt * sizeof(struct TuiMenuDefSTRUCT));
 
 	// Menu Definition Values
-	for (size_t i = 0; i < menusCnt; i++){
-		sprintf(strSearch, "%s%d.TextColor", strPath, i + 1);
+	for (int i = 0; i < menusCnt; i++){
+		sprintf(strSearch, "%s.%d.TextColor", strPath, i + 1);
 		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.TextStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TextStyle", strPath, i + 1);
 		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.SelectColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectColor", strPath, i + 1);
 		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.SelectStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectStyle", strPath, i + 1);
 		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.DisabledColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.DisabledColor", strPath, i + 1);
 		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.DisabledStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, i + 1);
 		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.KeyColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.KeyColor", strPath, i + 1);
 		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.KeyStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.KeyStyle", strPath, i + 1);
 		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.TimeColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TimeColor", strPath, i + 1);
 		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.TimeStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TimeStyle", strPath, i + 1);
 		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.PrintRunTime", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, i + 1);
 		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.PrintRealTime", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, i + 1);
 		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.Positions", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
 		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
-		
+
+printf("pre1st\n");		
 		// Add positions
+		sprintf(strSearch, "%s.%d.", strPath, i + 1);
 		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);		
 
 	}
+
+	return menusCnt;
 	
 }
 
