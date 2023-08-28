@@ -114,6 +114,10 @@ int main() {
 			free(userColors);
 			free(userStyles);
 			free(userHeaders);
+			free(userTopMenuDefs);
+			free(userBotMenuDefs);
+			free(userRightMenuDefs);
+			free(userLeftMenuDefs);
 		#endif
 	// *************************************************************
 

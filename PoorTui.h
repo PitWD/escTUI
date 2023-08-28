@@ -66,7 +66,10 @@ typedef struct{
 // global access on headers
 TuiHeaderSTRUCT *userHeaders = NULL;
 
-typedef struct{
+struct TuiMenuDefSTRUCT;
+struct TuiMenuPosSTRUCT;
+
+struct TuiMenuDefSTRUCT{
 	int txtColor;
 	int txtStyle;
 	int selectColor;
@@ -75,18 +78,28 @@ typedef struct{
 	int disabledStyle;
 	int keyColor;
 	int keyStyle;
-	int posCnt;				// count of sub-positions
+	int timeColor;
+	int timeStyle;
+	int posCnt;						// count of sub-positions
+	struct TuiMenuPosSTRUCT *pos1st;		
 	uint8_t printRunTime :1;
 	uint8_t printRealTime :1;
-}TuiMenuDefSTRUCT;
+};
+// global access on Menu Definitions
+struct TuiMenuDefSTRUCT *userTopMenuDefs = NULL;
+struct TuiMenuDefSTRUCT *userBotMenuDefs = NULL;
+struct TuiMenuDefSTRUCT *userLeftMenuDefs = NULL;
+struct TuiMenuDefSTRUCT *userRightMenuDefs = NULL;
 
-typedef struct{
+struct TuiMenuPosSTRUCT{
 	char *caption;
-	TuiMenuDefSTRUCT *definition;
+	struct TuiMenuDefSTRUCT *definition;
 	int keyCode;
 	int enabled;
 	int posCnt;						// count of sub-positions
-	int pos1st;						// id of 1st sub-position
+	struct TuiMenuPosSTRUCT *nextPos;		// on same level
+	struct TuiMenuPosSTRUCT *prevPos;		// on same level
+	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
 	uint8_t selected :1;			// if position is selected
 	uint8_t isOption :1;
 	uint8_t isCheck :1;
@@ -153,9 +166,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 			CursorLeft(15);
 		}
 		printf("%s", gStrRunTime);
-	}
-	
-	
+	}	
 }
 
 int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
@@ -196,6 +207,7 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 		sprintf(strSearch, "global.header.%d.PrintRealTime", i + 1);
 		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
 
+		printf("%04d Header:\n", i +1);
 		TUIrenderHeader(0,0,0,i,0);
 		ResFBU();
 		printf("\n");
@@ -203,8 +215,126 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 
 	}
 	printf("\n");
+
+	return headersCount;
 	
 }
+
+struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiMenuDefSTRUCT *definition, int positions){
+
+	static struct TuiMenuPosSTRUCT **menuPos = NULL;
+	static size_t cnt = 0;
+
+	// Helper
+	char strSearch[STR_SMALL_SIZE];
+	char strHLP[STR_SMALL_SIZE];
+	char strPos1[STR_SMALL_SIZE];
+
+	
+	int posReturn = cnt;	// save for return
+
+	for (int i = 0; i < positions; i++){
+		
+		int j = i + 1;	// User to Memory indexing
+
+		// Add mem for new position
+		cnt++;
+		int pos1 = cnt - 1;
+		menuPos = (struct TuiMenuPosSTRUCT**)realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT*));
+		menuPos[pos1] = (struct TuiMenuPosSTRUCT*)malloc(sizeof(struct TuiMenuPosSTRUCT));
+
+		sprintf(strSearch, "%s%d.Text", strPath, j);
+		sprintf(strHLP, "%s%d", strPath, j);
+		IniGetStr(strFile, strSearch, strHLP, strPos1);
+		(*menuPos)[pos1].caption = IniStrToMem(strPos1, 0);
+
+		sprintf(strSearch, "%s%d.Enabled", strPath, j);
+		(*menuPos)[pos1].posCnt = IniGetBool(strFile, strSearch, 1);
+		sprintf(strSearch, "%s%d.isCheck", strPath, j);
+		(*menuPos)[pos1].isCheck = IniGetBool(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.isOption", strPath, j);
+		(*menuPos)[pos1].isOption = IniGetBool(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.isActivated", strPath, j);
+		(*menuPos)[pos1].activated = IniGetBool(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.Positions", strPath, j);
+		(*menuPos)[pos1].posCnt = IniGetInt(strFile, strSearch, 0);
+		
+		// already known stuff
+		(*menuPos)[pos1].definition = definition;
+		(*menuPos)[pos1].nextPos = NULL;
+		(*menuPos)[pos1].prevPos = NULL;
+		(*menuPos)[pos1].pos1st = NULL;
+		
+		// if not 1st pos, we have to set...
+		if (i){
+			// actual pos2 is nextPos of prevPos
+			(*menuPos)[pos1 - 1].nextPos = menuPos[pos1];
+			// prevPos is prevPos...
+			(*menuPos)[pos1].prevPos = menuPos[pos1 - 1];
+		}
+		// clean temporary vals of this position
+		(*menuPos)[pos1].activated = 0;
+		(*menuPos)[pos1].selected = 0;
+		// extract key
+
+		if ((*menuPos)[pos1].posCnt){
+			sprintf(strSearch, "%s%d.", strPath, j);
+			(*menuPos)[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, (*menuPos)[pos1].posCnt);
+		}
+	}
+	
+
+	return menuPos[posReturn];
+		
+}
+
+// "global.TopMenu."
+int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu){
+
+	// Helper
+	char strSearch[STR_SMALL_SIZE];
+
+	sprintf(strSearch, "%s%s", strPath, "count");
+	int menusCnt = IniGetInt(strFile, strSearch, 0);
+
+	*menu = (struct TuiMenuDefSTRUCT*)malloc(menusCnt * sizeof(struct TuiMenuDefSTRUCT));
+
+	// Menu Definition Values
+	for (size_t i = 0; i < menusCnt; i++){
+		sprintf(strSearch, "%s%d.TextColor", strPath, i + 1);
+		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.TextStyle", strPath, i + 1);
+		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.SelectColor", strPath, i + 1);
+		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.SelectStyle", strPath, i + 1);
+		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.DisabledColor", strPath, i + 1);
+		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.DisabledStyle", strPath, i + 1);
+		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.KeyColor", strPath, i + 1);
+		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.KeyStyle", strPath, i + 1);
+		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.TimeColor", strPath, i + 1);
+		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.TimeStyle", strPath, i + 1);
+		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.PrintRunTime", strPath, i + 1);
+		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.PrintRealTime", strPath, i + 1);
+		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		sprintf(strSearch, "%s%d.Positions", strPath, i + 1);
+		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
+		
+		// Add positions
+		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);		
+
+	}
+	
+}
+
 
 /*
 										EOF - Detailed Description
