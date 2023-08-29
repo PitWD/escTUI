@@ -295,12 +295,17 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     int isToken = 0;
 
     int insertLine = 0;
+    int allowIncrease = 1;
 
     char strIN[STR_SMALL_SIZE];
     while (fgets(strIN, STR_SMALL_SIZE, file) != NULL) {
 
         cntLine++;
 
+        if (allowIncrease){
+            insertLine++;
+        }
+    
         // Save original line for return
         strcpy(strSearch, strIN);
 
@@ -309,6 +314,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
 
         // Check if line is below actual token-level
         if (strIN[0] == '['){
+            allowIncrease = 0;
             if (actToken){
                 if (strIN[actToken] != '.'){
                     // Broken Token
@@ -333,7 +339,8 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
                     break;
                 }
                 else{
-                    insertLine = cntLine + 1;
+                    insertLine = cntLine;
+                    allowIncrease = 1;
                     actToken++;
                 }                        
             }               
@@ -915,7 +922,9 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
 
         if (!imInside){
             imInside = 1;
-            r = IniCreateMissingValue(fileName, strSearch, strDefault, typValue, missingToken, insertLine);
+            char strAutoValue[STR_SMALL_SIZE];
+            sprintf(strAutoValue, "%s #!", strDefault);
+            r = IniCreateMissingValue(fileName, strSearch, strAutoValue, typValue, missingToken, insertLine);
             // ReRead as it's written...
             r = IniGetValue(fileName, strSearch, strDefault, typValue, strReturn);
         }
