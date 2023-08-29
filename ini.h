@@ -245,7 +245,7 @@ int IniGetTokens(char *strIN, char **tokens){
     count--;
 
     // remove "[." and "]" from the Value token
-    if(count){
+    if(count > 0){
         StrTrimCnt_LR(tokens[count], count + 1, 1);
     }
     count++;
@@ -343,10 +343,15 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     
     fclose(file);
 
+    /*
     cntTokens++;
     for (actToken = 0; actToken < cntTokens; actToken++){
         free(strTokens[actToken]);
+        strTokens[actToken] = NULL;
     }
+    */
+
+    free(*strTokens);
 
     return r;
 } 
@@ -756,7 +761,9 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
         if (r > 0){
             sprintf(strWork, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
             // Check & normalize value
+            //printf("work: %s = %s / ", strWork, strValue);
             r = IniChangeValueLine(strWork, strValue, typValue);
+            //printf("%s\n",strWork);
             if (r > -1){
                 IniInsertLine(fileName, strWork, insertLine);
             }
@@ -764,9 +771,13 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
     }
 
     // Free the allocated memory
-    for (i = 0; i < cntToken + 1; i++){
+    /*
+    for (i = 0; i < cntToken; i++){
         free(tokens[i]);
+        tokens[i] = NULL;
     }
+    */
+    free(*tokens);
 
     return r;
 } 
@@ -873,7 +884,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
                         sprintf(strReturn, "%ld", (long)dVal);
                         break;
                     case INI_TYPE_Bool:
-                        if (dVal != 0){
+                        if (dVal > 0.1){
                             strcpy(strReturn, "true");
                         } 
                         else{
@@ -907,15 +918,16 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         }
         else{
             // WTF - kind of a File-Error ?!?!
+
             strcpy(strReturn, strSearch);
             r = -1;
         }
-        imInside = 0;
     }
     else{
         // FileError
     }
-
+    
+    imInside = 0;
     return r;     
 }
 #define IniGet(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_AsItIs, strReturn)
@@ -923,11 +935,13 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
 long IniGetLong(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     sprintf(strValue, "%ld", defLong);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Int, strValue);
-    long valLong = strtol(strValue, &pEnd, 10);
+
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Int, strReturn);
+    long valLong = strtol(strReturn, &pEnd, 10);
     if (*pEnd == '\0'){
         return valLong;
     }
@@ -937,11 +951,12 @@ long IniGetLong(const char *fileName, const char *strSearch, const long defLong)
 double IniGetDouble(const char *fileName, const char *strSearch, const double defDouble){
 
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     sprintf(strValue, "%.8f", defDouble);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Float, strValue);
-    double valDouble = strtod(strValue, &pEnd);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Float, strReturn);
+    double valDouble = strtod(strReturn, &pEnd);
     if (*pEnd == '\0'){
         return valDouble;
     }
@@ -951,11 +966,12 @@ double IniGetDouble(const char *fileName, const char *strSearch, const double de
 long IniGetLongHex(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     sprintf(strValue, "%#lx", defLong);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strValue);
-    long valLong = strtol(strValue, &pEnd, 16);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strReturn);
+    long valLong = strtol(strReturn, &pEnd, 16);
     if (*pEnd == '\0'){
         return valLong;
     }
@@ -965,6 +981,7 @@ long IniGetLongHex(const char *fileName, const char *strSearch, const long defLo
 int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
 
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     if (defBool){
@@ -975,9 +992,9 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
     }
     
     
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bool, strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bool, strReturn);
 
-    if(strncasecmp(strValue, "true", 4) == 0){
+    if(strncasecmp(strReturn, "true", 4) == 0){
         // True
         return 1;
     }
@@ -988,28 +1005,31 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
 long IniGetLongBin(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
 
     StrLong2Bin(defLong, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
-    return StrBin2Long(strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    return StrBin2Long(strReturn);
     
 }
 int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
     
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
 
     StrInt2Bin(defInt, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
-    return StrBin2Int(strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    return StrBin2Int(strReturn);
     
 }
 unsigned char IniGetByteBin(const char *fileName, const char *strSearch, unsigned char defByte){
     
     char strValue[STR_SMALL_SIZE];
+    char strReturn[STR_SMALL_SIZE];
 
     StrByte2Bin(defByte, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strValue);
-    return StrBin2Byte(strValue);
+    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    return StrBin2Byte(strReturn);
     
 }
 

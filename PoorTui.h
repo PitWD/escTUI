@@ -100,10 +100,10 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenuPosSTRUCT *nextPos;		// on same level
 	struct TuiMenuPosSTRUCT *prevPos;		// on same level
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
-	uint8_t selected :1;			// if position is selected
-	uint8_t isOption :1;
-	uint8_t isCheck :1;
-	uint8_t	activated :1;			// if position is a check or option and active
+	int selected :1;			// if position is selected
+	int isOption :1;
+	int isCheck :1;
+	int	activated :1;			// if position is a check or option and active
 }TuiMenuPosSTRUCT;
 
 typedef struct{
@@ -220,7 +220,7 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 	
 }
 
-struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiMenuDefSTRUCT *definition, int positions){
+struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, const char *strPath, struct TuiMenuDefSTRUCT *definition, const int positions){
 
 	static struct TuiMenuPosSTRUCT **menuPos = NULL;
 	static int cnt = 0;
@@ -237,33 +237,46 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiM
 		
 		int j = i + 1;	// User to Memory indexing
 
+		//printf("preAlloc\n");
 		// Add mem for new position
 		cnt++;
 		int pos1 = cnt - 1;
 		menuPos = (struct TuiMenuPosSTRUCT**)realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT*));
 		menuPos[pos1] = (struct TuiMenuPosSTRUCT*)malloc(sizeof(struct TuiMenuPosSTRUCT));
+		//printf("afterAlloc\n");
 
 		sprintf(strSearch, "%s%d.Text", strPath, j);
 		sprintf(strHLP, "%s%d", strPath, j);
 		IniGetStr(strFile, strSearch, strHLP, strPos1);
 		(*menuPos)[pos1].caption = IniStrToMem(strPos1, 0);
 
+//printf("afterText: %s\n", (*menuPos)[pos1].caption);
+//fflush(stdout);
+
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
-		(*menuPos)[pos1].posCnt = IniGetBool(strFile, strSearch, 1);
+		(*menuPos)[pos1].enabled = IniGetBool(strFile, strSearch, 1);
+//printf("afterEnabled\n");
+		sprintf(strSearch, "%s%d.isOption", strPath, j);
+//printf("afterEnabled2 %s\n", strSearch);
+		(*menuPos)[pos1].isOption = IniGetBool(strFile, strSearch, 0);
+//printf("afterOption\n");
 		sprintf(strSearch, "%s%d.isCheck", strPath, j);
 		(*menuPos)[pos1].isCheck = IniGetBool(strFile, strSearch, 0);
-		sprintf(strSearch, "%s%d.isOption", strPath, j);
-		(*menuPos)[pos1].isOption = IniGetBool(strFile, strSearch, 0);
+//printf("afterCheck\n");
 		sprintf(strSearch, "%s%d.isActivated", strPath, j);
 		(*menuPos)[pos1].activated = IniGetBool(strFile, strSearch, 0);
+//printf("afterActivated\n");
 		sprintf(strSearch, "%s%d.Positions", strPath, j);
 		(*menuPos)[pos1].posCnt = IniGetInt(strFile, strSearch, 0);
+//printf("posCnt: %d @ %s\n", (*menuPos)[pos1].posCnt, strSearch);
 		
+		//printf("prePointer\n");
 		// already known stuff
 		(*menuPos)[pos1].definition = definition;
 		(*menuPos)[pos1].nextPos = NULL;
 		(*menuPos)[pos1].prevPos = NULL;
 		(*menuPos)[pos1].pos1st = NULL;
+		//printf("afterPointer\n");
 		
 		// if not 1st pos, we have to set...
 		if (i){
@@ -279,10 +292,13 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(char *strFile, char *strPath, struct TuiM
 
 		if ((*menuPos)[pos1].posCnt){
 			sprintf(strSearch, "%s%d.", strPath, j);
+			//printf("%s cnt=%d\n", strSearch, (*menuPos)[pos1].posCnt);
+			//fflush(stdout);
 			(*menuPos)[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, (*menuPos)[pos1].posCnt);
 		}
 
-		printf("%04d %s : %s\n", cnt, strPath, (*menuPos)[pos1].caption);
+		printf("%04d %s : %s : pos1=%d\n", cnt, strPath, (*menuPos)[pos1].caption, pos1);
+		fflush(stdout);
 	}
 	
 
@@ -330,7 +346,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
 		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
 
-printf("pre1st\n");		
+printf("pre1st cnt=%d\n", (*menu)[i].posCnt);		
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
 		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);		
