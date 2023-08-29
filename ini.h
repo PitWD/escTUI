@@ -15,12 +15,12 @@ char *IniStrToMem(const char *strIN, int reset){
 	// return pointer on embedded strIN
 
 	static char **strArray = NULL;
-	static size_t cnt = 0;
+	static int cnt = 0;
 	
 	if (reset){
 		// free memory		
 		if (strArray){
-			for (size_t i = 0; i < cnt - 1; i++){
+			for (size_t i = 0; i < cnt; i++){
 				free(strArray[i]);
 				strArray[i] = NULL;
 			}
@@ -294,6 +294,8 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     int actToken = 0;
     int isToken = 0;
 
+    int insertLine = 0;
+
     char strIN[STR_SMALL_SIZE];
     while (fgets(strIN, STR_SMALL_SIZE, file) != NULL) {
 
@@ -311,7 +313,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
                 if (strIN[actToken] != '.'){
                     // Broken Token
                     r = -2;
-                    sprintf(strSearch, "\"%d:%d\"", actToken, cntLine);
+                    sprintf(strSearch, "\"%d:%d\"", actToken, insertLine);
                     break;
                 }
             }         
@@ -331,6 +333,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
                     break;
                 }
                 else{
+                    insertLine = cntLine + 1;
                     actToken++;
                 }                        
             }               
