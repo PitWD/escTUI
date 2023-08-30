@@ -80,7 +80,8 @@ struct TuiMenuDefSTRUCT{
 	int keyStyle;
 	int timeColor;
 	int timeStyle;
-	int posCnt;						// count of sub-positions
+	int posCnt;	
+	int renderLen;					// count of sub-positions
 	struct TuiMenuPosSTRUCT *pos1st;		
 	uint8_t printRunTime :1;
 	uint8_t printRealTime :1;
@@ -116,11 +117,96 @@ typedef struct{
 
 void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
 	
-	// Width to render
-	if (!width){
-		width = TERM_ScreenWidth;
+	int renderLen = 0;
+	int renderWidth = 0;
+	int renderRealTime = 0;
+	int renderRunTime = 0;
+	int renderSmall = 0;
+
+	char strHLP[STR_MID_SIZE];
+
+	if (!posX){
+		// Start at 1st Pos
 		posX = 1;
 	}
+	
+	if (!width){
+		// Width to render
+		width = TERM_ScreenWidth;
+	}
+
+	// Width - respecting posX
+	width = width - posX + 1;
+	renderWidth = width;
+	strcpy(strHLP, userHeaders[headerID].caption);
+	renderLen = strlen(strHLP);
+	
+	if (userHeaders[headerID].printRealTime){
+		width -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+		renderRealTime = 1;
+	}
+	if (userHeaders[headerID].printRunTime){
+		width -= 16;	// 00000d 00:00:00 (+ leading space)
+		renderRunTime = 1;
+	}
+	if (renderRealTime && renderRunTime){
+		renderLen += 3;	// cause runtime is smaller than realtime and we'll eventually add three spaces later
+	}
+	
+	if (renderLen > width){
+		// menu/caption doesn't fit - f*ck
+		if (renderRunTime){
+			width += 16;	// 00000d 00:00:00 (+ leading space)
+			if (renderRealTime && renderRunTime){
+				renderLen -= 3;	// runtime removed...
+			}
+			renderRunTime = 0;
+			if (renderLen > width){
+				// still too small...
+				if (renderRealTime){
+					width += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+					if (renderLen > width){
+						// we're finally f*cked
+						renderSmall = 1;
+					}
+				}
+				else{
+					// we're finally f*cked
+					renderSmall = 1;
+				}
+				
+			}
+			
+		}
+		else if (renderRealTime){
+			width += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+			renderRealTime = 0;
+			if (renderLen > width){
+				// we're finally f*cked
+				renderSmall = 1;
+			}
+		}
+		if (renderLen > width){
+			// too long without time
+			renderSmall = 1;
+		}
+		
+		if (renderSmall){
+			// cut caption
+			strncpy(strHLP, userHeaders[headerID].caption, width - 3);
+			strHLP[width - 3] = '~';
+			strHLP[width - 2] = '\0';
+		}
+		else{
+			// full caption fits
+		}
+		
+	}
+	else{
+		// full caption fits
+	}
+	
 	// Where to render
 	if (posX && posY){
 		Locate(posX, posY);
@@ -129,37 +215,48 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 		LocateX(posX);
 	}
 	
-
 	if (!justRefresh){
 		// Style & Color
 		SetColorStyle(&userColors[userHeaders[headerID].txtColor - 1], 1);
 		SetTxtStyle(&userStyles[userHeaders[headerID].txtStyle - 1], 1);
-		StrPrintCentered(userHeaders[headerID].caption, width);
+		if (renderRealTime ^ renderRunTime) {
+			// one time active - center is left of time...
+			StrPrintCentered(strHLP, width);
+			StrPrintSpaces(renderWidth - width);
+		}
+		else{
+			// everything fits regular
+			if (renderRealTime && renderRunTime){
+				// add three spaces, cause runtime is shorter than realtime
+				strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
+			}			
+			StrPrintCentered(strHLP, renderWidth);
+		}
 	}
 	else{
 		// we just refresh time(s)
-		CursorRight(width);
+		CursorRight(renderWidth);
 	}
 
-	if (userHeaders[headerID].printRealTime || userHeaders[headerID].printRunTime){
+	if (renderRealTime || renderRunTime){
 		// Set style & color of times
 		SetColorStyle(&userColors[userHeaders[headerID].timeColor - 1], 1);
 		SetTxtStyle(&userStyles[userHeaders[headerID].timeStyle - 1], 1);
 	}
 	
 	// Do we print the Realtime (all time right alignment)
-	if (userHeaders[headerID].printRealTime){
+	if (renderRealTime){
 		// 01.01.2023 00:00:00
 		CursorLeft(19);
 		printf("%s %s", gStrDate, gStrTime);
 		CursorRight(1);
 	}
 	// Do we print the RunTime
-	if (userHeaders[headerID].printRunTime){
+	if (renderRunTime){
 		// 00000d 00:00:00
 		if (userHeaders[headerID].printRealTime){
 			// left alignment, cause RealTime already exist
-			CursorLeft(width - 2);
+			CursorLeft(renderWidth - 2);
 		}
 		else{
 			// right alignment
@@ -167,6 +264,138 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 		}
 		printf("%s", gStrRunTime);
 	}	
+}
+
+void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *menuDef, int justRefresh){
+
+	char strHlp[STR_SMALL_SIZE];
+	char strLine[STR_MID_SIZE];
+
+	int renderRealTime = 0;
+	int renderRunTime = 0;
+	int renderSmall = 0;	// width too small to render full MenuText 
+	int renderLen = 0;
+	int dontRender = 0;		// even too small to render shortcuts
+	int renderWidth = 0;
+
+	if (!posX){
+		// Start at 1st Pos
+		posX = 1;
+	}
+	
+	if (!width){
+		// Width to render
+		width = TERM_ScreenWidth;
+	}
+
+	// Width - respecting posX
+	width = width - posX + 1;
+	renderWidth = width;
+
+	// Where to render
+	if (posX && posY){
+		Locate(posX, posY);
+	}
+	else if (posX){
+		LocateX(posX);
+	}
+
+
+	if (!menuDef->renderLen){
+		// 1st call
+		// Extract keyPos and remove keyCode brackets once...
+		// Calculate len of top-level MenuLine
+		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+		while (menuPos != NULL){
+			int keyCodeFound = 0;
+			for (size_t i = 0; i < strlen(menuPos->caption); i++){
+				int j = 0;
+				if (menuPos->caption[i] == '(' && !keyCodeFound){
+					keyCodeFound = 1;
+					menuPos->keyCode = j;
+					i++;
+					strHlp[j++] = menuPos->caption[i++];
+					if (menuPos->caption[i] == ')'){
+						// Key is encapsulated
+						i++;
+					}
+				}
+				strHlp[j++] = menuPos->caption[i];
+				strHlp[j++] = '\0';
+			}
+			strcpy(menuPos->caption, strHlp);
+			menuDef->renderLen += strlen(menuPos->caption) + 1;
+			menuPos = menuPos->nextPos;
+		}
+		menuDef->renderLen += 1;	// Leading Space
+	}
+	renderLen = menuDef->renderLen;
+
+	if (menuDef->printRealTime){
+		width -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+		renderRealTime = 1;
+	}
+	if (menuDef->printRunTime){
+		width -= 16;	// 00000d 00:00:00 (+ leading space)
+		renderRunTime = 1;
+	}
+	
+	if (renderLen > width){
+		// menu doesn't fit - f*ck
+		if (renderRunTime){
+			width += 16;	// 00000d 00:00:00 (+ leading space)
+			renderRunTime = 0;
+			if (renderLen > width){
+				// still too small...
+				if (renderRealTime){
+					width += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+					if (renderLen > width){
+						// we're finally f*cked
+						renderSmall = 1;
+					}
+				}
+				else{
+					// we're finally f*cked
+					renderSmall = 1;
+				}
+				
+			}
+			
+		}
+		else if (renderRealTime){
+			width += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+			renderRealTime = 0;
+			if (renderLen > width){
+				// we're finally f*cked
+				renderSmall = 1;
+			}
+		}
+		if (renderSmall){
+			// check if small menu fits...
+			renderLen = menuDef->posCnt * 2 + 1;
+			if (renderLen > width){
+				// too small to render even single-key menu...
+				dontRender = 1;
+			}
+			
+		}
+		
+	}
+	
+
+	if (!justRefresh){
+		// Style & Color
+		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+	}
+	else{
+		// we just refresh time(s)
+		CursorRight(renderWidth);
+	}
+
+
+
 }
 
 int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
@@ -187,25 +416,25 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 		sprintf(strSearch, "global.header.%d.Caption", i + 1);
 		sprintf(strHLP, "Header%d", i + 1);
 		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
-		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
+		userHeader[i]->caption = IniStrToMem(strHeaderCaption, 0);
 		// TextColor 
 		sprintf(strSearch, "global.header.%d.TextColor", i + 1);
-		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->txtColor = IniGetInt(strFile, strSearch, 0);
 		// TextStyle 
 		sprintf(strSearch, "global.header.%d.TextStyle", i + 1);
-		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->txtStyle = IniGetInt(strFile, strSearch, 0);
 		// TimeColor 
 		sprintf(strSearch, "global.header.%d.TimeColor", i + 1);
-		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->timeColor = IniGetInt(strFile, strSearch, 0);
 		// TimeStyle 
 		sprintf(strSearch, "global.header.%d.TimeStyle", i + 1);
-		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->timeStyle = IniGetInt(strFile, strSearch, 0);
 		// PrintRunTime 
 		sprintf(strSearch, "global.header.%d.PrintRunTime", i + 1);
-		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		userHeader[i]->printRunTime = IniGetBool(strFile, strSearch, 0);
 		// PrintRealTime 
 		sprintf(strSearch, "global.header.%d.PrintRealTime", i + 1);
-		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		userHeader[i]->printRealTime = IniGetBool(strFile, strSearch, 0);
 
 		printf("%04d Header:\n", i +1);
 		TUIrenderHeader(0,0,0,i,0);
@@ -302,8 +531,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt);
 		}
 
-		printf("%04d %s : %s : pos1=%d : posReturn=%d i:positions = %d:%d\n", cnt, strPath, menuPos[pos1].caption, pos1, posReturn, i, positions);
-		fflush(stdout);
+		// printf("%04d %s : %s : pos1=%d : posReturn=%d i:positions = %d:%d\n", cnt, strPath, menuPos[pos1].caption, pos1, posReturn, i, positions);
+		// fflush(stdout);
 	}
 	
 
@@ -325,36 +554,38 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
 		sprintf(strSearch, "%s.%d.TextColor", strPath, i + 1);
-		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->txtColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TextStyle", strPath, i + 1);
-		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->txtStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectColor", strPath, i + 1);
-		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->selectColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectStyle", strPath, i + 1);
-		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->selectStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledColor", strPath, i + 1);
-		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->disabledColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, i + 1);
-		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->disabledStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyColor", strPath, i + 1);
-		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->keyColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyStyle", strPath, i + 1);
-		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->keyStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeColor", strPath, i + 1);
-		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->timeColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeStyle", strPath, i + 1);
-		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->timeStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, i + 1);
-		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		menu[i]->printRunTime = IniGetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, i + 1);
-		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		menu[i]->printRealTime = IniGetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
-		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
+		menu[i]->posCnt = IniGetInt(strFile, strSearch, 0);
 
-printf("pre1st cnt=%d\n", (*menu)[i].posCnt);		
+		menu[i]->renderLen = 0;
+
+// printf("pre1st cnt=%d\n", (*menu)[i].posCnt);		
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
-		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);		
+		menu[i]->pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], menu[i]->posCnt);		
 
 	}
 
