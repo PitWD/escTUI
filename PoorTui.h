@@ -122,6 +122,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	int renderRealTime = 0;
 	int renderRunTime = 0;
 	int renderSmall = 0;
+	int dontRender = 0;
 
 	char strHLP[STR_MID_SIZE];
 
@@ -194,14 +195,20 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 		
 		if (renderSmall){
 			// cut caption
-			strncpy(strHLP, userHeaders[headerID].caption, width - 3);
-			strHLP[width - 3] = '~';
-			strHLP[width - 2] = '\0';
+			if (width >= 3){
+				/* code */
+				strncpy(strHLP, userHeaders[headerID].caption, width - 3);
+				strHLP[width - 3] = '~';
+				strHLP[width - 2] = '\0';
+			}
+			else{
+				// too small to render 
+				dontRender = 1;
+			}
 		}
 		else{
 			// full caption fits
 		}
-		
 	}
 	else{
 		// full caption fits
@@ -225,7 +232,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 			StrPrintSpaces(renderWidth - width);
 		}
 		else{
-			// everything fits regular
+			// center is center
 			if (renderRealTime && renderRunTime){
 				// add three spaces, cause runtime is shorter than realtime
 				strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
@@ -292,15 +299,6 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 	width = width - posX + 1;
 	renderWidth = width;
 
-	// Where to render
-	if (posX && posY){
-		Locate(posX, posY);
-	}
-	else if (posX){
-		LocateX(posX);
-	}
-
-
 	if (!menuDef->renderLen){
 		// 1st call
 		// Extract keyPos and remove keyCode brackets once...
@@ -339,11 +337,17 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 		width -= 16;	// 00000d 00:00:00 (+ leading space)
 		renderRunTime = 1;
 	}
+	if (renderRealTime && renderRunTime){
+		renderLen += 3;	// cause runtime is smaller than realtime and we'll eventually add three spaces later
+	}
 	
 	if (renderLen > width){
 		// menu doesn't fit - f*ck
 		if (renderRunTime){
 			width += 16;	// 00000d 00:00:00 (+ leading space)
+			if (renderRealTime && renderRunTime){
+				renderLen -= 3;	// runtime removed...
+			}
 			renderRunTime = 0;
 			if (renderLen > width){
 				// still too small...
@@ -371,6 +375,10 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 				renderSmall = 1;
 			}
 		}
+		if (renderLen > width){
+			// too long without time
+			renderSmall = 1;
+		}
 		if (renderSmall){
 			// check if small menu fits...
 			renderLen = menuDef->posCnt * 2 + 1;
@@ -378,16 +386,65 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 				// too small to render even single-key menu...
 				dontRender = 1;
 			}
-			
 		}
-		
+		else{
+			// full menu fits
+		}
 	}
-	
+	else{
+		// full menu fits
+	}
+
+	// Where to render
+	if (posX && posY){
+		Locate(posX, posY);
+	}
+	else if (posX){
+		LocateX(posX);
+	}
 
 	if (!justRefresh){
 		// Style & Color
 		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+		
+		// Build main - menu line
+		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+		while (menuPos != NULL){
+			int keyCodeFound = 0;
+			for (size_t i = 0; i < strlen(menuPos->caption); i++){
+				int j = 0;
+				if (menuPos->caption[i] == '(' && !keyCodeFound){
+					keyCodeFound = 1;
+					menuPos->keyCode = j;
+					i++;
+					strHlp[j++] = menuPos->caption[i++];
+					if (menuPos->caption[i] == ')'){
+						// Key is encapsulated
+						i++;
+					}
+				}
+				strHlp[j++] = menuPos->caption[i];
+				strHlp[j++] = '\0';
+			}
+			strcpy(menuPos->caption, strHlp);
+			menuDef->renderLen += strlen(menuPos->caption) + 1;
+			menuPos = menuPos->nextPos;
+		}
+
+		if (renderRealTime ^ renderRunTime) {
+			// one time active - center is left of time...
+			//StrPrintCentered(strHLP, width);
+			//StrPrintSpaces(renderWidth - width);
+		}
+		else{
+			// center is center
+			if (renderRealTime && renderRunTime){
+				// add three spaces, cause runtime is shorter than realtime
+				//strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
+			}			
+			StrPrintCentered(strHLP, renderWidth);
+		}
 	}
 	else{
 		// we just refresh time(s)
