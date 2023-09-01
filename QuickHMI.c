@@ -93,16 +93,23 @@ int main() {
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
 		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
+		for (size_t i = 0; i < userHeadersCnt; i++){
+			TUIrenderHeader(0,0,0,i,0);
+			printf("\n");
+		}
 		
+
 		//printf("Und hier...\n");
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenuDefs);
 
 		for (size_t i = 0; i < userTopMenuCnt; i++){
-			
+			TUIrenderTopMenu(0, 0, 0, &userTopMenuDefs[i], 0);
 		}
 		
+		ResFBU();
+		printf("\n");
 
-		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\na b c d e f g h i j k l m n o p q r s t u v w x y z\n");
 		printf("\x1B(0");
 		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
 		printf("\x1B(B");
