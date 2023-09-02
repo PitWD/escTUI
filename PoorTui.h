@@ -104,7 +104,7 @@ struct TuiMenuPosSTRUCT{
 	int selected :1;			// if position is selected
 	int isOption :1;
 	int isCheck :1;
-	int	activated :1;			// if position is a check or option and active
+	int	activated :1;			// if position is a check or option...
 }TuiMenuPosSTRUCT;
 
 typedef struct{
@@ -273,6 +273,185 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
+void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos){
+
+	int selectedMenuPos = 0;
+	int selectedMenuPosHlp = 0;
+
+	int renderSmall = 0;
+
+	int renderHeight = 0;
+	int renderWidth = 0;
+	int renderTabs = 1;
+
+	int posCnt = 0;
+
+	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
+
+	// set eventually standard positions...
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:
+		// BottomMenu
+		break;
+	case 4:
+		// TopMenu next levels...
+	default:
+		// TopMenu
+		if (posX && posY){
+			// Locate(posX, posY);
+		}
+		else if (posX){
+			// LocateX(posX);
+			posY = 3;		
+		}
+		else if (posY){
+			posX = 1;
+		}
+		else{
+			posY = 3;
+			posX = 1;
+		}
+		break;
+	}
+
+	// Get Size
+	while (menuPos){
+		int actWidth = strlen(menuPos->caption);
+		posCnt++;
+		renderWidth = (renderWidth > actWidth) ? renderWidth : actWidth;
+		menuPos = menuPos->nextPos;
+	}
+	renderHeight = posCnt;
+	menuPos = menuPos1st;
+
+	// Does it fit in Y as supposed
+	int orgHeight = renderHeight;
+	int orgWidth = renderWidth;
+	int orgPosY = posY;
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:
+		// BottomMenu
+		break;
+	case 4:
+		// TopMenu next levels...
+	default:
+		// TopMenu
+		
+		while ((renderHeight + 1 + posY) > TERM_ScreenHeight){
+			// exceeding terminal height - try down to top
+			orgPosY -= renderHeight;
+			if (!((renderHeight + 1 + orgPosY) > TERM_ScreenHeight)){
+				// that'll work
+				posY = orgPosY;
+			}
+			else{
+				// to high - we lower the menu in height by raising with
+				renderTabs++;
+				renderHeight = orgHeight - ((orgHeight / renderTabs) * (renderTabs - 1));
+				renderWidth = orgWidth * renderTabs + renderTabs - 1;
+			}
+		}
+		break;
+	}
+
+	// Does it fit in X as supposed
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:
+		// BottomMenu
+		break;
+	case 4:
+		// TopMenu next levels...
+		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+			// too width - try right to left
+			if ((TERM_ScreenWidth - ((renderWidth * 2) - strlen(menuPos1st->caption)) - renderWidth) < 0){
+				// we're screwed - maybe single-key menu is working
+				renderSmall = 1;
+				renderWidth = 0;
+				// Get reduced size
+				while (menuPos){
+					if (!renderWidth){
+						// Is at least one key + 2 spaces
+						renderWidth = 3;
+					}
+					if (menuPos->isCheck || menuPos->isOption){
+						// containing option or check
+						renderWidth = renderTabs * 7 + (renderTabs -1);
+						break;
+					}
+					menuPos = menuPos->nextPos;
+				}
+				menuPos = menuPos1st;
+			}
+			else{
+				// we change alignment
+				posX -= (renderWidth * 2) - strlen(menuPos1st->caption);;
+			}
+		}
+		break;
+	default:
+		// TopMenu - 1st level
+		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+			// too width - try right to left
+			if ((TERM_ScreenWidth - (renderWidth - strlen(menuPos1st->caption)) - renderWidth) < 0){
+				// we're screwed - maybe single-key menu is working
+				renderSmall = 1;
+				renderWidth = 0;
+				// Get reduced size
+				while (menuPos){
+					if (!renderWidth){
+						// Is at least one key + 2 spaces
+						renderWidth = 3;
+					}
+					if (menuPos->isCheck || menuPos->isOption){
+						// containing option or check
+						renderWidth = renderTabs * 7 + (renderTabs -1);
+						break;
+					}
+					menuPos = menuPos->nextPos;
+				}
+				menuPos = menuPos1st;
+			}
+			else{
+				// we change alignment
+				posX -= renderWidth - strlen(menuPos1st->caption);
+			}
+		}
+		break;
+	}
+
+	Locate(posX, posY);
+	int posInTab = posCnt - ((posCnt / renderTabs) * (renderTabs - 1));
+	for (size_t i = 0; i < renderTabs; i++){
+		for (size_t j = 0; j < posInTab; j++){
+		
+		}
+		posInTab = posCnt / renderTabs;
+	}
+	
+	
+	SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+	SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+	
+}
+
 void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *menuDef, int justRefresh){
 
 	char strHlp[STR_SMALL_SIZE];
@@ -285,6 +464,9 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 	int dontRender = 0;		// even too small to render shortcuts
 	int renderWidth = 0;
 
+	int selectedMenuPos = 0;
+	int selectedMenuPosHlp = 0;
+
 	if (!posX){
 		// Start at 1st Pos
 		posX = 1;
@@ -296,19 +478,16 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 	}
 
 	// Width - respecting posX
-	width = width - posX + 1;
+	width = width - posX + 2;
 	renderWidth = width;
 
 	if (!menuDef->renderLen){
 		// 1st call
-		// Extract keyPos and remove keyCode brackets once...
 		// Calculate len of top-level MenuLine
 		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 		while (menuPos != NULL){
-			int keyCodeFound;
-			keyCodeFound = 0;
-			menuPos->keyCode = 0;
 
+			/*
 			int j;
 			j = 0;
 			for (size_t i = 0; i < strlen(menuPos->caption); i++){
@@ -327,10 +506,11 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 			strHlp[j] = '\0';
 
 			strcpy(menuPos->caption, strHlp);
-			menuDef->renderLen += strlen(menuPos->caption) + 2;
+			*/
+			menuDef->renderLen += strlen(menuPos->caption);
 			menuPos = menuPos->nextPos;
 		}
-		menuDef->renderLen += 1;	// Leading Space
+		menuDef->renderLen += 1;	// trailing Space
 	}
 	renderLen = menuDef->renderLen;
 
@@ -381,6 +561,26 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 		if (renderSmall){
 			// check if small menu fits...
 			renderLen = menuDef->posCnt * 3 + 2;
+			if (menuDef->printRealTime && renderLen < width){
+				// maybe time fits in short-key-menu-style again
+				width -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+				renderRealTime = 1;
+				if (renderLen > width){
+					// no...
+					width += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+				}
+			}
+			if (menuDef->printRunTime && renderLen < width){
+				// maybe time fits in short-key-menu-style again
+				width -= 16;	// 01.01.2023 09:09:21  (+ trailing space)
+				renderRunTime = 1;
+				if (renderLen > width){
+					// no...
+					width += 16;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRunTime = 0;
+				}
+			}
 			if (renderLen > width){
 				// too small to render even single-key menu...
 				dontRender = 1;
@@ -407,35 +607,47 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 		
-		printf(" ");	// 1st space...
 
 		if (renderSmall){
 			// render just the keys
+			printf(" ");	// 1st space...
 			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 			while (menuPos){
-				if (menuPos->enabled){
+				selectedMenuPosHlp++;
+				if (menuPos->selected && menuPos->enabled){
+					/* code */
+					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+					selectedMenuPos = selectedMenuPosHlp;
+				}
+				else if (menuPos->enabled){
 					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-					printf("%c", menuPos->caption[menuPos->keyCode]);
-					SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-					SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 				}
 				else{
 					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
-					printf("%c", menuPos->caption[menuPos->keyCode]);
-				}						
+				}			
+				printf("%c", menuPos->caption[menuPos->keyCode]);
+				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
 				printf("  ");
 				menuPos = menuPos->nextPos;
 			}
-			printf(" ");
+			//printf(" ");
 		}
 		else{
 			// render full line
 			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 			while (menuPos){
-				//printf("%s\n", menuPos->caption);
-				if (menuPos->enabled){
+				selectedMenuPosHlp++;
+				if (menuPos->selected && menuPos->enabled){
+					/* code */
+					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+					selectedMenuPos = selectedMenuPosHlp;
+				}
+				else if (menuPos->enabled){
 					SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 				}
@@ -447,12 +659,14 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 					int j = 0;
 					if (i == menuPos->keyCode){
 						// key char...
-						if (menuPos->enabled){
+						if (menuPos->enabled && menuPos->selected){
+							/* code */
+							SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+							SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+						}
+						else if (menuPos->enabled){
 							SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 							SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-							printf("%c", menuPos->caption[i]);
-							SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-							SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 						}
 						else{
 							SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
@@ -461,11 +675,15 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 						}						
 					}
 					else{
-						// regular char
-						printf("%c", menuPos->caption[i]);
+						// regular char	
+						SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 					}					
+					printf("%c", menuPos->caption[i]);
 				}
-				printf("  ");
+				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+				//printf(" ");
 				menuPos = menuPos->nextPos;
 			}
 		}
@@ -505,7 +723,22 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 		printf("%s", gStrRunTime);
 	}	
 
-
+	if (selectedMenuPos && menuDef->pos1st){
+		// render selected Submenu
+		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+		
+		// Set cursor one row below start of selected menu
+		CursorLeft(renderWidth);
+		CursorDown(1);
+		int x = 0;
+		while (--selectedMenuPos){
+			x += strlen(menuPos->caption) + 2;
+			menuPos = menuPos->nextPos;			
+		}
+		CursorRight(x);
+		// Render SubMenu
+		TUIrenderSubMenu(++x, 3, 0, menuDef, menuPos);
+	}
 }
 
 int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
@@ -578,13 +811,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		cnt++;
 		int pos1 = cnt - 1;
 		menuPos = realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT));
-		nextPos = realloc(nextPos, (cnt + 1) * sizeof(int)); // 1-indexed to get 0 for NULL
-		prevPos = realloc(prevPos, (cnt + 1) * sizeof(int)); // 1-indexed to get 0 for NULL
-
-		sprintf(strSearch, "%s%d.Text", strPath, j);
-		sprintf(strHLP, "%s%d", strPath, j);
-		IniGetStr(strFile, strSearch, strHLP, strPos1);
-		menuPos[pos1].caption = IniStrToMem(strPos1, 0);
+		nextPos = realloc(nextPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
+		prevPos = realloc(prevPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
 
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
 		menuPos[pos1].enabled = IniGetBool(strFile, strSearch, 1);
@@ -597,6 +825,61 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		sprintf(strSearch, "%s%d.Positions", strPath, j);
 		menuPos[pos1].posCnt = IniGetInt(strFile, strSearch, 0);
 
+		sprintf(strSearch, "%s%d.Text", strPath, j);
+		sprintf(strHLP, "%s%d", strPath, j);
+		IniGetStr(strFile, strSearch, strHLP, strPos1);
+		
+		// Search key and remove brackets
+		menuPos[pos1].keyCode = 0;
+
+		int k;
+		k = 0;
+		int keyCodeFound = 0;
+		for (int l = 0; l < strlen(strPos1); l++){
+			if (strPos1[l] == '(' && !keyCodeFound){
+				keyCodeFound = 1;
+				menuPos[pos1].keyCode = k;
+				l++;
+				strHLP[k++] = strPos1[l++];
+				if (strPos1[l] == ')'){
+					// Key is encapsulated
+					l++;
+				}
+			}
+			strHLP[k++] = strPos1[l];
+		}
+		strHLP[k] = '\0';
+		menuPos[pos1].keyCode++;
+
+		// Build leading part
+		if (menuPos[pos1].isOption){
+			// ( ) / (x)
+			if (menuPos[pos1].activated){
+				strcpy(strPos1, " (x) ");
+			}
+			else{
+				strcpy(strPos1, " ( ) ");
+			}
+			menuPos[pos1].keyCode += 4;
+		}
+		else if (menuPos[pos1].isCheck){
+			// [ ] / [x]
+			if (menuPos[pos1].activated){
+				strcpy(strPos1, " [x] ");
+			}
+			else{
+				strcpy(strPos1, " [ ] ");
+			}
+			menuPos[pos1].keyCode += 4;
+		}
+		else{
+			// just leading and trailing spaces
+			strcpy(strPos1, " ");
+		}
+		
+		sprintf(strPos1, "%s%s ", strPos1, strHLP);
+
+		menuPos[pos1].caption = IniStrToMem(strPos1, 0);
 		// already known stuff
 		menuPos[pos1].definition = definition;
 		// stuff to reset
