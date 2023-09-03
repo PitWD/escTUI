@@ -1124,3 +1124,4 @@ int IniSetByteBin(const char *fileName, const char *strSearch, const unsigned ch
     StrByte2Bin(bValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
+// ::::
