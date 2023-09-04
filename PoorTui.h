@@ -330,10 +330,12 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
-	// Does it fit in Y as supposed
+	// copy original positions & dimensions
 	int orgHeight = renderHeight;
 	int orgWidth = renderWidth;
-	int orgPosY = posY;
+	int orgPosY = posY; int orgPosX = posX;
+
+	// Does it fit in Y as supposed
 	switch (menuType){
 	case 1:
 		// LeftMenu
@@ -553,7 +555,10 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 				}
 				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-				
+
+				StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+				CursorDown(1);
+				CursorLeft(orgWidth);
 				//printf(" ");
 				menuPos = menuPos->nextPos;
 				
