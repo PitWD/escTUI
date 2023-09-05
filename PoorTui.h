@@ -383,7 +383,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		// TopMenu next levels...
 		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 			// too width - try right to left
-			if ((TERM_ScreenWidth - ((renderWidth * 2) - strlen(menuPos1st->caption)) - renderWidth) < 0){
+			if ((TERM_ScreenWidth - ((renderWidth * 2) - strlen(orgWidth)) - renderWidth) < 0){
 				// we're screwed - maybe single-key menu is working
 				renderSmall = 1;
 				renderWidth = 0;
@@ -404,7 +404,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 			}
 			else{
 				// we change alignment
-				posX -= (renderWidth * 2) - strlen(menuPos1st->caption);;
+				posX -= (renderWidth * 2) - strlen(orgWidth);
 			}
 		}
 		break;
@@ -412,7 +412,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		// TopMenu - 1st level
 		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 			// too width - try right to left
-			if ((TERM_ScreenWidth - (renderWidth - strlen(menuPos1st->caption)) - renderWidth) < 0){
+			if ((TERM_ScreenWidth - (renderWidth - strlen(orgWidth)) - renderWidth) < 0){
 				// we're screwed - maybe single-key menu is working
 				renderSmall = 1;
 				renderWidth = 0;
@@ -434,7 +434,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 			}
 			else{
 				// we change alignment
-				posX -= renderWidth - strlen(menuPos1st->caption);
+				posX -= renderWidth - strlen(orgWidth);
 			}
 		}
 		break;
