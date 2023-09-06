@@ -383,7 +383,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		// TopMenu next levels...
 		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 			// too width - try right to left
-			if ((TERM_ScreenWidth - ((renderWidth * 2) - strlen(orgWidth)) - renderWidth) < 0){
+			if ((TERM_ScreenWidth - ((renderWidth * 2) - orgWidth) - renderWidth) < 0){
 				// we're screwed - maybe single-key menu is working
 				renderSmall = 1;
 				renderWidth = 0;
@@ -404,7 +404,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 			}
 			else{
 				// we change alignment
-				posX -= (renderWidth * 2) - strlen(orgWidth);
+				posX -= (renderWidth * 2) - orgWidth;
 			}
 		}
 		break;
@@ -412,7 +412,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		// TopMenu - 1st level
 		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 			// too width - try right to left
-			if ((TERM_ScreenWidth - (renderWidth - strlen(orgWidth)) - renderWidth) < 0){
+			if ((TERM_ScreenWidth - (renderWidth - orgWidth) - renderWidth) < 0){
 				// we're screwed - maybe single-key menu is working
 				renderSmall = 1;
 				renderWidth = 0;
@@ -434,7 +434,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 			}
 			else{
 				// we change alignment
-				posX -= renderWidth - strlen(orgWidth);
+				posX -= renderWidth - orgWidth;
 			}
 		}
 		break;
@@ -564,6 +564,10 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 				
 			}
 		}
+		// Cursor is on pos1 of next line (which does not get printed in actually tab)
+		// The "next line" may get printed in the next tab
+		CursorUp(posInTab);		// Back to Top
+		
 		posInTab = posCnt / renderTabs;
 	}
 	
