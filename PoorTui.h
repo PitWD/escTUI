@@ -466,6 +466,10 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		// trash unused positions
 		menuPos = menuPos->nextPos;
 	}
+	while (menuPos){
+		//
+	}
+	
 	
 	int posInTab = posCnt - ((posCnt / renderTabs) * (renderTabs - 1));
 	for (size_t i = 0; i < renderTabs; i++){
@@ -479,17 +483,21 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 				// render just the keys (+ eventually check/option brackets)
 				printf(" ");	// 1st space...
 				if (menuPos->selected && menuPos->enabled){
+					// enabled & selected
 					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
 					selectedMenuPos = selectedMenuPosHlp;
 				}
 				else if (menuPos->enabled){
+					// enabled
 				}
 				else{
+					// disabled
 					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
 				}
 				if (menuPos->isCheck){
+					// is a check
 					printf("[");
 					if (menuPos->activated){
 						printf("x");
@@ -500,6 +508,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 					printf("] ");
 				}
 				else if (menuPos->isOption){
+					// is an option
 					printf("(");
 					if (menuPos->activated){
 						printf("x");
@@ -519,16 +528,18 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 				if (menuPos->selected && menuPos->enabled){
 				}
 				else if (menuPos->enabled){
+					// Key in keyColor and keyStyle
 					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
 				}
 				else{
 				}
-
 				printf("%c", menuPos->caption[menuPos->keyCode]);
+
 				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
 				printf(" ");
+				
 				CursorDown(1);
 				if (renderSmall == 2){
 					// with option/check
@@ -593,7 +604,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		// Cursor is on pos1 of next line (which does not get printed in actually tab)
 		// The "next line" may get printed in the next tab
 		CursorUp(posInTab);		// Back to Top
-		
+
 		posInTab = posCnt / renderTabs;
 	}
 	
