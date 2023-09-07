@@ -107,13 +107,13 @@ struct TuiMenuPosSTRUCT{
 	int	activated :1;			// if position is a check or option...
 }TuiMenuPosSTRUCT;
 
-typedef struct{
-	int header :1;
-	int topMenu :1;
-	int bottomMenu :1;
-	int leftMenu :1;
-	int rightMenu :1;
-}TuiDesktopDefSTRUCT;
+struct TuiDesktopDefSTRUCT{
+	int header;
+	int topMenu;
+	int bottomMenu;
+	int leftMenu;
+	int rightMenu;
+};
 
 void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
 	
@@ -273,12 +273,13 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMenuDefSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopDefSTRUCT *deskDef){
 
 	int selectedMenuPos = 0;
 	int selectedMenuPosHlp = 0;
 
 	int renderSmall = 0;
+	int dontRender = 0;
 
 	int renderHeight = 0;
 	int renderWidth = 0;
@@ -320,11 +321,17 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		break;
 	}
 
-	// Get Size
+	int selectedPos = 0;
+
+	// Get Size, Count, Selected, ... once... ;-)
 	while (menuPos){
 		int actWidth = strlen(menuPos->caption);
 		posCnt++;
 		renderWidth = (renderWidth > actWidth) ? renderWidth : actWidth;
+		if (!selectedPos && menuPos->enabled && menuPos->selected){
+			// find eventually selected pos...
+			selectedPos = posCnt;
+		}
 		menuPos = menuPos->nextPos;
 	}
 	renderHeight = posCnt;
@@ -334,6 +341,9 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 	int orgHeight = renderHeight;
 	int orgWidth = renderWidth;
 	int orgPosY = posY; int orgPosX = posX;
+
+	// Helper if menu doesn't fit as supposed
+	int offsetPosY = 0;
 
 	// Does it fit in Y as supposed
 	switch (menuType){
@@ -350,22 +360,21 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		// TopMenu next levels...
 	default:
 		// TopMenu
-		
-		while ((renderHeight + 1 + posY) > TERM_ScreenHeight){
-			// exceeding terminal height - try down to top
-			orgPosY -= renderHeight;
-			if (!((renderHeight + 1 + orgPosY) > TERM_ScreenHeight)){
-				// that'll work
-				posY = orgPosY;
+		if ((renderHeight + posY) > TERM_ScreenHeight){
+			// too high to print all positions - shift posY below menuLine
+			posY = (deskDef->header > 0) + 1;
+			if ((renderHeight + posY) > TERM_ScreenHeight){
+				// still to high
+				if (selectedPos > TERM_ScreenHeight - posY){
+					// invisible selected Pos - shift offset
+					offsetPosY = selectedPos - (TERM_ScreenHeight - posY);
+				}
 			}
 			else{
-				// to high - we lower the menu in height by raising with
-				renderTabs++;
-				renderHeight = orgHeight - ((orgHeight / renderTabs) * (renderTabs - 1));
-				renderWidth = orgWidth * renderTabs + renderTabs - 1;
+				// fits - shift back as much as possible
+				posY += TERM_ScreenHeight - (renderHeight + posY);
 			}
-		}
-		break;
+		}		
 	}
 
 	// Does it fit in X as supposed
@@ -409,11 +418,15 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 		}
 		break;
 	default:
-		// TopMenu - 1st level
+		// TopMenu - 1st level		
 		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-			// too width - try right to left
-			if ((TERM_ScreenWidth - (renderWidth - orgWidth) - renderWidth) < 0){
+			// too width - try to invert direction
+			posX -= renderWidth;
+			invert = 1;
+			if (posX < 1){
 				// we're screwed - maybe single-key menu is working
+				posX = orgPosX;
+				invert = 0;
 				renderSmall = 1;
 				renderWidth = 0;
 				// Get reduced size
@@ -423,24 +436,37 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, struct TuiMenuDefSTRUCT 
 						renderWidth = 3;
 					}
 					if (menuPos->isCheck || menuPos->isOption){
-						// containing option or check
-						renderWidth = renderTabs * 7 + (renderTabs -1);
+						// containing option or check - ' [ ] A '
+						renderWidth = 7;
 						renderSmall = 2;
 						break;
 					}
 					menuPos = menuPos->nextPos;
 				}
 				menuPos = menuPos1st;
+				if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+					// Uhhh, even the short version doesn't fit...
+					posX -= renderWidth;
+					invert = 1;
+					if (posX < 1){
+						// Damn, this area is awful small... we can't render this
+						dontRender = 1;
+					}
+				}
 			}
 			else{
-				// we change alignment
-				posX -= renderWidth - orgWidth;
+				// we already changed the alignment
 			}
 		}
 		break;
 	}
 
 	Locate(posX, posY);
+	for (size_t i = 0; i < offsetPosY; i++){
+		// trash unused positions
+		menuPos = menuPos->nextPos;
+	}
+	
 	int posInTab = posCnt - ((posCnt / renderTabs) * (renderTabs - 1));
 	for (size_t i = 0; i < renderTabs; i++){
 		for (size_t j = 0; j < posInTab; j++){
