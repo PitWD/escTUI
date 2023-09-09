@@ -54,7 +54,7 @@ static char TuiDecBoxDraw[16][2] = {" ", " ", " ", "m", " ", "x",
 
 
 
-typedef struct{
+struct TuiHeaderDefSTRUCT{
 	char *caption;
 	int txtColor;
 	int txtStyle;
@@ -62,9 +62,9 @@ typedef struct{
 	int timeStyle;
 	uint8_t printRunTime :1;
 	uint8_t printRealTime :1;
-}TuiHeaderSTRUCT;
+};
 // global access on headers
-TuiHeaderSTRUCT *userHeaders = NULL;
+struct TuiHeaderDefSTRUCT *userHeaders = NULL;
 
 struct TuiMenuDefSTRUCT;
 struct TuiMenuPosSTRUCT;
@@ -87,10 +87,10 @@ struct TuiMenuDefSTRUCT{
 	uint8_t printRealTime :1;
 };
 // global access on Menu Definitions
-struct TuiMenuDefSTRUCT *userTopMenuDefs = NULL;
-struct TuiMenuDefSTRUCT *userBotMenuDefs = NULL;
-struct TuiMenuDefSTRUCT *userLeftMenuDefs = NULL;
-struct TuiMenuDefSTRUCT *userRightMenuDefs = NULL;
+struct TuiMenuDefSTRUCT *userTopMenus = NULL;
+struct TuiMenuDefSTRUCT *userBotMenus = NULL;
+struct TuiMenuDefSTRUCT *userLeftMenus = NULL;
+struct TuiMenuDefSTRUCT *userRightMenus = NULL;
 
 struct TuiMenuPosSTRUCT{
 	char *caption;
@@ -105,6 +105,7 @@ struct TuiMenuPosSTRUCT{
 	int isOption :1;
 	int isCheck :1;
 	int	activated :1;			// if position is a check or option...
+	int isSpacer :1;
 }TuiMenuPosSTRUCT;
 
 struct TuiDesktopDefSTRUCT{
@@ -114,6 +115,7 @@ struct TuiDesktopDefSTRUCT{
 	int leftMenu;
 	int rightMenu;
 };
+struct TuiDesktopDefSTRUCT *userDesktopDefs = NULL;
 
 void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
 	
@@ -550,7 +552,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 			if (menuPos->selected && menuPos->enabled){
 				selectedMenuPos = selectedMenuPosHlp;
 			}
-			for (size_t k = 0; k < strlen(menuPos->caption); k++){
+			for (size_t i = 0; i < strlen(menuPos->caption); i++){
 				if (menuPos->enabled && menuPos->selected){
 					// enabled - selected
 					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
@@ -558,7 +560,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 				}
 				else if (menuPos->enabled){
 					// enabled
-					if (k && (k == menuPos->keyCode)){
+					if (i && (i == menuPos->keyCode)){
 						// is key
 						SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 						SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
@@ -573,7 +575,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
 				}
-				if (k == 2 && (menuPos->isCheck || menuPos->isOption)){
+				if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
 					// Set Value of check/option
 					if (menuPos->activated){
 						printf("x");
@@ -583,7 +585,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 					}
 				}
 				else{
-					printf("%c", menuPos->caption[k]);
+					printf("%c", menuPos->caption[i]);
 				}
 			}
 			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
@@ -857,7 +859,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 	}
 }
 
-int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
+int TUIinitHeaders(char *strFile, struct TuiHeaderDefSTRUCT **userHeader){
 
 	// User Header - Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -868,7 +870,7 @@ int TUIinitHeaders(char *strFile, TuiHeaderSTRUCT **userHeader){
 	int headersCount = IniGetInt(strFile, "global.header.HeaderCount", 0);
 
 	// memory to store all header
-	*userHeader = (TuiHeaderSTRUCT*)malloc(headersCount * sizeof(TuiHeaderSTRUCT));
+	*userHeader = (struct TuiHeaderDefSTRUCT*)malloc(headersCount * sizeof(struct TuiHeaderDefSTRUCT));
 
 	for (int i = 0; i < headersCount; i++){
 		// Caption
@@ -965,8 +967,16 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			strHLP[k++] = strPos1[l];
 		}
 		strHLP[k] = '\0';
-		menuPos[pos1].keyCode++;
-
+		if (strHLP[0] == '-'){
+			// indicates a spacer
+			menuPos[pos1].isSpacer = 1;
+		}
+		else{
+			menuPos[pos1].isSpacer = 0;
+			// increase keyPos (leading space)
+			menuPos[pos1].keyCode++;
+		}
+		
 		// Build leading part
 		if (menuPos[pos1].isOption){
 			// ( ) / (x)
@@ -1087,6 +1097,21 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 	
 }
 
+int TUIinitDesktops(char *strFile, struct TuiDesktopDefSTRUCT **strPath){
+	// Helper
+	char strSearch[STR_SMALL_SIZE];
+
+	sprintf(strSearch, "%s.%s", strPath, "Count");
+	int desksCnt = IniGetInt(strFile, strSearch, 0);
+
+	*strPath = (struct TuiDesktopDefSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopDefSTRUCT));
+
+	// Menu Definition Values
+	for (int i = 0; i < desksCnt; i++){
+
+	}
+
+}
 
 /*
 										EOF - Detailed Description

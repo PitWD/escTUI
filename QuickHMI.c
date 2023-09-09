@@ -98,12 +98,11 @@ int main() {
 			printf("\n");
 		}
 		
-
 		//printf("Und hier...\n");
-		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenuDefs);
+		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 
 		for (size_t i = 0; i < userTopMenuCnt; i++){
-			TUIrenderTopMenu(0, 0, 0, &userTopMenuDefs[i], 0);
+			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], 0);
 		}
 		
 		ResFBU();
