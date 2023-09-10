@@ -102,11 +102,20 @@ int main() {
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 
 		for (size_t i = 0; i < userTopMenuCnt; i++){
-			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], 0);
+			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
+		}
+		ResFBU();
+		printf("\n");
+
+		for (size_t i = 0; i < userTopMenuCnt; i++){
+
+			userTopMenus[i].pos1st->selected = 1;
+			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
 		
 		ResFBU();
 		printf("\n");
+
 
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(0");
@@ -127,10 +136,10 @@ int main() {
 			free(userColors);
 			free(userStyles);
 			free(userHeaders);
-			free(userTopMenuDefs);
-			free(userBotMenuDefs);
-			free(userRightMenuDefs);
-			free(userLeftMenuDefs);
+			free(userTopMenus);
+			free(userBotMenus);
+			free(userRightMenus);
+			free(userLeftMenus);
 		#endif
 	// *************************************************************
 

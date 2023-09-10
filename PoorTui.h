@@ -54,7 +54,7 @@ static char TuiDecBoxDraw[16][2] = {" ", " ", " ", "m", " ", "x",
 
 
 
-struct TuiHeaderDefSTRUCT{
+struct TuiHeadersSTRUCT{
 	char *caption;
 	int txtColor;
 	int txtStyle;
@@ -64,12 +64,12 @@ struct TuiHeaderDefSTRUCT{
 	uint8_t printRealTime :1;
 };
 // global access on headers
-struct TuiHeaderDefSTRUCT *userHeaders = NULL;
+struct TuiHeadersSTRUCT *userHeaders = NULL;
 
-struct TuiMenuDefSTRUCT;
+struct TuiMenusSTRUCT;
 struct TuiMenuPosSTRUCT;
 
-struct TuiMenuDefSTRUCT{
+struct TuiMenusSTRUCT{
 	int txtColor;
 	int txtStyle;
 	int selectColor;
@@ -87,14 +87,14 @@ struct TuiMenuDefSTRUCT{
 	uint8_t printRealTime :1;
 };
 // global access on Menu Definitions
-struct TuiMenuDefSTRUCT *userTopMenus = NULL;
-struct TuiMenuDefSTRUCT *userBotMenus = NULL;
-struct TuiMenuDefSTRUCT *userLeftMenus = NULL;
-struct TuiMenuDefSTRUCT *userRightMenus = NULL;
+struct TuiMenusSTRUCT *userTopMenus = NULL;
+struct TuiMenusSTRUCT *userBotMenus = NULL;
+struct TuiMenusSTRUCT *userLeftMenus = NULL;
+struct TuiMenusSTRUCT *userRightMenus = NULL;
 
 struct TuiMenuPosSTRUCT{
 	char *caption;
-	struct TuiMenuDefSTRUCT *definition;
+	struct TuiMenusSTRUCT *definition;
 	int keyCode;
 	int enabled;
 	int posCnt;						// count of sub-positions
@@ -108,14 +108,14 @@ struct TuiMenuPosSTRUCT{
 	int isSpacer :1;
 }TuiMenuPosSTRUCT;
 
-struct TuiDesktopDefSTRUCT{
+struct TuiDesktopsSTRUCT{
 	int header;
 	int topMenu;
 	int bottomMenu;
 	int leftMenu;
 	int rightMenu;
 };
-struct TuiDesktopDefSTRUCT *userDesktopDefs = NULL;
+struct TuiDesktopsSTRUCT *userDesktopDefs = NULL;
 
 void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
 	
@@ -275,18 +275,19 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMenuDefSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopDefSTRUCT *deskDef){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
 
-	int selectedMenuPos = 0;
-	int selectedMenuPosHlp = 0;
+	// if posX and invert is given... posX must have right alignment! (after having width we move it)
 
+	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
+	int selectedPos = 0;
+	
 	int renderSmall = 0;
 	int dontRender = 0;
 
 	int renderHeight = 0;
 	int renderWidth = 0;
-	int renderTabs = 1;
-
+	
 	int posCnt = 0;
 
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
@@ -323,8 +324,6 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		break;
 	}
 
-	int selectedPos = 0;
-
 	// Get Size, Count, Selected, ... once... ;-)
 	while (menuPos){
 		int actWidth = strlen(menuPos->caption);
@@ -333,6 +332,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		if (!selectedPos && menuPos->enabled && menuPos->selected){
 			// find eventually selected pos...
 			selectedPos = posCnt;
+			selectedMenu = menuPos;
 		}
 		menuPos = menuPos->nextPos;
 	}
@@ -368,7 +368,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 			if ((renderHeight + posY) > TERM_ScreenHeight){
 				// still to high
 				if (selectedPos > TERM_ScreenHeight - posY){
-					// invisible selected Pos - shift offset
+					// invisible selectedPos - shift offset
 					offsetPosY = selectedPos - (TERM_ScreenHeight - posY);
 				}
 			}
@@ -379,6 +379,11 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		}		
 	}
 
+	if (invert){
+		// correct posX
+		posX -= renderWidth;
+	}
+	
 	// Does it fit in X as supposed
 	switch (menuType){
 	case 1:
@@ -392,43 +397,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		break;
 	case 4:
 		// TopMenu next levels...
-		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-			// too width - try right to left
-			if ((TERM_ScreenWidth - ((renderWidth * 2) - orgWidth) - renderWidth) < 0){
-				// we're screwed - maybe single-key menu is working
-				renderSmall = 1;
-				renderWidth = 0;
-				// Get reduced size
-				while (menuPos){
-					if (!renderWidth){
-						// Is at least one key + 2 spaces
-						renderWidth = 3;
-					}
-					if (menuPos->isCheck || menuPos->isOption){
-						// containing option or check
-						renderWidth = renderTabs * 7 + (renderTabs -1);
-						break;
-					}
-					menuPos = menuPos->nextPos;
-				}
-				menuPos = menuPos1st;
-			}
-			else{
-				// we change alignment
-				posX -= (renderWidth * 2) - orgWidth;
-			}
-		}
 		break;
 	default:
-		// TopMenu - 1st level		
-		if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-			// too width - try to invert direction
-			posX -= renderWidth;
-			invert = 1;
+		// TopMenu - 1st level
+		if (invert){
+			// Print to left
 			if (posX < 1){
-				// we're screwed - maybe single-key menu is working
-				posX = orgPosX;
-				invert = 0;
+				// that's bad - we've just the reduced size as option
 				renderSmall = 1;
 				renderWidth = 0;
 				// Get reduced size
@@ -446,18 +421,53 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 					menuPos = menuPos->nextPos;
 				}
 				menuPos = menuPos1st;
-				if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-					// Uhhh, even the short version doesn't fit...
-					posX -= renderWidth;
-					invert = 1;
-					if (posX < 1){
-						// Damn, this area is awful small... we can't render this
-						dontRender = 1;
-					}
+				posX = orgPosX - renderWidth;
+				if (posX < 1){
+					// Damn, this area is awful small... we can't render this
+					dontRender = 1;
 				}
 			}
-			else{
-				// we already changed the alignment
+		}
+		else{
+			// Print to right
+			if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+				// too width - try to invert direction
+				posX -= renderWidth;
+				invert = 1;
+				if (posX < 1){
+					// we're screwed - maybe single-key menu is working
+					posX = orgPosX;
+					invert = 0;
+					renderSmall = 1;
+					renderWidth = 0;
+					// Get reduced size
+					while (menuPos){
+						if (!renderWidth){
+							// Is at least one key + 2 spaces
+							renderWidth = 3;
+						}
+						if (menuPos->isCheck || menuPos->isOption){
+							// containing option or check - ' [ ] A '
+							renderWidth = 7;
+							renderSmall = 2;
+							break;
+						}
+						menuPos = menuPos->nextPos;
+					}
+					menuPos = menuPos1st;
+					if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+						// Uhhh, even the short version doesn't fit...
+						posX -= renderWidth;
+						invert = 1;
+						if (posX < 1){
+							// Damn, this area is awful small... we can't render this
+							dontRender = 1;
+						}
+					}
+				}
+				else{
+					// we already changed the alignment
+				}
 			}
 		}
 		break;
@@ -472,7 +482,6 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 		
 		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-		selectedMenuPosHlp++;
 
 		if (renderSmall){
 			// render just the keys (+ eventually check/option brackets)
@@ -481,7 +490,6 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 				// enabled & selected
 				SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 				SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
-				selectedMenuPos = selectedMenuPosHlp;
 			}
 			else if (menuPos->enabled){
 				// enabled
@@ -549,9 +557,6 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 
 		else{
 			// render full line
-			if (menuPos->selected && menuPos->enabled){
-				selectedMenuPos = selectedMenuPosHlp;
-			}
 			for (size_t i = 0; i < strlen(menuPos->caption); i++){
 				if (menuPos->enabled && menuPos->selected){
 					// enabled - selected
@@ -599,13 +604,26 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 			
 		}
 	}
+
+	if (selectedMenu){
+		// there is another subMenu to render...
 		
-	SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-	SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-	
+		// set X & Y
+		posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
+		if (invert){
+			posX--;
+		}
+		else{
+			posX += renderWidth;
+		}
+		
+		TUIrenderSubMenu(posX, posY, 4, invert, menuDef, selectedMenu, deskDef);
+		
+	}
+		
 }
 
-void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *menuDef, int justRefresh){
+void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh){
 
 	char strHlp[STR_SMALL_SIZE];
 	char strLine[STR_MID_SIZE];
@@ -855,11 +873,11 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenuDefSTRUCT *me
 		}
 		CursorRight(x);
 		// Render SubMenu
-		TUIrenderSubMenu(++x, 3, 0, menuDef, menuPos);
+		TUIrenderSubMenu(++x, 3, 0, 0, menuDef, menuPos->pos1st->pos1st, deskDef);
 	}
 }
 
-int TUIinitHeaders(char *strFile, struct TuiHeaderDefSTRUCT **userHeader){
+int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 
 	// User Header - Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -870,31 +888,32 @@ int TUIinitHeaders(char *strFile, struct TuiHeaderDefSTRUCT **userHeader){
 	int headersCount = IniGetInt(strFile, "global.header.HeaderCount", 0);
 
 	// memory to store all header
-	*userHeader = (struct TuiHeaderDefSTRUCT*)malloc(headersCount * sizeof(struct TuiHeaderDefSTRUCT));
+	*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
 
 	for (int i = 0; i < headersCount; i++){
+		int j = i + 1;	// User index in file is 1-based...
 		// Caption
-		sprintf(strSearch, "global.header.%d.Caption", i + 1);
+		sprintf(strSearch, "global.header.%d.Caption", j);
 		sprintf(strHLP, "Header%d", i + 1);
 		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
 		userHeader[i]->caption = IniStrToMem(strHeaderCaption, 0);
 		// TextColor 
-		sprintf(strSearch, "global.header.%d.TextColor", i + 1);
+		sprintf(strSearch, "global.header.%d.TextColor", j);
 		userHeader[i]->txtColor = IniGetInt(strFile, strSearch, 0);
 		// TextStyle 
-		sprintf(strSearch, "global.header.%d.TextStyle", i + 1);
+		sprintf(strSearch, "global.header.%d.TextStyle", j);
 		userHeader[i]->txtStyle = IniGetInt(strFile, strSearch, 0);
 		// TimeColor 
-		sprintf(strSearch, "global.header.%d.TimeColor", i + 1);
+		sprintf(strSearch, "global.header.%d.TimeColor", j);
 		userHeader[i]->timeColor = IniGetInt(strFile, strSearch, 0);
 		// TimeStyle 
-		sprintf(strSearch, "global.header.%d.TimeStyle", i + 1);
+		sprintf(strSearch, "global.header.%d.TimeStyle", j);
 		userHeader[i]->timeStyle = IniGetInt(strFile, strSearch, 0);
 		// PrintRunTime 
-		sprintf(strSearch, "global.header.%d.PrintRunTime", i + 1);
+		sprintf(strSearch, "global.header.%d.PrintRunTime", j);
 		userHeader[i]->printRunTime = IniGetBool(strFile, strSearch, 0);
 		// PrintRealTime 
-		sprintf(strSearch, "global.header.%d.PrintRealTime", i + 1);
+		sprintf(strSearch, "global.header.%d.PrintRealTime", j);
 		userHeader[i]->printRealTime = IniGetBool(strFile, strSearch, 0);
 
 	}
@@ -904,11 +923,12 @@ int TUIinitHeaders(char *strFile, struct TuiHeaderDefSTRUCT **userHeader){
 	
 }
 
-struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenuDefSTRUCT *definition, int positions){
+struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions){
 
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
 	static int *nextPos = NULL;
 	static int *prevPos = NULL;
+	static int *pos1st = NULL;
 	
 	static int cnt = 0;
 
@@ -931,6 +951,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		menuPos = realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT));
 		nextPos = realloc(nextPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
 		prevPos = realloc(prevPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
+		pos1st = realloc(pos1st, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
 
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
 		menuPos[pos1].enabled = IniGetBool(strFile, strSearch, 1);
@@ -1006,6 +1027,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		sprintf(strPos1, "%s%s ", strPos1, strHLP);
 
 		menuPos[pos1].caption = IniStrToMem(strPos1, 0);
+		printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
 		// already known stuff
 		menuPos[pos1].definition = definition;
 		// stuff to reset
@@ -1015,10 +1037,11 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		menuPos[pos1].selected = 0;
 		nextPos[pos1] = 0;
 		prevPos[pos1] = 0;
+		pos1st[pos1] = 0;
 		
 		// if not 1st pos, we have to set...
 		if (i){
-			// save IDs instead of pointers while recursion
+			// save IDs instead of pointers while recursion (realloc moves pointer)
 			nextPos[lastPos + 1] = pos1;
 			prevPos[pos1 + 1] = lastPos;
 		}
@@ -1026,7 +1049,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		
 		if (menuPos[pos1].posCnt){
 			sprintf(strSearch, "%s%d.", strPath, j);
-			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt);
+			pos1st[pos1 + 1] = pos1 + 1;
+			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt);			
 		}
 
 	}
@@ -1038,15 +1062,21 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			// ID = 0 // substitute for NULL
 			menuPos[i].nextPos = &menuPos[nextPos[i + 1]];
 		}		
-		menuPos[i].prevPos = &menuPos[prevPos[i + 1]];
+		//if (prevPos[i + 1]){
+			menuPos[i].prevPos = &menuPos[prevPos[i + 1]];
+		//}
+		//if (pos1st[i + 1]){
+			menuPos[i].pos1st = &menuPos[pos1st[i + 1]];
+		//}
 	}
-	
+
+	printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);
 	return &menuPos[posReturn];
 	
 }
 
 // "global.TopMenu."
-int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu){
+int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -1054,7 +1084,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 	sprintf(strSearch, "%s.%s", strPath, "Count");
 	int menusCnt = IniGetInt(strFile, strSearch, 0);
 
-	*menu = (struct TuiMenuDefSTRUCT*)malloc(menusCnt * sizeof(struct TuiMenuDefSTRUCT));
+	*menu = (struct TuiMenusSTRUCT*)malloc(menusCnt * sizeof(struct TuiMenusSTRUCT));
 
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
@@ -1097,19 +1127,37 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenuDefSTRUCT **menu
 	
 }
 
-int TUIinitDesktops(char *strFile, struct TuiDesktopDefSTRUCT **strPath){
+int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
+	
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
 
-	sprintf(strSearch, "%s.%s", strPath, "Count");
-	int desksCnt = IniGetInt(strFile, strSearch, 0);
+	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
 
-	*strPath = (struct TuiDesktopDefSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopDefSTRUCT));
+	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
 
 	// Menu Definition Values
 	for (int i = 0; i < desksCnt; i++){
+		int j = i + 1; // User index in file is 1-based...
 
+		// Header
+		sprintf(strSearch, "global.desktops.%d.Header", j);
+		desktop[i]->header = IniGetInt(strFile, strSearch, 0);
+		// TopMenu
+		sprintf(strSearch, "global.desktops.%d.TopMenu", j);
+		desktop[i]->topMenu = IniGetInt(strFile, strSearch, 0);
+		// BottomMenu
+		sprintf(strSearch, "global.desktops.%d.BottomMenu", j);
+		desktop[i]->bottomMenu = IniGetInt(strFile, strSearch, 0);
+		// LeftMenu
+		sprintf(strSearch, "global.desktops.%d.LeftMenu", j);
+		desktop[i]->leftMenu = IniGetInt(strFile, strSearch, 0);
+		// RightMenu
+		sprintf(strSearch, "global.desktops.%d.RightMenu", j);
+		desktop[i]->rightMenu = IniGetInt(strFile, strSearch, 0);
 	}
+
+	return desksCnt;
 
 }
 
