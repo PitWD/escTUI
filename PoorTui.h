@@ -635,6 +635,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 	int dontRender = 0;		// even too small to render shortcuts
 	int renderWidth = 0;
 
+	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
 	int selectedMenuPos = 0;
 	int selectedMenuPosHlp = 0;
 
@@ -769,6 +770,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
 					selectedMenuPos = selectedMenuPosHlp;
+					selectedMenu = menuPos;
 				}
 				else if (menuPos->enabled){
 					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
@@ -793,6 +795,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 				selectedMenuPosHlp++;
 				if (menuPos->selected && menuPos->enabled){
 					selectedMenuPos = selectedMenuPosHlp;
+					selectedMenu = menuPos;
 				}
 				for (size_t i = 0; i < strlen(menuPos->caption); i++){
 					// int j = 0;
@@ -859,7 +862,8 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		printf("%s", gStrRunTime);
 	}	
 
-	if (selectedMenuPos && menuDef->pos1st){
+	// if (selectedMenuPos && menuDef->pos1st){
+	if (selectedMenuPos){
 		// render selected Submenu
 		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 		
@@ -873,7 +877,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		}
 		CursorRight(x);
 		// Render SubMenu
-		TUIrenderSubMenu(++x, 3, 0, 0, menuDef, menuPos->pos1st->pos1st, deskDef);
+		TUIrenderSubMenu(++x, 3, 0, 0, menuDef, selectedMenu->pos1st, deskDef);
 	}
 }
 
