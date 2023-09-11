@@ -101,6 +101,9 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenuPosSTRUCT *nextPos;		// on same level
 	struct TuiMenuPosSTRUCT *prevPos;		// on same level
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
+	int nextID;
+	int prevID;
+	int pos1ID;
 	int selected :1;			// if position is selected
 	int isOption :1;
 	int isCheck :1;
@@ -963,9 +966,9 @@ printf("%s\n", userHeaders[i].caption);
 struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe){
 
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
-	static int *nextPos = NULL;
-	static int *prevPos = NULL;
-	static int *pos1st = NULL;
+	//static int *nextPos = NULL;
+	//static int *prevPos = NULL;
+	//static int *pos1st = NULL;
 	
 	static int cnt = 0;
 
@@ -1013,9 +1016,6 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		cnt++;
 		int pos1 = cnt - 1;
 		menuPos = realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT));
-		nextPos = realloc(nextPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
-		prevPos = realloc(prevPos, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
-		pos1st = realloc(pos1st, (cnt + 1) * sizeof(int)); // +1-indexed to get 0 for NULL
 
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
 		menuPos[pos1].enabled = IniGetBool(strFile, strSearch, 1);
@@ -1091,55 +1091,55 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		sprintf(strPos1, "%s%s ", strPos1, strHLP);
 
 		menuPos[pos1].caption = IniStrToMem(strPos1, 0);
-		printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
+// printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
 		// already known stuff
 		menuPos[pos1].definition = definition;
 		// stuff to reset
 		menuPos[pos1].nextPos = NULL;
 		menuPos[pos1].prevPos = NULL;
 		menuPos[pos1].pos1st = NULL;
+
+		menuPos[pos1].nextID = 0;
+		menuPos[pos1].prevID = 0;
+		menuPos[pos1].pos1ID = 0;
+
 		menuPos[pos1].selected = 0;
-		nextPos[pos1] = 0;
-		prevPos[pos1] = 0;
-		//pos1st[pos1] = 0;
 		
 		// if not 1st pos, we have to set...
 		if (i){
 			// save IDs instead of pointers while recursion (realloc moves pointer)
-			nextPos[lastPos + 1] = pos1;
-			prevPos[pos1 + 1] = lastPos;
+			menuPos[lastPos].nextID = pos1;
 		}
+		menuPos[pos1].prevID = lastPos;
 		lastPos = pos1;
 		
 		if (menuPos[pos1].posCnt){
 			sprintf(strSearch, "%s%d.", strPath, j);
 			//pos1st[pos1 + 1] = pos1 + 1;
-			pos1st[cnt] = cnt;
+			menuPos[pos1].pos1ID = cnt;
 			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
 		}
 		else{
-			pos1st[cnt] = 0;
+			menuPos[pos1].pos1ID = 0;
 		}
-		
 
 	}
 	
 	for (size_t i = 0; i < cnt; i++){
 		// restore valid pointers from IDs
 		// ID = 0 // substitute for NULL
-		if (nextPos[i + 1])	{
-			// ID = 0 // substitute for NULL
-			menuPos[i].nextPos = &menuPos[nextPos[i + 1]];
-		}		
-		if (prevPos[i + 1]){
-			menuPos[i].prevPos = &menuPos[prevPos[i + 1]];
+		if (menuPos[i].prevID){
+			menuPos[i].prevPos = &menuPos[menuPos[i].prevID];
 		}
-		if (pos1st[i + 1]){
-			menuPos[i].pos1st = &menuPos[pos1st[i + 1]];
+		if (menuPos[i].nextID){
+			menuPos[i].nextPos = &menuPos[menuPos[i].nextID];
+		}
+		if (menuPos[i].pos1ID){
+			menuPos[i].pos1st = &menuPos[menuPos[i].pos1ID];
 		}
 	}
 
-	printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);
+// printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);
 	return &menuPos[posReturn];
 	
 }
@@ -1190,8 +1190,8 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
 		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 0);	
 
-		printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
-		printf("%s\n", menu[i]->pos1st->caption);	
+// printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
+// printf("%s\n", menu[i]->pos1st->caption);	
 
 	}
 
