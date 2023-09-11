@@ -110,8 +110,9 @@ int main() {
 
 		for (size_t i = 0; i < userTopMenuCnt; i++){
 
-			userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
+			//userTopMenus[i].pos1st->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
+			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->selected = 1;
 			//userMenuPos[userTopMenus[i].pos1st].selected = 1;
 			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}

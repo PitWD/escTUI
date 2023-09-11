@@ -872,7 +872,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		CursorDown(1);
 		int x = 0;
 		while (--selectedMenuPos){
-			x += strlen(menuPos->caption) + 2;
+			x += strlen(menuPos->caption); // + 2;
 			menuPos = menuPos->nextPos;			
 		}
 		CursorRight(x);
