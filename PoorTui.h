@@ -278,7 +278,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
 
 	// if posX and invert is given... posX must have right alignment! (after having width we move it)
 
@@ -384,7 +384,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 
 	if (invert){
 		// correct posX
-		posX -= renderWidth;
+		posX -= renderWidth - menuWidth;
 	}
 	
 	// Does it fit in X as supposed
@@ -435,7 +435,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 			// Print to right
 			if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 				// too width - try to invert direction
-				posX -= renderWidth;
+				posX -= renderWidth - menuWidth;
 				invert = 1;
 				if (posX < 1){
 					// we're screwed - maybe single-key menu is working
@@ -460,7 +460,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 					menuPos = menuPos1st;
 					if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 						// Uhhh, even the short version doesn't fit...
-						posX -= renderWidth;
+						posX -= renderWidth - menuWidth;
 						invert = 1;
 						if (posX < 1){
 							// Damn, this area is awful small... we can't render this
@@ -620,7 +620,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int invert, struct TuiMe
 			posX += renderWidth;
 		}
 		
-		TUIrenderSubMenu(posX, posY, 4, invert, menuDef, selectedMenu, deskDef);
+		TUIrenderSubMenu(posX, posY, 4, 0, invert, menuDef, selectedMenu, deskDef);
 		
 	}
 		
@@ -873,14 +873,16 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		// Set cursor one row below start of selected menu
 		CursorLeft(renderWidth);
 		CursorDown(1);
+		int xHlp = 0;
 		int x = 0;
 		while (--selectedMenuPos){
-			x += strlen(menuPos->caption); // + 2;
+			xHlp = strlen(menuPos->caption);
+			x += xHlp; // + 2;
 			menuPos = menuPos->nextPos;			
 		}
 		CursorRight(x);
 		// Render SubMenu
-		TUIrenderSubMenu(++x, 3, 0, 0, menuDef, selectedMenu->pos1st, deskDef);
+		TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef);
 	}
 }
 
