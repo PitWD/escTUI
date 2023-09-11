@@ -863,7 +863,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 	}	
 
 	// if (selectedMenuPos && menuDef->pos1st){
-	if (selectedMenuPos){
+	if (selectedMenu){
 		// render selected Submenu
 		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 		
@@ -960,7 +960,7 @@ printf("%s\n", userHeaders[i].caption);
 	
 }
 
-struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions){
+struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe){
 
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
 	static int *nextPos = NULL;
@@ -976,6 +976,34 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 
 	int posReturn = cnt;	// save for return
 	int lastPos = 0;
+
+	if (testMe){
+		for (size_t i = 0; i < cnt; i++){
+			printf("pos: %d @: %d pos1st: %d nextPos: %d prevPos: %d\n", i, &menuPos[i], menuPos[i].pos1st, menuPos[i].nextPos, menuPos[i].prevPos);
+			//printf("pos: %d @: %s pos1st: %s nextPos: %s prevPos: %s\n\n", i, menuPos[i].caption, menuPos[i].pos1st->caption, menuPos[i].nextPos->caption, menuPos[i].prevPos->caption);
+			printf("pos: %d @: %s pos1st: ", i, menuPos[i].caption);
+			if (menuPos[i].pos1st){
+				printf("%s nextPos: ", menuPos[i].pos1st->caption);
+			}
+			else{
+				printf("NULL nextPos:");
+			}
+			if (menuPos[i].nextPos){
+				printf("%s prevPos: ", menuPos[i].nextPos->caption);
+			}
+			else{
+				printf("NULL prevPos:");
+			}
+			if (menuPos[i].prevPos){
+				printf("%s\n\n", menuPos[i].prevPos->caption);
+			}
+			else{
+				printf("NULL\n\n");
+			}
+		}
+		return NULL;
+	}
+	
 
 	for (int i = 0; i < positions; i++){
 		
@@ -1073,7 +1101,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		menuPos[pos1].selected = 0;
 		nextPos[pos1] = 0;
 		prevPos[pos1] = 0;
-		pos1st[pos1] = 0;
+		//pos1st[pos1] = 0;
 		
 		// if not 1st pos, we have to set...
 		if (i){
@@ -1085,9 +1113,14 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		
 		if (menuPos[pos1].posCnt){
 			sprintf(strSearch, "%s%d.", strPath, j);
-			pos1st[pos1 + 1] = pos1 + 1;
-			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt);			
+			//pos1st[pos1 + 1] = pos1 + 1;
+			pos1st[cnt] = cnt;
+			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
 		}
+		else{
+			pos1st[cnt] = 0;
+		}
+		
 
 	}
 	
@@ -1098,12 +1131,12 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			// ID = 0 // substitute for NULL
 			menuPos[i].nextPos = &menuPos[nextPos[i + 1]];
 		}		
-		//if (prevPos[i + 1]){
+		if (prevPos[i + 1]){
 			menuPos[i].prevPos = &menuPos[prevPos[i + 1]];
-		//}
-		//if (pos1st[i + 1]){
+		}
+		if (pos1st[i + 1]){
 			menuPos[i].pos1st = &menuPos[pos1st[i + 1]];
-		//}
+		}
 	}
 
 	printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);
@@ -1155,7 +1188,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
-		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);	
+		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 0);	
 
 		printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
 		printf("%s\n", menu[i]->pos1st->caption);	
