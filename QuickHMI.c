@@ -93,6 +93,7 @@ int main() {
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
 		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
+		//int userHeadersCnt = TUIinitHeaders("desktops.ini");
 		for (size_t i = 0; i < userHeadersCnt; i++){
 			TUIrenderHeader(0,0,0,i,0);
 			printf("\n");
@@ -100,7 +101,7 @@ int main() {
 		
 		//printf("Und hier...\n");
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
-
+		printf("GotTop\n");
 		for (size_t i = 0; i < userTopMenuCnt; i++){
 			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
@@ -110,6 +111,7 @@ int main() {
 		for (size_t i = 0; i < userTopMenuCnt; i++){
 
 			userTopMenus[i].pos1st->selected = 1;
+			//userMenuPos[userTopMenus[i].pos1st].selected = 1;
 			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
 		

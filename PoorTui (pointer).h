@@ -900,60 +900,27 @@ int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 		sprintf(strSearch, "global.header.%d.Caption", j);
 		sprintf(strHLP, "Header%d", i + 1);
 		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
-		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
+		userHeader[i]->caption = IniStrToMem(strHeaderCaption, 0);
 		// TextColor 
 		sprintf(strSearch, "global.header.%d.TextColor", j);
-		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->txtColor = IniGetInt(strFile, strSearch, 0);
 		// TextStyle 
 		sprintf(strSearch, "global.header.%d.TextStyle", j);
-		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->txtStyle = IniGetInt(strFile, strSearch, 0);
 		// TimeColor 
 		sprintf(strSearch, "global.header.%d.TimeColor", j);
-		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->timeColor = IniGetInt(strFile, strSearch, 0);
 		// TimeStyle 
 		sprintf(strSearch, "global.header.%d.TimeStyle", j);
-		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		userHeader[i]->timeStyle = IniGetInt(strFile, strSearch, 0);
 		// PrintRunTime 
 		sprintf(strSearch, "global.header.%d.PrintRunTime", j);
-		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		userHeader[i]->printRunTime = IniGetBool(strFile, strSearch, 0);
 		// PrintRealTime 
 		sprintf(strSearch, "global.header.%d.PrintRealTime", j);
-		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		userHeader[i]->printRealTime = IniGetBool(strFile, strSearch, 0);
 
 	}
-
-/*	// direct
-	userHeaders = malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
-
-	for (int i = 0; i < headersCount; i++){
-		int j = i + 1;	// User index in file is 1-based...
-		// Caption
-		sprintf(strSearch, "global.header.%d.Caption", j);
-		sprintf(strHLP, "Header%d", i + 1);
-		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
-		userHeaders[i].caption = IniStrToMem(strHeaderCaption, 0);
-printf("%s\n", userHeaders[i].caption);
-		// TextColor 
-		sprintf(strSearch, "global.header.%d.TextColor", j);
-		userHeaders[i].txtColor = IniGetInt(strFile, strSearch, 0);
-		// TextStyle 
-		sprintf(strSearch, "global.header.%d.TextStyle", j);
-		userHeaders[i].txtStyle = IniGetInt(strFile, strSearch, 0);
-		// TimeColor 
-		sprintf(strSearch, "global.header.%d.TimeColor", j);
-		userHeaders[i].timeColor = IniGetInt(strFile, strSearch, 0);
-		// TimeStyle 
-		sprintf(strSearch, "global.header.%d.TimeStyle", j);
-		userHeaders[i].timeStyle = IniGetInt(strFile, strSearch, 0);
-		// PrintRunTime 
-		sprintf(strSearch, "global.header.%d.PrintRunTime", j);
-		userHeaders[i].printRunTime = IniGetBool(strFile, strSearch, 0);
-		// PrintRealTime 
-		sprintf(strSearch, "global.header.%d.PrintRealTime", j);
-		userHeaders[i].printRealTime = IniGetBool(strFile, strSearch, 0);
-
-	}
-*/
 	printf("\n");
 
 	return headersCount;
@@ -974,6 +941,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	char strHLP[STR_SMALL_SIZE];
 	char strPos1[STR_SMALL_SIZE];
 
+	
 	int posReturn = cnt;	// save for return
 	int lastPos = 0;
 
@@ -1125,40 +1093,37 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
 		sprintf(strSearch, "%s.%d.TextColor", strPath, i + 1);
-		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->txtColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TextStyle", strPath, i + 1);
-		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->txtStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectColor", strPath, i + 1);
-		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->selectColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectStyle", strPath, i + 1);
-		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->selectStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledColor", strPath, i + 1);
-		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->disabledColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, i + 1);
-		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->disabledStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyColor", strPath, i + 1);
-		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->keyColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyStyle", strPath, i + 1);
-		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->keyStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeColor", strPath, i + 1);
-		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		menu[i]->timeColor = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeStyle", strPath, i + 1);
-		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		menu[i]->timeStyle = IniGetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, i + 1);
-		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		menu[i]->printRunTime = IniGetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, i + 1);
-		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		menu[i]->printRealTime = IniGetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
-		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
+		menu[i]->posCnt = IniGetInt(strFile, strSearch, 0);
 
-		(*menu)[i].renderLen = 0;
+		menu[i]->renderLen = 0;
 
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
-		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt);	
-
-		printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
-		printf("%s\n", menu[i]->pos1st->caption);	
+		menu[i]->pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], menu[i]->posCnt);		
 
 	}
 
