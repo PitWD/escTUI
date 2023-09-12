@@ -435,7 +435,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			// Print to right
 			if ((TERM_ScreenWidth - posX - renderWidth) < 0){
 				// too width - try to invert direction
-				posX -= renderWidth - menuWidth;
+				posX -= renderWidth - menuWidth - 1;
 				invert = 1;
 				if (posX < 1){
 					// we're screwed - maybe single-key menu is working
