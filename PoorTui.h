@@ -1116,25 +1116,34 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		lastPos = pos1;
 		
 		if (menuPos[pos1].posCnt){
+			// SubMenu exist
 			sprintf(strSearch, "%s%d.", strPath, j);
 			//pos1st[pos1 + 1] = pos1 + 1;
 			menuPos[pos1].pos1ID = cnt;
-			menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
+			//menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
+			TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
 		}
 		else{
+			// No SubMenu
 			menuPos[pos1].pos1ID = 0;
 		}
 
 	}
 	
+	int j = 0;
 	for (size_t i = 0; i < cnt; i++){
 		// restore valid pointers from IDs
-		// ID = 0 // substitute for NULL
-		if (menuPos[i].prevID){
+		if (menuPos[i].prevID || (j && (i == j))){
 			menuPos[i].prevPos = &menuPos[menuPos[i].prevID];
 		}
 		if (menuPos[i].nextID){
 			menuPos[i].nextPos = &menuPos[menuPos[i].nextID];
+			if (!i){
+				// e.g. File  Edit  Settings
+				// keep ID of edit to get/set missing prevPos from "Edit"
+				// see "|| (j && (i == j))" in 1st IF
+				j = menuPos[i].nextID;
+			}
 		}
 		if (menuPos[i].pos1ID){
 			menuPos[i].pos1st = &menuPos[menuPos[i].pos1ID];
