@@ -760,11 +760,9 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		// Style & Color
 		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-		
 
 		if (renderSmall){
 			// render just the keys
-			printf(" ");	// 1st space...
 			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 			while (menuPos){
 				selectedMenuPosHlp++;
@@ -772,24 +770,41 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 					/* code */
 					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+					printf(" ");	// 1st space...
 					selectedMenuPos = selectedMenuPosHlp;
 					selectedMenu = menuPos;
 				}
 				else if (menuPos->enabled){
+					printf(" ");	// 1st space...
 					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
 				}
 				else{
+					printf(" ");	// 1st space...
 					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
 				}			
 				printf("%c", menuPos->caption[menuPos->keyCode]);
+
 				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
-				printf("  ");
+
+				if (menuPos->selected && menuPos->enabled){
+					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+				}
+				else if (menuPos->enabled){
+				}
+				else{
+				}			
+				printf(" ");
+
+				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
+
 				menuPos = menuPos->nextPos;
 			}
-			//printf(" ");
+			printf(" ");
 		}
 		else{
 			// render full line
@@ -875,8 +890,14 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		CursorDown(1);
 		int xHlp = 0;
 		int x = 0;
+		if (renderSmall){
+			xHlp = 2;
+			x = selectedMenuPos - 1;
+		}
 		while (--selectedMenuPos){
-			xHlp = strlen(menuPos->caption);
+			if (!renderSmall){
+				xHlp = strlen(menuPos->caption);
+			}
 			x += xHlp; // + 2;
 			menuPos = menuPos->nextPos;			
 		}
