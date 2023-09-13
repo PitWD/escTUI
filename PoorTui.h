@@ -102,9 +102,9 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenuPosSTRUCT *prevPos;		// on same level
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
 	struct TuiMenuPosSTRUCT *parentPos;		// parent on upper level
-	int nextID;
-	int prevID;
-	int pos1ID;
+	int nextID;					// helper for reallocating
+	int prevID;					// helper for reallocating
+	int pos1ID;					// helper for reallocating
 	int parentID;				// calculated but not used actually
 	int selected :1;			// if position is selected
 	int isOption :1;

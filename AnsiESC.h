@@ -374,6 +374,22 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 	return stylesCountSum;
 }
 
+// DEC BoxDraw
+void DECbox(int set){
+	if (set){
+		printf("\x1B(0"); // enable BoxDraw Mode
+	}
+	else{
+		printf("\x1B(B"); // disable BoxDraw Mode
+	}
+}
+#define DECboxON DECbox(1)
+#define DECboxOFF DECbox(0)
+void DEClineX(int len){
+	DECboxON;
+	StrPrintChars('q', len);
+	DECboxOFF;
+}
 // Cursor Positions
 void Locate(int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
