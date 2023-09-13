@@ -111,9 +111,9 @@ int main() {
 
 			//userTopMenus[i].pos1st->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->selected = 1;
-			userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
+			//userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->nextPos->selected = 1;
-			//userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
+			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
 			TUIrenderTopMenu(1, 2, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
 		

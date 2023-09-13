@@ -478,178 +478,190 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		break;
 	}
 
-	Locate(posX, posY);
-	for (size_t i = 0; i < offsetPosY; i++){
-		// trash unused positions
-		menuPos = menuPos->nextPos;
-	}
-	while (menuPos){
-		
-		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-
-		if (renderSmall){
-			// render just the keys (+ eventually check/option brackets)
-			printf(" ");	// 1st space...
-			if (menuPos->selected && menuPos->enabled){
-				// enabled & selected
-				SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
-			}
-			else if (menuPos->enabled){
-				// enabled
-			}
-			else{
-				// disabled
-				SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
-			}
-			if (menuPos->isCheck){
-				// is a check
-				printf("[");
-				if (menuPos->activated){
-					printf("x");
-				}
-				else{
-					printf(" ");
-				}
-				printf("] ");
-			}
-			else if (menuPos->isOption){
-				// is an option
-				printf("(");
-				if (menuPos->activated){
-					printf("x");
-				}
-				else{
-					printf(" ");
-				}
-				printf(") ");
-			}
-			else if (renderSmall == 2){
-				if (menuPos->isSpacer){
-					DEClineX(4);
-				}
-				else{
-					StrPrintSpaces(4);
-				}
-			}
-			else{
-				// we're fine
-			}
-			
-			if (menuPos->selected && menuPos->enabled){
-			}
-			else if (menuPos->enabled && !menuPos->isSpacer){
-				// Key in keyColor and keyStyle
-				SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-			}
-			else{
-			}
-			if (menuPos->isSpacer){
-				DEClineX(1);
-			}
-			else{
-				printf("%c", menuPos->caption[menuPos->keyCode]);
-			}
-
-			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
-			printf(" ");
-			
-			CursorDown(1);
-			if (renderSmall == 2){
-				// with option/check
-				CursorLeft(7);
-			}
-			else{
-				CursorLeft(3);
-			}
-			
+	if (!dontRender){
+		Locate(posX, posY);
+		for (size_t i = 0; i < offsetPosY; i++){
+			// trash unused positions
 			menuPos = menuPos->nextPos;
 		}
+		while (menuPos){
+			
+			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 
-		else{
-			// render full line
-			for (size_t i = 0; i < strlen(menuPos->caption); i++){
-				if (menuPos->enabled && menuPos->selected){
-					// enabled - selected
+			if (renderSmall){
+				// render just the keys (+ eventually check/option brackets)
+				printf(" ");	// 1st space...
+				if (menuPos->selected && menuPos->enabled){
+					// enabled & selected
 					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
 				}
 				else if (menuPos->enabled){
 					// enabled
-					if (i && (i == menuPos->keyCode)){
-						// is key
-						SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
-						SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-					}
-					else{
-						SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-						SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-					}
 				}
 				else{
 					// disabled
 					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
 				}
-				if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
-					// Set Value of check/option
+				if (menuPos->isCheck){
+					// is a check
+					printf("[");
 					if (menuPos->activated){
 						printf("x");
 					}
 					else{
 						printf(" ");
 					}
+					printf("] ");
 				}
-				else{
-					if (menuPos->isSpacer){
-						/* code */
+				else if (menuPos->isOption){
+					// is an option
+					printf("(");
+					if (menuPos->activated){
+						printf("x");
 					}
 					else{
-						printf("%c", menuPos->caption[i]);
+						printf(" ");
+					}
+					printf(") ");
+				}
+				else if (renderSmall == 2){
+					if (menuPos->isSpacer){
+						DEClineX(4);
+					}
+					else{
+						StrPrintSpaces(4);
 					}
 				}
-			}
-			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+				else{
+					// we're fine
+				}
+				
+				if (menuPos->selected && menuPos->enabled){
+				}
+				else if (menuPos->enabled && !menuPos->isSpacer){
+					// Key in keyColor and keyStyle
+					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
+				}
+				else{
+				}
+				if (menuPos->isSpacer){
+					DEClineX(1);
+				}
+				else{
+					printf("%c", menuPos->caption[menuPos->keyCode]);
+				}
 
-			if (menuPos->isSpacer){
+				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
 				printf(" ");
-				DEClineX(orgWidth - 2);
-				printf(" ");
+				
+				CursorDown(1);
+				if (renderSmall == 2){
+					// with option/check
+					CursorLeft(7);
+				}
+				else{
+					CursorLeft(3);
+				}
+				
+				menuPos = menuPos->nextPos;
+			}
+
+			else{
+				// render full line
+				for (size_t i = 0; i < strlen(menuPos->caption); i++){
+					if (menuPos->enabled && menuPos->selected){
+						// enabled - selected
+						SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+					}
+					else if (menuPos->enabled){
+						// enabled
+						if (i && (i == menuPos->keyCode)){
+							// is key
+							SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
+							SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
+						}
+						else{
+							SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+							SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+						}
+					}
+					else{
+						// disabled
+						SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
+					}
+					if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
+						// Set Value of check/option
+						if (menuPos->activated){
+							printf("x");
+						}
+						else{
+							printf(" ");
+						}
+					}
+					else{
+						if (menuPos->isSpacer){
+							/* code */
+						}
+						else{
+							printf("%c", menuPos->caption[i]);
+						}
+					}
+				}
+				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+
+				if (menuPos->isSpacer){
+					printf(" ");
+					DEClineX(orgWidth - 2);
+					printf(" ");
+				}
+				else{
+					StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+				}
+				
+				
+				
+				CursorDown(1);
+				CursorLeft(orgWidth);
+				//printf(" ");
+				menuPos = menuPos->nextPos;
+				
+			}
+		}
+
+		if (selectedMenu){
+			// there is another subMenu to render...
+			
+			// set X & Y
+			posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
+			if (invert){
+				posX--;
 			}
 			else{
-				StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+				posX += renderWidth;
 			}
 			
-			
-			
-			CursorDown(1);
-			CursorLeft(orgWidth);
-			//printf(" ");
-			menuPos = menuPos->nextPos;
+			TUIrenderSubMenu(posX, posY, 4, 0, invert, menuDef, selectedMenu, deskDef);
 			
 		}
 	}
-
-	if (selectedMenu){
-		// there is another subMenu to render...
-		
-		// set X & Y
-		posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
-		if (invert){
-			posX--;
-		}
-		else{
-			posX += renderWidth;
-		}
-		
-		TUIrenderSubMenu(posX, posY, 4, 0, invert, menuDef, selectedMenu, deskDef);
-		
+	else{
+		ResFBU();
+		SetFg16(fgRed);
+		TxtBold(1);
+		printf("!! Can't Render 01 !!\n");
+		TxtBold(0);
+		ResFBU();
 	}
+	
+	
 		
 }
 
@@ -775,163 +787,174 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		// full menu fits
 	}
 
-	// Where to render
-	if (posX && posY){
-		Locate(posX, posY);
-	}
-	else if (posX){
-		LocateX(posX);
-	}
-
-	if (!justRefresh){
-		// Style & Color
-		SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-		SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-
-		if (renderSmall){
-			// render just the keys
-			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
-			while (menuPos){
-				selectedMenuPosHlp++;
-				if (menuPos->selected && menuPos->enabled){
-					/* code */
-					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
-					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
-					printf(" ");	// 1st space...
-					selectedMenuPos = selectedMenuPosHlp;
-					selectedMenu = menuPos;
-				}
-				else if (menuPos->enabled){
-					printf(" ");	// 1st space...
-					SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
-					SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-				}
-				else{
-					printf(" ");	// 1st space...
-					SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
-					SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
-				}			
-				printf("%c", menuPos->caption[menuPos->keyCode]);
-
-				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
-
-				if (menuPos->selected && menuPos->enabled){
-					SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
-					SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
-				}
-				else if (menuPos->enabled){
-				}
-				else{
-				}			
-				printf(" ");
-
-				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
-
-				menuPos = menuPos->nextPos;
-			}
-			printf(" ");
+	if (!dontRender){
+		// Where to render
+		if (posX && posY){
+			Locate(posX, posY);
 		}
-		else{
-			// render full line
-			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
-			while (menuPos){
-				selectedMenuPosHlp++;
-				if (menuPos->selected && menuPos->enabled){
-					selectedMenuPos = selectedMenuPosHlp;
-					selectedMenu = menuPos;
-				}
-				for (size_t i = 0; i < strlen(menuPos->caption); i++){
-					// int j = 0;
-					if (menuPos->enabled && menuPos->selected){
+		else if (posX){
+			LocateX(posX);
+		}
+
+		if (!justRefresh){
+			// Style & Color
+			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+
+			if (renderSmall){
+				// render just the keys
+				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+				while (menuPos){
+					selectedMenuPosHlp++;
+					if (menuPos->selected && menuPos->enabled){
 						/* code */
+						SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+						printf(" ");	// 1st space...
+						selectedMenuPos = selectedMenuPosHlp;
+						selectedMenu = menuPos;
+					}
+					else if (menuPos->enabled){
+						printf(" ");	// 1st space...
+						SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
+					}
+					else{
+						printf(" ");	// 1st space...
+						SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
+						SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
+					}			
+					printf("%c", menuPos->caption[menuPos->keyCode]);
+
+					SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
+
+					if (menuPos->selected && menuPos->enabled){
 						SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
 						SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
 					}
 					else if (menuPos->enabled){
-						if (i == menuPos->keyCode){
-							SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
-							SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
-						}
-						else{
-							SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-							SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-						}
 					}
 					else{
-						SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
-						SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
-					}						
-					printf("%c", menuPos->caption[i]);
+					}			
+					printf(" ");
+
+					SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
+
+					menuPos = menuPos->nextPos;
 				}
-				SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
-				SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
-				//printf(" ");
-				menuPos = menuPos->nextPos;
+				printf(" ");
 			}
-		}
+			else{
+				// render full line
+				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+				while (menuPos){
+					selectedMenuPosHlp++;
+					if (menuPos->selected && menuPos->enabled){
+						selectedMenuPos = selectedMenuPosHlp;
+						selectedMenu = menuPos;
+					}
+					for (size_t i = 0; i < strlen(menuPos->caption); i++){
+						// int j = 0;
+						if (menuPos->enabled && menuPos->selected){
+							/* code */
+							SetColorStyle(&userColors[menuDef->selectColor - 1], 1);
+							SetTxtStyle(&userStyles[menuDef->selectStyle - 1], 1);
+						}
+						else if (menuPos->enabled){
+							if (i == menuPos->keyCode){
+								SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
+								SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
+							}
+							else{
+								SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+								SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+							}
+						}
+						else{
+							SetColorStyle(&userColors[menuDef->disabledColor - 1], 1);
+							SetTxtStyle(&userStyles[menuDef->disabledStyle - 1], 1);
+						}						
+						printf("%c", menuPos->caption[i]);
+					}
+					SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
+					SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
+					//printf(" ");
+					menuPos = menuPos->nextPos;
+				}
+			}
 
-		StrPrintSpaces(renderWidth - renderLen);
+			StrPrintSpaces(renderWidth - renderLen);
 
-	}
-	else{
-		// we just refresh time(s)
-		CursorRight(renderWidth);
-	}
-
-	if (renderRealTime || renderRunTime){
-		// Set style & color of times
-		SetColorStyle(&userColors[menuDef->timeColor - 1], 1);
-		SetTxtStyle(&userStyles[menuDef->timeStyle - 1], 1);
-	}
-	
-	// Do we print the Realtime (all time right alignment)
-	if (renderRealTime){
-		// 01.01.2023 00:00:00
-		CursorLeft(19);
-		printf("%s %s", gStrDate, gStrTime);
-		CursorRight(1);
-	}
-	// Do we print the RunTime
-	if (renderRunTime){
-		// 00000d 00:00:00
-		if (renderRealTime){
-			// left of RealTime 
-			CursorLeft(36);
 		}
 		else{
-			// right alignment
-			CursorLeft(15);
+			// we just refresh time(s)
+			CursorRight(renderWidth);
 		}
-		printf("%s", gStrRunTime);
-	}	
 
-	// if (selectedMenuPos && menuDef->pos1st){
-	if (selectedMenu){
-		// render selected Submenu
-		struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+		if (renderRealTime || renderRunTime){
+			// Set style & color of times
+			SetColorStyle(&userColors[menuDef->timeColor - 1], 1);
+			SetTxtStyle(&userStyles[menuDef->timeStyle - 1], 1);
+		}
 		
-		// Set cursor one row below start of selected menu
-		CursorLeft(renderWidth);
-		CursorDown(1);
-		int xHlp = 0;
-		int x = 0;
-		if (renderSmall){
-			xHlp = 2;
-			x = selectedMenuPos - 1;
+		// Do we print the Realtime (all time right alignment)
+		if (renderRealTime){
+			// 01.01.2023 00:00:00
+			CursorLeft(19);
+			printf("%s %s", gStrDate, gStrTime);
+			CursorRight(1);
 		}
-		while (--selectedMenuPos){
-			if (!renderSmall){
-				xHlp = strlen(menuPos->caption);
+		// Do we print the RunTime
+		if (renderRunTime){
+			// 00000d 00:00:00
+			if (renderRealTime){
+				// left of RealTime 
+				CursorLeft(36);
 			}
-			x += xHlp; // + 2;
-			menuPos = menuPos->nextPos;			
+			else{
+				// right alignment
+				CursorLeft(15);
+			}
+			printf("%s", gStrRunTime);
+		}	
+
+		// if (selectedMenuPos && menuDef->pos1st){
+		if (selectedMenu){
+			// render selected Submenu
+			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+			
+			// Set cursor one row below start of selected menu
+			CursorLeft(renderWidth);
+			CursorDown(1);
+			int xHlp = 0;
+			int x = 0;
+			if (renderSmall){
+				xHlp = 2;
+				x = selectedMenuPos - 1;
+			}
+			while (--selectedMenuPos){
+				if (!renderSmall){
+					xHlp = strlen(menuPos->caption);
+				}
+				x += xHlp; // + 2;
+				menuPos = menuPos->nextPos;			
+			}
+			CursorRight(x);
+			// Render SubMenu
+			TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef);
 		}
-		CursorRight(x);
-		// Render SubMenu
-		TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef);
 	}
+	else{
+		ResFBU();
+		SetFg16(fgRed);
+		TxtBold(1);
+		printf("!! Can't Render 02 !!\n");
+		TxtBold(0);
+		ResFBU();
+	}
+
 }
 
 int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
