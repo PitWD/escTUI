@@ -101,6 +101,7 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenuPosSTRUCT *nextPos;		// on same level
 	struct TuiMenuPosSTRUCT *prevPos;		// on same level
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
+	struct TuiMenuPosSTRUCT *parentPos;		// parent on upper level
 	int nextID;
 	int prevID;
 	int pos1ID;
@@ -1005,20 +1006,28 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 
 	if (testMe){
 		for (size_t i = 0; i < cnt; i++){
-			printf("pos: %d @: %d pos1st: %d nextPos: %d prevPos: %d\n", i, &menuPos[i], menuPos[i].pos1st, menuPos[i].nextPos, menuPos[i].prevPos);
+			printf("pos: %d @: %d pos1st: %d parentPos: %d nextPos: %d prevPos: %d\n", i, &menuPos[i], menuPos[i].pos1st, menuPos[i].parentPos, menuPos[i].nextPos, menuPos[i].prevPos);
 			//printf("pos: %d @: %s pos1st: %s nextPos: %s prevPos: %s\n\n", i, menuPos[i].caption, menuPos[i].pos1st->caption, menuPos[i].nextPos->caption, menuPos[i].prevPos->caption);
 			printf("pos: %d @: %s pos1st: ", i, menuPos[i].caption);
+			
 			if (menuPos[i].pos1st){
-				printf("%s nextPos: ", menuPos[i].pos1st->caption);
+				printf("%s parentPos: ", menuPos[i].pos1st->caption);
 			}
 			else{
-				printf("NULL nextPos:");
+				printf("NULL parentPos:");
 			}
+			if (menuPos[i].parentPos){
+				printf("%s nextPos: ", menuPos[i].parentPos->caption);
+			}
+			else{
+				printf("NULL nextPos: ");
+			}
+
 			if (menuPos[i].nextPos){
 				printf("%s prevPos: ", menuPos[i].nextPos->caption);
 			}
 			else{
-				printf("NULL prevPos:");
+				printf("NULL prevPos: ");
 			}
 			if (menuPos[i].prevPos){
 				printf("%s\n\n", menuPos[i].prevPos->caption);
@@ -1121,6 +1130,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		menuPos[pos1].nextPos = NULL;
 		menuPos[pos1].prevPos = NULL;
 		menuPos[pos1].pos1st = NULL;
+		menuPos[pos1].parentPos = NULL;
 
 		menuPos[pos1].nextID = 0;
 		menuPos[pos1].prevID = 0;
@@ -1141,8 +1151,9 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			sprintf(strSearch, "%s%d.", strPath, j);
 			//pos1st[pos1 + 1] = pos1 + 1;
 			menuPos[pos1].pos1ID = cnt;
-			//menuPos[pos1].pos1st = TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
-			TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);			
+			menuPos[cnt].pos1ID = pos1;
+
+			TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);
 		}
 		else{
 			// No SubMenu
@@ -1161,13 +1172,14 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			menuPos[i].nextPos = &menuPos[menuPos[i].nextID];
 			if (!i){
 				// e.g. File  Edit  Settings
-				// keep ID of edit to get/set missing prevPos from "Edit"
+				// keep ID of "Edit" to get/set missing prevPos from "Edit"
 				// see "|| (j && (i == j))" in 1st IF
 				j = menuPos[i].nextID;
 			}
 		}
 		if (menuPos[i].pos1ID){
 			menuPos[i].pos1st = &menuPos[menuPos[i].pos1ID];
+			menuPos[menuPos[i].pos1ID].parentPos = &menuPos[i];
 		}
 	}
 
