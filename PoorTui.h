@@ -527,7 +527,12 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 				printf(") ");
 			}
 			else if (renderSmall == 2){
-				StrPrintSpaces(4);
+				if (menuPos->isSpacer){
+					DEClineX(4);
+				}
+				else{
+					StrPrintSpaces(4);
+				}
 			}
 			else{
 				// we're fine
@@ -535,14 +540,19 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			
 			if (menuPos->selected && menuPos->enabled){
 			}
-			else if (menuPos->enabled){
+			else if (menuPos->enabled && !menuPos->isSpacer){
 				// Key in keyColor and keyStyle
 				SetColorStyle(&userColors[menuDef->keyColor - 1], 1);
 				SetTxtStyle(&userStyles[menuDef->keyStyle - 1], 1);
 			}
 			else{
 			}
-			printf("%c", menuPos->caption[menuPos->keyCode]);
+			if (menuPos->isSpacer){
+				DEClineX(1);
+			}
+			else{
+				printf("%c", menuPos->caption[menuPos->keyCode]);
+			}
 
 			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);					
