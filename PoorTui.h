@@ -97,7 +97,7 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenusSTRUCT *definition;
 	int keyCode;
 	int enabled;
-	int posCnt;						// count of sub-positions
+	int posCnt;								// count of sub-positions
 	struct TuiMenuPosSTRUCT *nextPos;		// on same level
 	struct TuiMenuPosSTRUCT *prevPos;		// on same level
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
@@ -105,6 +105,7 @@ struct TuiMenuPosSTRUCT{
 	int nextID;
 	int prevID;
 	int pos1ID;
+	int parentID;				// calculated but not used actually
 	int selected :1;			// if position is selected
 	int isOption :1;
 	int isCheck :1;
@@ -1014,7 +1015,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 				printf("%s parentPos: ", menuPos[i].pos1st->caption);
 			}
 			else{
-				printf("NULL parentPos:");
+				printf("NULL parentPos: ");
 			}
 			if (menuPos[i].parentPos){
 				printf("%s nextPos: ", menuPos[i].parentPos->caption);
@@ -1180,6 +1181,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		if (menuPos[i].pos1ID){
 			menuPos[i].pos1st = &menuPos[menuPos[i].pos1ID];
 			menuPos[menuPos[i].pos1ID].parentPos = &menuPos[i];
+			menuPos[menuPos[i].pos1ID].parentID = i;
 		}
 	}
 
