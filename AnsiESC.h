@@ -382,6 +382,7 @@ void DECbox(int set){
 	else{
 		printf("\x1B(B"); // disable BoxDraw Mode
 	}
+	fflush(stdout);
 }
 #define DECboxON DECbox(1)
 #define DECboxOFF DECbox(0)

@@ -122,6 +122,7 @@ int main() {
 
 		TUIaddMenuPos("", "", NULL, 0, 1);
 
+
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(0");
 		printf("a b c d e f g h i j k l m n opqrs t u v w x y z\n");
@@ -134,10 +135,10 @@ int main() {
 		// Set TUI_RunCoreLoop = 0 to reach this point
 
 		// Free color & font strings
-		IniStrToMem("",1);
 		#if __APPLE__
 			// NO CLUE WHY freeing is messy
 		#else
+			IniStrToMem("",1);
 			free(userColors);
 			free(userStyles);
 			free(userHeaders);

@@ -595,13 +595,28 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 					}
 				}
 				else{
-					printf("%c", menuPos->caption[i]);
+					if (menuPos->isSpacer){
+						/* code */
+					}
+					else{
+						printf("%c", menuPos->caption[i]);
+					}
 				}
 			}
 			SetColorStyle(&userColors[menuDef->txtColor - 1], 1);
 			SetTxtStyle(&userStyles[menuDef->txtStyle - 1], 1);
 
-			StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+			if (menuPos->isSpacer){
+				printf(" ");
+				DEClineX(orgWidth - 2);
+				printf(" ");
+			}
+			else{
+				StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+			}
+			
+			
+			
 			CursorDown(1);
 			CursorLeft(orgWidth);
 			//printf(" ");
