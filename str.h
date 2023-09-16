@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "mathe.h"
 
 #define STR_SMALL_SIZE 255
 #define STR_MID_SIZE 1024

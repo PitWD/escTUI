@@ -120,13 +120,13 @@ int main() {
 		ResFBU();
 		printf("\n");
 
-		// TUIaddMenuPos("", "", NULL, 0, 1);
-
-
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(0");
 		printf("a b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(B");
+
+		ResFBU();
+		printf("\n");
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 

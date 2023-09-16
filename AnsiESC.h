@@ -387,10 +387,49 @@ void DECbox(int set){
 #define DECboxON DECbox(1)
 #define DECboxOFF DECbox(0)
 void DEClineX(int len){
+
 	DECboxON;
-	StrPrintChars('q', len);
+
+	if (len < 0){
+		// Right to left
+		for (int i = 0; i > len; i--){
+			printf("x");
+			CursorLeft(2);
+		}
+	}
+	else{
+		// Left to right
+		StrPrintChars('q', len);
+	}
+	
 	DECboxOFF;
+
 }
+void DEClineY(int len){
+	
+	DECboxON;
+
+	if (len < 0){
+		// bottom to top
+		for (int i = 0; i > len; i--){
+			printf("x");
+			CursorUp(1);
+			CursorLeft(1);
+		}
+	}
+	else{
+		// top to bottom
+		for (int i = 0; i < len; i++){
+			printf("x");
+			CursorDown(1);
+			CursorLeft(1);
+		}
+	}
+	
+	DECboxOFF;
+		
+}
+
 // Cursor Positions
 void Locate(int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 

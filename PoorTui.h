@@ -31,26 +31,27 @@ DEC char to BoxDraw:
 If frames are overlapping, it's just a simple bitwise OR to get the
 right char for displaying the crossing point right.
 
-(00)  = n/a					(Top)
-(01)  = n/a					(Right)
+(00)  = n/a					
+(01)  = n/a					(Top)
 (02)  = n/a					(Bottom)
-(03) └ = Top-Right
-(04)  = n/a					(Left)
-(05) │ = Top-Bottom
+(03) │ = Top-Bottom			
+(04)  = n/a					(Right)
+(05) └ = Top-Right
 (06) ┌ = Bottom-Right
 (07) ├ = Top-Right-Bottom
-(08)  = n/a
+(08)  = n/a					(Left)
 (09) ┘ = Top-Left
-(10) ─ = Right-Left
-(11) ┴ = Top-Left-Right
-(12) ┐ = Bottom-Left
-(13) ┤ = Top-Left-Bottom
+(10) ┐ = Bottom-Left
+(11) ┤ = Top-Bottom-Left
+(12) ─ = Left-Right
+(13) ┴ = Left-Right-Top
 (14) ┬ = Bottom-Left-Right
 (15) ┼ = Top-Right-Bottom-Left
+
 */
-static char TuiDecBoxDraw[16][2] = {" ", " ", " ", "m", " ", "x",
-									"l", "t", " ", "j", "q", "v",
-									"k", "u", "w", "n" };
+static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
+									'l', 't', ' ', 'j', 'k', 'u',
+									'q', 'v', 'w', 'n' };
 
 
 
@@ -656,7 +657,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		ResFBU();
 		SetFg16(fgRed);
 		TxtBold(1);
-		printf("!! Can't Render 01 !!\n");
+		printf("!! Can't Render Sub/Vert-Menu !!\n");
 		TxtBold(0);
 		ResFBU();
 	}
@@ -950,7 +951,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		ResFBU();
 		SetFg16(fgRed);
 		TxtBold(1);
-		printf("!! Can't Render 02 !!\n");
+		printf("!! Can't Render Top-Menu !!\n");
 		TxtBold(0);
 		ResFBU();
 	}
@@ -1325,6 +1326,95 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 
 	return desksCnt;
 
+}
+
+void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
+	
+	double spX = startX;
+	double spY = startY;
+	double epX = stopX;
+	double epY = stopY;
+	
+	int r = LineInRect(&spX, &spY, &epX, &epY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+
+	if (r){
+		// We have a line to draw
+
+		// back to int
+		startX = (spX + 0.5);
+		startY = (spY + 0.5);
+		stopX = (epX + 0.5);
+		stopY = (epY + 0.5);
+
+		Locate(startX, startY);
+
+		switch (r){
+		case 1:
+			// horizontal line
+			DEClineX(stopX - startX);
+			break;
+		case 2:
+			// vertical line
+			DEClineY(stopY - startY);
+			break;
+		case 3:
+			// diagonal line
+
+			int deltaX = stopX - startX;
+			int deltaY = stopY - startY;
+			int absDeltaX = abs(deltaX);
+			int absDeltaY = abs(deltaY);
+
+			// Define the to use stepping edges - see binary direction coding in: char TuiDecBoxDraw[16]
+			int decEdge1st = 5;		// Right to left & down to top pre-defined
+			int decEdge2nd = 10;		// Right to left & down to top pre-defined
+			if (deltaX > 0){
+				// left to right
+				decEdge1st += 4;
+				decEdge2nd -= 4;
+			}
+			if (deltaY > 0){
+				// top to down
+				decEdge1st += 1;
+				decEdge2nd -= 1;
+			}
+
+			int steps = absDeltaX;					// The shorter delta is needed - more vertical predefined
+			int missing = absDeltaY - absDeltaX; 	// more vertical predefined...
+			int missingPerStep = 0;
+			int missingRest = 0;
+			int decConnector = 3;					// top-bottom (more vertical)
+
+			if (absDeltaX > absDeltaY){
+				// more horizontal
+				steps = absDeltaY;
+				missing = absDeltaX - absDeltaY;
+				decConnector = 12;
+			}
+
+			if (missing){
+				// we're not 45°
+				missingPerStep = missing / steps;
+				missingRest = missing % steps;
+
+			}
+			else{
+				decConnector = 0;
+			}
+			
+			DECboxON;
+			
+			printf("%c", TuiDecBoxDraw[decEdge1st]);
+
+			for (int i = 0; i < steps; i++){
+				/* code */
+			}
+			
+
+			
+			break;
+		}
+	}
 }
 
 /*
