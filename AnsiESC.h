@@ -447,6 +447,16 @@ void CursorUp1st(int y) {
 void CursorDown(int y) {
 	printf("\x1B[%dB", y);
 }
+void CursorMoveY(int y){
+	if (y < 0){
+		// Down
+		CursorDown(y * -1);
+	}
+	else if (y > 0){
+		// Up
+		CursorUp(y);
+	}
+}
 void CursorDown1st(int y) {
 	printf("\x1B[%dE", y);
 }
@@ -456,10 +466,24 @@ void CursorRight(int x) {
 void CursorLeft(int x) {
 	printf("\x1B[%dD", x);
 }
+void CursorMoveX(int x){
+	if (x < 0){
+		// Left
+		CursorLeft(x * -1);
+	}
+	else if (x > 0){
+		// Right
+		CursorRight(x);
+	}
+	
+	
+}
 void GetAnsiCursorPos(void){
 	TERM_CursorWaitFor = 1;
 	printf("\x1B[6n");
 }
+
+#define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
 
 // Clear Lines
 void ClrLineA(int xS, int xE){
