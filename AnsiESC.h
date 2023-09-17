@@ -374,6 +374,61 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 	return stylesCountSum;
 }
 
+// Cursor Positions
+void Locate(int x, int y) {
+	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
+	printf("\x1B[%d;%dH", y, x);
+}
+void LocateX(int x) {
+	printf("\x1B[%dG", x);
+}
+void CursorUp(int y) {
+	printf("\x1B[%dA", y);
+}
+void CursorUp1st(int y) {
+	printf("\x1B[%dF", y);
+}
+void CursorDown(int y) {
+	printf("\x1B[%dB", y);
+}
+void CursorMoveY(int y){
+	if (y < 0){
+		// Down
+		CursorDown(y * -1);
+	}
+	else if (y > 0){
+		// Up
+		CursorUp(y);
+	}
+}
+void CursorDown1st(int y) {
+	printf("\x1B[%dE", y);
+}
+void CursorRight(int x) {
+	printf("\x1B[%dC", x);
+}
+void CursorLeft(int x) {
+	printf("\x1B[%dD", x);
+}
+void CursorMoveX(int x){
+	if (x < 0){
+		// Left
+		CursorLeft(x * -1);
+	}
+	else if (x > 0){
+		// Right
+		CursorRight(x);
+	}
+	
+	
+}
+void GetAnsiCursorPos(void){
+	TERM_CursorWaitFor = 1;
+	printf("\x1B[6n");
+}
+
+#define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
+
 // DEC BoxDraw
 void DECbox(int set){
 	if (set){
@@ -430,60 +485,6 @@ void DEClineY(int len){
 		
 }
 
-// Cursor Positions
-void Locate(int x, int y) {
-	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
-	printf("\x1B[%d;%dH", y, x);
-}
-void LocateX(int x) {
-	printf("\x1B[%dG", x);
-}
-void CursorUp(int y) {
-	printf("\x1B[%dA", y);
-}
-void CursorUp1st(int y) {
-	printf("\x1B[%dF", y);
-}
-void CursorDown(int y) {
-	printf("\x1B[%dB", y);
-}
-void CursorMoveY(int y){
-	if (y < 0){
-		// Down
-		CursorDown(y * -1);
-	}
-	else if (y > 0){
-		// Up
-		CursorUp(y);
-	}
-}
-void CursorDown1st(int y) {
-	printf("\x1B[%dE", y);
-}
-void CursorRight(int x) {
-	printf("\x1B[%dC", x);
-}
-void CursorLeft(int x) {
-	printf("\x1B[%dD", x);
-}
-void CursorMoveX(int x){
-	if (x < 0){
-		// Left
-		CursorLeft(x * -1);
-	}
-	else if (x > 0){
-		// Right
-		CursorRight(x);
-	}
-	
-	
-}
-void GetAnsiCursorPos(void){
-	TERM_CursorWaitFor = 1;
-	printf("\x1B[6n");
-}
-
-#define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
 
 // Clear Lines
 void ClrLineA(int xS, int xE){

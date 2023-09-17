@@ -128,6 +128,10 @@ int main() {
 		ResFBU();
 		printf("\n");
 
+		TermClearScreen(0);
+
+		DEClineXY(1, 1, 79, 23, 0);
+
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
 		TermCoreLoop(UserLoop);

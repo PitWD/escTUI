@@ -1360,29 +1360,41 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 		case 3:
 			// diagonal line
 
-			int deltaX = stopX - startX;
 			int deltaY = stopY - startY;
-			int absDeltaX = abs(deltaX);
+			
+			int deltaX = stopX - startX;
+			
 			int absDeltaY = abs(deltaY);
+			
+			int absDeltaX = abs(deltaX);
 
 			// Define the to use stepping edges - see binary direction coding in: char TuiDecBoxDraw[16]
 			int decEdge1st = 5;		// Right to left & down to top pre-defined
-			int decEdge2nd = 10;		// Right to left & down to top pre-defined
+			int decEdge2nd = 10;	// Right to left & down to top pre-defined
+			int moveX = -2;
+			int moveY = 1;
+
 			if (deltaX > 0){
 				// left to right
 				decEdge1st += 4;
 				decEdge2nd -= 4;
+				moveX = 0;
 			}
 			if (deltaY > 0){
 				// top to down
 				decEdge1st += 1;
 				decEdge2nd -= 1;
+				moveY = -1;
 			}
 
 			int steps = absDeltaX;					// The shorter delta is needed - more vertical predefined
 			int missing = absDeltaY - absDeltaX; 	// more vertical predefined...
-			int missingPerStep = 0;
-			int missingRest = 0;
+			int misPerStep = 0;						// count of connectors on all steps
+			int misRest = 0;						// count of missing connectors
+			int misStep = 0;						// every misStep steps we add an additional connector
+			int insertAt = 1;						// 0 = insert connectors pre 1st edge
+													// 1 = insert connectors past 1st edge
+
 			int decConnector = 3;					// top-bottom (more vertical)
 
 			if (absDeltaX > absDeltaY){
@@ -1390,13 +1402,16 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 				steps = absDeltaY;
 				missing = absDeltaX - absDeltaY;
 				decConnector = 12;
+				insertAt = 0;
 			}
 
 			if (missing){
 				// we're not 45°
-				missingPerStep = missing / steps;
-				missingRest = missing % steps;
-
+				misPerStep = missing / steps;
+				misRest = missing % steps;
+				if (misRest){
+					misStep = steps / misRest;
+				}
 			}
 			else{
 				decConnector = 0;
@@ -1404,14 +1419,59 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 			
 			DECboxON;
 			
-			printf("%c", TuiDecBoxDraw[decEdge1st]);
-
-			for (int i = 0; i < steps; i++){
-				/* code */
+			if (misRest && !insertAt){
+				// misRest pre 1st edge
+				misRest--;
+				printf("%c",TuiDecBoxDraw[decConnector]);
+				CursorMoveX(moveX);
 			}
-			
+			printf("%c", TuiDecBoxDraw[decEdge1st]);
+			CursorMoveXY(moveX, moveY);
 
-			
+			int misRestStep = misStep;
+			for (int i = 0; i < steps; i++){
+				misRestStep--;
+				if (misRest && insertAt && !misRestStep){
+					// misRest after 1st edge
+					misRest--;
+					printf("%c",TuiDecBoxDraw[decConnector]);
+					CursorMoveXY(moveX, moveY);
+				}
+				if (misPerStep && insertAt){
+					// regular connectors after 1st edge
+					for (int j = 0; j < misPerStep; j++){
+						printf("%c",TuiDecBoxDraw[decConnector]);
+						CursorMoveXY(moveX, moveY);
+					}
+				}
+				
+				// 2nd edge
+				printf("%c", TuiDecBoxDraw[decEdge2nd]);
+				CursorMoveXY(moveX, moveY);
+				
+				if (misPerStep && !insertAt){
+					// regular connectors pre 1st edge
+					for (int j = 0; j < misPerStep; j++){
+						printf("%c",TuiDecBoxDraw[decConnector]);
+						CursorMoveX(moveX);
+					}
+				}
+				if (misRest && !insertAt && !misRestStep){
+					// misRest pre 1st edge
+					misRest--;
+					printf("%c",TuiDecBoxDraw[decConnector]);
+					CursorMoveXY(moveX, moveY);
+				}
+
+				// 1st edge
+				printf("%c", TuiDecBoxDraw[decEdge1st]);
+				CursorMoveXY(moveX, moveY);
+
+				if (!misRestStep){
+					misRestStep = misStep;
+				}
+				
+			}
 			break;
 		}
 	}
