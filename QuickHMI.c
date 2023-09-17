@@ -130,7 +130,23 @@ int main() {
 
 		TermClearScreen(0);
 
-		DEClineXY(1, 1, 79, 23, 0);
+		printf("         1         2         3         4         5         6         7         8\n");
+		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
+		for (int i = 3; i < 10; i++){
+			printf("%d\n", i);
+		}
+		for (int i = 0; i < 10; i++){
+			printf("%d\n", i);
+		}
+		for (int i = 0; i < 5; i++){
+			printf("%d\n", i);
+		}
+		fflush(stdout);
+		DEClineXY(5,3,75,3,0);
+		DEClineXY(75,4,75,23,0);
+		DEClineXY(74,23,5,23,0);
+		DEClineXY(5,22,5,4,0);
+		DEClineXY(6, 4, 74, 22, 0);
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 

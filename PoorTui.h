@@ -1337,6 +1337,8 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 	
 	int r = LineInRect(&spX, &spY, &epX, &epY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
 
+//printf("r: %d\n");
+
 	if (r){
 		// We have a line to draw
 
@@ -1348,24 +1350,33 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 
 		Locate(startX, startY);
 
-		switch (r){
-		case 1:
+		int deltaY = stopY - startY;			
+		int deltaX = stopX - startX;
+
+		if (r == 1){
 			// horizontal line
-			DEClineX(stopX - startX);
-			break;
-		case 2:
+			if (deltaX > 0){
+				deltaX++;
+			}
+			else{
+				deltaX--;
+			}
+			DEClineX(deltaX);
+		}
+		if (r == 2){
 			// vertical line
-			DEClineY(stopY - startY);
-			break;
-		case 3:
+			if (deltaY > 0){
+				deltaY++;
+			}
+			else{
+				deltaY--;
+			}
+			DEClineY(deltaY);
+		}
+		if (r == 3){
 			// diagonal line
 
-			int deltaY = stopY - startY;
-			
-			int deltaX = stopX - startX;
-			
 			int absDeltaY = abs(deltaY);
-			
 			int absDeltaX = abs(deltaX);
 
 			// Define the to use stepping edges - see binary direction coding in: char TuiDecBoxDraw[16]
@@ -1472,7 +1483,6 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 				}
 				
 			}
-			break;
 		}
 	}
 }

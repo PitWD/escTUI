@@ -82,23 +82,27 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
     // normalize re
     double temp = 0;
 
-    if (reX2 > reX1){
+    if (reX2 < reX1){
         temp = reX1;
         reX1 = reX2;
         reX2 = temp;
     }
-    if (reY2 > reY1){
+    if (reY2 < reY1){
         temp = reY1;
         reY1 = reY2;
         reY2 = temp;
     }
 
-	double deltaX = stopX - startX;
-	double deltaY = stopY - startY;
+	double deltaX = *stopX - *startX;
+	double deltaY = *stopY - *startY;
 	int noLine = 0;
 
-	if (deltaX < MATH_TOL_GRADIENT){
-		// Vertical line
+//printf("IN\n");
+
+	if (abs(deltaX) < MATH_TOL_GRADIENT){
+//printf("Vert\n");
+
+    	// Vertical line
 		if (*startX >= reX1 && *startX <= reX2){
             // X is on screen....
 			if (*startY > reY2){
@@ -131,7 +135,9 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
             return 0;
         }
 	}
-	else if (deltaY < MATH_TOL_GRADIENT){
+	else if (abs(deltaY) < MATH_TOL_GRADIENT){
+//printf("Horz\n");
+
 		// Horizontal line
 		if (*startY >= reY1 && *startY <= reY2){
 			// Y is on screen
@@ -154,18 +160,23 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 		}
 		else{
 			// line above or under out of screen
+//printf("Horz1\n");
 			return 0;
 		}
-        if (abs(startY - stopY) > MATH_TOL_GRADIENT){
+        if (abs(startX - stopX) > MATH_TOL_GRADIENT){
             // line inside
+//printf("Horz2\n");
             return 1;
         }
         else{
             // line right or left out of screen
+//printf("Horz3\n");
             return 0;
         }
 	}
 	else{
+//printf("DIAG\n");
+
 		// Diagonal line
 		int spInRect = PointInRect(*startX, *startY, reX1, reY1, reX2, reY2);
 		int epInRect = PointInRect(*stopX, *stopY, reX1, reY1, reX2, reY2);

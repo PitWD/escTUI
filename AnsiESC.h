@@ -448,7 +448,7 @@ void DEClineX(int len){
 	if (len < 0){
 		// Right to left
 		for (int i = 0; i > len; i--){
-			printf("x");
+			printf("q");
 			CursorLeft(2);
 		}
 	}
@@ -474,7 +474,7 @@ void DEClineY(int len){
 	}
 	else{
 		// top to bottom
-		for (int i = 0; i < len; i++){
+		while (len--){
 			printf("x");
 			CursorDown(1);
 			CursorLeft(1);
