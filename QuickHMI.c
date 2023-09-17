@@ -161,10 +161,12 @@ int main() {
 		//DEClineXY(7, 15, 17, 5,  0);
 
 		//45° Right to left / Top to bottom
-		//DEClineXY(37, 5, 27, 15,  0);
+		DEClineXY(37, 5, 27, 15,  0);
 
 		//45° Right to left / bottom to top
 		//DEClineXY(37, 15, 27, 5,  0);
+
+		DECrect(10, 6, 20, 11);
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 

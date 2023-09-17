@@ -428,6 +428,40 @@ void GetAnsiCursorPos(void){
 #define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
 
 // DEC BoxDraw
+/*
+DEC char to BoxDraw:
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(0"); // enable BoxDraw
+		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
+		printf("\x1B(B"); // disable BoxDraw
+		a b c d e f g h i j k l m n o p q r s t u v w x y z
+		▒ ␉ ␌ ␍ ␊ ° ± ␤ ␋ ┘ ┐ ┌ └ ┼ ⎺ ⎻ ─ ⎼ ⎽ ├ ┤ ┴ ┬ │ ≤ ≥
+
+If frames are overlapping, it's just a simple bitwise OR to get the
+right char for displaying the crossing point right.
+
+(00)  = n/a					
+(01)  = n/a					(Top)
+(02)  = n/a					(Bottom)
+(03) │ = Top-Bottom			
+(04)  = n/a					(Right)
+(05) └ = Top-Right
+(06) ┌ = Bottom-Right
+(07) ├ = Top-Right-Bottom
+(08)  = n/a					(Left)
+(09) ┘ = Top-Left
+(10) ┐ = Bottom-Left
+(11) ┤ = Top-Bottom-Left
+(12) ─ = Left-Right
+(13) ┴ = Left-Right-Top
+(14) ┬ = Bottom-Left-Right
+(15) ┼ = Top-Right-Bottom-Left
+
+*/
+static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
+									'l', 't', ' ', 'j', 'k', 'u',
+									'q', 'v', 'w', 'n' };
+
 void DECbox(int set){
 	if (set){
 		printf("\x1B(0"); // enable BoxDraw Mode
@@ -482,7 +516,215 @@ void DEClineY(int len){
 	DECboxOFF;
 		
 }
+void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
+	
+	double spX = startX;
+	double spY = startY;
+	double epX = stopX;
+	double epY = stopY;
+	
+	int r = LineInRect(&spX, &spY, &epX, &epY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
 
+//printf("r: %d\n");
+
+	if (r){
+		// We have a line to draw
+
+		// back to int
+		startX = (spX + 0.5);
+		startY = (spY + 0.5);
+		stopX = (epX + 0.5);
+		stopY = (epY + 0.5);
+
+		Locate(startX, startY);
+
+		int deltaY = stopY - startY;			
+		int deltaX = stopX - startX;
+
+		if (r == 1){
+			// horizontal line
+			if (deltaX > 0){
+				deltaX++;
+			}
+			else{
+				deltaX--;
+			}
+			DEClineX(deltaX);
+		}
+		else if (r == 2){
+			// vertical line
+			if (deltaY > 0){
+				deltaY++;
+			}
+			else{
+				deltaY--;
+			}
+			DEClineY(deltaY);
+		}
+		else if (r == 3){
+			// diagonal line
+//printf("YES\n");
+			int absDeltaY = abs(deltaY);
+			int absDeltaX = abs(deltaX);
+
+			// Define the to use stepping edges - see binary direction coding in: char TuiDecBoxDraw[16]
+			int decEdge1st = 5;		// Right to left & down to top pre-defined
+			int decEdge2nd = 10;	// Right to left & down to top pre-defined
+			int moveX = -2;
+			int moveY = 1;
+
+			if (deltaX > 0){
+				// left to right
+				decEdge1st += 4;
+				decEdge2nd -= 4;
+				moveX = 0;
+			}
+			if (deltaY > 0){
+				// top to down
+				decEdge1st += 1;
+				decEdge2nd -= 1;
+				moveY = -1;
+			}
+
+			int steps = absDeltaX;					// The shorter delta is needed - more vertical predefined
+			int missing = absDeltaY - absDeltaX; 	// more vertical predefined...
+			int misPerStep = 0;						// count of connectors on all steps
+			int misRest = 0;						// count of missing connectors
+			int misStep = 0;						// every misStep steps we add an additional connector
+			int insertAt = 1;						// 0 = insert connectors pre 1st edge
+													// 1 = insert connectors past 1st edge
+
+			int decConnector = 3;					// top-bottom (more vertical)
+
+			if (absDeltaX > absDeltaY){
+				// more horizontal
+				steps = absDeltaY;
+				missing = absDeltaX - absDeltaY;
+				decConnector = 12;
+				insertAt = 0;
+			}
+
+			if (missing){
+				// we're not 45°
+				misPerStep = missing / steps;
+				misRest = missing % steps;
+				if (misRest){
+					misStep = steps / misRest;
+				}
+			}
+			else{
+				decConnector = 0;
+			}
+			
+			DECboxON;
+			
+			if (misRest && !insertAt){
+				// misRest pre 1st edge
+				misRest--;
+				printf("%c",TuiDecBoxDraw[decConnector]);
+				CursorMoveX(moveX);
+			}
+
+			printf("%c", TuiDecBoxDraw[decEdge1st]);
+			CursorMoveXY(-1, moveY);
+
+			int misRestStep = misStep;
+			for (int i = 0; i < steps; i++){
+				misRestStep--;
+				
+				
+				if (misPerStep && insertAt){
+					// regular connectors after 1st edge
+					for (int j = 0; j < misPerStep; j++){
+						printf("%c",TuiDecBoxDraw[decConnector]);
+						CursorMoveXY(-1, moveY);
+					}
+				}
+				
+
+				// 2nd edge
+				printf("%c", TuiDecBoxDraw[decEdge2nd]);
+				CursorMoveX(moveX);
+				//CursorMoveXY(moveX, moveY);
+				
+				
+				if (misPerStep && !insertAt){
+					// regular connectors pre 1st edge
+					for (int j = 0; j < misPerStep; j++){
+						printf("%c",TuiDecBoxDraw[decConnector]);
+						CursorMoveX(moveX);
+					}
+				}
+				if (misRest && !insertAt && !misRestStep){
+					// misRest pre 1st edge
+					misRest--;
+					printf("%c",TuiDecBoxDraw[decConnector]);
+					CursorMoveXY(moveX, 0);
+				}
+				
+
+				// 1st edge
+				printf("%c", TuiDecBoxDraw[decEdge1st]);
+				CursorMoveXY(-1, moveY);
+
+				if (misRest && insertAt && !misRestStep){
+					// misRest after 1st edge
+					misRest--;
+					printf("%c",TuiDecBoxDraw[decConnector]);
+					CursorMoveXY(-1, moveY);
+				}
+
+				if (!misRestStep){
+					misRestStep = misStep;
+				}
+				
+			}
+			DECboxOFF;
+//printf("moveX: %d  moveY: %d", moveX, moveY);
+		}
+	}
+}
+void DECrect(int startX, int startY, int stopX, int stopY){
+	
+	// normalize rect
+
+	int temp = 0;
+	if (stopX < startX){
+		temp = stopX;
+		stopX = startX;
+		startX = temp;
+	}
+	if (stopY < startY){
+		temp = stopY;
+		stopY = startY;
+		startY = temp;
+	}
+
+	if (PointInRect(startX, startY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight) && PointInRect(stopX, stopY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight)){
+		// rect is fully on screen - simplified creation
+		Locate(startX, startY);
+		DECboxON;
+		printf("l");					// top-left edge
+		DEClineX(stopX - startX - 1);
+		DECboxON;
+		printf("k");					// top-right edge
+		CursorMoveXY(-1, -1);
+		DEClineY(stopY - startY - 1);
+		DECboxON;
+		printf("j");					// bottom-right edge
+		CursorMoveX(-2);					
+		DEClineX(startX - stopX + 1);
+		DECboxON;
+		printf("m");					// bottom-left edge
+		CursorMoveXY(-1, 1);
+		DEClineY(startY - stopY + 1);
+	}
+	else{
+		// parts of the rect are out of screen
+	}
+	
+	
+}
 
 // Clear Lines
 void ClrLineA(int xS, int xE){
