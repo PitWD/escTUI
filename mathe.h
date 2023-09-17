@@ -49,12 +49,12 @@ int PointInRect(double pX, double pY, double reX1, double reY1, double reX2, dou
     // normalize re
     double temp = 0;
 
-    if (reX2 > reX1){
+    if (reX2 < reX1){
         temp = reX1;
         reX1 = reX2;
         reX2 = temp;
     }
-    if (reY2 > reY1){
+    if (reY2 < reY1){
         temp = reY1;
         reY1 = reY2;
         reY2 = temp;
@@ -189,6 +189,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 
 		if (spInRect && epInRect){
 			// start- and end-point on screen
+//printf("Both in Rect\n");
 		}
 		else if (spInRect || epInRect){
 			// start- or end-point on screen - find possible intersection edge

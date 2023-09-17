@@ -1363,7 +1363,7 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 			}
 			DEClineX(deltaX);
 		}
-		if (r == 2){
+		else if (r == 2){
 			// vertical line
 			if (deltaY > 0){
 				deltaY++;
@@ -1373,9 +1373,9 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 			}
 			DEClineY(deltaY);
 		}
-		if (r == 3){
+		else if (r == 3){
 			// diagonal line
-
+//printf("YES\n");
 			int absDeltaY = abs(deltaY);
 			int absDeltaX = abs(deltaX);
 
@@ -1436,29 +1436,29 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 				printf("%c",TuiDecBoxDraw[decConnector]);
 				CursorMoveX(moveX);
 			}
+
 			printf("%c", TuiDecBoxDraw[decEdge1st]);
-			CursorMoveXY(moveX, moveY);
+			CursorMoveXY(-1, moveY);
 
 			int misRestStep = misStep;
 			for (int i = 0; i < steps; i++){
 				misRestStep--;
-				if (misRest && insertAt && !misRestStep){
-					// misRest after 1st edge
-					misRest--;
-					printf("%c",TuiDecBoxDraw[decConnector]);
-					CursorMoveXY(moveX, moveY);
-				}
+				
+				
 				if (misPerStep && insertAt){
 					// regular connectors after 1st edge
 					for (int j = 0; j < misPerStep; j++){
 						printf("%c",TuiDecBoxDraw[decConnector]);
-						CursorMoveXY(moveX, moveY);
+						CursorMoveXY(-1, moveY);
 					}
 				}
 				
+
 				// 2nd edge
 				printf("%c", TuiDecBoxDraw[decEdge2nd]);
-				CursorMoveXY(moveX, moveY);
+				CursorMoveX(moveX);
+				//CursorMoveXY(moveX, moveY);
+				
 				
 				if (misPerStep && !insertAt){
 					// regular connectors pre 1st edge
@@ -1471,18 +1471,28 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 					// misRest pre 1st edge
 					misRest--;
 					printf("%c",TuiDecBoxDraw[decConnector]);
-					CursorMoveXY(moveX, moveY);
+					CursorMoveXY(moveX, 0);
 				}
+				
 
 				// 1st edge
 				printf("%c", TuiDecBoxDraw[decEdge1st]);
-				CursorMoveXY(moveX, moveY);
+				CursorMoveXY(-1, moveY);
+
+				if (misRest && insertAt && !misRestStep){
+					// misRest after 1st edge
+					misRest--;
+					printf("%c",TuiDecBoxDraw[decConnector]);
+					CursorMoveXY(-1, moveY);
+				}
 
 				if (!misRestStep){
 					misRestStep = misStep;
 				}
 				
 			}
+			DECboxOFF;
+//printf("moveX: %d  moveY: %d", moveX, moveY);
 		}
 	}
 }

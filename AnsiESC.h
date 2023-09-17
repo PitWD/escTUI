@@ -419,8 +419,6 @@ void CursorMoveX(int x){
 		// Right
 		CursorRight(x);
 	}
-	
-	
 }
 void GetAnsiCursorPos(void){
 	TERM_CursorWaitFor = 1;

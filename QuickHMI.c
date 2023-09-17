@@ -146,7 +146,25 @@ int main() {
 		DEClineXY(75,4,75,23,0);
 		DEClineXY(74,23,5,23,0);
 		DEClineXY(5,22,5,4,0);
-		DEClineXY(6, 4, 74, 22, 0);
+		
+		// more horizontal
+		//DEClineXY(6, 4, 74, 22, 0);
+		//DEClineXY(74, 22, 6, 4,  0);
+
+		DEClineXY(6, 5, 10, 22,  0);
+		DEClineXY(11, 22, 15, 5,  0);
+
+		//45° Left to right / Top to bottom
+		//DEClineXY(7, 5, 17, 15,  0);
+
+		//45° Left to right / Bottom to top
+		//DEClineXY(7, 15, 17, 5,  0);
+
+		//45° Right to left / Top to bottom
+		//DEClineXY(37, 5, 27, 15,  0);
+
+		//45° Right to left / bottom to top
+		//DEClineXY(37, 15, 27, 5,  0);
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
