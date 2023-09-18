@@ -462,7 +462,7 @@ static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
 									'l', 't', ' ', 'j', 'k', 'u',
 									'q', 'v', 'w', 'n' };
 
-void DECbox(int set){
+void DECboxMode(int set){
 	if (set){
 		printf("\x1B(0"); // enable BoxDraw Mode
 	}
@@ -471,8 +471,8 @@ void DECbox(int set){
 	}
 	fflush(stdout);
 }
-#define DECboxON DECbox(1)
-#define DECboxOFF DECbox(0)
+#define DECboxON DECboxMode(1)
+#define DECboxOFF DECboxMode(0)
 void DEClineX(int len){
 
 	DECboxON;
@@ -720,10 +720,83 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 		DEClineY(startY - stopY + 1);
 	}
 	else{
-		// parts of the rect are out of screen
+		// (parts of) the rect are out of screen
+		
+		// Horz top
+		double spX1 = startX;
+		double spY1 = startY;
+		double epX1 = stopX;
+		double epY1 = startY;
+
+		// Vert right
+		double spX2 = stopX;
+		double spY2 = startY;
+		double epX2 = stopX;
+		double epY2 = stopY;
+
+		// Horz bottom
+		double spX3 = stopX;
+		double spY3 = stopY;
+		double epX3 = startX;
+		double epY3 = stopY;
+
+		// Vert left
+		double spX4 = startX;
+		double spY4 = stopY;
+		double epX4 = startX;
+		double epY4 = startY;
+
+		int horzTop = LineInRect(&spX1, &spY1, &epX1, &epY1, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+		int vertRight = LineInRect(&spX2, &spY2, &epX2, &epY2, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+		int horzBot = LineInRect(&spX3, &spY3, &epX3, &epY3, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+		int vertLeft = LineInRect(&spX4, &spY4, &epX4, &epY4, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+
+		// round to 'int'...
+		spX1 += 0.5; spX2 += 0.5; spX3 += 0.5; spX4 += 0.5; 
+		spY1 += 0.5; spY2 += 0.5; spY3 += 0.5; spY4 += 0.5; 
+
+		// Draw valid lines
+		if (horzTop){
+			Locate(spX1, spY1);
+			DEClineX(epX1 - spX1 + 1);
+		}
+		if (vertRight){
+			Locate(spX2, spY2);
+			DEClineY(epY2 - spY2 + 1);
+		}
+		if (horzBot){
+			Locate(spX3, spY3);
+			DEClineX(epX3 - spX3 - 1);
+		}
+		if (vertLeft){
+			Locate(spX4, spY4);
+			DEClineY(epY4 - spY4 - 1);
+		}
+
+		// draw valid edges
+		DECboxON;
+		if (horzTop && vertLeft && (int)spX1 == startX && (int)spY1 == startY){
+			// top-left edge
+			Locate(startX, startY);
+			printf("l");
+		}
+		if (horzTop && vertRight && (int)epX1 == stopX && (int)epY1 == startY){
+			// top-right edge
+			Locate(stopX, startY);
+			printf("k");
+		}
+		if (horzBot && vertRight && (int)spX3 == stopX && (int)spY3 == stopY){
+			// bottom-right edge
+			Locate(stopX, stopY);
+			printf("j");
+		}
+		if (horzBot && vertLeft && (int)spX4 == startX && (int)spY4 == stopY){
+			// bottom left edge
+			Locate(startX, stopY);
+			printf("m");
+		}
+		DECboxOFF;
 	}
-	
-	
 }
 
 // Clear Lines

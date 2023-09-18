@@ -142,11 +142,9 @@ int main() {
 			printf("%d\n", i);
 		}
 		fflush(stdout);
-		DEClineXY(5,3,75,3,0);
-		DEClineXY(75,4,75,23,0);
-		DEClineXY(74,23,5,23,0);
-		DEClineXY(5,22,5,4,0);
-		
+				
+		DECrect(5, 3, 75, 23);
+
 		// more horizontal
 		//DEClineXY(6, 4, 74, 22, 0);
 		//DEClineXY(74, 22, 6, 4,  0);
@@ -167,6 +165,8 @@ int main() {
 		//DEClineXY(37, 15, 27, 5,  0);
 
 		DECrect(10, 6, 20, 11);
+
+		DECrect(3, 16, 155, 40);
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
