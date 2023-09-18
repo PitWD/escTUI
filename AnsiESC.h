@@ -766,7 +766,7 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 		}
 		if (horzBot){
 			Locate(spX3, spY3);
-			DEClineX(epX3 - spX3 - 1);
+			DEClineX(epX3 - spX3);
 		}
 		if (vertLeft){
 			Locate(spX4, spY4);
