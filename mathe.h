@@ -64,7 +64,7 @@ int PointInRect(double pX, double pY, double reX1, double reY1, double reX2, dou
         
 }
 
-double LenLine(spX, spY, epX, epY){
+double LenLine(double spX, double spY, double epX, double epY){
     // Len of a Line
     double deltaX = spX - epX;
     double deltaY = spY - epY;
@@ -319,7 +319,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 				return 0;
 			}
             // we have a valid line (spXY1 - spXY2) - sort direction like original
-            if (LenLine(startX, startY, spX1, spY1) < LenLine(startX, startY, spX2, spY2)){
+            if (LenLine(*startX, *startY, spX1, spY1) < LenLine(*startX, *startY, spX2, spY2)){
                 // direction fits
             }
             else{
