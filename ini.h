@@ -10,7 +10,101 @@
 #define INI_TYPE_Bool 5
 #define INI_TYPE_Bin 6
 
-char *IniStrToMem(const char *strIN, int reset){
+char *IniStrToMemFIX(const char *strIN, int reset) {
+    static char *strArray[1000] = { NULL }; // Array of pointers to strings
+    static int cnt = 0; // Number of strings in the array
+
+    if (reset) {
+        // Free memory
+        for (int i = 0; i < cnt; i++) {
+            free(strArray[i]);
+            strArray[i] = NULL;
+        }
+        cnt = 0; // Reset the count
+    } else {
+        // Put string in memory
+        for (int i = 0; i < cnt; i++) {
+            if (strcmp(strIN, strArray[i]) == 0) {
+                // String already exists, return a pointer to it
+                return strArray[i];
+            }
+        }
+
+        if (cnt < 1000) {
+            // Make sure we don't exceed the maximum number of strings
+            strArray[cnt] = (char *)malloc((strlen(strIN) + 1) * sizeof(char));
+            if (strArray[cnt] != NULL) {
+                strcpy(strArray[cnt], strIN);
+                cnt++;
+                return strArray[cnt - 1];
+            }
+        }
+    }
+
+    return NULL;
+}
+
+
+char *IniStrToMem(const char *strIN, int reset) {
+
+    static char **strArray = NULL;  // Array of pointers to strings
+    static int cnt = 0;             // Number of strings in the array
+    static int capacity = 0;        // Current capacity of the array
+
+
+    if (reset) {
+        // Free memory
+        
+        if (strArray) {
+            for (int i = 0; i < cnt; i++) {
+                free(strArray[i]);
+                strArray[i] = NULL;
+            }
+            free(strArray);
+            strArray = NULL;
+        }
+        cnt = 0;
+        capacity = 0;
+
+    } else {
+        // Put string in memory
+        
+        if (!strArray) {
+            // Allocate initial memory
+            capacity = 16;
+            strArray = (char**)malloc(capacity * sizeof(char *));
+            if (!strArray) {
+                // Memory allocation failed
+                return NULL;
+            }
+        }
+
+        if (cnt >= capacity){
+            // Need to resize the array
+            capacity += 8;
+            char **newStrArray = (char **)realloc(strArray, capacity * sizeof(char *));
+            strArray = newStrArray;
+        }
+
+        for (int i = 0; i < cnt; i++) {
+            if (strcmp(strIN, strArray[i]) == 0) {
+                // exists
+                return strArray[i];
+            }
+        }
+
+        strArray[cnt] = (char *)malloc((strlen(strIN) + 1) * sizeof(char));
+        strcpy(strArray[cnt], strIN);
+
+        cnt++;
+        return strArray[cnt - 1];
+    }
+
+    return NULL;
+}
+
+
+char *IniStrToMemOLD(const char *strIN, int reset){
 	// Add strIN to strArray
 	// return pointer on embedded strIN
 
@@ -27,14 +121,23 @@ char *IniStrToMem(const char *strIN, int reset){
 			free(strArray);
 			strArray = NULL;
 		}
+        cnt = 0;
 	}
 	else{
 		// Put string to memory
 
+if (cnt > 126){
+printf("pre search: %s: %d\n",strIN, cnt);
+}
+
 		if (cnt){
 			// look, if the string already exist...
 			for (size_t i = 0; i < cnt; i++){
-				if (!strcmp(strIN, strArray[i])){
+if (cnt == 128){
+    printf("i: %d  %d\n", i, strArray[i]);
+}
+				
+                if (!strncmp(strIN, strArray[i], strlen(strIN))){
 					// exist
 					return strArray[i];
 				}
@@ -43,8 +146,33 @@ char *IniStrToMem(const char *strIN, int reset){
 		
 
 		cnt++;
-		strArray = (char**)realloc(strArray, cnt * sizeof(char*));
+if (cnt > 126){
+printf("pre realloc: %d\n", cnt);
+}
+//        char **newStrArray = (char**)realloc(strArray, (cnt) * sizeof(char*));
+
+        char **newStrArray = (char**)malloc(cnt * sizeof(char*));
+        if (cnt > 1){
+            memcpy(newStrArray, strArray, (cnt - 1) * sizeof(char*));
+            free(strArray);
+        }
+        
+        char **strArray = (char**)malloc(cnt * sizeof(char*));
+
+        if (cnt > 1){
+            memcpy(strArray, newStrArray, cnt * sizeof(char*));
+        }
+
+        free(newStrArray);
+
+        
+if (cnt > 126){
+printf("pre malloc: %d\n", cnt);
+}
 		strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
+if (cnt > 126){
+printf("after malloc: %d\n", cnt);
+}
 		strcpy(strArray[cnt-1], strIN);
 		return strArray[cnt-1];
 
@@ -52,6 +180,7 @@ char *IniStrToMem(const char *strIN, int reset){
 
 	return NULL;
 }
+
 
 void IniTrimRemark (char *strIN){
     // Remove all trailing text after
