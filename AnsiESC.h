@@ -378,6 +378,8 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 void Locate(int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
 	printf("\x1B[%d;%dH", y, x);
+	TERM_CursorPosY = y;
+	TERM_CursorPosX = x;
 }
 void LocateX(int x) {
 	printf("\x1B[%dG", x);
@@ -496,12 +498,29 @@ void DEClineY(int len){
 	
 	DECboxON;
 
+	int isLastLine = 0;
+
+	#if __APPLE__
+		// we're fine
+	#elif __WIN32__ || _MSC_VER || __WIN64__
+		// no clue actually 
+	#else
+		// we can't print regularly, if we're on the last column 
+		if (TERM_CursorPosX == TERM_ScreenWidth){
+			isLastLine = 1;
+		}
+		
+	#endif
+
 	if (len < 0){
 		// bottom to top
 		for (int i = 0; i > len; i--){
 			printf("x");
 			CursorUp(1);
 			CursorLeft(1);
+			if (isLastLine){
+				CursorRight(1);
+			}
 		}
 	}
 	else{

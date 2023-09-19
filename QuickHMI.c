@@ -166,7 +166,7 @@ int main() {
 
 		DECrect(10, 6, 20, 11);
 
-		//DECrect(3, 16, 80, 25);
+		DECrect(3, 16, 80, 25);
 
 		DEClineXY(-5, 13, 200, 13,  0);
 
