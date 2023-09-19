@@ -508,8 +508,8 @@ void DEClineY(int len){
 		// top to bottom
 		while (len--){
 			printf("x");
-			CursorDown(1);
 			CursorLeft(1);
+			CursorDown(1);
 		}
 	}
 	
@@ -758,11 +758,11 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 		// Draw valid lines
 		if (horzTop){
 			Locate(spX1, spY1);
-			DEClineX(epX1 - spX1 + 1);
+			DEClineX(epX1 - spX1 + 2);
 		}
 		if (vertRight){
 			Locate(spX2, spY2);
-			DEClineY(epY2 - spY2 + 1);
+			DEClineY(epY2 - spY2 + 2);
 		}
 		if (horzBot){
 			Locate(spX3, spY3);
