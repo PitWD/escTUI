@@ -477,13 +477,33 @@ void DECboxMode(int set){
 #define DECboxOFF DECboxMode(0)
 void DEClineX(int len){
 
+	int isLastLine = 0;
+
+	#if __APPLE__
+		// we're fine
+	#elif __WIN32__ || _MSC_VER || __WIN64__
+		// no clue actually 
+	#else
+		// we can't print regularly, if we're on the last column 
+		if (TERM_CursorPosX == TERM_ScreenWidth){
+			isLastLine = 1;
+		}		
+	#endif
+
 	DECboxON;
 
 	if (len < 0){
 		// Right to left
 		for (int i = 0; i > len; i--){
 			printf("q");
-			CursorLeft(2);
+			if (!isLastLine){
+				CursorLeft(2);
+			}
+			else{
+				CursorLeft(1);
+			}
+			
+			isLastLine = 0;
 		}
 	}
 	else{
@@ -508,8 +528,7 @@ void DEClineY(int len){
 		// we can't print regularly, if we're on the last column 
 		if (TERM_CursorPosX == TERM_ScreenWidth){
 			isLastLine = 1;
-		}
-		
+		}		
 	#endif
 
 	if (len < 0){
@@ -517,9 +536,8 @@ void DEClineY(int len){
 		for (int i = 0; i > len; i--){
 			printf("x");
 			CursorUp(1);
-			CursorLeft(1);
-			if (isLastLine){
-				CursorRight(1);
+			if (!isLastLine){
+				CursorLeft(1);
 			}
 		}
 	}
@@ -527,8 +545,10 @@ void DEClineY(int len){
 		// top to bottom
 		while (len--){
 			printf("x");
-			CursorLeft(1);
 			CursorDown(1);
+			if (!isLastLine){
+				CursorLeft(1);
+			}
 		}
 	}
 	
