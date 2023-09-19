@@ -535,20 +535,20 @@ void DEClineY(int len){
 		// bottom to top
 		for (int i = 0; i > len; i--){
 			printf("x");
-			CursorUp(1);
 			if (!isLastLine){
 				CursorLeft(1);
 			}
+			CursorUp(1);
 		}
 	}
 	else{
 		// top to bottom
 		while (len--){
 			printf("x");
-			CursorDown(1);
 			if (!isLastLine){
 				CursorLeft(1);
 			}
+			CursorDown(1);
 		}
 	}
 	
@@ -747,41 +747,17 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 		DEClineX(stopX - startX - 1);
 		DECboxON;
 		printf("k");
-		/*
-		#if __APPLE__ 
-			CursorMoveXY(-1, -1);
-		#elif __WIN32__ || _MSC_VER || __WIN64__
-			CursorMoveXY(-1, -1);
-		#else
-			Locate(stopX, startY + 1);
-		#endif
-		*/
+		
 		Locate(stopX, startY + 1);
 		DEClineY(stopY - startY - 1);
 		DECboxON;
 		printf("j");					// bottom-right edge
-		/*
-		#if __APPLE__ 
-			CursorMoveX(-2);
-		#elif __WIN32__ || _MSC_VER || __WIN64__
-			CursorMoveXY(-2);
-		#else
-			Locate(stopX - 1, stopY);
-		#endif
-		*/
+				
 		Locate(stopX - 1, stopY);
 		DEClineX(startX - stopX + 1);
 		DECboxON;
 		printf("m");					// bottom-left edge
-		/*
-		#if __APPLE__ 
-			CursorMoveXY(-1, 1);
-		#elif __WIN32__ || _MSC_VER || __WIN64__
-			CursorMoveXY(-1, 1);
-		#else
-			Locate(startX, stopY - 1);
-		#endif
-		*/
+				
 		Locate(startX, stopY - 1);
 		DEClineY(startY - stopY + 1);
 	}
