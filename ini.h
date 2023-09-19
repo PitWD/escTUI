@@ -71,7 +71,7 @@ char *IniStrToMem(const char *strIN, int reset) {
         
         if (!strArray) {
             // Allocate initial memory
-            capacity = 16;
+            capacity = 32;
             strArray = (char**)malloc(capacity * sizeof(char *));
             if (!strArray) {
                 // Memory allocation failed
@@ -81,7 +81,7 @@ char *IniStrToMem(const char *strIN, int reset) {
 
         if (cnt >= capacity){
             // Need to resize the array
-            capacity += 8;
+            capacity += 32;
             char **newStrArray = (char **)realloc(strArray, capacity * sizeof(char *));
             strArray = newStrArray;
         }
