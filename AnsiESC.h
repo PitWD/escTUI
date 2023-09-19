@@ -746,16 +746,43 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 		printf("l");					// top-left edge
 		DEClineX(stopX - startX - 1);
 		DECboxON;
-		printf("k");					// top-right edge
-		CursorMoveXY(-1, -1);
+		printf("k");
+		/*
+		#if __APPLE__ 
+			CursorMoveXY(-1, -1);
+		#elif __WIN32__ || _MSC_VER || __WIN64__
+			CursorMoveXY(-1, -1);
+		#else
+			Locate(stopX, startY + 1);
+		#endif
+		*/
+		Locate(stopX, startY + 1);
 		DEClineY(stopY - startY - 1);
 		DECboxON;
 		printf("j");					// bottom-right edge
-		CursorMoveX(-2);					
+		/*
+		#if __APPLE__ 
+			CursorMoveX(-2);
+		#elif __WIN32__ || _MSC_VER || __WIN64__
+			CursorMoveXY(-2);
+		#else
+			Locate(stopX - 1, stopY);
+		#endif
+		*/
+		Locate(stopX - 1, stopY);
 		DEClineX(startX - stopX + 1);
 		DECboxON;
 		printf("m");					// bottom-left edge
-		CursorMoveXY(-1, 1);
+		/*
+		#if __APPLE__ 
+			CursorMoveXY(-1, 1);
+		#elif __WIN32__ || _MSC_VER || __WIN64__
+			CursorMoveXY(-1, 1);
+		#else
+			Locate(startX, stopY - 1);
+		#endif
+		*/
+		Locate(startX, stopY - 1);
 		DEClineY(startY - stopY + 1);
 	}
 	else{
