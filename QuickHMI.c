@@ -137,9 +137,10 @@ int main() {
 		for (int i = 0; i < 10; i++){
 			printf("%d\n", i);
 		}
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 4; i++){
 			printf("%d\n", i);
 		}
+		printf("4");
 		fflush(stdout);
 				
 		DECrect(5, 3, 75, 23);
@@ -165,14 +166,14 @@ int main() {
 
 		DECrect(10, 6, 20, 11);
 
-		DECrect(3, 16, 80, 40);
+		//DECrect(3, 16, 80, 25);
 
 		DEClineXY(-5, 13, 200, 13,  0);
 
 		DEClineXY(200, 14, -5, 14,  0);
 
+		// centered verts
 		DEClineXY(39, -4, 39, 50,  0);
-
 		DEClineXY(41, 50, 41, -4,  0);
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
