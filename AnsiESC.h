@@ -556,6 +556,41 @@ void DEClineY(int len){
 }
 void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 	
+	// if newLine = true 
+	//	startX & startY are working like "moveTo"
+	//	stopX & stopY are working like "lineTo"
+	// if newLine = false
+	// 	startX & startY getting replaced by lastX & lastY
+	//	intersection style of connection points will be calculated
+
+	// EDGE logic:
+	// 1st element	from where in X
+	//				to where in Y
+	// 2nd element	from where in Y
+	//				to where in X
+
+	static double lastX = 0;
+	static double lastY = 0;
+	static double lastXcut = 0;
+	static double lastYcut = 0;
+	static int lastDirection = 0;	// 0 = NA
+									// 1 = left to right
+									// 2 = right to left
+									// 4 = top to down
+									// 8 = down to top
+	if (newLine){
+		// (1st) line
+		lastX = 0;
+		lastY = 0;
+		lastXcut = 0;
+		lastYcut = 0;
+	}
+	else{
+		// lineTo from last point
+		startX = lastX;
+		startY = lastY;
+	}
+	
 	double spX = startX;
 	double spY = startY;
 	double epX = stopX;
