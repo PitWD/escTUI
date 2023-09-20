@@ -481,7 +481,7 @@ void DEClineX(int len){
 
 	#if __APPLE__
 		// we're fine
-	#elif __WIN32__ || _MSC_VER || __WIN64__
+	//#elif __WIN32__ || _MSC_VER || __WIN64__
 		// no clue actually 
 	#else
 		// we can't print regularly, if we're on the last column 
@@ -501,9 +501,8 @@ void DEClineX(int len){
 			}
 			else{
 				CursorLeft(1);
-			}
-			
-			isLastLine = 0;
+				isLastLine = 0;
+			}			
 		}
 	}
 	else{
@@ -522,8 +521,8 @@ void DEClineY(int len){
 
 	#if __APPLE__
 		// we're fine
-	#elif __WIN32__ || _MSC_VER || __WIN64__
-		// no clue actually 
+	//#elif __WIN32__ || _MSC_VER || __WIN64__
+		// like linux 
 	#else
 		// we can't print regularly, if we're on the last column 
 		if (TERM_CursorPosX == TERM_ScreenWidth){
