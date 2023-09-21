@@ -569,6 +569,8 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 	// 2nd element	from where in Y
 	//				to where in X
 
+	int isLastLine = 0;			// to handle the last column - issue
+
 	static double lastX = 0;
 	static double lastY = 0;
 	static double lastXcut = 0;
@@ -611,21 +613,50 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 
 		Locate(startX, startY);
 
+		#if __APPLE__
+			// we're fine
+		//#elif __WIN32__ || _MSC_VER || __WIN64__
+			// like linux 
+		#else
+			// we can't print regularly, if we're on the last column 
+			if (TERM_CursorPosX == TERM_ScreenWidth){
+				isLastLine = 1;
+			}		
+		#endif
+
 		int deltaY = stopY - startY;			
 		int deltaX = stopX - startX;
 
 		if (r == 1){
 			// horizontal line
+			lastX = startX + deltaX;
+			lastY = startY;
+			if (lastY > TERM_ScreenHeight){
+				lastY = TERM_ScreenHeight;
+			}
+			else if (lastY < 1){
+				lastY = 1;
+			}
+			if (lastX > TERM_ScreenWidth){
+				lastX = TERM_ScreenWidth;
+			}
+			else if (lastX < 1){
+				lastX = 1;
+			}
 			if (deltaX > 0){
 				deltaX++;
+				lastDirection = 1;		// left to right
 			}
 			else{
 				deltaX--;
+				lastDirection = 2;		// right to left
 			}
 			DEClineX(deltaX);
 		}
 		else if (r == 2){
 			// vertical line
+			lastY = startY + deltaY;
+			lastX = startX;
 			if (deltaY > 0){
 				deltaY++;
 			}
