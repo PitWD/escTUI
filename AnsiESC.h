@@ -575,11 +575,10 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 	static double lastY = 0;
 	static double lastXcut = 0;
 	static double lastYcut = 0;
-	static int lastDirection = 0;	// 0 = NA
-									// 1 = left to right
-									// 2 = right to left
-									// 4 = top to down
-									// 8 = down to top
+	static int lastDirection = 0;	// binary direction coding like in TuiDecBoxDraw[16] 
+	static int actDirection = 0;
+	static int interChar = 0;		// intersection char
+
 	if (newLine){
 		// (1st) line
 		lastX = 0;
@@ -592,6 +591,11 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 		startX = lastX;
 		startY = lastY;
 	}
+
+	// save theoretical last position for the case, that the line
+	// is fully outside the screen...
+	lastX = stopX;
+	lastY = stopY;
 	
 	double spX = startX;
 	double spY = startY;
@@ -629,27 +633,32 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 
 		if (r == 1){
 			// horizontal line
-			lastX = startX + deltaX;
-			lastY = startY;
-			if (lastY > TERM_ScreenHeight){
-				lastY = TERM_ScreenHeight;
+			actDirection = 12;		// right + left
+			interChar = actDirection;
+			if (!newLine){
+				// is a LineTo
+				if (startX == lastX && startY == lastY){
+					// intersection on start-point exist
+					interChar = actDirection & lastDirection;
+				}
 			}
-			else if (lastY < 1){
-				lastY = 1;
-			}
-			if (lastX > TERM_ScreenWidth){
-				lastX = TERM_ScreenWidth;
-			}
-			else if (lastX < 1){
-				lastX = 1;
-			}
+			printf("%c", TuiDecBoxDraw[interChar]);
 			if (deltaX > 0){
-				deltaX++;
-				lastDirection = 1;		// left to right
+				// left to right
+				if (TERM_CursorPosX < TERM_ScreenWidth){
+					TERM_CursorPosX++;
+				}
 			}
 			else{
-				deltaX--;
-				lastDirection = 2;		// right to left
+				// right to left
+				if (TERM_CursorPosX == TERM_ScreenWidth){
+					if (!isLastLine){
+						// MAC can have the cursor behind screen width
+						CursorLeft(1);
+					}
+				}
+				CursorLeft(1);
+				TERM_CursorPosX--;
 			}
 			DEClineX(deltaX);
 		}
@@ -659,9 +668,11 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 			lastX = startX;
 			if (deltaY > 0){
 				deltaY++;
+				actDirection = 3;
 			}
 			else{
 				deltaY--;
+				actDirection = 3;
 			}
 			DEClineY(deltaY);
 		}
@@ -787,6 +798,10 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 //printf("moveX: %d  moveY: %d", moveX, moveY);
 		}
 	}
+	else{
+		// no line to draw
+	}
+	
 }
 void DECrect(int startX, int startY, int stopX, int stopY){
 	
