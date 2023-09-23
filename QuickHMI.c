@@ -142,15 +142,16 @@ int main() {
 		}
 		printf("4");
 		fflush(stdout);
-				
+
+/*		
 		DECrect(5, 3, 75, 23);
 
 		// more horizontal
 		//DEClineXY(6, 4, 74, 22, 0);
 		//DEClineXY(74, 22, 6, 4,  0);
 
-		DEClineXY(6, 5, 10, 22,  0);
-		DEClineXY(11, 22, 15, 5,  0);
+		DEClineXY(6, 5, 10, 22);
+		DEClineXY(11, 22, 15, 5);
 
 		//45° Left to right / Top to bottom
 		//DEClineXY(7, 5, 17, 15,  0);
@@ -159,7 +160,7 @@ int main() {
 		//DEClineXY(7, 15, 17, 5,  0);
 
 		//45° Right to left / Top to bottom
-		DEClineXY(37, 5, 27, 15,  0);
+		DEClineXY(37, 5, 27, 15);
 
 		//45° Right to left / bottom to top
 		//DEClineXY(37, 15, 27, 5,  0);
@@ -168,13 +169,19 @@ int main() {
 
 		DECrect(3, 16, 80, 25);
 
-		DEClineXY(-5, 13, 200, 13,  0);
+		DEClineXY(-5, 13, 200, 13);
 
-		DEClineXY(200, 14, -5, 14,  0);
+		DEClineXY(200, 14, -5, 14);
 
 		// centered verts
-		DEClineXY(39, -4, 39, 50,  0);
-		DEClineXY(41, 50, 41, -4,  0);
+		DEClineXY(39, -4, 39, 50);
+		DEClineXY(41, 50, 41, -4);
+*/
+		DECmoveTo(50, 5);
+		DEClineTo(55, 5);
+		DEClineTo(55, 10);
+		DEClineTo(50, 10);
+		DECclose;
 
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 

@@ -426,6 +426,12 @@ void GetAnsiCursorPos(void){
 	TERM_CursorWaitFor = 1;
 	printf("\x1B[6n");
 }
+void CursorSave(){
+  printf("\0337");
+}
+void CursorRestore(){
+  printf("\0338");
+}
 
 #define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
 
@@ -554,8 +560,14 @@ void DEClineY(int len){
 	DECboxOFF;
 		
 }
-void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
+
+void DECline(int startX, int startY, int stopX, int stopY, int newLine){
 	
+	// newLine = 1		DECmoveTo	- just sets the startX and startY for the/a (poly)-line
+	// newLine = 3 		DECclose	- close poly-line
+	// newLine = 2 		DEClineXY	- full line in start & stop
+	// newLine = 0		DEClineTo	- (next) stopX & stopY
+
 	// if newLine = true 
 	//	startX & startY are working like "moveTo"
 	//	stopX & stopY are working like "lineTo"
@@ -570,32 +582,61 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 	//				to where in X
 
 	int isLastLine = 0;			// to handle the last column - issue
+	int renderEndPoint = 0;		// just if a poly-line gets closed (newLine = 3)
 
-	static double lastX = 0;
-	static double lastY = 0;
-	static double lastXcut = 0;
-	static double lastYcut = 0;
+	static int lastX = 0;
+	static int lastY = 0;
+	static int polyStartX= 0;
+	static int polyStartY = 0;
+	
 	static int lastDirection = 0;	// binary direction coding like in TuiDecBoxDraw[16] 
 	static int actDirection = 0;
+	static int startDirection = 0;
 	static int interChar = 0;		// intersection char
 
+	static int moveToActive = 0;
+
+	if (newLine == 1){
+		// just a moveTo for 1st Line
+		lastX = startX;
+		lastY = startY;
+		polyStartX = startX;
+		polyStartY = startY;
+		moveToActive = 1;
+		return;
+	}
+	else if (newLine == 3){
+		// close poly-ine
+		stopX = polyStartX;
+		stopY = polyStartY;
+		newLine = 0;
+		renderEndPoint = 1;
+	}
+	else if (newLine == 2){
+		// full line
+	}
+	else{
+	}
+	
 	if (newLine){
 		// (1st) line
 		lastX = 0;
 		lastY = 0;
-		lastXcut = 0;
-		lastYcut = 0;
+		polyStartX = startX;
+		polyStartY = startY;
+		moveToActive = 0;
 	}
 	else{
 		// lineTo from last point
 		startX = lastX;
 		startY = lastY;
+		if (moveToActive){
+			lastX = 0;
+			lastY = 0;
+			moveToActive = 0;
+			newLine = 1;
+		}
 	}
-
-	// save theoretical last position for the case, that the line
-	// is fully outside the screen...
-	lastX = stopX;
-	lastY = stopY;
 	
 	double spX = startX;
 	double spY = startY;
@@ -608,6 +649,7 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 
 	if (r){
 		// We have a line to draw
+		DECboxON;
 
 		// back to int
 		startX = (spX + 0.5);
@@ -622,7 +664,7 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 		//#elif __WIN32__ || _MSC_VER || __WIN64__
 			// like linux 
 		#else
-			// we can't print regularly, if we're on the last column 
+			// we can't print "regularly", if we're on the last column 
 			if (TERM_CursorPosX == TERM_ScreenWidth){
 				isLastLine = 1;
 			}		
@@ -633,15 +675,22 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 
 		if (r == 1){
 			// horizontal line
-			actDirection = 12;		// right + left
-			interChar = actDirection;
+			interChar =  12;		// right + left
+			
+			actDirection = (deltaX > 0) ? 4 : 8;
 			if (!newLine){
 				// is a LineTo
 				if (startX == lastX && startY == lastY){
 					// intersection on start-point exist
-					interChar = actDirection & lastDirection;
+					interChar = actDirection + lastDirection;
 				}
 			}
+			else{
+				startDirection = actDirection;
+			}
+			
+			actDirection = (deltaX > 0) ? 8 : 4;
+			
 			printf("%c", TuiDecBoxDraw[interChar]);
 			if (deltaX > 0){
 				// left to right
@@ -656,23 +705,51 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 						// MAC can have the cursor behind screen width
 						CursorLeft(1);
 					}
+					CursorLeft(1);
 				}
-				CursorLeft(1);
+				else{
+					CursorLeft(2);
+				}
 				TERM_CursorPosX--;
 			}
 			DEClineX(deltaX);
 		}
 		else if (r == 2){
 			// vertical line
-			lastY = startY + deltaY;
-			lastX = startX;
-			if (deltaY > 0){
-				deltaY++;
-				actDirection = 3;
+			interChar = 3;		// top + bottom
+
+			actDirection = (deltaY > 0) ? 2 : 1;
+			if (!newLine){
+				// is a LineTo
+				if (startX == lastX && startY == lastY){
+					// intersection on start-point exist
+					interChar = actDirection + lastDirection;
+				}
 			}
 			else{
-				deltaY--;
-				actDirection = 3;
+				startDirection = actDirection;
+			}
+			
+			actDirection = (deltaY > 0) ? 1 : 2 ;
+			printf("%c", TuiDecBoxDraw[interChar]);
+
+			if (TERM_CursorPosX == TERM_ScreenWidth){
+				if (!isLastLine){
+					// MAC can have the cursor behind screen width
+					CursorLeft(1);
+				}
+			}
+			else{
+				CursorLeft(1);
+			}
+
+			if (deltaY > 0){
+				CursorDown(1);
+				TERM_CursorPosY++;
+			}
+			else{
+				CursorUp(1);
+				TERM_CursorPosY--;
 			}
 			DEClineY(deltaY);
 		}
@@ -794,15 +871,30 @@ void DEClineXY(int startX, int startY, int stopX, int stopY, int newLine){
 				}
 				
 			}
-			DECboxOFF;
 //printf("moveX: %d  moveY: %d", moveX, moveY);
 		}
+
+		if (renderEndPoint){
+			Locate(stopX, stopY);
+			DECboxON;
+			interChar = startDirection + actDirection;
+			printf("%c", TuiDecBoxDraw[interChar]);
+		}
+		DECboxOFF;
 	}
 	else{
 		// no line to draw
 	}
+	lastX = stopX;
+	lastY = stopY;
+	lastDirection = actDirection;
 	
 }
+#define DEClineXY(startX, startY, stopX, stopY) DECline(startX, startY, stopX, stopY, 2)
+#define DECmoveTo(x, y) DECline(x, y, 0, 0, 1)
+#define DEClineTo(x, y) DECline(0, 0, x, y, 0)
+#define DECclose DECline(0, 0, 0, 0, 3)
+
 void DECrect(int startX, int startY, int stopX, int stopY){
 	
 	// normalize rect
