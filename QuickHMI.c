@@ -147,42 +147,103 @@ int main() {
 		DECrect(5, 3, 75, 23);
 
 		// more horizontal
-		//DEClineXY(6, 4, 74, 22, 0);
-		//DEClineXY(74, 22, 6, 4,  0);
+		//LINlineXY(6, 4, 74, 22, 0);
+		//LINlineXY(74, 22, 6, 4,  0);
 
-		DEClineXY(6, 5, 10, 22);
-		DEClineXY(11, 22, 15, 5);
+		LINlineXY(6, 5, 10, 22);
+		LINlineXY(11, 22, 15, 5);
 
 		//45° Left to right / Top to bottom
-		//DEClineXY(7, 5, 17, 15,  0);
+		//LINlineXY(7, 5, 17, 15,  0);
 
 		//45° Left to right / Bottom to top
-		//DEClineXY(7, 15, 17, 5,  0);
+		//LINlineXY(7, 15, 17, 5,  0);
 
 		//45° Right to left / Top to bottom
-		DEClineXY(37, 5, 27, 15);
+		LINlineXY(37, 5, 27, 15);
 
 		//45° Right to left / bottom to top
-		//DEClineXY(37, 15, 27, 5,  0);
+		//LINlineXY(37, 15, 27, 5,  0);
 
 		DECrect(10, 6, 20, 11);
 
 		DECrect(3, 16, 80, 25);
 
-		DEClineXY(-5, 13, 200, 13);
+		LINlineXY(-5, 13, 200, 13);
 
-		DEClineXY(200, 14, -5, 14);
+		LINlineXY(200, 14, -5, 14);
 
 		// centered verts
-		DEClineXY(39, -4, 39, 50);
-		DEClineXY(41, 50, 41, -4);
-*/
+		LINlineXY(39, -4, 39, 50);
+		LINlineXY(41, 50, 41, -4);
+
 		DECmoveTo(50, 5);
-		DEClineTo(55, 5);
-		DEClineTo(55, 10);
-		DEClineTo(50, 10);
+		LINlineTo(55, 5);
+		LINlineTo(55, 10);
+		LINlineTo(50, 10);
 		DECclose;
 
+		DECmoveTo(20,5);
+		LINlineTo(25,10);
+		LINlineTo(20,15);
+		LINlineTo(15,10);
+		DECclose;
+*/
+SetFg16(fgBlue);
+		LINmoveTo(82-2,5);
+		LINlineTo(82-3,19);
+		LINlineTo(82-5,20);
+		LINlineTo(82-9,9);
+		LINlineTo(82-13,21);
+		LINlineTo(82-14,19);
+		LINlineTo(82-20,18);
+		LINlineTo(82-25,9);
+		LINlineTo(82-30,3);
+		LINlineTo(82-35,4);
+		LINlineTo(82-40,12);
+		LINlineTo(82-43,21);
+		LINlineTo(82-53,6);
+		LINlineTo(82-58,11);
+		LINlineTo(82-53,16);
+		LINlineTo(82-58,21);
+		LINclose;
+		
+SetFg16(fgGreen);
+		LINmoveTo(2,5);
+		LINlineTo(3,19);
+		LINlineTo(5,20);
+		LINlineTo(9,9);
+		LINlineTo(13,21);
+		LINlineTo(14,19);
+		LINlineTo(20,18);
+		LINlineTo(25,9);
+		LINlineTo(30,3);
+		LINlineTo(35,4);
+		LINlineTo(40,12);
+		LINlineTo(43,21);
+		LINlineTo(53,6);
+		LINlineTo(58,11);
+		LINlineTo(53,16);
+		LINlineTo(58,21);
+		LINclose;
+
+SetFg16(fgRed);
+		LINmoveTo(23,5);
+		LINlineTo(60,9);
+		LINlineTo(5,12);
+		LINlineTo(55,18);
+		LINlineTo(13,21);
+		LINclose;
+
+SetFg16(fgYellow);
+		LINmoveTo(82-23,5);
+		LINlineTo(82-60,9);
+		LINlineTo(82-5,12);
+		LINlineTo(82-55,18);
+		LINlineTo(82-13,21);
+		LINclose;
+
+ResFg();
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
 		TermCoreLoop(UserLoop);

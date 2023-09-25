@@ -465,6 +465,14 @@ right char for displaying the crossing point right.
 (14) ┬ = Bottom-Left-Right
 (15) ┼ = Top-Right-Bottom-Left
 
+static char TuiDecBoxDraw[16] = {' ', ' ', ' ', '*', ' ', '*',
+									'*', '*', ' ', '*', '*', '*',
+									'*', '*', '*', '*' };
+
+static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
+									'l', 't', ' ', 'j', 'k', 'u',
+									'q', 'v', 'w', 'n' };
+
 */
 static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
 									'l', 't', ' ', 'j', 'k', 'u',
@@ -560,6 +568,157 @@ void DEClineY(int len){
 	DECboxOFF;
 		
 }
+
+void LINline(int spX, int spY, int epX, int epY, int newLine) {
+    
+	static int lastX;
+	static int lastY;
+	static int polyStartX;
+	static int polyStartY;
+	
+	if (newLine == 1){
+		// just a moveTo for the 1st line
+		lastX = spX;
+		lastY = spY;
+		polyStartX = spX;
+		polyStartY = spY;
+		return;
+	}
+	else if (newLine == 3){
+		// close poly-ine
+		spX = lastX;
+		spY = lastY;
+		epX = polyStartX;
+		epY = polyStartY;
+	}
+	else if (newLine == 2){
+		// full (new) line
+		polyStartX = spX;
+		polyStartY = spY;
+	}
+	else{
+		// lineTo
+		spX = lastX;
+		spY = lastY;
+	}
+
+	double spXd = spX;
+	double spYd = spY;
+	double epXd = epX;
+	double epYd = epY;
+	
+	int r = LineInRect(&spXd, &spYd, &epXd, &epYd, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+
+//printf("r: %d\n");
+
+	if (r){
+		// We have a line to draw
+
+		// back to int
+		spX = (spXd + 0.5);
+		spY = (spYd + 0.5);
+		epX = (epXd + 0.5);
+		epY = (epYd + 0.5);
+	}
+	else{
+		lastX = (epXd + 0.5);
+		lastY = (epYd + 0.5);
+		return;
+	}
+	
+	
+	int dx = abs(epX - spX);
+    int dy = abs(epY - spY);
+    int sx = (spX < epX) ? 1 : -1;
+    int sy = (spY < epY) ? 1 : -1;
+
+    int diff = dx - dy;
+
+	char nextHorz = 0;
+
+    while (1) {
+		Locate(spX, spY);
+        //printf("*");
+
+		if (nextHorz){
+			// we're on a Y-jump of a more horizontal line....
+			printf("%c", nextHorz);
+			nextHorz = 0;
+			DECboxOFF;
+		}
+		else if (dx > dy){
+			// more horizontal
+			printf("-");
+	        //printf("─");
+		}
+		else if (dx < dy){
+			// more vertical
+	        printf("|");
+		}
+		else{
+			// 45°
+			if (sx == 1){
+		        printf("\\");
+			}
+			else{
+		        printf("/");
+			}			
+		}
+		
+        if (spX == epX && spY == epY) {
+			lastX = spX;
+			lastY = spY;
+			break;
+        }
+
+		lastX = spX;
+		lastY = spY;
+
+        int diff2 = 2 * diff;
+
+        if (diff2 > -dy) {
+            diff -= dy;
+            spX += sx;
+			if (dx < dy){
+				// more vertical - is a jump
+				Locate(lastX, lastY);
+				//if (sx == 1 && sy == 1){
+				if (sx == sy){
+					printf("\\");
+				}
+				else{
+					printf("/");
+				}
+			}
+        }
+
+        if (diff2 < dx) {
+            diff += dx;
+            spY += sy;
+			if (dx > dy){
+				// more horizontal - is a jump
+				Locate(lastX, lastY);
+				DECboxON;
+				if (sy == 1){
+					//printf("r");
+					//nextHorz = 'p';
+					printf("s");
+					nextHorz = 'o';
+				}
+				else{
+					//printf("p");
+					//nextHorz = 'r';
+					printf("o");
+					nextHorz = 's';
+				}				
+			}
+        }
+    }
+}
+#define LINlineXY(startX, startY, stopX, stopY) LINline(startX, startY, stopX, stopY, 2)
+#define LINmoveTo(x, y) LINline(x, y, 0, 0, 1)
+#define LINlineTo(x, y) LINline(0, 0, x, y, 0)
+#define LINclose LINline(0, 0, 0, 0, 3)
 
 void DECline(int startX, int startY, int stopX, int stopY, int newLine){
 	
