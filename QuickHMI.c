@@ -234,15 +234,15 @@ SetFg16(fgRed);
 		LINlineTo(55,18);
 		LINlineTo(13,21);
 		LINclose;
-
+TxtBold(1);
 SetFg16(fgYellow);
-		LINmoveTo(82-23,5);
-		LINlineTo(82-60,9);
+		LINmoveTo(82-23,3);
+		LINlineTo(82-70,11);
 		LINlineTo(82-5,12);
 		LINlineTo(82-55,18);
 		LINlineTo(82-13,21);
 		LINclose;
-
+TxtBold(0);
 ResFg();
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
