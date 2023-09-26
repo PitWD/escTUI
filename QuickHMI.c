@@ -236,12 +236,20 @@ SetFg16(fgRed);
 		LINclose;
 TxtBold(1);
 SetFg16(fgYellow);
+/*
 		LINmoveTo(82-23,3);
 		LINlineTo(82-70,11);
 		LINlineTo(82-5,12);
 		LINlineTo(82-55,18);
 		LINlineTo(82-13,21);
 		LINclose;
+*/
+		DECmoveTo(82-23,3);
+		DEClineTo(82-70,11);
+		DEClineTo(82-5,12);
+		DEClineTo(82-55,18);
+		DEClineTo(82-13,21);
+		DECclose;
 TxtBold(0);
 ResFg();
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...

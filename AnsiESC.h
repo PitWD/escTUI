@@ -1047,6 +1047,9 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 	static int lastY;
 	static int polyStartX;
 	static int polyStartY;
+	static int lastDir;
+	int fromDir = 0;
+	int toDir = 0;
 	
 	if (newLine == 1){
 		// just a moveTo for the 1st line
@@ -1110,39 +1113,80 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
     while (1) {
 		Locate(spX, spY);
 
-		if (nextHorz){
-			// we're on a Y-jump of a more horizontal line....
-			printf("%c", nextHorz);
-			nextHorz = 0;
-			DECboxOFF;
-		}
-		else if (dx > dy){
+		if (dx > dy){
 			// more horizontal
 			printf("q");
+			if (dx == 1){
+				// Left -> Right
+				fromDir = 8;		// Left (West)
+				toDir = 4;
+			}
+			else{
+				// Left <- Right
+				fromDir = 4;		// Right (East)
+				toDir = 8;
+			}
 		}
 		else if (dx < dy){
 			// more vertical
 	        printf("x");
+			if (dy == 1){
+				// Top -> Down
+				fromDir = 1;		// Top (North)
+				toDir = 2;
+			}
+			else{
+				// Down -> Top
+				fromDir = 2;		// Down (South)
+				toDir = 1;
+			}
 		}
 		else{
 			// 45°
 			if (sx == 1){
-		        printf("\\");
+				// Backslash - TopLeft - BottomRight
+		        if (sy == 1){
+					// Top -> Bottom └┐
+					printf("mk");			// └┐
+					fromDir = 1;		// Top (North)
+					toDir = 2;
+				}
+				else{
+					// Bottom -> Top └┐
+					printf("k");			// ┐
+					Locate(spX - 1, spY);
+					printf("m");			// └
+					fromDir = 2;		// Down (South)
+					toDir = 1;
+				}
 			}
 			else{
-		        printf("/");
+				// Slash - TopRight - BottomLeft
+		        if (sy == 1){
+					// Top -> Bottom ┌┘
+					printf("j");			// ┘
+					Locate(spX - 1, spY);
+					printf("l");			// ┌
+					fromDir = 1;		// Top (North)
+					toDir = 2;
+				}
+				else{
+					// Bottom -> Top ┌┘
+					printf("lj");			// ┌┘
+					fromDir = 2;		// Down (South)
+					toDir = 1;
+				}
 			}			
 		}
 		
+		
+		lastX = spX;
+		lastY = spY;
+		lastDir = toDir;
         if (spX == epX && spY == epY) {
-			lastX = spX;
-			lastY = spY;
 			DECboxOFF;
 			break;
         }
-
-		lastX = spX;
-		lastY = spY;
 
         int diff2 = 2 * diff;
 
@@ -1153,10 +1197,32 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				// more vertical - is a jump
 				Locate(lastX, lastY);
 				if (sx == sy){
-					printf("\\");
+					// Backslash - TopLeft - BottomRight
+					if (sy == 1){
+						// Top -> Bottom └┐
+						printf("mk");			// └┐
+						lastX++;
+					}
+					else{
+						// Bottom -> Top └┐
+						printf("k");			// ┐
+						Locate(--lastX, lastY);
+						printf("m");			// └
+					}
 				}
 				else{
-					printf("/");
+					// Slash - TopRight - BottomLeft
+					if (sy == 1){
+						// Top -> Bottom ┌┘
+						printf("j");			// ┘
+						Locate(--lastX, lastY);
+						printf("l");			// ┌
+					}
+					else{
+						// Bottom -> Top ┌┘
+						printf("lj");			// ┌┘
+						lastX++;
+					}
 				}
 			}
         }
@@ -1167,15 +1233,40 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 			if (dx > dy){
 				// more horizontal - is a jump
 				Locate(lastX, lastY);
-				DECboxON;
-				if (sy == 1){
-					printf("s");
-					nextHorz = 'o';
+				if (sx == sy){
+					// Backslash - TopLeft - BottomRight
+					if (sx == 1){
+						// Left -> Right ┐
+						//               └ Top -> Down
+						printf("k");
+						Locate(lastX, ++lastY);
+						printf("m");
+					}
+					else{
+						// Left <- Right ┐
+						//               └ Up <- Down
+						printf("m");
+						Locate(lastX, --lastY);
+						printf("k");
+					}
 				}
 				else{
-					printf("o");
-					nextHorz = 's';
-				}				
+					// Slash - TopRight - BottomLeft
+					if (sx == 1){
+						//             ┌ Left -> Right
+						// Down -> Top ┘
+						printf("j");
+						Locate(lastX, --lastY);
+						printf("l");
+					}
+					else{
+						//             ┌ Left <- Right
+						// Down <- Top ┘
+						printf("l");
+						Locate(lastX, ++lastY);
+						printf("j");
+					}
+				}
 			}
         }
     }
