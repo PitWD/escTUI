@@ -664,6 +664,7 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
         if (spX == epX && spY == epY) {
 			lastX = spX;
 			lastY = spY;
+			fflush(stdout);
 			break;
         }
 
