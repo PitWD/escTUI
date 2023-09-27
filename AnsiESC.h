@@ -672,7 +672,6 @@ void CHRline(int spX, int spY, int epX, int epY, int newLine, char c) {
 #define CHRlineTo(x, y) CHRline(0, 0, x, y, 0, 0)
 #define CHRclose CHRline(0, 0, 0, 0, 3, 0)
 
-
 void LINline(int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
@@ -815,6 +814,200 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
 #define LINmoveTo(x, y) LINline(x, y, 0, 0, 1)
 #define LINlineTo(x, y) LINline(0, 0, x, y, 0)
 #define LINclose LINline(0, 0, 0, 0, 3)
+
+void LINline2(int spX, int spY, int epX, int epY, int newLine) {
+    
+	static int lastX;
+	static int lastY;
+	static int lastDir;
+
+	static int polyStartX;
+	static int polyStartY;
+	static int polyStartDir;
+
+	static int firstLine = 0;	// Becomes true after 1st line of a poly-line is drawn
+								// to signalize, that start-point intersection need to get calculated
+	int doInterStart = 0;
+	int doInterStop = 0;
+
+	int actDir = 0;
+
+	if (newLine == 1){
+		// just a moveTo for the 1st line
+		lastX = spX;
+		lastY = spY;
+		polyStartX = spX;
+		polyStartY = spY;
+		polyStartDir = 0;
+		lastDir = 0;
+		firstLine = 0;
+		return;
+	}
+	else if (newLine == 3){
+		// close poly-ine
+		spX = lastX;
+		spY = lastY;
+		epX = polyStartX;
+		epY = polyStartY;
+		doInterStop = 1;
+	}
+	else if (newLine == 2){
+		// full (new) line
+		polyStartX = spX;
+		polyStartY = spY;
+		polyStartDir = 0;
+		lastDir = 0;
+		firstLine = 0;
+	}
+	else{
+		// lineTo
+		spX = lastX;
+		spY = lastY;
+	}
+
+	double spXd = spX;
+	double spYd = spY;
+	double epXd = epX;
+	double epYd = epY;
+	
+	int r = LineInRect(&spXd, &spYd, &epXd, &epYd, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+
+	if (r){
+		// We have a line to draw
+
+		// back to int
+		spX = (spXd + 0.5);
+		spY = (spYd + 0.5);
+		epX = (epXd + 0.5);
+		epY = (epYd + 0.5);
+	}
+	else{
+		lastX = (epXd + 0.5);
+		lastY = (epYd + 0.5);
+		return;
+	}
+	
+	int dx = abs(epX - spX);
+    int dy = abs(epY - spY);
+    int sx = (spX < epX) ? 1 : -1;
+    int sy = (spY < epY) ? 1 : -1;
+
+    int diff = dx - dy;
+
+	char nextHorz = 0;
+
+	doInterStart = firstLine;
+
+    while (1) {
+		Locate(spX, spY);
+
+		actDir = 0;
+
+		if (nextHorz){
+			// we're on a Y-jump of a more horizontal line....
+			printf("%c", nextHorz);
+			nextHorz = 0;
+			DECboxOFF;
+		}
+		else if (dx > dy){
+			// more horizontal
+			printf("-");
+		}
+		else if (dx < dy){
+			// more vertical
+	        printf("|");
+		}
+		else{
+			// 45°
+			if (sx == sy ){
+		        printf("\\");
+				actDir = '\\';
+			}
+			else{
+		        printf("/");
+				actDir = '/';
+			}			
+		}
+		
+        if (spX == epX && spY == epY){
+			if (doInterStop){
+				Locate(spX, spY);
+				if (polyStartDir == '\\' && actDir == '/'){
+					printf("|");
+				}
+				else if (polyStartDir == '/' && actDir == '\\'){
+					printf("-");
+				}
+			}
+			if (!firstLine){
+				polyStartDir = actDir;
+			}			
+			lastX = spX;
+			lastY = spY;
+			lastDir = actDir;
+			fflush(stdout);
+			firstLine = 1;
+			break;
+        }
+
+		lastX = spX;
+		lastY = spY;
+
+        int diff2 = 2 * diff;
+
+        if (diff2 > -dy) {
+            diff -= dy;
+            spX += sx;
+			if (dx < dy){
+				// more vertical - is a jump
+				Locate(lastX, lastY);
+				if (sx == sy){
+					printf("\\");
+					actDir = '\\';
+				}
+				else{
+					printf("/");
+					actDir = '/';
+				}
+			}
+        }
+
+        if (diff2 < dx) {
+            diff += dx;
+            spY += sy;
+			if (dx > dy){
+				// more horizontal - is a jump
+				Locate(lastX, lastY);
+				DECboxON;
+				if (sy == 1){
+					printf("s");
+					nextHorz = 'o';
+				}
+				else{
+					printf("o");
+					nextHorz = 's';
+				}				
+			}
+        }
+
+		if (doInterStart){
+			Locate(lastX, lastY);
+			if (lastDir == '\\' && actDir == '/'){
+				printf("-");
+			}
+			else if (lastDir == '/' && actDir == '\\'){
+				printf("|");
+			}
+			doInterStart = 0;
+		}
+
+		lastDir = actDir;
+    }
+}
+#define LINlineXY2(startX, startY, stopX, stopY) LINline2(startX, startY, stopX, stopY, 2)
+#define LINmoveTo2(x, y) LINline2(x, y, 0, 0, 1)
+#define LINlineTo2(x, y) LINline2(0, 0, x, y, 0)
+#define LINclose2 LINline2(0, 0, 0, 0, 3)
 
 void DECline(int spX, int spY, int epX, int epY, int newLine) {
     
@@ -976,12 +1169,11 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 			}
 		}
 
-			
 		lastX = spX;
 		lastY = spY;
         if (spX == epX && spY == epY) {
-			Locate(spX, spY);
 			if (doInterStop){
+				Locate(spX, spY);
 				if (((fromDir + toDir) == 3 && (polyFromDir + polyToDir) == 12) || ((fromDir + toDir) == 12 && (polyFromDir + polyToDir) == 3)){
 					// Vert meets Horz
 					printf("%c", TuiDecBoxDraw[polyToDir + fromDir]);
@@ -996,6 +1188,7 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				polyToDir = toDir;
 			}
 			DECboxOFF;
+			fflush(stdout);
 			firstLine = 1;
 			break;
         }

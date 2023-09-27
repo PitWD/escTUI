@@ -266,42 +266,49 @@ SetFg16(fgYellow);
 
 TxtBold(1);
 SetFg16(fgWhite);
-		CHRmoveTo(9,5, '*');
-		CHRlineTo(14,10);
-		CHRlineTo(9,15);
-		CHRlineTo(4,10);
+		CHRmoveTo(9,3, '*');
+		CHRlineTo(14,8);
+		CHRlineTo(9,13);
+		CHRlineTo(4,8);
 		CHRclose;
 
-		DECmoveTo(21,5);
-		DEClineTo(26,10);
-		DEClineTo(21,15);
-		DEClineTo(16,10);
+		DECmoveTo(21,3);
+		DEClineTo(26,8);
+		DEClineTo(21,13);
+		DEClineTo(16,8);
 		DECclose;
 
-		DECmoveTo(33,5);
-		DEClineTo(38,10);
-		DEClineTo(33,15);
-		DEClineTo(28,10);
+		DECmoveTo(33,3);
+		DEClineTo(38,8);
+		DEClineTo(33,13);
+		DEClineTo(28,8);
 		DECclose;
 
 SetFg16(fgCyan);
-		LINmoveTo(33,5);
-		LINlineTo(28,10);
-		LINlineTo(33,15);
-		LINlineTo(38,10);
-		LINclose;
+		LINmoveTo2(33,3);
+		LINlineTo2(28,8);
+		LINlineTo2(33,13);
+		LINlineTo2(38,8);
+		LINclose2;
 
-		DECmoveTo(45,5);
-		DEClineTo(40,10);
-		DEClineTo(45,15);
-		DEClineTo(50,10);
+		DECmoveTo(45,3);
+		DEClineTo(40,8);
+		DEClineTo(45,13);
+		DEClineTo(50,8);
 		DECclose;
 
-		DECmoveTo(70, 5);
-		DEClineTo(75, 5);
-		DEClineTo(75, 10);
-		DEClineTo(70, 10);
-		DECclose;
+		LINmoveTo2(57,3);
+		LINlineTo2(52,8);
+		LINlineTo2(57,13);
+		LINlineTo2(62,8);
+		LINclose2;
+
+		LINmoveTo2(9,14);
+		LINlineTo2(14,19);
+		LINlineTo2(9,24);
+		LINlineTo2(4,19);
+		LINclose2;
+
 
 TxtBold(0);
 ResFg();
