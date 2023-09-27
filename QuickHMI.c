@@ -266,11 +266,11 @@ SetFg16(fgYellow);
 
 TxtBold(1);
 SetFg16(fgWhite);
-		LINmoveTo(9,5);
-		LINlineTo(14,10);
-		LINlineTo(9,15);
-		LINlineTo(4,10);
-		LINclose;
+		CHRmoveTo(9,5, '*');
+		CHRlineTo(14,10);
+		CHRlineTo(9,15);
+		CHRlineTo(4,10);
+		CHRclose;
 
 		DECmoveTo(21,5);
 		DEClineTo(26,10);
@@ -286,15 +286,21 @@ SetFg16(fgWhite);
 
 SetFg16(fgCyan);
 		LINmoveTo(33,5);
-		LINlineTo(38,10);
-		LINlineTo(33,15);
 		LINlineTo(28,10);
+		LINlineTo(33,15);
+		LINlineTo(38,10);
 		LINclose;
 
-		DECmoveTo(50, 5);
-		DEClineTo(55, 5);
-		DEClineTo(55, 10);
-		DEClineTo(50, 10);
+		DECmoveTo(45,5);
+		DEClineTo(40,10);
+		DEClineTo(45,15);
+		DEClineTo(50,10);
+		DECclose;
+
+		DECmoveTo(70, 5);
+		DEClineTo(75, 5);
+		DEClineTo(75, 10);
+		DEClineTo(70, 10);
 		DECclose;
 
 TxtBold(0);

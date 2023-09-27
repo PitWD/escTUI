@@ -571,6 +571,108 @@ void DEClineY(int len){
 		
 }
 
+void CHRline(int spX, int spY, int epX, int epY, int newLine, char c) {
+    
+	static int lastX;
+	static int lastY;
+	static int polyStartX;
+	static int polyStartY;
+
+	static char myChar;
+	
+	if (c){
+		// just set the char
+		myChar = c;
+	}
+	
+	if (newLine == 1){
+		// just a moveTo for the 1st line
+		lastX = spX;
+		lastY = spY;
+		polyStartX = spX;
+		polyStartY = spY;
+		return;
+	}
+	else if (newLine == 3){
+		// close poly-ine
+		spX = lastX;
+		spY = lastY;
+		epX = polyStartX;
+		epY = polyStartY;
+	}
+	else if (newLine == 2){
+		// full (new) line
+		polyStartX = spX;
+		polyStartY = spY;
+	}
+	else{
+		// lineTo
+		spX = lastX;
+		spY = lastY;
+	}
+
+	double spXd = spX;
+	double spYd = spY;
+	double epXd = epX;
+	double epYd = epY;
+	
+	int r = LineInRect(&spXd, &spYd, &epXd, &epYd, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
+
+	if (r){
+		// We have a line to draw
+
+		// back to int
+		spX = (spXd + 0.5);
+		spY = (spYd + 0.5);
+		epX = (epXd + 0.5);
+		epY = (epYd + 0.5);
+	}
+	else{
+		lastX = (epXd + 0.5);
+		lastY = (epYd + 0.5);
+		return;
+	}
+	
+	int dx = abs(epX - spX);
+    int dy = abs(epY - spY);
+    int sx = (spX < epX) ? 1 : -1;
+    int sy = (spY < epY) ? 1 : -1;
+
+    int diff = dx - dy;
+
+	char nextHorz = 0;
+
+    while (1) {
+		Locate(spX, spY);
+
+		printf("%c", myChar);
+		
+        if (spX == epX && spY == epY) {
+			lastX = spX;
+			lastY = spY;
+			fflush(stdout);
+			break;
+        }
+
+        int diff2 = 2 * diff;
+
+        if (diff2 > -dy) {
+            diff -= dy;
+            spX += sx;
+        }
+
+        if (diff2 < dx) {
+            diff += dx;
+            spY += sy;
+        }
+    }
+}
+#define CHRlineXY(startX, startY, stopX, stopY, c) CHRline(startX, startY, stopX, stopY, 2, c)
+#define CHRmoveTo(x, y, c) CHRline(x, y, 0, 0, 1, c)
+#define CHRlineTo(x, y) CHRline(0, 0, x, y, 0, 0)
+#define CHRclose CHRline(0, 0, 0, 0, 3, 0)
+
+
 void LINline(int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
