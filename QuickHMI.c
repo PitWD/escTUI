@@ -249,7 +249,7 @@ SetFg16(fgYellow);
 		DEClineTo(82-5,12);
 		DEClineTo(82-55,18);
 		DEClineTo(82-13,21);
-		DECclose;
+		//DECclose;
 TxtBold(0);
 ResFg();
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
