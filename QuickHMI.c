@@ -234,7 +234,6 @@ SetFg16(fgRed);
 		LINlineTo(55,18);
 		LINlineTo(13,21);
 		LINclose;
-TxtBold(1);
 SetFg16(fgYellow);
 /*
 		LINmoveTo(82-23,3);
@@ -249,9 +248,60 @@ SetFg16(fgYellow);
 		DEClineTo(82-5,12);
 		DEClineTo(82-55,18);
 		DEClineTo(82-13,21);
-		//DECclose;
+		DECclose;
+
+/*
+		LINmoveTo(20,5);
+		LINlineTo(25,10);
+		LINlineTo(20,15);
+		LINlineTo(15,10);
+		LINclose;
+
+		DECmoveTo(20,5);
+		DEClineTo(25,10);
+		DEClineTo(20,15);
+		DEClineTo(15,10);
+		DECclose;
+*/
+
+TxtBold(1);
+SetFg16(fgWhite);
+		LINmoveTo(9,5);
+		LINlineTo(14,10);
+		LINlineTo(9,15);
+		LINlineTo(4,10);
+		LINclose;
+
+		DECmoveTo(21,5);
+		DEClineTo(26,10);
+		DEClineTo(21,15);
+		DEClineTo(16,10);
+		DECclose;
+
+		DECmoveTo(33,5);
+		DEClineTo(38,10);
+		DEClineTo(33,15);
+		DEClineTo(28,10);
+		DECclose;
+
+SetFg16(fgCyan);
+		LINmoveTo(33,5);
+		LINlineTo(38,10);
+		LINlineTo(33,15);
+		LINlineTo(28,10);
+		LINclose;
+
+		DECmoveTo(50, 5);
+		DEClineTo(55, 5);
+		DEClineTo(55, 10);
+		DEClineTo(50, 10);
+		DECclose;
+
 TxtBold(0);
 ResFg();
+Locate(1,24);
+fflush(stdout);
+//printf("%d", (10 &  ))
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
 		// Use a dummy if your app is fully event-driven 
 		TermCoreLoop(UserLoop);

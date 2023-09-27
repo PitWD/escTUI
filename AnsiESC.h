@@ -442,6 +442,8 @@ DEC char to BoxDraw:
 		printf("\x1B(0"); // enable BoxDraw
 		printf("a b c d e f g h i j k l m n o p q r s t u v w x y z\n");
 		printf("\x1B(B"); // disable BoxDraw
+		                    1     1     1       1 1 1
+                          9 0 6 5 5     2     7 1 3 4 3		
 		a b c d e f g h i j k l m n o p q r s t u v w x y z
 		▒ ␉ ␌ ␍ ␊ ° ± ␤ ␋ ┘ ┐ ┌ └ ┼ ⎺ ⎻ ─ ⎼ ⎽ ├ ┤ ┴ ┬ │ ≤ ≥
 
@@ -653,7 +655,7 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
 		}
 		else{
 			// 45°
-			if (sx == 1){
+			if (sx == sy ){
 		        printf("\\");
 			}
 			else{
@@ -712,335 +714,6 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
 #define LINlineTo(x, y) LINline(0, 0, x, y, 0)
 #define LINclose LINline(0, 0, 0, 0, 3)
 
-void DEClineOLD(int startX, int startY, int stopX, int stopY, int newLine){
-	
-	// newLine = 1		DECmoveTo	- just sets the startX and startY for the/a (poly)-line
-	// newLine = 3 		DECclose	- close poly-line
-	// newLine = 2 		DEClineXY	- full line in start & stop
-	// newLine = 0		DEClineTo	- (next) stopX & stopY
-
-	// if newLine = true 
-	//	startX & startY are working like "moveTo"
-	//	stopX & stopY are working like "lineTo"
-	// if newLine = false
-	// 	startX & startY getting replaced by lastX & lastY
-	//	intersection style of connection points will be calculated
-
-	// EDGE logic:
-	// 1st element	from where in X
-	//				to where in Y
-	// 2nd element	from where in Y
-	//				to where in X
-
-	int isLastLine = 0;			// to handle the last column - issue
-	int renderEndPoint = 0;		// just if a poly-line gets closed (newLine = 3)
-
-	static int lastX = 0;
-	static int lastY = 0;
-	static int polyStartX= 0;
-	static int polyStartY = 0;
-	
-	static int lastDirection = 0;	// binary direction coding like in TuiDecBoxDraw[16] 
-	static int actDirection = 0;
-	static int startDirection = 0;
-	static int interChar = 0;		// intersection char
-
-	static int moveToActive = 0;
-
-	if (newLine == 1){
-		// just a moveTo for 1st Line
-		lastX = startX;
-		lastY = startY;
-		polyStartX = startX;
-		polyStartY = startY;
-		moveToActive = 1;
-		return;
-	}
-	else if (newLine == 3){
-		// close poly-ine
-		stopX = polyStartX;
-		stopY = polyStartY;
-		newLine = 0;
-		renderEndPoint = 1;
-	}
-	else if (newLine == 2){
-		// full line
-	}
-	else{
-	}
-	
-	if (newLine){
-		// (1st) line
-		lastX = 0;
-		lastY = 0;
-		polyStartX = startX;
-		polyStartY = startY;
-		moveToActive = 0;
-	}
-	else{
-		// lineTo from last point
-		startX = lastX;
-		startY = lastY;
-		if (moveToActive){
-			lastX = 0;
-			lastY = 0;
-			moveToActive = 0;
-			newLine = 1;
-		}
-	}
-	
-	double spX = startX;
-	double spY = startY;
-	double epX = stopX;
-	double epY = stopY;
-	
-	int r = LineInRect(&spX, &spY, &epX, &epY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
-
-//printf("r: %d\n");
-
-	if (r){
-		// We have a line to draw
-		DECboxON;
-
-		// back to int
-		startX = (spX + 0.5);
-		startY = (spY + 0.5);
-		stopX = (epX + 0.5);
-		stopY = (epY + 0.5);
-
-		Locate(startX, startY);
-
-		#if __APPLE__
-			// we're fine
-		//#elif __WIN32__ || _MSC_VER || __WIN64__
-			// like linux 
-		#else
-			// we can't print "regularly", if we're on the last column 
-			if (TERM_CursorPosX == TERM_ScreenWidth){
-				isLastLine = 1;
-			}		
-		#endif
-
-		int deltaY = stopY - startY;			
-		int deltaX = stopX - startX;
-
-		if (r == 1){
-			// horizontal line
-			interChar =  12;		// right + left
-			
-			actDirection = (deltaX > 0) ? 4 : 8;
-			if (!newLine){
-				// is a LineTo
-				if (startX == lastX && startY == lastY){
-					// intersection on start-point exist
-					interChar = actDirection + lastDirection;
-				}
-			}
-			else{
-				startDirection = actDirection;
-			}
-			
-			actDirection = (deltaX > 0) ? 8 : 4;
-			
-			printf("%c", TuiDecBoxDraw[interChar]);
-			if (deltaX > 0){
-				// left to right
-				if (TERM_CursorPosX < TERM_ScreenWidth){
-					TERM_CursorPosX++;
-				}
-			}
-			else{
-				// right to left
-				if (TERM_CursorPosX == TERM_ScreenWidth){
-					if (!isLastLine){
-						// MAC can have the cursor behind screen width
-						CursorLeft(1);
-					}
-					CursorLeft(1);
-				}
-				else{
-					CursorLeft(2);
-				}
-				TERM_CursorPosX--;
-			}
-			DEClineX(deltaX);
-		}
-		else if (r == 2){
-			// vertical line
-			interChar = 3;		// top + bottom
-
-			actDirection = (deltaY > 0) ? 2 : 1;
-			if (!newLine){
-				// is a LineTo
-				if (startX == lastX && startY == lastY){
-					// intersection on start-point exist
-					interChar = actDirection + lastDirection;
-				}
-			}
-			else{
-				startDirection = actDirection;
-			}
-			
-			actDirection = (deltaY > 0) ? 1 : 2 ;
-			printf("%c", TuiDecBoxDraw[interChar]);
-
-			if (TERM_CursorPosX == TERM_ScreenWidth){
-				if (!isLastLine){
-					// MAC can have the cursor behind screen width
-					CursorLeft(1);
-				}
-			}
-			else{
-				CursorLeft(1);
-			}
-
-			if (deltaY > 0){
-				CursorDown(1);
-				TERM_CursorPosY++;
-			}
-			else{
-				CursorUp(1);
-				TERM_CursorPosY--;
-			}
-			DEClineY(deltaY);
-		}
-		else if (r == 3){
-			// diagonal line
-//printf("YES\n");
-			int absDeltaY = abs(deltaY);
-			int absDeltaX = abs(deltaX);
-
-			// Define the to use stepping edges - see binary direction coding in: char TuiDecBoxDraw[16]
-			int decEdge1st = 5;		// Right to left & down to top pre-defined
-			int decEdge2nd = 10;	// Right to left & down to top pre-defined
-			int moveX = -2;
-			int moveY = 1;
-
-			if (deltaX > 0){
-				// left to right
-				decEdge1st += 4;
-				decEdge2nd -= 4;
-				moveX = 0;
-			}
-			if (deltaY > 0){
-				// top to down
-				decEdge1st += 1;
-				decEdge2nd -= 1;
-				moveY = -1;
-			}
-
-			int steps = absDeltaX;					// The shorter delta is needed - more vertical predefined
-			int missing = absDeltaY - absDeltaX; 	// more vertical predefined...
-			int misPerStep = 0;						// count of connectors on all steps
-			int misRest = 0;						// count of missing connectors
-			int misStep = 0;						// every misStep steps we add an additional connector
-			int insertAt = 1;						// 0 = insert connectors pre 1st edge
-													// 1 = insert connectors past 1st edge
-
-			int decConnector = 3;					// top-bottom (more vertical)
-
-			if (absDeltaX > absDeltaY){
-				// more horizontal
-				steps = absDeltaY;
-				missing = absDeltaX - absDeltaY;
-				decConnector = 12;
-				insertAt = 0;
-			}
-
-			if (missing){
-				// we're not 45°
-				misPerStep = missing / steps;
-				misRest = missing % steps;
-				if (misRest){
-					misStep = steps / misRest;
-				}
-			}
-			else{
-				decConnector = 0;
-			}
-			
-			DECboxON;
-			
-			if (misRest && !insertAt){
-				// misRest pre 1st edge
-				misRest--;
-				printf("%c",TuiDecBoxDraw[decConnector]);
-				CursorMoveX(moveX);
-			}
-
-			printf("%c", TuiDecBoxDraw[decEdge1st]);
-			CursorMoveXY(-1, moveY);
-
-			int misRestStep = misStep;
-			for (int i = 0; i < steps; i++){
-				misRestStep--;
-				
-				
-				if (misPerStep && insertAt){
-					// regular connectors after 1st edge
-					for (int j = 0; j < misPerStep; j++){
-						printf("%c",TuiDecBoxDraw[decConnector]);
-						CursorMoveXY(-1, moveY);
-					}
-				}
-				
-
-				// 2nd edge
-				printf("%c", TuiDecBoxDraw[decEdge2nd]);
-				CursorMoveX(moveX);
-				//CursorMoveXY(moveX, moveY);
-				
-				
-				if (misPerStep && !insertAt){
-					// regular connectors pre 1st edge
-					for (int j = 0; j < misPerStep; j++){
-						printf("%c",TuiDecBoxDraw[decConnector]);
-						CursorMoveX(moveX);
-					}
-				}
-				if (misRest && !insertAt && !misRestStep){
-					// misRest pre 1st edge
-					misRest--;
-					printf("%c",TuiDecBoxDraw[decConnector]);
-					CursorMoveXY(moveX, 0);
-				}
-				
-
-				// 1st edge
-				printf("%c", TuiDecBoxDraw[decEdge1st]);
-				CursorMoveXY(-1, moveY);
-
-				if (misRest && insertAt && !misRestStep){
-					// misRest after 1st edge
-					misRest--;
-					printf("%c",TuiDecBoxDraw[decConnector]);
-					CursorMoveXY(-1, moveY);
-				}
-
-				if (!misRestStep){
-					misRestStep = misStep;
-				}
-				
-			}
-//printf("moveX: %d  moveY: %d", moveX, moveY);
-		}
-
-		if (renderEndPoint){
-			Locate(stopX, stopY);
-			DECboxON;
-			interChar = startDirection + actDirection;
-			printf("%c", TuiDecBoxDraw[interChar]);
-		}
-		DECboxOFF;
-	}
-	else{
-		// no line to draw
-	}
-	lastX = stopX;
-	lastY = stopY;
-	lastDirection = actDirection;
-	
-}
 void DECline(int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
@@ -1048,13 +721,16 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 	static int polyStartX;
 	static int polyStartY;
 	static int polyStartDir;
+	static int polyFromDir;
+	static int polyToDir;
 	
 	static int firstLine = 0;	// Becomes true after 1st line of a poly-line is drawn
 								// to signalize, that start-point intersection need to get calculated
 	int doInterStart = 0;
 	int doInterStop = 0;
 	
-	static int lastDir;
+	static int fromDirLast;
+	static int toDirLast;
 	int fromDir = 0;
 	int toDir = 0;
 	
@@ -1128,7 +804,7 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 
 		if (dx > dy){
 			// more horizontal
-			if (dx == 1){
+			if (sx == 1){
 				// Left -> Right
 				fromDir = 8;		// Left (West)
 				toDir = 4;
@@ -1138,17 +814,11 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				fromDir = 4;		// Right (East)
 				toDir = 8;
 			}
-			if (doInterStart){
-				printf("%c", TuiDecBoxDraw[fromDir + lastDir]);
-				printf("WE DID IT1 %d:%d",fromDir,  lastDir);
-			}
-			else{
-				printf("q");
-			}			
+			printf("q");
 		}
 		else if (dx < dy){
 			// more vertical
-			if (dy == 1){
+			if (sy == 1){
 				// Top -> Down
 				fromDir = 1;		// Top (North)
 				toDir = 2;
@@ -1158,31 +828,27 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				fromDir = 2;		// Down (South)
 				toDir = 1;
 			}
-			if (doInterStart){
-				printf("%c", TuiDecBoxDraw[fromDir + lastDir]);
-				printf("WE DID IT2 %d:%d",fromDir,  lastDir);
-			}
-			else{
-				printf("x");
-			}			
+			printf("x");
 		}
 		else{
 			// 45°
-			if (sx == 1){
+			char char2nd = 0;
+			if (sx == sy){
 				// Backslash - TopLeft - BottomRight
 		        if (sy == 1){
 					// Top -> Bottom └┐
-					printf("mk");			// └┐
+					printf("m");
+					char2nd= 'k';			// └┐
 					fromDir = 1;		// Top (North)
-					toDir = 2;
+					toDir = 4;
 				}
 				else{
 					// Bottom -> Top └┐
 					printf("k");			// ┐
 					Locate(spX - 1, spY);
-					printf("m");			// └
+					char2nd = 'm';			// └
 					fromDir = 2;		// Down (South)
-					toDir = 1;
+					toDir = 8;
 				}
 			}
 			else{
@@ -1191,25 +857,42 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 					// Top -> Bottom ┌┘
 					printf("j");			// ┘
 					Locate(spX - 1, spY);
-					printf("l");			// ┌
+					char2nd = 'l';			// ┌
 					fromDir = 1;		// Top (North)
-					toDir = 2;
+					toDir = 8;
 				}
 				else{
 					// Bottom -> Top ┌┘
-					printf("lj");			// ┌┘
+					printf("l");			// ┌┘
 					fromDir = 2;		// Down (South)
-					toDir = 1;
+					toDir = 4;
+					char2nd = 'j';
 				}
 			}			
+			if (!(spX == epX && spY == epY)){
+				printf("%c", char2nd);
+			}
 		}
 
-		doInterStart = 0;
 			
 		lastX = spX;
 		lastY = spY;
-		lastDir = toDir;
         if (spX == epX && spY == epY) {
+			Locate(spX, spY);
+			if (doInterStop){
+				if (((fromDir + toDir) == 3 && (polyFromDir + polyToDir) == 12) || ((fromDir + toDir) == 12 && (polyFromDir + polyToDir) == 3)){
+					// Vert meets Horz
+					printf("%c", TuiDecBoxDraw[polyToDir + fromDir]);
+				}
+				else{
+					// no 90°
+					printf("%c", TuiDecBoxDraw[(fromDir + toDir) | (polyFromDir + polyToDir)]);
+				}
+			}
+			if (!firstLine){
+				polyFromDir = fromDir;
+				polyToDir = toDir;
+			}
 			DECboxOFF;
 			firstLine = 1;
 			break;
@@ -1228,13 +911,16 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 					if (sy == 1){
 						// Top -> Bottom └┐
 						printf("mk");			// └┐
-						lastX++;
+						fromDir = 1;
+						toDir = 4;
 					}
 					else{
 						// Bottom -> Top └┐
 						printf("k");			// ┐
-						Locate(--lastX, lastY);
+						Locate(lastX - 1, lastY);
 						printf("m");			// └
+						fromDir = 2;
+						toDir = 8;
 					}
 				}
 				else{
@@ -1242,13 +928,16 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 					if (sy == 1){
 						// Top -> Bottom ┌┘
 						printf("j");			// ┘
-						Locate(--lastX, lastY);
-						printf("l");			// ┌
+						Locate(lastX - 1, lastY);
+						printf("l");
+						fromDir = 1;
+						toDir = 8;			// ┌
 					}
 					else{
 						// Bottom -> Top ┌┘
 						printf("lj");			// ┌┘
-						lastX++;
+						fromDir = 2;
+						toDir = 4;
 					}
 				}
 			}
@@ -1266,15 +955,19 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 						// Left -> Right ┐
 						//               └ Top -> Down
 						printf("k");
-						Locate(lastX, ++lastY);
+						Locate(lastX, lastY + 1);
 						printf("m");
+						fromDir = 8;
+						toDir= 2;
 					}
 					else{
 						// Left <- Right ┐
 						//               └ Up <- Down
 						printf("m");
-						Locate(lastX, --lastY);
+						Locate(lastX, lastY - 1);
 						printf("k");
+						fromDir = 4;
+						toDir = 1;
 					}
 				}
 				else{
@@ -1283,279 +976,39 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 						//             ┌ Left -> Right
 						// Down -> Top ┘
 						printf("j");
-						Locate(lastX, --lastY);
+						Locate(lastX, lastY - 1);
 						printf("l");
+						fromDir = 8;
+						toDir = 1;
 					}
 					else{
 						//             ┌ Left <- Right
 						// Down <- Top ┘
 						printf("l");
-						Locate(lastX, ++lastY);
+						Locate(lastX, lastY + 1);
 						printf("j");
+						fromDir = 4;
+						toDir = 2;
 					}
 				}
 			}
         }
-    }
+		if (doInterStart){
+			Locate(lastX, lastY);
+			if (((fromDir + toDir) == 3 && (fromDirLast + toDirLast) == 12) || ((fromDir + toDir) == 12 && (fromDirLast + toDirLast) == 3)){
+				// Vert meets Horz
+				printf("%c", TuiDecBoxDraw[fromDirLast + toDir]);
+			}
+			else{
+				// no 90°
+				printf("%c", TuiDecBoxDraw[(fromDir + toDir) | (fromDirLast + toDirLast)]);
+			}
+			doInterStart = 0;
+		}
+		fromDirLast = fromDir;
+		toDirLast = toDir;
+	}
 }
-void DECline3(int spX, int spY, int epX, int epY, int newLine) {
-    
-	static int lastX;
-	static int lastY;
-	static int polyStartX;
-	static int polyStartY;
-	static int polyStartDir;
-	
-	static int firstLine = 0;	// Becomes true after 1st line of a poly-line is drawn
-								// to signalize, that start-point intersection need to get calculated
-	int doInterStart = 0;
-	int doInterStop = 0;
-	
-	static int lastDir;
-	int fromDir = 0;
-	int toDir = 0;
-	
-	if (newLine == 1){
-		// just a moveTo for the 1st line
-		lastX = spX;
-		lastY = spY;
-		polyStartX = spX;
-		polyStartY = spY;
-		firstLine = 0;
-		return;
-	}
-	else if (newLine == 3){
-		// close poly-ine
-		spX = lastX;
-		spY = lastY;
-		epX = polyStartX;
-		epY = polyStartY;
-		doInterStop = 1;
-	}
-	else if (newLine == 2){
-		// full (new) line
-		polyStartX = spX;
-		polyStartY = spY;
-		firstLine = 0;
-	}
-	else{
-		// lineTo
-		spX = lastX;
-		spY = lastY;
-	}
-
-	double spXd = spX;
-	double spYd = spY;
-	double epXd = epX;
-	double epYd = epY;
-	
-	int r = LineInRect(&spXd, &spYd, &epXd, &epYd, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
-
-	if (r){
-		// We have a line to draw
-
-		// back to int
-		spX = (spXd + 0.5);
-		spY = (spYd + 0.5);
-		epX = (epXd + 0.5);
-		epY = (epYd + 0.5);
-	}
-	else{
-		lastX = epX;
-		lastY = epY;
-		firstLine = 0;
-		return;
-	}
-	
-	
-	int dx = abs(epX - spX);
-    int dy = abs(epY - spY);
-    int sx = (spX < epX) ? 1 : -1;
-    int sy = (spY < epY) ? 1 : -1;
-
-    int diff = dx - dy;
-
-	char nextHorz = 0;
-
-	doInterStart = firstLine;
-
-	DECboxON;
-    while (1) {
-		Locate(spX, spY);
-
-		if (dx > dy){
-			// more horizontal
-			if (dx == 1){
-				// Left -> Right
-				fromDir = 8;		// Left (West)
-				toDir = 4;
-			}
-			else{
-				// Left <- Right
-				fromDir = 4;		// Right (East)
-				toDir = 8;
-			}
-			if (doInterStart){
-				printf("%c", TuiDecBoxDraw[toDir + lastDir]);
-				printf("WE DID IT1 %d:%d",toDir,  lastDir);
-			}
-			else{
-				printf("q");
-			}			
-		}
-		else if (dx < dy){
-			// more vertical
-			if (dy == 1){
-				// Top -> Down
-				fromDir = 1;		// Top (North)
-				toDir = 2;
-			}
-			else{
-				// Down -> Top
-				fromDir = 2;		// Down (South)
-				toDir = 1;
-			}
-			if (doInterStart){
-				printf("%c%c%c", TuiDecBoxDraw[toDir + lastDir],  TuiDecBoxDraw[toDir + lastDir],  TuiDecBoxDraw[toDir + lastDir]);
-				printf("WE DID IT2 %d:%d",toDir,  lastDir);
-			}
-			else{
-				printf("x");
-			}			
-		}
-		else{
-			// 45°
-			if (sx == 1){
-				// Backslash - TopLeft - BottomRight
-		        if (sy == 1){
-					// Top -> Bottom └┐
-					printf("mk");			// └┐
-					fromDir = 1;		// Top (North)
-					toDir = 2;
-				}
-				else{
-					// Bottom -> Top └┐
-					printf("k");			// ┐
-					Locate(spX - 1, spY);
-					printf("m");			// └
-					fromDir = 2;		// Down (South)
-					toDir = 1;
-				}
-			}
-			else{
-				// Slash - TopRight - BottomLeft
-		        if (sy == 1){
-					// Top -> Bottom ┌┘
-					printf("j");			// ┘
-					Locate(spX - 1, spY);
-					printf("l");			// ┌
-					fromDir = 1;		// Top (North)
-					toDir = 2;
-				}
-				else{
-					// Bottom -> Top ┌┘
-					printf("lj");			// ┌┘
-					fromDir = 2;		// Down (South)
-					toDir = 1;
-				}
-			}			
-		}
-
-		doInterStart = 0;
-			
-		lastX = spX;
-		lastY = spY;
-		lastDir = toDir;
-        if (spX == epX && spY == epY) {
-			DECboxOFF;
-			firstLine = 1;
-			break;
-        }
-
-        int diff2 = 2 * diff;
-
-        if (diff2 > -dy) {
-            diff -= dy;
-            spX += sx;
-			if (dx < dy){
-				// more vertical - is a jump
-				Locate(lastX, lastY);
-				if (sx == sy){
-					// Backslash - TopLeft - BottomRight
-					if (sy == 1){
-						// Top -> Bottom └┐
-						printf("mk");			// └┐
-						lastX++;
-					}
-					else{
-						// Bottom -> Top └┐
-						printf("k");			// ┐
-						Locate(--lastX, lastY);
-						printf("m");			// └
-					}
-				}
-				else{
-					// Slash - TopRight - BottomLeft
-					if (sy == 1){
-						// Top -> Bottom ┌┘
-						printf("j");			// ┘
-						Locate(--lastX, lastY);
-						printf("l");			// ┌
-					}
-					else{
-						// Bottom -> Top ┌┘
-						printf("lj");			// ┌┘
-						lastX++;
-					}
-				}
-			}
-        }
-
-        if (diff2 < dx) {
-            diff += dx;
-            spY += sy;
-			if (dx > dy){
-				// more horizontal - is a jump
-				Locate(lastX, lastY);
-				if (sx == sy){
-					// Backslash - TopLeft - BottomRight
-					if (sx == 1){
-						// Left -> Right ┐
-						//               └ Top -> Down
-						printf("k");
-						Locate(lastX, ++lastY);
-						printf("m");
-					}
-					else{
-						// Left <- Right ┐
-						//               └ Up <- Down
-						printf("m");
-						Locate(lastX, --lastY);
-						printf("k");
-					}
-				}
-				else{
-					// Slash - TopRight - BottomLeft
-					if (sx == 1){
-						//             ┌ Left -> Right
-						// Down -> Top ┘
-						printf("j");
-						Locate(lastX, --lastY);
-						printf("l");
-					}
-					else{
-						//             ┌ Left <- Right
-						// Down <- Top ┘
-						printf("l");
-						Locate(lastX, ++lastY);
-						printf("j");
-					}
-				}
-			}
-        }
-    }
-}
-
 #define DEClineXY(startX, startY, stopX, stopY) DECline(startX, startY, stopX, stopY, 2)
 #define DECmoveTo(x, y) DECline(x, y, 0, 0, 1)
 #define DEClineTo(x, y) DECline(0, 0, x, y, 0)
