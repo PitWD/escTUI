@@ -819,10 +819,12 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
 	static int lastY;
+	static int lastChar;
 	static int lastDir;
 
 	static int polyStartX;
 	static int polyStartY;
+	static int polyStartChar;
 	static int polyStartDir;
 
 	static int firstLine = 0;	// Becomes true after 1st line of a poly-line is drawn
@@ -830,6 +832,7 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 	int doInterStart = 0;
 	int doInterStop = 0;
 
+	int actChar = 0;
 	int actDir = 0;
 
 	if (newLine == 1){
@@ -838,7 +841,9 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 		lastY = spY;
 		polyStartX = spX;
 		polyStartY = spY;
+		polyStartChar = 0;
 		polyStartDir = 0;
+		lastChar = 0;
 		lastDir = 0;
 		firstLine = 0;
 		return;
@@ -855,7 +860,9 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 		// full (new) line
 		polyStartX = spX;
 		polyStartY = spY;
+		polyStartChar = 0;
 		polyStartDir = 0;
+		lastChar = 0;
 		lastDir = 0;
 		firstLine = 0;
 	}
@@ -896,12 +903,16 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 
 	char nextHorz = 0;
 
+	
+	actDir = sy;
+	
+	
 	doInterStart = firstLine;
 
     while (1) {
 		Locate(spX, spY);
 
-		actDir = 0;
+		actChar = 0;
 
 		if (nextHorz){
 			// we're on a Y-jump of a more horizontal line....
@@ -921,29 +932,37 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 			// 45°
 			if (sx == sy ){
 		        printf("\\");
-				actDir = '\\';
+				actChar = '\\';
 			}
 			else{
 		        printf("/");
-				actDir = '/';
+				actChar = '/';
 			}			
 		}
 		
         if (spX == epX && spY == epY){
 			if (doInterStop){
 				Locate(spX, spY);
-				if (polyStartDir == '\\' && actDir == '/'){
-					printf("|");
+				if (polyStartDir != actDir){
+					if ((polyStartChar == '\\' && actChar == '/') || (polyStartChar == '/' && actChar == '\\')){
+						printf("-");
+					}
 				}
-				else if (polyStartDir == '/' && actDir == '\\'){
-					printf("-");
+				else{
+					if ((polyStartChar == '\\' && actChar == '/') || (polyStartChar == '/' && actChar == '\\')){
+						printf("|");
+					}
 				}
 			}
+
+
 			if (!firstLine){
+				polyStartChar = actChar;
 				polyStartDir = actDir;
 			}			
 			lastX = spX;
 			lastY = spY;
+			lastChar = actChar;
 			lastDir = actDir;
 			fflush(stdout);
 			firstLine = 1;
@@ -963,11 +982,11 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 				Locate(lastX, lastY);
 				if (sx == sy){
 					printf("\\");
-					actDir = '\\';
+					actChar = '\\';
 				}
 				else{
 					printf("/");
-					actDir = '/';
+					actChar = '/';
 				}
 			}
         }
@@ -992,15 +1011,21 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 
 		if (doInterStart){
 			Locate(lastX, lastY);
-			if (lastDir == '\\' && actDir == '/'){
-				printf("-");
+			if (lastDir != actDir){
+				if ((lastChar == '\\' && actChar == '/') || (lastChar == '/' && actChar == '\\')){
+					printf("-");
+				}
 			}
-			else if (lastDir == '/' && actDir == '\\'){
-				printf("|");
+			else{
+				if ((lastChar == '\\' && actChar == '/') || (lastChar == '/' && actChar == '\\')){
+					printf("|");
+				}
 			}
+					
 			doInterStart = 0;
 		}
 
+		lastChar = actChar;
 		lastDir = actDir;
     }
 }
