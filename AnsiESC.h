@@ -879,6 +879,8 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 	
 	int r = LineInRect(&spXd, &spYd, &epXd, &epYd, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight);
 
+	#define SBS 139		// '/' + '\'
+
 	if (r){
 		// We have a line to draw
 
@@ -943,18 +945,14 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
         if (spX == epX && spY == epY){
 			if (doInterStop){
 				Locate(spX, spY);
-				if (polyStartDir != actDir){
-					if ((polyStartChar == '\\' && actChar == '/') || (polyStartChar == '/' && actChar == '\\')){
-						printf("-");
-					}
+				actChar += polyStartChar;
+				if (polyStartDir != actDir && actChar == SBS){
+					printf("-");
 				}
-				else{
-					if ((polyStartChar == '\\' && actChar == '/') || (polyStartChar == '/' && actChar == '\\')){
-						printf("|");
-					}
+				else if(actChar == SBS){
+					printf("|");
 				}
 			}
-
 
 			if (!firstLine){
 				polyStartChar = actChar;
@@ -1011,17 +1009,15 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 
 		if (doInterStart){
 			Locate(lastX, lastY);
-			if (lastDir != actDir){
-				if ((lastChar == '\\' && actChar == '/') || (lastChar == '/' && actChar == '\\')){
-					printf("-");
-				}
+			lastChar += actChar;
+
+			if (lastDir != actDir && lastChar == SBS){
+				printf("-");
 			}
-			else{
-				if ((lastChar == '\\' && actChar == '/') || (lastChar == '/' && actChar == '\\')){
-					printf("|");
-				}
+			else if(lastChar == SBS){
+				printf("|");
 			}
-					
+
 			doInterStart = 0;
 		}
 

@@ -285,11 +285,11 @@ SetFg16(fgWhite);
 		DECclose;
 
 SetFg16(fgCyan);
-		LINmoveTo2(33,3);
-		LINlineTo2(28,8);
-		LINlineTo2(33,13);
-		LINlineTo2(38,8);
-		LINclose2;
+		LINmoveTo(33,3);
+		LINlineTo(28,8);
+		LINlineTo(33,13);
+		LINlineTo(38,8);
+		LINclose;
 
 		DECmoveTo(45,3);
 		DEClineTo(40,8);
