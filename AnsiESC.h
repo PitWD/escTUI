@@ -85,6 +85,177 @@ typedef struct {
 	// EscColorSTRUCT *pColor;
 } EscStyleSTRUCT; 
 
+struct CanvasSTRUCT {
+    EscColorSTRUCT *color;
+    EscStyleSTRUCT *style;
+    wchar_t c;
+    int width;
+}***myCanvas;
+int canvasMaxX = 0;
+int canvasMaxY = 0;
+#define canvasMaxZ 4
+
+#include <stdlib.h>
+
+int SizeCanvas(int x, int y) {
+	// Function to allocate, reallocate, or free myCanvas
+    static int isSized = 0;
+
+    // If x or y is zero and isSized, free the array, reset isSized, and return
+    if ((x == 0 || y == 0) && isSized) {
+        for (int i = 0; i < canvasMaxX; i++) {
+            for (int j = 0; j < canvasMaxY; j++) {
+                free(myCanvas[i][j]);
+            }
+            free(myCanvas[i]);
+        }
+        free(myCanvas);
+        isSized = 0;
+        canvasMaxX = canvasMaxY = 0;
+        return 0;
+    }
+
+    // If x and y are not zero and isSized, reallocate the array and return
+    if (x > 0 && y > 0 && isSized) {
+        myCanvas = (struct CanvasSTRUCT ***)realloc(myCanvas, x * sizeof(struct CanvasSTRUCT **));
+        if (!myCanvas) {
+            // Handle memory allocation error
+            return -1;
+        }
+
+        for (int i = canvasMaxX; i < x; i++) {
+            myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
+            if (!myCanvas[i]) {
+                // Handle memory allocation error
+                return -1;
+            }
+
+            for (int j = 0; j < y; j++) {
+                myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
+                if (!myCanvas[i][j]) {
+                    // Handle memory allocation error
+                    return -1;
+                }
+            }
+        }
+
+        canvasMaxX = x;
+        canvasMaxY = y;
+        return 0;
+    }
+
+    // If x and y are not zero and not isSized, allocate the array and return
+    if (x > 0 && y > 0 && !isSized) {
+        myCanvas = (struct CanvasSTRUCT ***)malloc(x * sizeof(struct CanvasSTRUCT **));
+        if (!myCanvas) {
+            // Handle memory allocation error
+            return -1;
+        }
+
+        for (int i = 0; i < x; i++) {
+            myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
+            if (!myCanvas[i]) {
+                // Handle memory allocation error
+                return -1;
+            }
+
+            for (int j = 0; j < y; j++) {
+                myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
+                if (!myCanvas[i][j]) {
+                    // Handle memory allocation error
+                    return -1;
+                }
+            }
+        }
+
+        canvasMaxX = x;
+        canvasMaxY = y;
+        isSized = 1;
+        return 0;
+    }
+
+    return -1; // Return -1 for invalid input
+}
+
+int CompareCanvasPos(int x, int y, int z1, int z2) {
+    // Check if x, y, z1, and z2 are within the valid range
+    if (x < 0 || x >= canvasMaxX || y < 0 || y >= canvasMaxY || z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ) {
+        // Invalid indices, return -1 to indicate an error
+        return -1;
+    }
+
+
+    if (myCanvas[x][y][z1].c != myCanvas[x][y][z2].c) {
+        return 1;
+    }
+    else if (myCanvas[x][y][z1].style != myCanvas[x][y][z2].style) {
+        return 2;
+    }
+    else if (myCanvas[x][y][z1].color != myCanvas[x][y][z2].color) {
+        return 4;
+    }
+    // else if (myCanvas[x][y][z1].width != myCanvas[x][y][z2].width) {
+    //    // will never happen - already covered by comparing .c
+	//	return 8;
+    // }
+
+    return 0;
+}
+int CompareCanvasPosUnsafe(int x, int y, int z1, int z2) {
+
+    if (myCanvas[x][y][z1].c != myCanvas[x][y][z2].c) {
+        return 1;
+    }
+    else if (myCanvas[x][y][z1].style != myCanvas[x][y][z2].style) {
+        return 2;
+    }
+    else if (myCanvas[x][y][z1].color != myCanvas[x][y][z2].color) {
+        return 4;
+    }
+    // else if (myCanvas[x][y][z1].width != myCanvas[x][y][z2].width) {
+    //    // will never happen - already covered by comparing .c
+	//	return 8;
+    // }
+
+    return 0;
+}
+
+int CopyCanvasPos(int x, int y, int z1, int z2) {
+    // Check if x, y, z1, and z2 are within the valid range
+    if (x < 0 || x >= canvasMaxX || y < 0 || y >= canvasMaxY || z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ) {
+        // Invalid indices, return 0 to indicate an error
+        return 0;
+    }
+
+    // Copy the content of myCanvas[x][y][z1] to myCanvas[x][y][z2]
+    myCanvas[x][y][z2] = myCanvas[x][y][z1];
+
+    // Return 1 to indicate a successful copy
+    return 1;
+}
+void CopyCanvasPosUnsafe(int x, int y, int z1, int z2) {
+
+    // Copy the content of myCanvas[x][y][z1] to myCanvas[x][y][z2]
+    myCanvas[x][y][z2] = myCanvas[x][y][z1];
+
+}
+
+int CopyCanvasAll(int z1, int z2) {
+
+    if (z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
+        // Invalid indices, return 0 to indicate an error
+        return 0;
+    }
+
+    // Use a single memcpy to copy the entire array
+    memcpy(&myCanvas[0][0][z2], &myCanvas[0][0][z1], sizeof(struct CanvasSTRUCT) * canvasMaxX * canvasMaxY);
+
+    // Return 1 to indicate a successful copy
+    return 1;
+}
+
+
+
 // Collector for all strings of EscColor and EscStyle
 
 // Standard, but optional, ESC Sequences

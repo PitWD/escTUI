@@ -143,7 +143,6 @@ void(*TermSizeChanged)(int x, int y) = TermDummyEventIntInt;
 void(*TermInfo[3])(char *strIN) = {TermDummyEventStr, TermDummyEventStr, TermDummyEventStr};
 
 
-
 #define ESC27_EXCHANGE_SIZE 33          // Has to be at least 1 greater than greatest to expect Command/Response !!
 #define ESC27_STREAM_IN_SIZE 33         // Has to be >= ESC27_EXCHANGE_SIZE !!
 //unsigned char streamInESC27[ESC27_STREAM_IN_SIZE];
@@ -2345,6 +2344,7 @@ void TermCoreLoop(void(*UserLoop)()){
 	// Loop Minimum
 
 }
+
 
 
 /*
