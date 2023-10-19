@@ -781,11 +781,12 @@ int CopyCanvasAll(int z1, int z2) {
         return 0;
     }
 
+	size_t size = sizeof(struct CanvasSTRUCT) * canvasMaxX * canvasMaxY;
     // Use a single memcpy to copy the entire array
-    memcpy(&myCanvas[0][0][z2], &myCanvas[0][0][z1], sizeof(struct CanvasSTRUCT) * canvasMaxX * canvasMaxY);
+    memcpy(&myCanvas[0][0][z2], &myCanvas[0][0][z1], size);
 
     // Return 1 to indicate a successful copy
-    return 1;
+    return size;
 }
 
 
