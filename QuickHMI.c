@@ -24,7 +24,7 @@ void UserSecondChanged(void){
 	static int i = 0;
 	i++;
 	TERM_RunCoreLoop = 0;
-	if (i < 10){
+	if (i < 100){
 		//printf("Second\n");
 		TERM_RunCoreLoop = 1;
 	}
