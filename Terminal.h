@@ -12,6 +12,7 @@
 #include "Timing.h"
 #include <signal.h>
 #include <string.h>
+#include <wchar.h>
 
 #if __WIN32__ || _MSC_VER || __WIN64__
     #include <conio.h>
@@ -825,6 +826,22 @@ int CharLen(wchar_t ucs) {
 	return intable(WIDE_EASTASIAN, sizeof(WIDE_EASTASIAN)/sizeof(struct width_interval), ucs) ? 2 : 1;
 }
 // *** 3rd Party END ***
+
+int StrLen(wchar_t *strIN){
+	// Get terminal print-len of strIN
+	
+	int cLen = wcslen(strIN);		// cnt of wide chars
+
+	int r = 0;
+
+	for (int i = 0; i < cLen; i++){
+		int wcLen = CharLen(strIN[i]);		// terminal len of wchar_t
+		if (wcLen > 0) r += wcLen;
+	}
+
+	return r;
+
+}
 
 int SizeCanvas(int x, int y) {
 	// Function to allocate, reallocate, or free myCanvas
