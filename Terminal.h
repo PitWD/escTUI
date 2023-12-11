@@ -844,11 +844,10 @@ int StrLen(wchar_t *strIN){
 }
 
 int SizeCanvas(int x, int y) {
-	// Function to allocate, reallocate, or free myCanvas
     static int isSized = 0;
 
-    // If x or y is zero and isSized, free the array, reset isSized, and return
-    if ((x == 0 || y == 0) && isSized) {
+    // If x or y is zero, free the array, reset isSized, and return
+    if (x == 0 || y == 0) {
         for (int i = 0; i < canvasMaxX; i++) {
             for (int j = 0; j < canvasMaxY; j++) {
                 free(myCanvas[i][j]);
@@ -861,55 +860,38 @@ int SizeCanvas(int x, int y) {
         return 0;
     }
 
-    // If x and y are not zero and isSized, reallocate the array and return
-    if (x > 0 && y > 0 && isSized) {
-        myCanvas = (struct CanvasSTRUCT ***)realloc(myCanvas, x * sizeof(struct CanvasSTRUCT **));
-        if (!myCanvas) {
-            // Handle memory allocation error
-            return -1;
+    // If x and y are not zero, allocate or realloc the array and return
+    if (x > 0 && y > 0) {
+		
+        if (isSized) {
+            myCanvas = (struct CanvasSTRUCT ***)realloc(myCanvas, x * sizeof(struct CanvasSTRUCT **));
+        } else {
+            myCanvas = (struct CanvasSTRUCT ***)malloc(x * sizeof(struct CanvasSTRUCT **));
         }
-
-        for (int i = canvasMaxX; i < x; i++) {
-            myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
-            if (!myCanvas[i]) {
-                // Handle memory allocation error
-                return -1;
-            }
-
-            for (int j = 0; j < y; j++) {
-                myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
-                if (!myCanvas[i][j]) {
-                    // Handle memory allocation error
-                    return -1;
-                }
-            }
-        }
-
-        canvasMaxX = x;
-        canvasMaxY = y;
-        return 0;
-    }
-
-    // If x and y are not zero and not isSized, allocate the array and return
-    if (x > 0 && y > 0 && !isSized) {
-        myCanvas = (struct CanvasSTRUCT ***)malloc(x * sizeof(struct CanvasSTRUCT **));
-        if (!myCanvas) {
+        isSized = 0;
+		if (!myCanvas) {
             // Handle memory allocation error
             return -1;
         }
 
         for (int i = 0; i < x; i++) {
-            myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
-            if (!myCanvas[i]) {
-                // Handle memory allocation error
-                return -1;
-            }
+			myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
+			if (!myCanvas[i]) {
+				// Handle memory allocation error
+				return -1;
+			}
 
             for (int j = 0; j < y; j++) {
-                myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
-                if (!myCanvas[i][j]) {
-                    // Handle memory allocation error
-                    return -1;
+				myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
+				if (!myCanvas[i][j]) {
+					// Handle memory allocation error
+					return -1;
+				}
+
+                // Initialize each element to the defaultCanvas
+                for (int k = 0; k < canvasMaxZ; k++) {
+                    //memcpy(&myCanvas[i][j][k], &defaultCanvas, elementSize);
+					memset(&myCanvas[i][j][k], 0, sizeof(struct CanvasSTRUCT));
                 }
             }
         }
