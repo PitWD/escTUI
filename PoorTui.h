@@ -601,7 +601,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			}
 		}
 
-		if (selectedMenu){
+		if (selectedMenu->pos1st){
 			// there is another subMenu to render...
 			
 			// set X & Y
