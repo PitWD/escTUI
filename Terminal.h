@@ -287,10 +287,11 @@ struct CanvasSTRUCT {
 int canvasMaxX = 0;
 int canvasMaxY = 0;
 #define canvasMaxZ 4
-#define CANVAS_Term 0
-#define CANVAS_TermNext 1
-#define CANVAS_Screen 2
-#define CANVAS_Menu 3
+#define CANVAS_Term 0		// User View	
+#define CANVAS_TermNext 1	// Next to view (menu on screen)
+#define CANVAS_Screen 2		// receives background event data and all other non-menu data
+#define CANVAS_Menu 3		// Menu (on user-view)
+
 
 // *** 3rd Party START ***
 struct width_interval {
@@ -857,7 +858,7 @@ int SizeCanvas(int x, int y) {
         free(myCanvas);
         isSized = 0;
         canvasMaxX = canvasMaxY = 0;
-        return 0;
+        return 1;
     }
 
     // If x and y are not zero, allocate or realloc the array and return
@@ -871,21 +872,21 @@ int SizeCanvas(int x, int y) {
         isSized = 0;
 		if (!myCanvas) {
             // Handle memory allocation error
-            return -1;
+            return 0;
         }
 
         for (int i = 0; i < x; i++) {
 			myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
 			if (!myCanvas[i]) {
 				// Handle memory allocation error
-				return -1;
+				return 0;
 			}
 
             for (int j = 0; j < y; j++) {
 				myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
 				if (!myCanvas[i][j]) {
 					// Handle memory allocation error
-					return -1;
+					return 0;
 				}
 
                 // Initialize each element to the defaultCanvas
@@ -899,35 +900,41 @@ int SizeCanvas(int x, int y) {
         canvasMaxX = x;
         canvasMaxY = y;
         isSized = 1;
-        return 0;
+		return 1;
     }
 
-    return -1; // Return -1 for invalid input
+    return 0; // Return -1 for invalid input
+}
+
+void resetCanvas(int z) {
+    // Set all canvas positions to 0
+    memset(&myCanvas[0][0][z], 0, canvasMaxX * canvasMaxY * sizeof(struct CanvasSTRUCT));
+}
+void resetCanvasAll() {
+	// Set all canvas positions to 0
+	for (int z = 0; z < canvasMaxZ; z++) {
+		resetCanvas(z);
+	}
+}
+
+int IsCanvasPosValid(int x, int y, int z) {
+	// Check if x, y, and z are within the valid range
+	if (x < 0 || x >= canvasMaxX || y < 0 || y >= canvasMaxY || z < 0 || z >= canvasMaxZ) {
+		return 0;
+	}
+
+	return 1;
 }
 
 int CompareCanvasPos(int x, int y, int z1, int z2) {
     // Check if x, y, z1, and z2 are within the valid range
-    if (x < 0 || x >= canvasMaxX || y < 0 || y >= canvasMaxY || z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ) {
+    if (!IsCanvasPosValid(x, y, z1) || !IsCanvasPosValid(x, y, z2)){
         // Invalid indices, return -1 to indicate an error
-        return -1;
+        return 0;
     }
 
+    return CompareCanvasPosUnsafe(x, y, z1, z2);
 
-    if (myCanvas[x][y][z1].c != myCanvas[x][y][z2].c) {
-        return 1;
-    }
-    else if (myCanvas[x][y][z1].style != myCanvas[x][y][z2].style) {
-        return 2;
-    }
-    else if (myCanvas[x][y][z1].color != myCanvas[x][y][z2].color) {
-        return 4;
-    }
-    // else if (myCanvas[x][y][z1].width != myCanvas[x][y][z2].width) {
-    //    // will never happen - already covered by comparing .c
-	//	return 8;
-    // }
-
-    return 0;
 }
 int CompareCanvasPosUnsafe(int x, int y, int z1, int z2) {
 
@@ -950,13 +957,12 @@ int CompareCanvasPosUnsafe(int x, int y, int z1, int z2) {
 
 int CopyCanvasPos(int x, int y, int z1, int z2) {
     // Check if x, y, z1, and z2 are within the valid range
-    if (x < 0 || x >= canvasMaxX || y < 0 || y >= canvasMaxY || z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ) {
-        // Invalid indices, return 0 to indicate an error
+    if (!IsCanvasPosValid(x, y, z1) || !IsCanvasPosValid(x, y, z2)){
+        // Invalid indices, return -1 to indicate an error
         return 0;
     }
 
-    // Copy the content of myCanvas[x][y][z1] to myCanvas[x][y][z2]
-    myCanvas[x][y][z2] = myCanvas[x][y][z1];
+	CopyCanvasPosUnsafe(x, y, z1, z2);
 
     // Return 1 to indicate a successful copy
     return 1;
@@ -983,7 +989,76 @@ int CopyCanvasAll(int z1, int z2) {
     return size;
 }
 
+int CopyCharToCanvas(int x, int y, int z, wchar_t c, int style, int color) {
+	// Check if x, y, and z are within the valid range
+	if (!IsCanvasPosValid(x, y, z)){
+		// Invalid indices, return -1 to indicate an error
+		return 0;
+	}
 
+	// Copy the character and style to the specified position
+	CopyCharToCanvasUnsafe(x, y, z, c, style, color);
+
+	// Return 1 to indicate a successful copy
+	return 1;
+}
+int CopyCharToCanvasUnsafe(int x, int y, int z, wchar_t c, int style, int color) {
+	// Copy the character and style to the specified position
+	myCanvas[x][y][z].c = c;
+	myCanvas[x][y][z].style = style;
+	myCanvas[x][y][z].color = color;
+	int len = CharLen(c);
+	if (len > 0){
+		myCanvas[x][y][z].width = len;
+	}
+	else {
+		myCanvas[x][y][z].width = 0;
+	}
+	
+	// Return 1 to indicate a successful copy
+	return 1;
+}
+
+int CopyStringToCanvas(int x, int y, int z, wchar_t *str, int style, int color) {
+	// Check if x, y, and z are within the valid range
+	if (!IsCanvasPosValid(x, y, z)){
+		// Invalid indices, return -1 to indicate an error
+		return 0;
+	}
+	// Check, if x + count of chars doesn't exceed the canvas
+	if (x + StrLen(str) > canvasMaxX - 1){
+		// Invalid indices, return -1 to indicate an error
+		return 0;
+	}
+
+	// Copy the string to the specified position
+    for (int i = 0; str[i] != '\0'; i++) {
+		CopyCharToCanvasUnsafe(x + i, y, z, str[i], style, color);
+    }
+
+	// Return 1 to indicate a successful copy
+	return 1;
+}
+
+int CopyCanvasAllDifferent(int z1, int z2) {
+	// Check if z1 and z2 are within the valid range
+	if (z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
+		// Invalid indices, return 0 to indicate an error
+		return 0;
+	}
+
+	// Copy the content of myCanvas[z1] to myCanvas[z2]
+	for (int x = 0; x < canvasMaxX; x++) {
+		for (int y = 0; y < canvasMaxY; y++) {
+			if (CompareCanvasPosUnsafe(x, y, z1, z2)) {
+				CopyCanvasPosUnsafe(x, y, z1, z2);
+			}
+		}
+	}
+
+	// Return 1 to indicate a successful copy
+	return 1;
+}
 
 void TermInitEvents(){
 	int i = 0;
