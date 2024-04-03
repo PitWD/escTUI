@@ -278,6 +278,10 @@ typedef struct {
 	// EscColorSTRUCT *pColor;
 } EscStyleSTRUCT; 
 
+// global access on colors and styles
+EscColorSTRUCT *userColors = NULL;
+EscStyleSTRUCT *userStyles = NULL;
+
 struct CanvasSTRUCT {
     EscColorSTRUCT *color;
     EscStyleSTRUCT *style;
@@ -926,16 +930,6 @@ int IsCanvasPosValid(int x, int y, int z) {
 	return 1;
 }
 
-int CompareCanvasPos(int x, int y, int source, int destination) {
-    // Check if x, y, source, and destination are within the valid range
-    if (!IsCanvasPosValid(x, y, source) || !IsCanvasPosValid(x, y, destination)){
-        // Invalid indices, return -1 to indicate an error
-        return 0;
-    }
-
-    return CompareCanvasPosUnsafe(x, y, source, destination);
-
-}
 int CompareCanvasPosUnsafe(int x, int y, int source, int destination) {
 
     if (myCanvas[x][y][source].c != myCanvas[x][y][destination].c) {
@@ -954,7 +948,23 @@ int CompareCanvasPosUnsafe(int x, int y, int source, int destination) {
 
     return 0;
 }
+int CompareCanvasPos(int x, int y, int source, int destination) {
+    // Check if x, y, source, and destination are within the valid range
+    if (!IsCanvasPosValid(x, y, source) || !IsCanvasPosValid(x, y, destination)){
+        // Invalid indices, return -1 to indicate an error
+        return 0;
+    }
 
+    return CompareCanvasPosUnsafe(x, y, source, destination);
+
+}
+
+void CopyCanvasPosUnsafe(int x, int y, int source, int destination) {
+
+    // Copy the content of myCanvas[x][y][source] to myCanvas[x][y][destination]
+    myCanvas[x][y][destination] = myCanvas[x][y][source];
+
+}
 int CopyCanvasPos(int x, int y, int source, int destination) {
     // Check if x, y, source, and destination are within the valid range
     if (!IsCanvasPosValid(x, y, source) || !IsCanvasPosValid(x, y, destination)){
@@ -966,12 +976,6 @@ int CopyCanvasPos(int x, int y, int source, int destination) {
 
     // Return 1 to indicate a successful copy
     return 1;
-}
-void CopyCanvasPosUnsafe(int x, int y, int source, int destination) {
-
-    // Copy the content of myCanvas[x][y][source] to myCanvas[x][y][destination]
-    myCanvas[x][y][destination] = myCanvas[x][y][source];
-
 }
 
 int CopyCanvasAll(int source, int destination) {
@@ -989,6 +993,22 @@ int CopyCanvasAll(int source, int destination) {
     return size;
 }
 
+int CopyCharToCanvasUnsafe(int x, int y, int z, wchar_t c, int style, int color) {
+	// Copy the character and style to the specified position
+	myCanvas[x][y][z].c = c;
+	myCanvas[x][y][z].style = &userStyles[style];
+	myCanvas[x][y][z].color = &userColors[color];
+	int len = CharLen(c);
+	if (len > 0){
+		myCanvas[x][y][z].width = len;
+	}
+	else {
+		myCanvas[x][y][z].width = 0;
+	}
+	
+	// Return 1 to indicate a successful copy
+	return 1;
+}
 int CopyCharToCanvas(int x, int y, int z, wchar_t c, int style, int color) {
 	// Check if x, y, and z are within the valid range
 	if (!IsCanvasPosValid(x, y, z)){
@@ -999,22 +1019,6 @@ int CopyCharToCanvas(int x, int y, int z, wchar_t c, int style, int color) {
 	// Copy the character and style to the specified position
 	CopyCharToCanvasUnsafe(x, y, z, c, style, color);
 
-	// Return 1 to indicate a successful copy
-	return 1;
-}
-int CopyCharToCanvasUnsafe(int x, int y, int z, wchar_t c, int style, int color) {
-	// Copy the character and style to the specified position
-	myCanvas[x][y][z].c = c;
-	myCanvas[x][y][z].style = style;
-	myCanvas[x][y][z].color = color;
-	int len = CharLen(c);
-	if (len > 0){
-		myCanvas[x][y][z].width = len;
-	}
-	else {
-		myCanvas[x][y][z].width = 0;
-	}
-	
 	// Return 1 to indicate a successful copy
 	return 1;
 }
@@ -1040,7 +1044,7 @@ int CopyStringToCanvas(int x, int y, int z, wchar_t *str, int style, int color) 
 	return 1;
 }
 
-int CopyCanvasAllDifferent(int source, int destination) {
+int CopyCanvasAllDifferent(int source, int destination, int toScreen) {
 	// Check if source and destination are within the valid range
 	if (source < 0 || source >= canvasMaxZ || destination < 0 || destination >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
 		// Invalid indices, return 0 to indicate an error
@@ -1048,8 +1052,9 @@ int CopyCanvasAllDifferent(int source, int destination) {
 	}
 
 	// Copy the content of myCanvas[source] to myCanvas[destination]
-	for (int x = 0; x < canvasMaxX; x++) {
-		for (int y = 0; y < canvasMaxY; y++) {
+	for (int y = 0; y < canvasMaxY; y++) {
+		for (int x = 0; x < canvasMaxY; x++) {
+			struct CanvasSTRUCT sourceCanvas = myCanvas[x][y][source];
 			if (CompareCanvasPosUnsafe(x, y, source, destination)) {
 				CopyCanvasPosUnsafe(x, y, source, destination);
 			}

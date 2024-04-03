@@ -24,9 +24,7 @@ char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0"
 static EscStyleSTRUCT ActTxtStyle;
 static EscColorSTRUCT ActTxtColor;
 
-// global access on colors and styles
-EscColorSTRUCT *userColors = NULL;
-EscStyleSTRUCT *userStyles = NULL;
+
 
 void ResFBU(void);
 void SetColorStyle(EscColorSTRUCT *pColor, int set);
@@ -82,23 +80,23 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 	// groups color model
 	int colorsModel = IniGetInt(strFile, "global.colors.ColorModel", 0);
 	
-	// memory to store count of colors in each group
+	// memory to store count of colors of each group
 	int *colorsCount;
 	colorsCount = (int*)malloc(colorsGroupsCount * sizeof(int));
 	
 	int colorsCountSum = 0;
 
-	// read counts of colors and calc sum
+	// read counts of colors of the groups and calc sum
 	for (int i = 0; i < colorsGroupsCount; i++){
 		sprintf(strSearch, "global.colors.group%d.Count", i + 1);
 		colorsCount[i] = IniGetInt(strFile, strSearch, 0);
 		colorsCountSum += colorsCount[i];
 	}
 	
-	// memory to store all colors
-	*userColor = (EscColorSTRUCT*)malloc(colorsCountSum * sizeof(EscColorSTRUCT));
+	// memory to store all colors - index 0 reserved for default/last color
+	*userColor = (EscColorSTRUCT*)malloc((colorsCountSum + 1) * sizeof(EscColorSTRUCT));
 
-	colorsCountSum = 0;
+	colorsCountSum = 1;
 
 	for (int i = 0; i < colorsGroupsCount; i++){
 		sprintf(strSearch, "global.colors.group%d.Name", i + 1);
@@ -127,17 +125,18 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 			// printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
 			printf("%04d. %s_%s: ", colorsCountSum , (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
 
-			colorsCountSum++;
-
 			LocateX(36);
-			SetColorStyle(&(*userColor)[colorsCountSum - 1], 1);
+			SetColorStyle(&(*userColor)[colorsCountSum], 1);
 			//printf("Res - Done\n");
 			//return;
-			printf("->   (%03d:%03d)   <-", (*userColor)[colorsCountSum - 1].fg.Color, (*userColor)[colorsCountSum - 1].bg.Color);
+			printf("->   (%03d:%03d)   <-", (*userColor)[colorsCountSum].fg.Color, (*userColor)[colorsCountSum].bg.Color);
 			fflush(stdout);
 			ResFBU();
 			printf("\n");
 			fflush(stdout);
+
+			colorsCountSum++;
+
 		}
 		printf("\n");
 		fflush(stdout);		
@@ -177,9 +176,9 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 		stylesCountSum += stylesCount[i];
 	}
 	
-	*userTxtStyles = (EscStyleSTRUCT*)malloc(stylesCountSum * sizeof(EscStyleSTRUCT));
+	*userTxtStyles = (EscStyleSTRUCT*)malloc((stylesCountSum +1) * sizeof(EscStyleSTRUCT));
 	
-	stylesCountSum = 0;
+	stylesCountSum = 1;
 
 	for (int i = 0; i < stylesGroupsCount; i++){
 		sprintf(strSearch, "global.txtStyles.group%d.Name", i + 1);
@@ -269,20 +268,18 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 
 		    // *userTxtStyles)[stylesCountSum].pColor = &ActTxtColor;
 
-			printf("%04d. %s_%s: ",stylesCountSum + 1, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
-
-			stylesCountSum++;
+			printf("%04d. %s_%s: ", stylesCountSum, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
 
 			LocateX(45);
-			SetTxtStyle(&(*userTxtStyles)[stylesCountSum - 1], 1);
-			if ((*userTxtStyles)[stylesCountSum - 1].dbl_height){
+			SetTxtStyle(&(*userTxtStyles)[stylesCountSum], 1);
+			if ((*userTxtStyles)[stylesCountSum].dbl_height){
 				printf("\n");
 				TxtDblTop(1);
 				printf("->   ( TEST )   <-\n");
 				TxtDblBot(1);
 				printf("->   ( TEST )   <-");
 			}
-			else if ((*userTxtStyles)[stylesCountSum - 1].dbl_width){
+			else if ((*userTxtStyles)[stylesCountSum].dbl_width){
 				printf("\n");
 				TxtDblWidth(1);
 				printf("->   ( TEST )   <-");				
@@ -291,9 +288,12 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 				printf("->   ( TEST )   <-");
 			}					
 			fflush(stdout);
-			SetTxtStyle(&(*userTxtStyles)[stylesCountSum - 1], 0);
+			SetTxtStyle(&(*userTxtStyles)[stylesCountSum], 0);
 			printf("\n");
 			fflush(stdout);
+
+			stylesCountSum++;
+
 		}
 		printf("\n");
 		fflush(stdout);		
