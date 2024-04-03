@@ -926,28 +926,28 @@ int IsCanvasPosValid(int x, int y, int z) {
 	return 1;
 }
 
-int CompareCanvasPos(int x, int y, int z1, int z2) {
-    // Check if x, y, z1, and z2 are within the valid range
-    if (!IsCanvasPosValid(x, y, z1) || !IsCanvasPosValid(x, y, z2)){
+int CompareCanvasPos(int x, int y, int source, int destination) {
+    // Check if x, y, source, and destination are within the valid range
+    if (!IsCanvasPosValid(x, y, source) || !IsCanvasPosValid(x, y, destination)){
         // Invalid indices, return -1 to indicate an error
         return 0;
     }
 
-    return CompareCanvasPosUnsafe(x, y, z1, z2);
+    return CompareCanvasPosUnsafe(x, y, source, destination);
 
 }
-int CompareCanvasPosUnsafe(int x, int y, int z1, int z2) {
+int CompareCanvasPosUnsafe(int x, int y, int source, int destination) {
 
-    if (myCanvas[x][y][z1].c != myCanvas[x][y][z2].c) {
+    if (myCanvas[x][y][source].c != myCanvas[x][y][destination].c) {
         return 1;
     }
-    else if (myCanvas[x][y][z1].style != myCanvas[x][y][z2].style) {
+    else if (myCanvas[x][y][source].style != myCanvas[x][y][destination].style) {
         return 2;
     }
-    else if (myCanvas[x][y][z1].color != myCanvas[x][y][z2].color) {
+    else if (myCanvas[x][y][source].color != myCanvas[x][y][destination].color) {
         return 4;
     }
-    // else if (myCanvas[x][y][z1].width != myCanvas[x][y][z2].width) {
+    // else if (myCanvas[x][y][source].width != myCanvas[x][y][destination].width) {
     //    // will never happen - already covered by comparing .c
 	//	return 8;
     // }
@@ -955,35 +955,35 @@ int CompareCanvasPosUnsafe(int x, int y, int z1, int z2) {
     return 0;
 }
 
-int CopyCanvasPos(int x, int y, int z1, int z2) {
-    // Check if x, y, z1, and z2 are within the valid range
-    if (!IsCanvasPosValid(x, y, z1) || !IsCanvasPosValid(x, y, z2)){
+int CopyCanvasPos(int x, int y, int source, int destination) {
+    // Check if x, y, source, and destination are within the valid range
+    if (!IsCanvasPosValid(x, y, source) || !IsCanvasPosValid(x, y, destination)){
         // Invalid indices, return -1 to indicate an error
         return 0;
     }
 
-	CopyCanvasPosUnsafe(x, y, z1, z2);
+	CopyCanvasPosUnsafe(x, y, source, destination);
 
     // Return 1 to indicate a successful copy
     return 1;
 }
-void CopyCanvasPosUnsafe(int x, int y, int z1, int z2) {
+void CopyCanvasPosUnsafe(int x, int y, int source, int destination) {
 
-    // Copy the content of myCanvas[x][y][z1] to myCanvas[x][y][z2]
-    myCanvas[x][y][z2] = myCanvas[x][y][z1];
+    // Copy the content of myCanvas[x][y][source] to myCanvas[x][y][destination]
+    myCanvas[x][y][destination] = myCanvas[x][y][source];
 
 }
 
-int CopyCanvasAll(int z1, int z2) {
+int CopyCanvasAll(int source, int destination) {
 
-    if (z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
+    if (source < 0 || source >= canvasMaxZ || destination < 0 || destination >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
         // Invalid indices, return 0 to indicate an error
         return 0;
     }
 
 	size_t size = sizeof(struct CanvasSTRUCT) * canvasMaxX * canvasMaxY;
     // Use a single memcpy to copy the entire array
-    memcpy(&myCanvas[0][0][z2], &myCanvas[0][0][z1], size);
+    memcpy(&myCanvas[0][0][destination], &myCanvas[0][0][source], size);
 
     // Return 1 to indicate a successful copy
     return size;
@@ -1040,18 +1040,18 @@ int CopyStringToCanvas(int x, int y, int z, wchar_t *str, int style, int color) 
 	return 1;
 }
 
-int CopyCanvasAllDifferent(int z1, int z2) {
-	// Check if z1 and z2 are within the valid range
-	if (z1 < 0 || z1 >= canvasMaxZ || z2 < 0 || z2 >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
+int CopyCanvasAllDifferent(int source, int destination) {
+	// Check if source and destination are within the valid range
+	if (source < 0 || source >= canvasMaxZ || destination < 0 || destination >= canvasMaxZ || canvasMaxX <= 0 || canvasMaxY <= 0) {
 		// Invalid indices, return 0 to indicate an error
 		return 0;
 	}
 
-	// Copy the content of myCanvas[z1] to myCanvas[z2]
+	// Copy the content of myCanvas[source] to myCanvas[destination]
 	for (int x = 0; x < canvasMaxX; x++) {
 		for (int y = 0; y < canvasMaxY; y++) {
-			if (CompareCanvasPosUnsafe(x, y, z1, z2)) {
-				CopyCanvasPosUnsafe(x, y, z1, z2);
+			if (CompareCanvasPosUnsafe(x, y, source, destination)) {
+				CopyCanvasPosUnsafe(x, y, source, destination);
 			}
 		}
 	}
