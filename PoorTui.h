@@ -245,14 +245,16 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
+void TUIrenderSubMenuOLD(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
 
 	// if posX and invert is given... posX must have right alignment! (after having width we move it)
+
+	// posX is always the left alignment of the calling menu
 
 	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
 	int selectedPos = 0;
 	
-	int renderSmall = 0;
+	int renderSmall = 3;	// Key + 2 spaces
 	int dontRender = 0;
 
 	int renderHeight = 0;
@@ -304,8 +306,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			selectedPos = posCnt;
 			selectedMenu = menuPos;
 		}
+		if (menuPos->isCheck || menuPos->isOption){
+			renderSmall = 7;	// [ ] A
+		}
+		
 		menuPos = menuPos->nextPos;
 	}
+	renderWidth += 2;			// +2 = leading & trailing space
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
@@ -367,7 +374,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		break;
 	case 4:
 		// TopMenu next levels...
-		break;
+		// break;
 	default:
 		// TopMenu - 1st level
 		if (invert){
@@ -626,6 +633,338 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			}
 			else{
 				posX += renderWidth;
+			}
+			
+			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef);
+		}
+	}
+	else{
+		ResFBU();
+		SetFg16(fgRed);
+		TxtBold(1);
+		printf("!! Can't Render Sub/Vert-Menu !!\n");
+		TxtBold(0);
+		ResFBU();
+	}
+			
+}
+
+void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
+
+	// if posX and invert is given... posX must have right alignment! (after having width we move it)
+
+	// posX is always the left alignment of the calling menu
+
+	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
+	int selectedPos = 0;
+	
+	int renderSmall = 3;	// Key + 2 spaces
+	int dontRender = 0;
+
+	int renderHeight = 0;
+	int renderWidth = 0;
+	
+	int posCnt = 0;
+
+	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
+
+	// Get Size, Count, Selected, ... once... ;-)
+	while (menuPos){
+		int actWidth = strlen(menuPos->caption);
+		posCnt++;
+		renderWidth = (renderWidth > actWidth) ? renderWidth : actWidth;
+		if (!selectedPos && menuPos->enabled && menuPos->selected){
+			// find eventually selected pos...
+			selectedPos = posCnt;
+			selectedMenu = menuPos;
+		}
+		if (menuPos->isCheck || menuPos->isOption){
+			renderSmall = 7;	// [ ] A
+		}
+		
+		menuPos = menuPos->nextPos;
+	}
+	//renderWidth += 2;			// +2 = leading & trailing space
+	renderHeight = posCnt;
+	menuPos = menuPos1st;
+
+	// copy original positions & dimensions
+	int orgHeight = renderHeight;
+	int orgWidth = renderWidth;
+	int orgPosY = posY; int orgPosX = posX;
+
+	// Helper if menu doesn't fit as supposed
+	int offsetPosY = 0;
+
+	// Does it fit in Y as supposed
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:
+		// BottomMenu
+		break;
+	case 4:
+		// TopMenu next levels...
+	default:
+		// TopMenu
+		if ((renderHeight + posY) > TERM_ScreenHeight){
+			// too high to print all positions - shift posY below menuLine
+			posY = (deskDef->header > 0) + 1;
+			if ((renderHeight + posY) > TERM_ScreenHeight){
+				// still to high
+				if (selectedPos > TERM_ScreenHeight - posY){
+					// invisible selectedPos - shift offset
+					offsetPosY = selectedPos - (TERM_ScreenHeight - posY);
+				}
+			}
+			else{
+				// fits - shift back as much as possible
+				posY += TERM_ScreenHeight - (renderHeight + posY);
+			}
+		}		
+	}
+
+	if (invert){
+		// correct posX
+		posX -= renderWidth;
+		if (posX < 1){
+			// Full Size to the left will not work - try to reduce
+			renderWidth = renderSmall;
+			posX = orgPosX - renderWidth;
+			if (posX < 1){
+				// Damn, this area is awful small... we can't render this inverse
+				posX = orgPosX;
+				renderWidth = orgWidth;
+				invert = 0;
+			}
+		}
+	}
+	
+	// Does it fit in X as supposed
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:
+		// BottomMenu
+		break;
+	case 4:
+		// TopMenu next levels...
+		if (!invert){
+			posX += menuWidth;
+		}
+	default:
+		// TopMenu - 1st level
+		if (!invert){
+			// Print to right
+			if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+				// too width - try to invert direction
+				posX = orgPosX - renderWidth;
+				if (!menuType){
+					posX += menuWidth + 1;
+				}
+				invert = 1;
+				if (posX < 1){
+					// Full width doesn't fit inverted - try to reduce
+					renderWidth = renderSmall;
+					invert = 0;
+					posX = orgPosX;
+					if ((TERM_ScreenWidth - posX - renderWidth) < 0){
+						// Also small, no way to go the right Direction
+						posX = orgPosX - renderWidth;
+						invert = 1;
+						if (posX < 1){
+							// Damn, this area is awful small... we can't render this
+							dontRender = 1;
+						}
+					}
+				}
+			}
+		}
+		break;
+	}
+
+	if (!dontRender){
+		Locate(posX, posY);
+		for (size_t i = 0; i < offsetPosY; i++){
+			// trash unused positions
+			menuPos = menuPos->nextPos;
+		}
+		while (menuPos){
+			
+			SetColorStyle(&userColors[menuDef->txtColor], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+
+			if (renderSmall == renderWidth){
+				// render just the keys (+ eventually check/option brackets)
+				printf(" ");	// 1st space...
+				if (menuPos->selected && menuPos->enabled){
+					// enabled & selected
+					SetColorStyle(&userColors[menuDef->selectColor], 1);
+					SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+				}
+				else if (menuPos->enabled){
+					// enabled
+				}
+				else{
+					// disabled
+					SetColorStyle(&userColors[menuDef->disabledColor], 1);
+					SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+				}
+				if (menuPos->isCheck){
+					// is a check
+					printf("[");
+					if (menuPos->activated){
+						printf("x");
+					}
+					else{
+						printf(" ");
+					}
+					printf("] ");
+				}
+				else if (menuPos->isOption){
+					// is an option
+					printf("(");
+					if (menuPos->activated){
+						printf("x");
+					}
+					else{
+						printf(" ");
+					}
+					printf(") ");
+				}
+				else if (renderSmall == 7){
+					if (menuPos->isSpacer){
+						DEClineX(4);
+					}
+					else{
+						StrPrintSpaces(4);
+					}
+				}
+				else{
+					// we're fine
+				}
+				
+				if (menuPos->selected && menuPos->enabled){
+				}
+				else if (menuPos->enabled && !menuPos->isSpacer){
+					// Key in keyColor and keyStyle
+					SetColorStyle(&userColors[menuDef->keyColor], 1);
+					SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+				}
+				else{
+				}
+				if (menuPos->isSpacer){
+					DEClineX(1);
+				}
+				else{
+					printf("%c", menuPos->caption[menuPos->keyCode]);
+				}
+
+				SetColorStyle(&userColors[menuDef->txtColor], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle], 1);					
+				printf(" ");
+				
+				CursorDown(1);
+				CursorLeft(renderSmall);
+				
+				menuPos = menuPos->nextPos;
+			}
+
+			else{
+				// render full line
+				for (size_t i = 0; i < strlen(menuPos->caption); i++){
+					if (menuPos->enabled && menuPos->selected){
+						// enabled - selected
+						SetColorStyle(&userColors[menuDef->selectColor], 1);
+						SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+					}
+					else if (menuPos->enabled){
+						// enabled
+						if (i && (i == menuPos->keyCode)){
+							// is key
+							SetColorStyle(&userColors[menuDef->keyColor], 1);
+							SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+						}
+						else{
+							SetColorStyle(&userColors[menuDef->txtColor], 1);
+							SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+						}
+					}
+					else{
+						// disabled
+						SetColorStyle(&userColors[menuDef->disabledColor], 1);
+						SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+					}
+					if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
+						// Set Value of check/option
+						if (menuPos->activated){
+							printf("x");
+						}
+						else{
+							printf(" ");
+						}
+					}
+					else{
+						if (menuPos->isSpacer){
+							/* code */
+						}
+						else{
+							printf("%c", menuPos->caption[i]);
+						}
+					}
+				}
+				SetColorStyle(&userColors[menuDef->txtColor], 1);
+				SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+
+				if (menuPos->isSpacer){
+					printf(" ");
+					DEClineX(orgWidth - 2);
+					printf(" ");
+				}
+				else{
+					StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+				}
+				
+				CursorDown(1);
+				CursorLeft(orgWidth);
+				//printf(" ");
+				fflush(stdout);
+				menuPos = menuPos->nextPos;
+				
+			}
+		}
+
+		if (selectedPos){
+			// there is another subMenu to render...
+			switch (menuType){
+			case 1:
+				// LeftMenu
+				break;
+			case 2:
+				// RightMenu
+				break;
+			case 3:
+				// BottomMenu
+				break;
+			case 4:
+				// TopMenu next levels...
+				break;
+			default:
+				// TopMenu - 1st level
+				menuWidth = 0;
+			}
+			// set X & Y
+			posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
+			if (!invert){
+				posX -= menuWidth;
 			}
 			
 			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef);
