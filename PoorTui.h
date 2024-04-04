@@ -602,17 +602,33 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 		if (selectedPos){
 			// there is another subMenu to render...
-			
+			switch (menuType){
+			case 1:
+				// LeftMenu
+				break;
+			case 2:
+				// RightMenu
+				break;
+			case 3:
+				// BottomMenu
+				break;
+			case 4:
+				// TopMenu next levels...
+				break;
+			default:
+				// TopMenu - 1st level
+				menuWidth = 0;
+			}
 			// set X & Y
 			posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
 			if (invert){
-				posX--;
+				posX -= renderWidth;
 			}
 			else{
 				posX += renderWidth;
 			}
 			
-			TUIrenderSubMenu(posX, posY, 4, 0, invert, menuDef, selectedMenu->pos1st, deskDef);
+			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef);
 		}
 	}
 	else{
