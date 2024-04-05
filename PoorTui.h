@@ -651,9 +651,8 @@ void TUIrenderSubMenuOLD(int posX, int posY, int menuType, int menuWidth, int in
 
 void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
 
-	// if posX and invert is given... posX must have right alignment! (after having width we move it)
-
-	// posX is always the left alignment of the calling menu
+	// posX is always the 1st char of the calling menu
+	// menuWidth is the width of the calling menu
 
 	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
 	int selectedPos = 0;
@@ -684,14 +683,37 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		
 		menuPos = menuPos->nextPos;
 	}
-	//renderWidth += 2;			// +2 = leading & trailing space
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
-	// copy original positions & dimensions
-	int orgHeight = renderHeight;
-	int orgWidth = renderWidth;
-	int orgPosY = posY; int orgPosX = posX;
+	int XfullInverted = posX - renderWidth;
+	int XfullRight = posX + menuWidth;
+	int XsmallInverted = posX - renderSmall;
+	int XsmallRight = XfullRight;
+
+	switch (menuType){
+	case 1:
+		// LeftMenu
+		break;
+	case 2:
+		// RightMenu
+		break;
+	case 3:		
+		// BottomMenu
+		break;
+	case 4:	
+		// TopMenu next levels...
+		break;	
+	default:
+		// TopMenu
+		XfullInverted += menuWidth + 1;
+		XsmallInverted += menuWidth + 1;
+		XfullRight -= menuWidth;
+		XsmallRight -= XfullRight;
+	}
+	
+	// save for eventually next levels
+	int orgPosY;
 
 	// Helper if menu doesn't fit as supposed
 	int offsetPosY = 0;
@@ -728,69 +750,66 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		}		
 	}
 
+	// Does inverted fit in X as supposed
 	if (invert){
-		// correct posX
-		posX -= renderWidth;
-		if (posX < 1){
+		if (XfullInverted < 1){
 			// Full Size to the left will not work - try to reduce
-			renderWidth = renderSmall;
-			posX = orgPosX - renderWidth;
-			if (posX < 1){
+			if (XsmallInverted < 1){
 				// Damn, this area is awful small... we can't render this inverse
-				posX = orgPosX;
-				renderWidth = orgWidth;
 				invert = 0;
 			}
+			else{
+				renderWidth = renderSmall;
+			}			
 		}
 	}
 	
-	// Does it fit in X as supposed
-	switch (menuType){
-	case 1:
-		// LeftMenu
-		break;
-	case 2:
-		// RightMenu
-		break;
-	case 3:
-		// BottomMenu
-		break;
-	case 4:
-		// TopMenu next levels...
-		if (!invert){
-			posX += menuWidth;
-		}
-	default:
-		// TopMenu - 1st level
-		if (!invert){
-			// Print to right
-			if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-				// too width - try to invert direction
-				posX = orgPosX - renderWidth;
-				if (!menuType){
-					posX += menuWidth + 1;
-				}
-				invert = 1;
-				if (posX < 1){
-					// Full width doesn't fit inverted - try to reduce
-					renderWidth = renderSmall;
-					invert = 0;
-					posX = orgPosX;
-					if ((TERM_ScreenWidth - posX - renderWidth) < 0){
-						// Also small, no way to go the right Direction
-						posX = orgPosX - renderWidth;
+	// Does Right fit in X as supposed
+	if (!invert){
+		if (XfullRight + renderWidth > TERM_ScreenWidth){
+			// Full Size to the right will not work - try inverse
+			if (XfullInverted < 1){
+				// Full Size inverted doesn't work - try small to the right
+				if (XsmallRight + renderSmall > TERM_ScreenWidth){
+					// Small Size to the right will not work - try small inverse
+					if (XsmallInverted < 1){
+						// Damn, this area is awful small... we can't render this
+						dontRender = 1;
+					}
+					else{
+						// Change to small inverted
+						renderWidth = renderSmall;
 						invert = 1;
-						if (posX < 1){
-							// Damn, this area is awful small... we can't render this
-							dontRender = 1;
-						}
 					}
 				}
+				else{
+					// Change to small
+					renderWidth = renderSmall;
+				}
+			}
+			else{
+				// Change to inverted
+				invert = 1;
 			}
 		}
-		break;
 	}
 
+	// Set posX
+	if (invert){
+		if (renderWidth == renderSmall){
+			// small
+			posX = XsmallInverted;
+		}
+		else{
+			// full
+			posX = XfullInverted;
+		}
+	}
+	else{
+		posX = XfullRight;
+	}
+	 
+	// Render 
 	if (!dontRender){
 		Locate(posX, posY);
 		for (size_t i = 0; i < offsetPosY; i++){
@@ -926,15 +945,15 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 				if (menuPos->isSpacer){
 					printf(" ");
-					DEClineX(orgWidth - 2);
+					DEClineX(renderWidth - 2);
 					printf(" ");
 				}
 				else{
-					StrPrintSpaces(orgWidth - strlen(menuPos->caption));
+					StrPrintSpaces(renderWidth - strlen(menuPos->caption));
 				}
 				
 				CursorDown(1);
-				CursorLeft(orgWidth);
+				CursorLeft(renderWidth);
 				//printf(" ");
 				fflush(stdout);
 				menuPos = menuPos->nextPos;
