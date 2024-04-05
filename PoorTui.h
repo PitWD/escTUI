@@ -1241,9 +1241,6 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 			// render selected Submenu
 			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 			
-			// Set cursor one row below start of selected menu
-			CursorLeft(renderWidth);
-			CursorDown(1);
 			int xHlp = 0;
 			int x = 0;
 			if (renderSmall){
@@ -1257,7 +1254,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 				x += xHlp; // + 2;
 				menuPos = menuPos->nextPos;			
 			}
-			CursorRight(x);
+
 			// Render SubMenu
 			TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef);
 		}
@@ -1314,38 +1311,6 @@ int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 
 	}
 
-/*	// direct
-	userHeaders = malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
-
-	for (int i = 0; i < headersCount; i++){
-		int j = i + 1;	// User index in file is 1-based...
-		// Caption
-		sprintf(strSearch, "global.header.%d.Caption", j);
-		sprintf(strHLP, "Header%d", i + 1);
-		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
-		userHeaders[i].caption = IniStrToMem(strHeaderCaption, 0);
-printf("%s\n", userHeaders[i].caption);
-		// TextColor 
-		sprintf(strSearch, "global.header.%d.TextColor", j);
-		userHeaders[i].txtColor = IniGetInt(strFile, strSearch, 0);
-		// TextStyle 
-		sprintf(strSearch, "global.header.%d.TextStyle", j);
-		userHeaders[i].txtStyle = IniGetInt(strFile, strSearch, 0);
-		// TimeColor 
-		sprintf(strSearch, "global.header.%d.TimeColor", j);
-		userHeaders[i].timeColor = IniGetInt(strFile, strSearch, 0);
-		// TimeStyle 
-		sprintf(strSearch, "global.header.%d.TimeStyle", j);
-		userHeaders[i].timeStyle = IniGetInt(strFile, strSearch, 0);
-		// PrintRunTime 
-		sprintf(strSearch, "global.header.%d.PrintRunTime", j);
-		userHeaders[i].printRunTime = IniGetBool(strFile, strSearch, 0);
-		// PrintRealTime 
-		sprintf(strSearch, "global.header.%d.PrintRealTime", j);
-		userHeaders[i].printRealTime = IniGetBool(strFile, strSearch, 0);
-
-	}
-*/
 	printf("\n");
 
 	return headersCount;
