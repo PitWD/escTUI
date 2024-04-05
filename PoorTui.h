@@ -78,6 +78,7 @@ struct TuiMenuPosSTRUCT{
 	int isCheck :1;
 	int	activated :1;			// if position is a check or option...
 	int isSpacer :1;
+	int printSmall :1;			// forced to print small
 }TuiMenuPosSTRUCT;
 
 struct TuiDesktopsSTRUCT{
@@ -247,7 +248,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	}	
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
 
 	// posX is always the 1st char of the calling menu
 	// menuWidth is the width of the calling menu
@@ -265,6 +266,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 
+	if (minX == 0){
+		minX = 1;
+	}
+	if (maxX == 0){
+		maxX = TERM_ScreenWidth;
+	}
+	
 	// Get Size, Count, Selected, ... once... ;-)
 	while (menuPos){
 		int actWidth = strlen(menuPos->caption);
@@ -350,9 +358,9 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 	// Does inverted fit in X as supposed
 	if (invert){
-		if (XfullInverted < 1){
+		if (XfullInverted < minX){
 			// Full Size to the left will not work - try to reduce
-			if (XsmallInverted < 1){
+			if (XsmallInverted < minX){
 				// Damn, this area is awful small... we can't render this inverse
 				invert = 0;
 			}
@@ -364,13 +372,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	
 	// Does Right fit in X as supposed
 	if (!invert){
-		if (XfullRight + renderWidth > TERM_ScreenWidth){
+		if (XfullRight + renderWidth > maxX){
 			// Full Size to the right will not work - try inverse
-			if (XfullInverted < 1){
+			if (XfullInverted < minX){
 				// Full Size inverted doesn't work - try small to the right
-				if (XsmallRight + renderSmall > TERM_ScreenWidth){
+				if (XsmallRight + renderSmall > maxX){
 					// Small Size to the right will not work - try small inverse
-					if (XsmallInverted < 1){
+					if (XsmallInverted < minX){
 						// Damn, this area is awful small... we can't render this
 						dontRender = 1;
 					}
@@ -433,7 +441,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 					SetColorStyle(&userColors[menuDef->disabledColor], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
 				}
-				printf(" ");	// 1st space...
+				printf(" ");	// Leading Space
 				if (menuPos->isCheck){
 					// is a check
 					printf("[");
@@ -502,7 +510,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 					SetColorStyle(&userColors[menuDef->disabledColor], 1);
 					SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
 				}
-				printf(" ");
+				printf(" ");	// Trailing Space
 				
 				CursorDown(1);
 				CursorLeft(renderSmall);
@@ -606,7 +614,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 				posX -= menuWidth;
 			}
 			
-			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef);
+			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, maxX);
 		}
 	}
 	else{
@@ -667,7 +675,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		renderRealTime = 1;
 	}
 	if (menuDef->printRunTime){
-		width -= 16;	// 00000d 00:00:00 (+ leading space)
+		width -= 16;	// 00000d 00:00:00 (+ leading space))
 		renderRunTime = 1;
 	}
 //printf("HIER:\n");
@@ -903,7 +911,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 			}
 
 			// Render SubMenu
-			TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef);
+			TUIrenderSubMenu(++x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0);
 		}
 	}
 	else{
