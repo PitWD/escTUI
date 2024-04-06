@@ -80,6 +80,7 @@ struct TuiMenuPosSTRUCT{
 	int isSpacer :1;
 	int printSmall :1;			// force to print small (preCalcSubMenu)
 	int printInverted :1;		// force to print inverted (preCalcSubMenu)
+	int isSubMenu :1;			// if position is a subMenu
 }TuiMenuPosSTRUCT;
 
 struct TuiDesktopsSTRUCT{
@@ -288,7 +289,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 		menuPos = menuPos->nextPos;
 	}
 
-	int renderHeight = posCnt;
+	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
 	// save for eventually next levels
@@ -325,57 +326,60 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	if (menuPos->printSmall){
 		// is already forced to print small
 		renderWidth = renderSmall;
-		invert = menuPos->printInverted;
+		XfullInverted = XsmallInverted;
+		XfullRight = XsmallRight;
 	}
-	else {
-		// we need to calculate...
 
-		// Does inverted fit in X as supposed
-		if (invert){
-			if (XfullInverted < minX){
-				// Full Size to the left will not work - try to reduce
-				if (XsmallInverted < minX){
-					// Damn, this area is awful small... we can't render this inverse
-					invert = 0;
+	// Does inverted fit in X as supposed
+	if (invert){
+		if (XfullInverted < minX){
+			// Full Size to the left will not work - try to reduce
+			if (XsmallInverted < minX){
+				// Damn, this area is awful small... we can't render this inverse
+				invert = 0;
+			}
+			else{
+				if (menuPos->printSmall){
+					// cause we're already forced to print small - we're done
+					dontRender = 1;
 				}
 				else{
 					renderWidth = renderSmall;
-				}			
-			}
+				}
+			}			
 		}
+	}
 
-		// Does Right fit in X as supposed
-		if (!invert){
-			if (XfullRight + renderWidth > maxX){
-				// Full Size to the right will not work - try inverse
-				if (XfullInverted < minX){
-					// Full Size inverted doesn't work - try small to the right
-					if (XsmallRight + renderSmall > maxX){
-						// Small Size to the right will not work - try small inverse
-						if (XsmallInverted < minX){
-							// Damn, this area is awful small... we can't render this
-							dontRender = 1;
-						}
-						else{
-							// Change to small inverted
-							renderWidth = renderSmall;
-							invert = 1;
-						}
+	// Does Right fit in X as supposed
+	if (!invert && !dontRender){
+		if (XfullRight + renderWidth > maxX){
+			// Full Size to the right will not work - try inverse
+			if (XfullInverted < minX){
+				// Full Size inverted doesn't work - try small to the right
+				if (XsmallRight + renderSmall > maxX){
+					// Small Size to the right will not work - try small inverse
+					if (XsmallInverted < minX){
+						// Damn, this area is awful small... we can't render this
+						dontRender = 1;
 					}
 					else{
-						// Change to small
+						// Change to small inverted
 						renderWidth = renderSmall;
+						invert = 1;
 					}
 				}
 				else{
-					// Change to inverted
-					invert = 1;
+					// Change to small
+					renderWidth = renderSmall;
 				}
 			}
+			else{
+				// Change to inverted
+				invert = 1;
+			}
 		}
-	
 	}
-
+	
 	// Set posX
 	if (invert){
 		if (renderWidth == renderSmall){
@@ -393,7 +397,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 
 	// Render 
 	if (!dontRender){
-		// Locate(posX, posY);
+		/*Locate(posX, posY);
 		for (size_t i = 0; i < offsetPosY; i++){
 			// trash unused positions
 			menuPos = menuPos->nextPos;
@@ -481,7 +485,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 
 			else{
 				// render full line
-				/*
+				
 				for (size_t i = 0; i < strlen(menuPos->caption); i++){
 					if (menuPos->enabled && menuPos->selected){
 						// enabled - selected
@@ -518,7 +522,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 							//printf("%c", menuPos->caption[i]);
 						}
 					}
-				} */
+				}
 
 				if (menuPos->isSpacer){
 					//printf(" ");
@@ -535,7 +539,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				menuPos = menuPos->nextPos;
 				
 			}
-		}
+		}*/
 
 		if (selectedPos){
 			// there is another subMenu to render...
@@ -562,6 +566,28 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				posX -= menuWidth;
 			}
 			
+			if (renderSmall && !menuPos->printSmall){
+				// Sub became small this time - loop up, and look if previous was small
+				menuPos = menuPos->parentPos;
+				while (menuPos->parentPos){
+					while (menuPos->prevPos){
+						menuPos = menuPos->prevPos;
+					}
+					menuPos = menuPos->parentPos;
+				}
+				
+				if (menuPos->printSmall){
+					// already small - the actual must be small too
+					menuPos1st->printSmall = 1;
+				}
+				else{
+					// search for the earliest in full size
+
+				}
+				
+			}
+			
+
 			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, maxX);
 		}
 	}
@@ -1299,7 +1325,7 @@ int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 	
 }
 
-struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe){
+struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe, int isSub){
 
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
 	//static int *nextPos = NULL;
@@ -1342,6 +1368,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		sprintf(strHLP, "%s%d", strPath, j);
 		IniGetStr(strFile, strSearch, strHLP, strPos1);
 		
+		menuPos[pos1].isSubMenu = isSub;
+
 		// Search key and remove brackets
 		menuPos[pos1].keyCode = 0;
 
@@ -1432,7 +1460,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			menuPos[pos1].pos1ID = cnt;
 			menuPos[cnt].pos1ID = pos1;
 
-			TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0);
+			TUIaddMenuPos(strFile, strSearch, definition, menuPos[pos1].posCnt, 0, 1);
 		}
 		else{
 			// No SubMenu
@@ -1558,7 +1586,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 //printf("last\n");
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
-		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 1);	
+		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 1, 0);	
 //printf("after menuPos...\n");
 //printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
 //printf("%s\n", menu[i]->pos1st->caption);	
