@@ -1185,7 +1185,7 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 						// selected
 						selectedMenuPos = selectedMenuPosHlp;
 						selectedMenu = menuPos;
-						if (renderLen > width - 3 + strlen(menuPos->caption)){
+						if (renderLen - 3 + strlen(menuPos->caption) > width){
 							// we can't fully render this menu
 							SetColorStyle(&userColors[menuDef->selectColor], 1);
 							SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
