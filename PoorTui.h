@@ -1137,12 +1137,12 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 				}
 			}
 			if (menuDef->printRunTime && renderLen < width){
-				// maybe time fits in short-key-menu-style again
-				width -= 16;	// 01.01.2023 09:09:21  (+ trailing space)
+				// maybe runtime fits in short-key-menu-style again
+				width -= 16;	// 00000d 00:00:00 (+ leading space)
 				renderRunTime = 1;
 				if (renderLen > width){
 					// no...
-					width += 16;	// 01.01.2023 09:09:21  (+ trailing space)
+					width += 16;	// 00000d 00:00:00 (+ leading space)
 					renderRunTime = 0;
 				}
 			}
@@ -1169,6 +1169,9 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		}
 
 		if (!justRefresh){
+			
+			int butSelected = 0;	// if a selected key fits in full width
+			
 			// Style & Color
 			SetColorStyle(&userColors[menuDef->txtColor], 1);
 			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
@@ -1179,12 +1182,31 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 				while (menuPos){
 					selectedMenuPosHlp++;
 					if (menuPos->selected && menuPos->enabled){
-						/* code */
-						SetColorStyle(&userColors[menuDef->selectColor], 1);
-						SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
-						printf(" ");	// 1st space...
+						// selected
 						selectedMenuPos = selectedMenuPosHlp;
 						selectedMenu = menuPos;
+						if (renderLen > width - 3 + strlen(menuPos->caption)){
+							// we can't fully render this menu
+							SetColorStyle(&userColors[menuDef->selectColor], 1);
+							SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+							printf(" ");	// 1st space...
+						}
+						else{
+							// we can fully render the selected menu
+							butSelected = 1;
+							renderLen += strlen(menuPos->caption) - 3;
+							for (size_t i = 0; i < strlen(menuPos->caption); i++){
+								if (i == menuPos->keyCode){
+									SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
+									SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
+								}
+								else{
+									SetColorStyle(&userColors[menuDef->selectColor], 1);
+									SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+								}
+								printf("%c", menuPos->caption[i]);
+							}
+						}
 						SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
 						SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
 					}
@@ -1197,9 +1219,12 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 						printf(" ");	// 1st space...
 						SetColorStyle(&userColors[menuDef->disabledColor], 1);
 						SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
-					}			
-					printf("%c", menuPos->caption[menuPos->keyCode]);
+					}
 
+					if (!butSelected){
+						printf("%c", menuPos->caption[menuPos->keyCode]);
+					}
+					
 					if (menuPos->selected && menuPos->enabled){
 						SetColorStyle(&userColors[menuDef->selectColor], 1);
 						SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
@@ -1212,7 +1237,11 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 						SetColorStyle(&userColors[menuDef->disabledColor], 1);
 						SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
 					}			
-					printf(" ");
+
+					if (!butSelected){
+						printf(" ");
+						butSelected = 0;
+					}
 
 					SetColorStyle(&userColors[menuDef->txtColor], 1);
 					SetTxtStyle(&userStyles[menuDef->txtStyle], 1);					
