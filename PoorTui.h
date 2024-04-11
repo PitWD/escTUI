@@ -1367,6 +1367,394 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 	}
 }
 
+void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh, int bottom){
+
+	char strHlp[STR_SMALL_SIZE];
+	char strLine[STR_MID_SIZE];
+
+	int renderRealTime = 0;
+	int renderRunTime = 0;
+	int renderSmall = 1;	// just the key + 2 spaces
+	int renderSelect = 0;	// "just the key" + selected key in full width 
+	int renderLen = 1;		// full size len of menu positions 
+	int dontRender = 0;		// even too small to render shortcuts
+	int renderWidth = 0;
+
+	int renderStyle = 0;	// 0 = full; 1 = small, but full selected; 2 = small
+
+	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
+	int selectedMenuPos = 0;
+	int selectedMenuPosHlp = 0;
+
+	if (!posX){
+		// Start at 1st Pos
+		posX = 1;
+	}
+	if (!width){
+		// Width to render
+		width = TERM_ScreenWidth;
+	}
+
+	// printable width - respecting posX
+	// 'width' is later following the settings (time & runtime)
+	width = width - posX + 1;
+	renderWidth = width;
+
+	// Calculate len of top-level MenuLine options - without time & date
+	struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+	while (menuPos != NULL){
+		renderLen += strlen(menuPos->caption);
+		renderSmall += 3;
+		if (menuPos->selected && menuPos->enabled){
+			renderSelect = strlen(menuPos->caption) - 3;
+		}
+		menuPos = menuPos->nextPos;
+	}
+
+	if (menuDef->printRealTime){
+		renderLen += 20;	// 01.01.2023 09:09:21  (+ trailing space)
+		renderSmall += 20;
+		renderRealTime = 1;
+	}
+	if (menuDef->printRunTime){
+		renderLen += 16;	// 00000d 00:00:00 (+ leading space))
+		renderSmall += 16;
+		renderRunTime = 1;
+	}
+
+	renderSelect += renderSmall;
+
+	if (renderLen > width){
+		// menu doesn't fit - f*ck
+		if (renderRunTime){
+			renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
+			renderRunTime = 0;
+			if (renderLen > width){
+				// still too small...
+				if (renderRealTime){
+					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+					if (renderLen > width){
+						// we're finally f*cked
+						renderStyle = 1;
+					}
+				}
+				else{
+					// we're finally f*cked
+					renderStyle = 1;
+				}
+			}
+		}
+		else if (renderRealTime){
+			renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+			renderRealTime = 0;
+			if (renderLen > width){
+				// we're finally f*cked
+				renderStyle = 1;
+			}
+		}
+		else{
+			// too long without time(s)
+			renderStyle = 1;
+		}
+
+		if (renderStyle && renderSelect > renderSmall){
+			// check if small menu, but full selected, fits...
+			renderLen = renderSelect;
+			renderRealTime = menuDef->printRealTime;
+			renderRunTime = menuDef->printRunTime;
+			if (renderLen > width){
+				if (renderRunTime){
+					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
+					renderRunTime = 0;
+					if (renderLen > width){
+						// still too small...
+						if (renderRealTime){
+							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+							renderRealTime = 0;
+							if (renderLen > width){
+								// we're finally f*cked
+								renderStyle = 2;
+							}
+						}
+						else{
+							// we're finally f*cked
+							renderStyle = 2;
+						}
+					}
+				}
+				else if (renderRealTime){
+					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+					if (renderLen > width){
+						// we're finally f*cked
+						renderStyle = 2;
+					}
+				}
+				else{
+					// too long without time(s)
+					renderStyle = 2;
+				}
+			}
+		}
+		else if(renderStyle){
+			// no key selected
+			renderLen = renderSmall;
+			renderStyle = 2;
+		}
+
+		if (renderStyle == 2){
+			// check if small menu, fits...
+			renderLen = renderSmall;
+			renderRealTime = menuDef->printRealTime;
+			renderRunTime = menuDef->printRunTime;
+			if (renderLen > width){
+				if (renderRunTime){
+					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
+					renderRunTime = 0;
+					if (renderLen > width){
+						// still too small...
+						if (renderRealTime){
+							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+							renderRealTime = 0;
+							if (renderLen > width){
+								// we're finally f*cked
+								dontRender = 1;
+							}
+						}
+						else{
+							// we're finally f*cked
+							dontRender = 1;
+						}
+					}
+				}
+				else if (renderRealTime){
+					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
+					renderRealTime = 0;
+					if (renderLen > width){
+						// we're finally f*cked
+						dontRender = 1;
+					}
+				}
+				else{
+					// too long without time(s)
+					dontRender = 1;
+				}
+			}
+		}
+	}
+	else{
+		// full menu fits
+	}
+
+	if (!dontRender){
+		// Where to render
+		if (posX && posY){
+			Locate(posX, posY);
+		}
+		else if (posX){
+			LocateX(posX);
+		}
+
+		if (!justRefresh){
+			
+			int butSelected = 0;	// if a selected key fits in full width
+			
+			// Style & Color
+			SetColorStyle(&userColors[menuDef->txtColor], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+
+			if (renderSmall){
+				// render just the keys
+				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+				while (menuPos){
+					selectedMenuPosHlp++;
+					if (menuPos->selected && menuPos->enabled){
+						// selected
+						selectedMenuPos = selectedMenuPosHlp;
+						selectedMenu = menuPos;
+						if (renderSmall == 1){
+							// we can't fully render this menu
+							SetColorStyle(&userColors[menuDef->selectColor], 1);
+							SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+							printf(" ");	// 1st space...
+						}
+						else{
+							// we can fully render the selected menu
+							butSelected = 1;
+							renderLen += strlen(menuPos->caption) - 3;
+							for (size_t i = 0; i < strlen(menuPos->caption); i++){
+								if (i == menuPos->keyCode){
+									SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
+									SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
+								}
+								else{
+									SetColorStyle(&userColors[menuDef->selectColor], 1);
+									SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+								}
+								printf("%c", menuPos->caption[i]);
+							}
+						}
+						SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
+						SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
+					}
+					else if (menuPos->enabled){
+						printf(" ");	// 1st space...
+						SetColorStyle(&userColors[menuDef->keyColor], 1);
+						SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+					}
+					else{
+						printf(" ");	// 1st space...
+						SetColorStyle(&userColors[menuDef->disabledColor], 1);
+						SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+					}
+
+					if (!butSelected){
+						printf("%c", menuPos->caption[menuPos->keyCode]);
+					}
+					
+					if (menuPos->selected && menuPos->enabled){
+						SetColorStyle(&userColors[menuDef->selectColor], 1);
+						SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+					}
+					else if (menuPos->enabled){
+						SetColorStyle(&userColors[menuDef->txtColor], 1);
+						SetTxtStyle(&userStyles[menuDef->txtStyle], 1);					
+					}
+					else{
+						SetColorStyle(&userColors[menuDef->disabledColor], 1);
+						SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+					}			
+
+					if (!butSelected){
+						printf(" ");
+						butSelected = 0;
+					}
+
+					SetColorStyle(&userColors[menuDef->txtColor], 1);
+					SetTxtStyle(&userStyles[menuDef->txtStyle], 1);					
+
+					menuPos = menuPos->nextPos;
+				}
+				printf(" ");
+			}
+			else{
+				// render full line
+				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+				while (menuPos){
+					selectedMenuPosHlp++;
+					if (menuPos->selected && menuPos->enabled){
+						selectedMenuPos = selectedMenuPosHlp;
+						selectedMenu = menuPos;
+					}
+					for (size_t i = 0; i < strlen(menuPos->caption); i++){
+						// int j = 0;
+						if (menuPos->enabled && menuPos->selected){
+							if (i == menuPos->keyCode){
+								SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
+								SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
+							}
+							else{
+								SetColorStyle(&userColors[menuDef->selectColor], 1);
+								SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+							}
+						}
+						else if (menuPos->enabled){
+							if (i == menuPos->keyCode){
+								SetColorStyle(&userColors[menuDef->keyColor], 1);
+								SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+							}
+							else{
+								SetColorStyle(&userColors[menuDef->txtColor], 1);
+								SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+							}
+						}
+						else{
+							SetColorStyle(&userColors[menuDef->disabledColor], 1);
+							SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+						}						
+						printf("%c", menuPos->caption[i]);
+					}
+					//printf(" ");
+					menuPos = menuPos->nextPos;
+				}
+			}
+
+			SetColorStyle(&userColors[menuDef->txtColor], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+			StrPrintSpaces(renderWidth - renderLen);
+
+		}
+		else{
+			// we just refresh time(s)
+			CursorRight(renderWidth);
+		}
+
+		if (renderRealTime || renderRunTime){
+			// Set style & color of times
+			SetColorStyle(&userColors[menuDef->timeColor], 1);
+			SetTxtStyle(&userStyles[menuDef->timeStyle], 1);
+		}
+		
+		// Do we print the Realtime (all time right alignment)
+		if (renderRealTime){
+			// 01.01.2023 00:00:00
+			CursorLeft(19);
+			printf("%s %s", gStrDate, gStrTime);
+			CursorRight(1);
+		}
+		// Do we print the RunTime
+		if (renderRunTime){
+			// 00000d 00:00:00
+			if (renderRealTime){
+				// left of RealTime 
+				CursorLeft(36);
+			}
+			else{
+				// right alignment
+				CursorLeft(15);
+			}
+			printf("%s", gStrRunTime);
+		}	
+
+		// if (selectedMenuPos && menuDef->pos1st){
+		if (selectedMenuPos){
+			// render selected Submenu
+			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
+			
+			int xHlp = 0;
+			int x = 0;
+			if (renderSmall){
+				xHlp = 2;
+				x = selectedMenuPos - 1;
+			}
+			while (--selectedMenuPos){
+				if (!renderSmall){
+					xHlp = strlen(menuPos->caption);
+				}
+				x += xHlp; // + 2;
+				menuPos = menuPos->nextPos;			
+			}
+
+			// Render SubMenu
+			x++;
+			if (PreCalcSubMenu(x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, x, 3, xHlp)){
+				//printf("pre-Render\n");
+				//fflush(stdout);
+				TUIrenderSubMenu(x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0);
+			}
+		}
+	}
+	else{
+		ResFBU();
+		SetFg16(fgRed);
+		TxtBold(1);
+		printf("!! Can't Render Top-Menu !!\n");
+		TxtBold(0);
+		ResFBU();
+	}
+}
+
 int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 
 	// User Header - Helper
