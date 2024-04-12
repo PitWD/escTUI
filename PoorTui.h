@@ -1039,7 +1039,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			
 }
 
-void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh){
+void TUIrenderTopMenuOld(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh){
 
 	char strHlp[STR_SMALL_SIZE];
 	char strLine[STR_MID_SIZE];
@@ -1367,38 +1367,35 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 	}
 }
 
-void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh, int bottom){
+void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh){
 
 	char strHlp[STR_SMALL_SIZE];
 	char strLine[STR_MID_SIZE];
 
 	int renderRealTime = 0;
 	int renderRunTime = 0;
-	int renderSmall = 1;	// just the key + 2 spaces
+	int renderSmall = 0;	// just the key + 2 spaces
 	int renderSelect = 0;	// "just the key" + selected key in full width 
-	int renderLen = 1;		// full size len of menu positions 
+	int renderLen = 0;		// full size len of menu positions 
 	int dontRender = 0;		// even too small to render shortcuts
-	int renderWidth = 0;
 
 	int renderStyle = 0;	// 0 = full; 1 = small, but full selected; 2 = small
 
 	struct TuiMenuPosSTRUCT *selectedMenu = NULL;
-	int selectedMenuPos = 0;
-	int selectedMenuPosHlp = 0;
+
+	int subXs = 0;  // subMenu X
+	int subXw = 0;	// subMenu Width	
 
 	if (!posX){
 		// Start at 1st Pos
 		posX = 1;
 	}
 	if (!width){
-		// Width to render
 		width = TERM_ScreenWidth;
 	}
 
-	// printable width - respecting posX
-	// 'width' is later following the settings (time & runtime)
-	width = width - posX + 1;
-	renderWidth = width;
+	// renderWidth - respecting posX
+	int renderWidth = width - posX + 1;	
 
 	// Calculate len of top-level MenuLine options - without time & date
 	struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
@@ -1406,6 +1403,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 		renderLen += strlen(menuPos->caption);
 		renderSmall += 3;
 		if (menuPos->selected && menuPos->enabled){
+			selectedMenu = menuPos;	
 			renderSelect = strlen(menuPos->caption) - 3;
 		}
 		menuPos = menuPos->nextPos;
@@ -1424,17 +1422,17 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 
 	renderSelect += renderSmall;
 
-	if (renderLen > width){
+	if (renderLen > renderWidth){
 		// menu doesn't fit - f*ck
 		if (renderRunTime){
 			renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
 			renderRunTime = 0;
-			if (renderLen > width){
+			if (renderLen > renderWidth){
 				// still too small...
 				if (renderRealTime){
 					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 					renderRealTime = 0;
-					if (renderLen > width){
+					if (renderLen > renderWidth){
 						// we're finally f*cked
 						renderStyle = 1;
 					}
@@ -1448,7 +1446,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 		else if (renderRealTime){
 			renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 			renderRealTime = 0;
-			if (renderLen > width){
+			if (renderLen > renderWidth){
 				// we're finally f*cked
 				renderStyle = 1;
 			}
@@ -1463,16 +1461,16 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 			renderLen = renderSelect;
 			renderRealTime = menuDef->printRealTime;
 			renderRunTime = menuDef->printRunTime;
-			if (renderLen > width){
+			if (renderLen > renderWidth){
 				if (renderRunTime){
 					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
 					renderRunTime = 0;
-					if (renderLen > width){
+					if (renderLen > renderWidth){
 						// still too small...
 						if (renderRealTime){
 							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 							renderRealTime = 0;
-							if (renderLen > width){
+							if (renderLen > renderWidth){
 								// we're finally f*cked
 								renderStyle = 2;
 							}
@@ -1486,7 +1484,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 				else if (renderRealTime){
 					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 					renderRealTime = 0;
-					if (renderLen > width){
+					if (renderLen > renderWidth){
 						// we're finally f*cked
 						renderStyle = 2;
 					}
@@ -1499,7 +1497,6 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 		}
 		else if(renderStyle){
 			// no key selected
-			renderLen = renderSmall;
 			renderStyle = 2;
 		}
 
@@ -1508,16 +1505,16 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 			renderLen = renderSmall;
 			renderRealTime = menuDef->printRealTime;
 			renderRunTime = menuDef->printRunTime;
-			if (renderLen > width){
+			if (renderLen > renderWidth){
 				if (renderRunTime){
 					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
 					renderRunTime = 0;
-					if (renderLen > width){
+					if (renderLen > renderWidth){
 						// still too small...
 						if (renderRealTime){
 							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 							renderRealTime = 0;
-							if (renderLen > width){
+							if (renderLen > renderWidth){
 								// we're finally f*cked
 								dontRender = 1;
 							}
@@ -1531,7 +1528,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 				else if (renderRealTime){
 					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 					renderRealTime = 0;
-					if (renderLen > width){
+					if (renderLen > renderWidth){
 						// we're finally f*cked
 						dontRender = 1;
 					}
@@ -1555,6 +1552,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 		else if (posX){
 			LocateX(posX);
 		}
+		subXs = posX;
 
 		if (!justRefresh){
 			
@@ -1564,17 +1562,15 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 			SetColorStyle(&userColors[menuDef->txtColor], 1);
 			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
 
-			if (renderSmall){
+			if (renderStyle){
 				// render just the keys
 				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 				while (menuPos){
-					selectedMenuPosHlp++;
 					if (menuPos->selected && menuPos->enabled){
 						// selected
-						selectedMenuPos = selectedMenuPosHlp;
-						selectedMenu = menuPos;
-						if (renderSmall == 1){
+						if (renderStyle == 2){
 							// we can't fully render this menu
+							subXw = 2;
 							SetColorStyle(&userColors[menuDef->selectColor], 1);
 							SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
 							printf(" ");	// 1st space...
@@ -1582,8 +1578,8 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 						else{
 							// we can fully render the selected menu
 							butSelected = 1;
-							renderLen += strlen(menuPos->caption) - 3;
-							for (size_t i = 0; i < strlen(menuPos->caption); i++){
+							subXw = strlen(menuPos->caption);
+							for (size_t i = 0; i < subXw; i++){
 								if (i == menuPos->keyCode){
 									SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
 									SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
@@ -1594,6 +1590,7 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 								}
 								printf("%c", menuPos->caption[i]);
 							}
+							subXw--;
 						}
 						SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
 						SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
@@ -1628,28 +1625,26 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 
 					if (!butSelected){
 						printf(" ");
-						butSelected = 0;
 					}
+					butSelected = 0;
 
 					SetColorStyle(&userColors[menuDef->txtColor], 1);
 					SetTxtStyle(&userStyles[menuDef->txtStyle], 1);					
 
 					menuPos = menuPos->nextPos;
+					if (!subXw){
+						subXs += 3;
+					}
 				}
-				printf(" ");
+				//printf(" ");
 			}
 			else{
 				// render full line
 				struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
 				while (menuPos){
-					selectedMenuPosHlp++;
-					if (menuPos->selected && menuPos->enabled){
-						selectedMenuPos = selectedMenuPosHlp;
-						selectedMenu = menuPos;
-					}
 					for (size_t i = 0; i < strlen(menuPos->caption); i++){
-						// int j = 0;
 						if (menuPos->enabled && menuPos->selected){
+							subXw++;
 							if (i == menuPos->keyCode){
 								SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
 								SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
@@ -1674,10 +1669,13 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 							SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
 						}						
 						printf("%c", menuPos->caption[i]);
+						if (!subXw){
+							subXs ++;
+						}
 					}
-					//printf(" ");
 					menuPos = menuPos->nextPos;
 				}
+				subXw--;
 			}
 
 			SetColorStyle(&userColors[menuDef->txtColor], 1);
@@ -1717,31 +1715,12 @@ void TUIrenderHorzMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *men
 			printf("%s", gStrRunTime);
 		}	
 
-		// if (selectedMenuPos && menuDef->pos1st){
-		if (selectedMenuPos){
+		if (selectedMenu && selectedMenu->pos1st){
 			// render selected Submenu
-			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
-			
-			int xHlp = 0;
-			int x = 0;
-			if (renderSmall){
-				xHlp = 2;
-				x = selectedMenuPos - 1;
-			}
-			while (--selectedMenuPos){
-				if (!renderSmall){
-					xHlp = strlen(menuPos->caption);
-				}
-				x += xHlp; // + 2;
-				menuPos = menuPos->nextPos;			
-			}
-
-			// Render SubMenu
-			x++;
-			if (PreCalcSubMenu(x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, x, 3, xHlp)){
+			if (PreCalcSubMenu(subXs, 3, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, subXs, 3, subXw)){
 				//printf("pre-Render\n");
 				//fflush(stdout);
-				TUIrenderSubMenu(x, 3, 0, xHlp, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0);
+				TUIrenderSubMenu(subXs, 3, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0);
 			}
 		}
 	}
