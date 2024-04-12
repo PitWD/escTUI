@@ -1397,6 +1397,19 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 		}	
 
 		if (selectedMenu && selectedMenu->pos1st){
+			// delete small and inverted flags from sub-structure before render
+			struct TuiMenuPosSTRUCT *menuPos = selectedMenu->pos1st;
+			while (menuPos){
+				menuPos->printSmall = 0;
+				menuPos->printInverted = 0;
+				if (menuPos->selected && menuPos->enabled){
+					// SubMenu found
+					menuPos = menuPos->pos1st;
+					menuPos->printSmall = 0;
+					menuPos->printInverted = 0;
+				}				
+				menuPos = menuPos->nextPos;
+			}
 			// render selected Submenu
 			if (PreCalcSubMenu(subXs, 3, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, subXs, 3, subXw)){
 				//printf("pre-Render\n");
