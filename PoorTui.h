@@ -611,13 +611,16 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 			}
 		}
 		else if ((renderSmall == renderWidth) && !menuPos->printSmall){
-			struct TuiMenuPosSTRUCT *menu1stSub = NULL;
+			// very last sub is small - loop menu to set 1st sub as invert & small
 			menuPos = menuDef->pos1st;
 			while (menuPos){
 				//printf("%s\n",menuPos->caption);
 				//fflush(stdout);
 				if (menuPos->selected && menuPos->enabled){
 					// SubMenu found
+					menuPos->pos1st->printInverted = 1;
+					menuPos->pos1st->printSmall = 1;
+					/*
 					menuPos = menuPos->pos1st;
 					if (!menu1stSub){
 						// 1st SubMenu found
@@ -626,7 +629,8 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 					}						
 					if (!menuPos->printSmall){
 						// SubMenu is full-size
-						menuPos->printSmall = 1;
+						//menuPos->printSmall = 1;
+						menu1stSub->pos1st->printInverted = 1;
 						//printf("  Set2Small: %s\n", menuPos->caption);
 						//fflush(stdout);
 						// recalculation needed
@@ -637,7 +641,9 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 						menuWidth = 0;
 						renderWidth = orgWidth;
 						break;
-					}					
+					}
+					*/
+					break;					
 				}
 				menuPos = menuPos->nextPos;
 			}
@@ -707,6 +713,11 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		XfullRight = XsmallRight;
 	}
 
+	if (menuPos->printInverted){
+		// is already forced to print inverted
+		invert = 1;
+	}
+	
 	switch (menuType){
 	case 1:
 		// LeftMenu
@@ -1572,6 +1583,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		menuPos[pos1].selected = 0;
 
 		menuPos[pos1].printSmall = 0;
+		menuPos[pos1].printInverted = 0;
 		
 		// if not 1st pos, we have to set...
 		if (i){
@@ -1594,7 +1606,6 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			// No SubMenu
 			menuPos[pos1].pos1ID = 0;
 		}
-
 	}
 
 //printf("pre Restore...\n");
