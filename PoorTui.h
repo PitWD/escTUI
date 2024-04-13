@@ -294,12 +294,6 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
-	// save for eventually next levels
-	int orgPosY = posY;
-	int orgPosX = posX;	
-	// Helper if menu doesn't fit as supposed
-	int offsetPosY = 0;
-
 	int XfullInverted = posX - renderWidth;
 	int XfullRight = posX + menuWidth;
 	int XsmallInverted = posX - renderSmall;
@@ -400,149 +394,6 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 
 	// Render 
 	if (!dontRender){
-		/*Locate(posX, posY);
-		for (size_t i = 0; i < offsetPosY; i++){
-			// trash unused positions
-			menuPos = menuPos->nextPos;
-		}
-		while (menuPos){
-			
-			if (renderSmall == renderWidth){
-				// render just the keys (+ eventually check/option brackets)
-				if (menuPos->selected && menuPos->enabled){
-					// enabled & selected
-				}
-				else if (menuPos->enabled){
-					// enabled
-				}
-				else{
-					// disabled
-				}
-				// printf(" ");	// Leading Space
-				if (menuPos->isCheck){
-					// is a check
-					// printf("[");
-					if (menuPos->activated){
-						// printf("x");
-					}
-					else{
-						// printf(" ");
-					}
-					// printf("] ");
-				}
-				else if (menuPos->isOption){
-					// is an option
-					// printf("(");
-					if (menuPos->activated){
-						// printf("x");
-					}
-					else{
-						// printf(" ");
-					}
-					// printf(") ");
-				}
-				else if (renderSmall == 7){
-					if (menuPos->isSpacer){
-						// DEClineX(4);
-					}
-					else{
-						// StrPrintSpaces(4);
-					}
-				}
-				else{
-					// we're fine
-				}
-				
-				if (menuPos->selected && menuPos->enabled){
-					// Selected Key 
-				}
-				else if (menuPos->enabled && !menuPos->isSpacer){
-					// Unselected Key
-				}
-				else{
-					// Color & Style is fine
-				}
-				if (menuPos->isSpacer){
-					// DEClineX(1);
-				}
-				else{
-					// printf("%c", menuPos->caption[menuPos->keyCode]);
-				}
-
-				if (menuPos->selected && menuPos->enabled){
-					// enabled & selected
-				}
-				else if (menuPos->enabled){
-					// enabled
-				}
-				else{
-					// disabled
-				}
-				// printf(" ");	// Trailing Space
-				
-				// CursorDown(1);
-				// CursorLeft(renderSmall);
-				
-				menuPos = menuPos->nextPos;
-			}
-
-			else{
-				// render full line
-				
-				for (size_t i = 0; i < strlen(menuPos->caption); i++){
-					if (menuPos->enabled && menuPos->selected){
-						// enabled - selected
-						if (i && (i == menuPos->keyCode)){
-							// is key
-						}
-						else{
-						}
-					}
-					else if (menuPos->enabled){
-						// enabled
-						if (i && (i == menuPos->keyCode)){
-							// is key
-						}
-						else{
-						}
-					}
-					else{
-						// disabled
-					}
-					if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
-						// Set Value of check/option
-						if (menuPos->activated){
-							//printf("x");
-						}
-						else{
-							//printf(" ");
-						}
-					}
-					else{
-						if (menuPos->isSpacer){
-						}
-						else{
-							//printf("%c", menuPos->caption[i]);
-						}
-					}
-				}
-
-				if (menuPos->isSpacer){
-					//printf(" ");
-					//DEClineX(renderWidth - 2);
-					//printf(" ");
-				}
-				else{
-					//StrPrintSpaces(renderWidth - strlen(menuPos->caption));
-				}
-				
-				//CursorDown(1);
-				//CursorLeft(renderWidth);
-				//fflush(stdout);
-				menuPos = menuPos->nextPos;
-				
-			}
-		}*/
 
 		if (selectedPos){
 			// there is another subMenu to render...
@@ -563,21 +414,17 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				// TopMenu - 1st level
 				menuWidth = 0;
 			}
-			// set X & Y
-			posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
+			
+			// set X
 			if (!invert){
 				posX -= menuWidth;
 			}
 			
 			if ((renderSmall == renderWidth) && !menuPos->printSmall){
-				//printf("1-forced\n");
-				//fflush(stdout);
 				// Sub became small this time - loop menu to find 1st full-size subMenu
 				struct TuiMenuPosSTRUCT *menu1stSub = NULL;
 				menuPos = menuDef->pos1st;
 				while (menuPos){
-					//printf("%s\n",menuPos->caption);
-					//fflush(stdout);
 					if (menuPos->selected && menuPos->enabled){
 						// SubMenu found
 						menuPos = menuPos->pos1st;
@@ -589,12 +436,9 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 						if (!menuPos->printSmall){
 							// SubMenu is full-size
 							menuPos->printSmall = 1;
-							//printf("  Set2Small: %s\n", menuPos->caption);
-							//fflush(stdout);
 							// recalculation needed
 							selectedMenu = menu1stSub;
 							posX = orgX;
-							posY = orgY;
 							invert = 0;
 							menuWidth = 0;
 							renderWidth = orgWidth;
@@ -604,8 +448,6 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 					menuPos = menuPos->nextPos;
 				}
 			}
-			//printf("inside\n");
-			//fflush(stdout);
 			if (!PreCalcSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, maxX, orgX, orgY, orgWidth)){
 				return 0;
 			}
@@ -614,41 +456,15 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 			// very last sub is small - loop menu to set 1st sub as invert & small
 			menuPos = menuDef->pos1st;
 			while (menuPos){
-				//printf("%s\n",menuPos->caption);
-				//fflush(stdout);
 				if (menuPos->selected && menuPos->enabled){
 					// SubMenu found
 					menuPos->pos1st->printInverted = 1;
 					menuPos->pos1st->printSmall = 1;
-					/*
-					menuPos = menuPos->pos1st;
-					if (!menu1stSub){
-						// 1st SubMenu found
-						menu1stSub = menuPos->parentPos;
-						//printf("  1stSub: %s\n", menuPos->caption);
-					}						
-					if (!menuPos->printSmall){
-						// SubMenu is full-size
-						//menuPos->printSmall = 1;
-						menu1stSub->pos1st->printInverted = 1;
-						//printf("  Set2Small: %s\n", menuPos->caption);
-						//fflush(stdout);
-						// recalculation needed
-						selectedMenu = menu1stSub;
-						posX = orgX;
-						posY = orgY;
-						invert = 0;
-						menuWidth = 0;
-						renderWidth = orgWidth;
-						break;
-					}
-					*/
 					break;					
 				}
 				menuPos = menuPos->nextPos;
 			}
 		}
-		
 	}
 	else{
 		return 0;	// Can't Render
