@@ -473,7 +473,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	return 1;	// Ready To Render
 }
 
-void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
 
 	// posX is always the 1st char of the calling menu
 	// menuWidth is the width of the calling menu
@@ -488,6 +488,8 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 	int renderWidth = 0;
 	
 	int posCnt = 0;
+
+	int ymove = -1;
 
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 
@@ -541,12 +543,13 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 	case 2:
 		// RightMenu
 		break;
-	case 3:		
-		// BottomMenu
-		break;
 	case 4:	
 		// TopMenu next levels...
-		break;	
+	case 5:
+		// BottomMenu next levels...
+		break;
+	case 3:		
+		// BottomMenu
 	default:
 		// TopMenu
 		XfullInverted += menuWidth + 1;
@@ -568,8 +571,26 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 	case 2:
 		// RightMenu
 		break;
+	case 5:
+		// BottomMenu next levels...	
 	case 3:
 		// BottomMenu
+		if ((posY - renderHeight) < 1){
+			// too high to print all positions - shift posY above menuLine
+			posY = TERM_ScreenHeight - 1;
+			if ((posY - renderHeight) < 1){
+				// still to high
+				if (posY - selectedPos < 1){
+					// invisible selectedPos - shift offset
+					offsetPosY = (posY - selectedPos) * -1;
+				}
+			}
+			else{
+				// fits - shift back as much as possible
+				posY -= TERM_ScreenHeight - renderHeight;
+			}
+		}	
+		ymove = 1;	
 		break;
 	case 4:
 		// TopMenu next levels...
@@ -748,7 +769,8 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 				}
 				printf(" ");	// Trailing Space
 				
-				CursorDown(1);
+				//CursorDown(1);
+				CursorMoveY(ymove);
 				CursorLeft(renderSmall);
 				
 				menuPos = menuPos->nextPos;
@@ -816,7 +838,8 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 					StrPrintSpaces(renderWidth - strlen(menuPos->caption));
 				}
 				
-				CursorDown(1);
+				//CursorDown(1);
+				CursorMoveY(ymove);
 				CursorLeft(renderWidth);
 				//printf(" ");
 				fflush(stdout);
@@ -864,7 +887,7 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 			
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
+void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
 
 	// posX is always the 1st char of the calling menu
 	// menuWidth is the width of the calling menu
@@ -932,13 +955,12 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	case 2:
 		// RightMenu
 		break;
-	case 4:	
-		// TopMenu next levels...
-	case 5:
-		// BottomMenu next levels...
-		break;
 	case 3:		
 		// BottomMenu
+		break;
+	case 4:	
+		// TopMenu next levels...
+		break;	
 	default:
 		// TopMenu
 		XfullInverted += menuWidth + 1;
@@ -960,25 +982,8 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	case 2:
 		// RightMenu
 		break;
-	case 5:
-		// BottomMenu next levels...	
 	case 3:
 		// BottomMenu
-		if ((posY - renderHeight) < 1){
-			// too high to print all positions - shift posY above menuLine
-			posY = TERM_ScreenHeight - 1;
-			if ((posY - renderHeight) < 1){
-				// still to high
-				if (posY - selectedPos < 1){
-					// invisible selectedPos - shift offset
-					offsetPosY = selectedPos - (TERM_ScreenHeight - posY);
-				}
-			}
-			else{
-				// fits - shift back as much as possible
-				posY += TERM_ScreenHeight - (renderHeight + posY);
-			}
-		}		
 		break;
 	case 4:
 		// TopMenu next levels...
