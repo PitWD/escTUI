@@ -473,7 +473,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	return 1;	// Ready To Render
 }
 
-void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
+void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 
 	// posX is always the 1st char of the calling menu
 	// menuWidth is the width of the calling menu
@@ -489,7 +489,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	
 	int posCnt = 0;
 
-	int ymove = -1;
+	int yStep = -1;
 
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 
@@ -499,7 +499,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	if (maxX == 0){
 		maxX = TERM_ScreenWidth;
 	}
-	
+	if (minY == 0){
+		minY = (deskDef->header > 0) + 2;
+	}
+	if (maxY == 0){
+		maxY = TERM_ScreenHeight - (deskDef->bottomMenu > 0);
+	}	
+
 	// Get Size, Count, Selected, ... once... ;-)
 	while (menuPos){
 		int actWidth = strlen(menuPos->caption);
@@ -560,7 +566,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	
 	// save for eventually next levels and recalculation
 	int orgPosY = posY;
-	// Helper if menu doesn't fit as supposed
+	// Helper if selected menu doesn't fit as supposed
 	int offsetPosY = 0;
 
 	// Does it fit in Y as supposed
@@ -577,38 +583,38 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		// BottomMenu
 		if ((posY - renderHeight) < 1){
 			// too high to print all positions - shift posY above menuLine
-			posY = TERM_ScreenHeight - 1;
+			posY = maxY;
 			if ((posY - renderHeight) < 1){
 				// still to high
 				if (posY - selectedPos < 1){
 					// invisible selectedPos - shift offset
-					offsetPosY = (posY - selectedPos) * -1;
+					offsetPosY = ((posY - selectedPos) * -1) + 1;
+				}
+				else{
 				}
 			}
 			else{
-				// fits - shift back as much as possible
-				posY -= TERM_ScreenHeight - renderHeight;
+				// fits
 			}
 		}	
-		ymove = 1;	
+		yStep = 1;	
 		break;
 	case 4:
 		// TopMenu next levels...
 	default:
 		// TopMenu
-		if ((renderHeight + posY) > TERM_ScreenHeight){
+		if ((renderHeight + posY) > maxY){
 			// too high to print all positions - shift posY below menuLine
-			posY = (deskDef->header > 0) + 1;
-			if ((renderHeight + posY) > TERM_ScreenHeight){
+			posY = (deskDef->header > 0) + 2;
+			if ((renderHeight + posY) > maxY){
 				// still to high
-				if (selectedPos > TERM_ScreenHeight - posY){
+				if (selectedPos > maxY - posY){
 					// invisible selectedPos - shift offset
-					offsetPosY = selectedPos - (TERM_ScreenHeight - posY);
+					offsetPosY = selectedPos - (maxY - posY);
 				}
 			}
 			else{
-				// fits - shift back as much as possible
-				posY += TERM_ScreenHeight - (renderHeight + posY);
+				// fits
 			}
 		}		
 	}
@@ -679,7 +685,9 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			// trash unused positions
 			menuPos = menuPos->nextPos;
 		}
-		while (menuPos){
+		int screenY = posY;
+
+		while (menuPos && (screenY <= maxY) && (screenY >= minY)){
 			
 			if (renderSmall == renderWidth){
 				// render just the keys (+ eventually check/option brackets)
@@ -769,10 +777,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 				}
 				printf(" ");	// Trailing Space
 				
-				//CursorDown(1);
-				CursorMoveY(ymove);
 				CursorLeft(renderSmall);
-				
 				menuPos = menuPos->nextPos;
 			}
 
@@ -838,14 +843,13 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 					StrPrintSpaces(renderWidth - strlen(menuPos->caption));
 				}
 				
-				//CursorDown(1);
-				CursorMoveY(ymove);
 				CursorLeft(renderWidth);
-				//printf(" ");
-				fflush(stdout);
-				menuPos = menuPos->nextPos;
 				
 			}
+			CursorMoveY(yStep);
+			screenY -= yStep;
+			fflush(stdout);
+			menuPos = menuPos->nextPos;
 		}
 
 		if (selectedPos){
@@ -873,7 +877,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 				posX -= menuWidth;
 			}
 			
-			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, maxX);
+			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, minY, maxX, maxY);
 		}
 	}
 	else{
@@ -884,9 +888,8 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		TxtBold(0);
 		ResFBU();
 	}
-			
 }
-
+/*
 void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int invert, struct TuiMenusSTRUCT *menuDef, struct TuiMenuPosSTRUCT *menuPos, struct TuiDesktopsSTRUCT *deskDef, int minX, int maxX){
 
 	// posX is always the 1st char of the calling menu
@@ -1211,7 +1214,7 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 					}
 					else{
 						if (menuPos->isSpacer){
-							/* code */
+							
 						}
 						else{
 							printf("%c", menuPos->caption[i]);
@@ -1277,7 +1280,7 @@ void TUIrenderSubMenuOld(int posX, int posY, int menuType, int menuWidth, int in
 	}
 			
 }
-
+*/
 void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh){
 
 	char strHlp[STR_SMALL_SIZE];
@@ -1641,10 +1644,10 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 				menuPos = menuPos->nextPos;
 			}
 			// render selected Submenu
-			if (PreCalcSubMenu(subXs, 3, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, subXs, 3, subXw)){
+			if (PreCalcSubMenu(subXs, (deskDef->header > 0) + 2, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, subXs, (deskDef->header > 0) + 2, subXw)){
 				//printf("pre-Render\n");
 				//fflush(stdout);
-				TUIrenderSubMenu(subXs, 3, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0);
+				TUIrenderSubMenu(subXs, (deskDef->header > 0) + 2, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, 0, 0);
 			}
 		}
 	}
