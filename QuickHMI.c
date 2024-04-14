@@ -118,11 +118,14 @@ int main() {
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
-			TUIrenderTopMenu(1,  (userDesktopDefs[i].header > 0) + 1, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
+			//TUIrenderTopMenu(1,  (userDesktopDefs[i].header > 0) + 1, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
+			TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
 		
 		ResFBU();
 		printf("\n");
+
+		TermClearScreen(0);
 
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(0");

@@ -500,7 +500,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		maxX = TERM_ScreenWidth;
 	}
 	if (minY == 0){
-		minY = (deskDef->header > 0) + 2;
+		minY = (deskDef->header > 0) + (deskDef->topMenu > 0) + 1;
 	}
 	if (maxY == 0){
 		maxY = TERM_ScreenHeight - (deskDef->bottomMenu > 0);
@@ -519,7 +519,6 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		if (menuPos->isCheck || menuPos->isOption){
 			renderSmall = 7;	// [ ] A
 		}
-		
 		menuPos = menuPos->nextPos;
 	}
 	renderHeight = posCnt;
@@ -581,20 +580,23 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		// BottomMenu next levels...	
 	case 3:
 		// BottomMenu
-		if ((posY - renderHeight) < 1){
+		if ((posY - renderHeight) < minY - 1){
 			// too high to print all positions - shift posY above menuLine
-			posY = maxY;
-			if ((posY - renderHeight) < 1){
+			if ((maxY - renderHeight) < minY - 1){
 				// still to high
-				if (posY - selectedPos < 1){
+				if (selectedPos > maxY - minY){
 					// invisible selectedPos - shift offset
-					offsetPosY = ((posY - selectedPos) * -1) + 1;
+					offsetPosY = selectedPos - (maxY - minY);
 				}
-				else{
-				}
+				posY = maxY;
 			}
 			else{
-				// fits
+				if (posY < maxY - renderHeight + 1){
+					posY = posY + renderHeight - 1;
+				}
+				else{
+					posY = maxY;
+				}
 			}
 		}	
 		yStep = 1;	
@@ -603,18 +605,23 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		// TopMenu next levels...
 	default:
 		// TopMenu
-		if ((renderHeight + posY) > maxY){
+		if ((renderHeight + posY - 1) > maxY){
 			// too high to print all positions - shift posY below menuLine
-			posY = (deskDef->header > 0) + 2;
-			if ((renderHeight + posY) > maxY){
+			if ((renderHeight + minY - 1) > maxY){
 				// still to high
-				if (selectedPos > maxY - posY){
+				if (selectedPos > maxY - minY){
 					// invisible selectedPos - shift offset
-					offsetPosY = selectedPos - (maxY - posY);
+					offsetPosY = selectedPos - (maxY - minY);
 				}
+				posY = minY;
 			}
 			else{
-				// fits
+				if (posY > renderHeight + minY - 1){
+					posY = posY - renderHeight + 1;
+				}
+				else{
+					posY = minY;
+				}				
 			}
 		}		
 	}
@@ -863,21 +870,26 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 				break;
 			case 3:
 				// BottomMenu
+				menuWidth = 0;
+				menuType = 5;
+			case 5:
+				// BottomMenu next levels...
+				posY = posY - selectedPos + 1;
 				break;
-			case 4:
-				// TopMenu next levels...
-				break;
-			default:
+			case 0:
 				// TopMenu - 1st level
 				menuWidth = 0;
+				menuType = 4;
+			case 4:
+				// TopMenu next levels...
+				posY = posY + selectedPos - 1;
+				break;
 			}
 			// set X & Y
-			posY = orgPosY + selectedPos - 1 - offsetPosY - (orgPosY - posY);
 			if (!invert){
 				posX -= menuWidth;
-			}
-			
-			TUIrenderSubMenu(posX, posY, 4, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, minY, maxX, maxY);
+			}			
+			TUIrenderSubMenu(posX, posY, menuType, renderWidth + menuWidth, invert, menuDef, selectedMenu->pos1st, deskDef, minX, minY, maxX, maxY);
 		}
 	}
 	else{
@@ -1647,7 +1659,8 @@ void TUIrenderTopMenu(int posX, int posY, int width, struct TuiMenusSTRUCT *menu
 			if (PreCalcSubMenu(subXs, (deskDef->header > 0) + 2, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, subXs, (deskDef->header > 0) + 2, subXw)){
 				//printf("pre-Render\n");
 				//fflush(stdout);
-				TUIrenderSubMenu(subXs, (deskDef->header > 0) + 2, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, 0, 0);
+				//TUIrenderSubMenu(subXs, (deskDef->header > 0) + 2, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, 0, 0);
+				TUIrenderSubMenu(subXs, TERM_ScreenHeight - 1, 3, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, 0, 0, 0, 0);
 			}
 		}
 	}
