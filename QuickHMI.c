@@ -98,13 +98,10 @@ int main() {
 			TUIrenderHeader(0,0,0,i,0);
 			printf("\n");
 		}
-		
-		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
-		for (size_t i = 0; i < userTopMenuCnt; i++){
-			TUIrenderTopMenu(0, 0, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
-		}
 
 		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
+
+		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 
 		ResFBU();
 		printf("\n");
@@ -118,8 +115,8 @@ int main() {
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
-			//TUIrenderTopMenu(1,  (userDesktopDefs[i].header > 0) + 1, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
-			TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
+			TUIrenderTopMenu(&userTopMenus[i], &userDesktopDefs[0], 0);
+			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 		}
 		
 		ResFBU();
