@@ -321,6 +321,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 		// LeftMenu
 	case 2:
 		// RightMenu
+		//break;
 	case 3:		
 		// BottomMenu
 	default:
@@ -399,29 +400,30 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	// Render 
 	if (!dontRender){
 
+		switch (menuType){
+		case 4:	
+			// TopMenu next levels...
+		case 5:
+			// LeftMenu next levels...
+		case 6:
+			// RightMenu
+		case 7:
+			// BottomMenu
+			break;
+		case 1:
+			// LeftMenu
+		case 2:
+			// RightMenu
+		case 3:
+			// BottomMenu
+		default:
+			// TopMenu - 1st level
+			menuType += 4;
+			menuWidth = 0;
+		}
+
 		if (selectedPos){
 			// there is another subMenu to render...
-			switch (menuType){
-			case 4:	
-				// TopMenu next levels...
-			case 5:
-				// LeftMenu next levels...
-			case 6:
-				// RightMenu
-			case 7:
-				// BottomMenu
-				break;
-			case 1:
-				// LeftMenu
-			case 2:
-				// RightMenu
-			case 3:
-				// BottomMenu
-			default:
-				// TopMenu - 1st level
-				menuType += 4;
-				menuWidth = 0;
-			}
 			
 			// set X
 			if (!invert){
@@ -475,18 +477,27 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 			// very last sub is small - loop menu to set 1st sub as invert & small
 			menuPos = menuDef->pos1st;
 			while (menuPos){
-				if ((menuType == 1 || menuType == 2 || menuType == 5 || menuType == 6) && !menuDef->pos1st->printSmall){
+				if ((menuType == 5 || menuType == 6) && !menuDef->pos1st->printSmall){
 					// LeftMenu or RightMenu - Main-SubMenu is allowed to go small, too
+					menuPos->pos1st->printInverted = 1;
 					menuDef->pos1st->printSmall = 1;
 					break;
 				}
-				else if (menuPos->selected && menuPos->enabled){
+				else if (menuPos->selected && menuPos->enabled && !menuPos->pos1st->printSmall){
 					// SubMenu found
 					menuPos->pos1st->printInverted = 1;
 					menuPos->pos1st->printSmall = 1;
 					break;					
 				}
-				menuPos = menuPos->nextPos;
+				else if (menuPos->selected && menuPos->enabled){
+					// SubMenu found
+					menuPos = menuPos->pos1st;
+				}
+				else{
+					menuPos = menuPos->nextPos;
+				}
+				
+				
 			}
 		}
 	}
@@ -566,6 +577,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		// LeftMenu
 	case 2:
 		// RightMenu
+		//break;
 	case 3:		
 		// BottomMenu
 	default:
