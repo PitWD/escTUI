@@ -432,8 +432,9 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 			
 			if ((renderSmall == renderWidth) && !menuPos->printSmall){
 				// Sub became small this time - loop menu to find 1st full-size subMenu
-				struct TuiMenuPosSTRUCT *menu1stSub = NULL;
 				menuPos = menuDef->pos1st;
+				struct TuiMenuPosSTRUCT *menu1stSub = NULL;
+				selectedPos = menuPos;
 				while (menuPos){
 					if ((menuType == 5 || menuType == 6) && !menuDef->pos1st->printSmall){
 						// LeftMenu or RightMenu - Main-SubMenu is allowed to go small, too
@@ -479,7 +480,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 			while (menuPos){
 				if ((menuType == 5 || menuType == 6) && !menuDef->pos1st->printSmall){
 					// LeftMenu or RightMenu - Main-SubMenu is allowed to go small, too
-					menuPos->pos1st->printInverted = 1;
+					//menuDef->pos1st->printInverted = 1;
 					menuDef->pos1st->printSmall = 1;
 					break;
 				}
@@ -925,6 +926,20 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	}
 }
 
+void TUIclearSmallInverted(struct TuiMenuPosSTRUCT *menuPos){
+	while (menuPos){
+		menuPos->printSmall = 0;
+		menuPos->printInverted = 0;
+		if (menuPos->selected && menuPos->enabled){
+			// SubMenu found
+			menuPos = menuPos->pos1st;
+			menuPos->printSmall = 0;
+			menuPos->printInverted = 0;
+		}				
+		menuPos = menuPos->nextPos;
+	}
+}
+
 void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh, int minX, int minY, int maxX, int maxY){
 
 	int renderRealTime = 0;
@@ -1297,6 +1312,8 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 
 		if (selectedMenu && selectedMenu->pos1st){
 			// delete small and inverted flags from sub-structure before render
+			TUIclearSmallInverted(selectedMenu->pos1st);
+			/*
 			struct TuiMenuPosSTRUCT *menuPos = selectedMenu->pos1st;
 			while (menuPos){
 				menuPos->printSmall = 0;
@@ -1309,6 +1326,7 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 				}				
 				menuPos = menuPos->nextPos;
 			}
+			*/
 			// render selected Submenu
 			if (menuType){
 				// BottomMenu
@@ -1375,6 +1393,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		menuType = 1;
 	}
 	
+	TUIclearSmallInverted(menuDef->pos1st);
 	int renderWidth = PreCalcSubMenu(posX, posY, menuType, 0, 0, menuDef, menuDef->pos1st, deskDef, minX, maxX, posX, posY, 0);
 
 	/*
