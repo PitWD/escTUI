@@ -165,7 +165,6 @@ int SetSubSmall(struct TuiMenuPosSTRUCT *menuPos){
 	return 0;
 }
 
-
 int PreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int minX, int maxX){
 
 	int mainLen = GetSubLen(menuPos, 0, 0);
@@ -285,6 +284,7 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, i
 	int maxHeight = maxY - minY + 1;	
 
 	struct PoorTuiMenuPosSTRUCT *selectedPos = NULL;
+	struct PoorTuiMenuPosSTRUCT *menuPos1st = menuPos;
 	
 	while (menuPos){
 		height++;
@@ -294,6 +294,8 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, i
 		}
 		menuPos = menuPos->nextPos;		
 	}
+
+	menuPos = menuPos1st;
 	
 	if (!downUp){
 		// Up -> Down
@@ -333,15 +335,16 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, i
 				// top alignment doesn't fit either
 				if (posY - selected + 1 < minY){	//*
 					// selected not on screen with bottom alignment
-					if (shiftY + selected + 2 < minY){
+					if (shiftY + selected - 1 > maxY){ //*
 						// selected not on screen with bottom alignment either
 						// center selected position // int halfHeight = maxHeight / 2 + minY;
-						shiftY = (maxHeight / 2 + minY) - selected - 1;
+						shiftY = (maxHeight / 2 + minY) + selected - 1;
 					}
 					else{
 					}
 				}
 				else{
+					shiftY = posY;
 				}
 			}
 			else{
@@ -350,28 +353,20 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, i
 		downUp = -1;
 	}
 	
-	
+	posY = shiftY;
 
-		int tooMuch = posY + height - 1 - maxY;
-		int space = posY - minY;				// space above menu
-		
-		shiftY = space;
-		if (tooMuch <= space){
-			shiftY = tooMuch;
-		}
-		else{
-			if (posY - shiftY + selected - 1 > maxY){
-				// selected not on screen
-				shiftY = posY - minY;
-			}
-			ignoreY = tooMuch - space;
-		}
-
-	
-	
-
+	int mainLen = GetSubLen(menuPos, 0, 0);
 	if (isMain){
-		// main menu
+		// 1st sub, related to prev. menu
+		if (menuPos->printInverted){
+			// inverted
+			int diff = mainLen - width;
+			posX -= diff;
+		}		
+	}
+	else{
+		// next subs
+		
 	}
 	
 }
