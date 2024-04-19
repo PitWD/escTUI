@@ -93,6 +93,289 @@ struct TuiDesktopsSTRUCT{
 };
 struct TuiDesktopsSTRUCT *userDesktopDefs = NULL;
 
+int GetSubLen(struct TuiMenuPosSTRUCT *menuPos, int all, int fullLen){
+
+	// menuPos is the 1st position of a sub-menu
+	// all is a flag to get the length, including all following sub-menus
+	// fullLen is the current length of the (sum of) calling menu(s)
+
+	int len = 0;
+	int loopLen = 0;
+	int smallLen = 3;	// Key + 2 spaces
+
+	struct PoorTuiMenuPosSTRUCT *selectedPos = NULL;
+
+	int isSmall = menuPos->printSmall;
+
+	while (menuPos){
+		if (!isSmall){
+			len = strlen(menuPos->caption);
+			loopLen = (loopLen > len) ? loopLen : len;
+		}		
+		else if(isSmall && smallLen == 3 && (menuPos->isCheck || menuPos->isOption)){
+			smallLen = 7;	// [ ] A
+			if (!all){
+				break;
+			}
+		}
+		if (all && menuPos->selected && menuPos->enabled){
+			selectedPos = menuPos->pos1st;
+		}
+		menuPos = menuPos->nextPos;
+	}
+	
+	if (isSmall){
+		loopLen = smallLen;
+	}	
+	fullLen += loopLen;
+	
+	if (selectedPos){
+		fullLen = GetSubLen(selectedPos, all, fullLen);
+	}
+
+	return fullLen;
+}
+
+int SetSubSmall(struct TuiMenuPosSTRUCT *menuPos){
+
+	// menuPos is the 1st position of a sub-menu
+	// crawl through all sub-menus and set 1st menuPos->printSmall = 0 to 1
+
+	while (menuPos){
+
+		if (!menuPos->printSmall){
+			menuPos->printSmall = 1;
+			return 1;
+		}
+		
+		while (menuPos){
+			if (menuPos->selected && menuPos->enabled && menuPos->pos1st){
+				// next level
+				menuPos = menuPos->pos1st;
+				break;
+			}
+			else{
+				// next position
+				menuPos = menuPos->nextPos;
+			}
+		}
+
+	}
+
+	return 0;
+}
+
+
+int PreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int minX, int maxX){
+
+	int mainLen = GetSubLen(menuPos, 0, 0);
+	int subLen = GetSubLen(menuPos, 1, 0) - mainLen;
+	int diff = mainLen - width;
+	int invertX = posX - diff;
+
+	// [main-part][sub-part]
+	// 0 = to the right
+	// 1 = to the left
+	int sX[2][2];
+	int eX[2][2];
+	int spaceX[2][2];
+	int main_sub[2][2];
+
+	// Start- and Endpoints
+	sX[0][0] = posX;
+	sX[0][1] = posX - subLen;
+	sX[1][0] = invertX;
+	sX[1][1] = invertX - subLen;
+	mainLen--;
+	eX[0][0] = posX + mainLen + subLen;
+	eX[0][1] = posX + mainLen;
+	eX[1][0] = invertX + mainLen + subLen;
+	eX[1][1] = invertX + mainLen;
+
+	// Space left to minX / maxX
+	spaceX[0][0] = maxX - eX[0][0];
+	spaceX[0][1] = sX[0][1] - minX;
+	spaceX[1][0] = maxX - eX[1][0];
+	spaceX[1][1] = sX[1][1] - minX;
+
+	// Final validity
+	main_sub[0][0] = (spaceX[0][0] >= 0) && (sX[0][0] >= minX);
+	main_sub[0][1] = (spaceX[0][1] >= 0) && (eX[0][1] <= maxX);
+	main_sub[1][0] = (spaceX[1][0] >= 0) && (sX[1][0] >= minX);
+	main_sub[1][1] = (spaceX[1][1] >= 0) && (eX[1][1] <= maxX);
+
+	// Find the valid one with the biggest space
+	int id = 0;
+	for (int i = 0; i < 2; i++){
+		for (int j = 0; j < 2; j++){
+			id++;
+			if (main_sub[i][j]){
+				if (main_sub[0][0]){
+					if ((spaceX[0][0] < spaceX[i][j])){
+						spaceX[0][0] = spaceX[i][j];
+						main_sub[0][0] = id;
+					}			
+				}
+				else{
+					spaceX[0][0] = spaceX[i][j];
+					main_sub[0][0] = id;
+				}
+			}
+		}
+	}
+		
+	// Set the valid one
+	int mainSet = 0;
+	int subSet = 0;
+	switch (main_sub[0][0]){
+	case 1:
+		// main regular - subs to the right
+		break;
+	case 2:
+		// main regular - subs to the left
+		subSet = 1;
+		break;
+	case 3:
+		// main inverted - subs to the right
+		mainSet = 1;
+		break;
+	case 4:
+		// main inverted - subs to the left
+		mainSet = 1;
+		subSet = 1;
+		break;
+	default:
+		// too big to render
+		if (SetSubSmall(menuPos)){
+			PreRenderSub(posX, width, menuPos, minX, maxX);
+		}
+		else{
+			// we can't go smaller - too big to render
+			return 0;
+		}
+	}
+
+	// Set the printInverted
+	menuPos->printInverted = mainSet;
+	while (menuPos){
+		if (menuPos->selected && menuPos->enabled){
+			// next level
+			menuPos = menuPos->pos1st;
+			if (menuPos){
+				menuPos->printInverted = subSet;
+			}		
+		}
+		else{
+			// next position
+			menuPos = menuPos->nextPos;
+		}
+	}
+
+	return 1;	
+
+}
+
+int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, int isMain, int downUp, int minX, int minY, int maxX, int maxY){
+
+	int height = 0;
+	int selected = 0;
+	int ignoreY = 0;
+	int shiftY = posY;
+
+	int maxHeight = maxY - minY + 1;	
+
+	struct PoorTuiMenuPosSTRUCT *selectedPos = NULL;
+	
+	while (menuPos){
+		height++;
+		if (menuPos->selected && menuPos->enabled){
+			selected = height;
+			selectedPos = menuPos->pos1st;
+		}
+		menuPos = menuPos->nextPos;		
+	}
+	
+	if (!downUp){
+		// Up -> Down
+		if (posY + height - 1 > maxY){
+			// top alignment doesn't fit
+			shiftY = posY - height + 2;
+			if (shiftY < minY){
+				// bottom alignment doesn't fit either
+				if (posY + selected - 1 > maxY){
+					// selected not on screen with top alignment
+					if (shiftY + selected + 2 < minY){
+						// selected not on screen with bottom alignment either
+						// center selected position // int halfHeight = maxHeight / 2 + minY;
+						shiftY = (maxHeight / 2 + minY) - selected - 1;
+					}
+					else{
+						// cut on top while looping - shiftY fits already
+					}
+				}
+				else{
+					// cut on bottom while looping
+					shiftY = posY;
+				}
+			}
+			else{
+				// cut on top - shiftY fits already
+			}
+		}
+		downUp = 1;
+	}
+	else{
+		// Down -> Up
+		if (posY - height + 1 < minY){		//*
+			// bottom alignment doesn't fit
+			shiftY = posY + height - 1;		//*
+			if (shiftY > maxY){				//*
+				// top alignment doesn't fit either
+				if (posY - selected + 1 < minY){	//*
+					// selected not on screen with bottom alignment
+					if (shiftY + selected + 2 < minY){
+						// selected not on screen with bottom alignment either
+						// center selected position // int halfHeight = maxHeight / 2 + minY;
+						shiftY = (maxHeight / 2 + minY) - selected - 1;
+					}
+					else{
+					}
+				}
+				else{
+				}
+			}
+			else{
+			}
+		}
+		downUp = -1;
+	}
+	
+	
+
+		int tooMuch = posY + height - 1 - maxY;
+		int space = posY - minY;				// space above menu
+		
+		shiftY = space;
+		if (tooMuch <= space){
+			shiftY = tooMuch;
+		}
+		else{
+			if (posY - shiftY + selected - 1 > maxY){
+				// selected not on screen
+				shiftY = posY - minY;
+			}
+			ignoreY = tooMuch - space;
+		}
+
+	
+	
+
+	if (isMain){
+		// main menu
+	}
+	
+}
+
 void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
 	
 	int renderLen = 0;
@@ -266,6 +549,8 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	int renderWidth = 0;
 
 	int posCnt = 0;
+
+	int printSmall = 0;
 	
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 
@@ -292,21 +577,28 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 		menuPos = menuPos->nextPos;
 	}
 
+//return renderWidth;	// Ready To Render
+
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
-	int XfullInverted = posX - renderWidth;// + 1;
-	int XfullRight = posX + menuWidth;
-	int XsmallInverted = posX - renderSmall;// + 1;
-	int XsmallRight = XfullRight;
+	int XfullInverted = posX - renderWidth; 	// Start of inverted line
+	int XfullRight = posX + menuWidth;			// Start of right line
+	int XsmallInverted = posX - renderSmall;	// Start of inverted small-line
+	int XsmallRight = XfullRight;				// Start of right small-line
 
 	if (menuPos->printSmall){
 		// is already forced to print small
 		renderWidth = renderSmall;
 		XfullInverted = XsmallInverted;
-		XfullRight = XsmallRight;
+		printSmall = 1;
+		//XfullRight = XsmallRight;
 	}
- 
+ 	if (menuPos->printInverted){
+		// is already forced to print inverted
+		invert = 1;
+	}
+
  	switch (menuType){
 	case 4:	
 		// TopMenu next levels...
@@ -321,6 +613,8 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 		// LeftMenu
 	case 2:
 		// RightMenu
+		//XfullInverted -= 1;
+		//XsmallInverted -= 1;
 		//break;
 	case 3:		
 		// BottomMenu
@@ -329,7 +623,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 		XfullInverted += menuWidth + 1;
 		XsmallInverted += menuWidth + 1;
 		XfullRight -= menuWidth;
-		XsmallRight -= XfullRight;
+		//XsmallRight = XfullRight;
 	}
 
 	// Does inverted fit in X as supposed
@@ -341,19 +635,14 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				invert = 0;
 			}
 			else{
-				if (menuPos->printSmall){
-					// cause we're already forced to print small - we're done
-					dontRender = 1;
-				}
-				else{
-					renderWidth = renderSmall;
-				}
+				renderWidth = renderSmall;
+				printSmall = 1;
 			}			
 		}
 	}
 
 	// Does Right fit in X as supposed
-	if (!invert && !dontRender){
+	if (!invert){
 		if (XfullRight + renderWidth > maxX + 1){
 			// Full Size to the right will not work - try inverse
 			if (XfullInverted < minX){
@@ -367,12 +656,14 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 					else{
 						// Change to small inverted
 						renderWidth = renderSmall;
+						printSmall = 1;
 						invert = 1;
 					}
 				}
 				else{
 					// Change to small
 					renderWidth = renderSmall;
+					printSmall = 1;
 				}
 			}
 			else{
@@ -384,7 +675,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	
 	// Set posX
 	if (invert){
-		if (renderWidth == renderSmall){
+		if (printSmall){
 			// small
 			posX = XsmallInverted;
 		}
@@ -400,51 +691,69 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 	// Render 
 	if (!dontRender){
 
-		switch (menuType){
-		case 4:	
-			// TopMenu next levels...
-		case 5:
-			// LeftMenu next levels...
-		case 6:
-			// RightMenu
-		case 7:
-			// BottomMenu
-			break;
-		case 1:
-			// LeftMenu
-		case 2:
-			// RightMenu
-		case 3:
-			// BottomMenu
-		default:
-			// TopMenu - 1st level
-			menuType += 4;
-			menuWidth = 0;
-		}
-
-		if (selectedPos){
+		if (selectedMenu){
 			// there is another subMenu to render...
 			
-			// set X
+			switch (menuType){
+			case 4:	
+				// TopMenu next levels...
+			case 5:
+				// LeftMenu next levels...
+			case 6:
+				// RightMenu
+			case 7:
+				// BottomMenu
+				break;
+			case 1:
+				// LeftMenu
+			case 2:
+				// RightMenu
+			case 3:
+				// BottomMenu
+			default:
+				// TopMenu - 1st level
+				menuType += 4;
+				menuWidth = 0;
+			}
+
 			if (!invert){
 				posX -= menuWidth;
 			}
-			
-			if ((renderSmall == renderWidth) && !menuPos->printSmall){
+
+			if (printSmall && !menuPos->printSmall){
 				// Sub became small this time - loop menu to find 1st full-size subMenu
 				menuPos = menuDef->pos1st;
 				struct TuiMenuPosSTRUCT *menu1stSub = NULL;
-				selectedPos = menuPos;
+				selectedMenu = menuPos;
 				while (menuPos){
-					if ((menuType == 5 || menuType == 6) && !menuDef->pos1st->printSmall){
+					if ((menuType == 5 || menuType == 6)){
 						// LeftMenu or RightMenu - Main-SubMenu is allowed to go small, too
-						menuDef->pos1st->printSmall = 1;
-						selectedMenu = menuDef->pos1st;
-						posX = orgX;
-						invert = 0;
-						menuWidth = 0;
-						renderWidth = orgWidth;
-						break;
+						if (!menuDef->pos1st->printSmall){
+							invert = menuType - 5;
+							menuDef->pos1st->printSmall = 1;
+							menuDef->pos1st->printInverted = invert;
+							selectedMenu = menuDef->pos1st;
+							posX = orgX;
+							menuWidth = 0;
+							renderWidth = orgWidth;
+							menuType -= 4;
+							break;
+						}
+						else if (menuPos->selected && menuPos->enabled){
+							// SubMenu is full-size
+							menuPos = menuPos->pos1st;
+							if (!menuPos->printSmall){
+								invert = menuType - 5;
+								menuPos->printSmall = 1;
+								menuDef->pos1st->printInverted = invert;
+								selectedMenu = menuDef->pos1st;
+								posX = orgX;
+								menuWidth = 0;
+								renderWidth = orgWidth;
+								menuType -= 4;
+								break;
+							}
+						}												
 					}
 					else if (menuPos->selected && menuPos->enabled){
 						// SubMenu found
@@ -474,7 +783,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				return 0;
 			}
 		}
-		else if ((renderSmall == renderWidth) && !menuPos->printSmall){
+		else if (printSmall && !menuPos->printSmall){
 			// very last sub is small - loop menu to set 1st sub as invert & small
 			menuPos = menuDef->pos1st;
 			while (menuPos){
@@ -482,6 +791,7 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 					// LeftMenu or RightMenu - Main-SubMenu is allowed to go small, too
 					//menuDef->pos1st->printInverted = 1;
 					menuDef->pos1st->printSmall = 1;
+					menuDef->pos1st->printInverted = menuType - 5;
 					break;
 				}
 				else if (menuPos->selected && menuPos->enabled && !menuPos->pos1st->printSmall){
@@ -497,8 +807,6 @@ int PreCalcSubMenu(int posX, int posY, int menuType, int menuWidth, int invert, 
 				else{
 					menuPos = menuPos->nextPos;
 				}
-				
-				
 			}
 		}
 	}
@@ -525,6 +833,8 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	
 	int posCnt = 0;
 
+	int printSmall = 0;	
+
 	int yStep = -1;
 
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
@@ -547,16 +857,17 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 	renderHeight = posCnt;
 	menuPos = menuPos1st;
 
-	int XfullInverted = posX - renderWidth;// + 1;
-	int XfullRight = posX + menuWidth;
-	int XsmallInverted = posX - renderSmall;// + 1;
-	int XsmallRight = XfullRight;
+	int XfullInverted = posX - renderWidth; 	// Start of inverted line
+	int XfullRight = posX + menuWidth;			// Start of right line
+	int XsmallInverted = posX - renderSmall;	// Start of inverted small-line
+	int XsmallRight = XfullRight;				// Start of right small-line
 
 	if (menuPos->printSmall){
 		// is already forced to print small
 		renderWidth = renderSmall;
 		XfullInverted = XsmallInverted;
-		XfullRight = XsmallRight;
+		printSmall = 1;
+		//XfullRight = XsmallRight;
 	}
 
 	if (menuPos->printInverted){
@@ -578,6 +889,8 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		// LeftMenu
 	case 2:
 		// RightMenu
+		//XfullInverted -= 1;
+		//XsmallInverted -= 1;
 		//break;
 	case 3:		
 		// BottomMenu
@@ -586,7 +899,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 		XfullInverted += menuWidth + 1;
 		XsmallInverted += menuWidth + 1;
 		XfullRight -= menuWidth;
-		XsmallRight -= XfullRight;
+		//XsmallRight = XfullRight;
 	}
 	
 	// save for eventually next levels and recalculation
@@ -662,6 +975,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 			}
 			else{
 				renderWidth = renderSmall;
+				printSmall = 1;
 			}			
 		}
 	}
@@ -681,12 +995,14 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 					else{
 						// Change to small inverted
 						renderWidth = renderSmall;
+						printSmall = 1;	
 						invert = 1;
 					}
 				}
 				else{
 					// Change to small
 					renderWidth = renderSmall;
+					printSmall = 1;
 				}
 			}
 			else{
@@ -698,7 +1014,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 	// Set posX
 	if (invert){
-		if (renderWidth == renderSmall){
+		if (printSmall){
 			// small
 			posX = XsmallInverted;
 		}
@@ -722,7 +1038,7 @@ void TUIrenderSubMenu(int posX, int posY, int menuType, int menuWidth, int inver
 
 		while (menuPos && (screenY <= maxY) && (screenY >= minY)){
 			
-			if (renderSmall == renderWidth){
+			if (printSmall){
 				// render just the keys (+ eventually check/option brackets)
 				if (menuPos->selected && menuPos->enabled){
 					// enabled & selected
@@ -1313,21 +1629,6 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 		if (selectedMenu && selectedMenu->pos1st){
 			// delete small and inverted flags from sub-structure before render
 			TUIclearSmallInverted(selectedMenu->pos1st);
-			/*
-			struct TuiMenuPosSTRUCT *menuPos = selectedMenu->pos1st;
-			while (menuPos){
-				menuPos->printSmall = 0;
-				menuPos->printInverted = 0;
-				if (menuPos->selected && menuPos->enabled){
-					// SubMenu found
-					menuPos = menuPos->pos1st;
-					menuPos->printSmall = 0;
-					menuPos->printInverted = 0;
-				}				
-				menuPos = menuPos->nextPos;
-			}
-			*/
-			// render selected Submenu
 			if (menuType){
 				// BottomMenu
 				posY--;
@@ -1336,7 +1637,7 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 				// TopMenu
 				posY++;
 			}
-			if (PreCalcSubMenu(subXs, posY, 0, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, minX, maxX, subXs, posY, subXw)){
+			if (PreCalcSubMenu(subXs, posY, menuType, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, minX, maxX, subXs, posY, subXw)){
 				TUIrenderSubMenu(subXs, posY, menuType, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, minX, minY, maxX, maxY);
 			}
 		}
@@ -1345,7 +1646,7 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 		ResFBU();
 		SetFg16(fgRed);
 		TxtBold(1);
-		printf("!! Can't Render Top-Menu !!\n");
+		printf("!! Can't Render Horz-Menu !!\n");
 		TxtBold(0);
 		ResFBU();
 	}
@@ -1370,10 +1671,13 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		maxY--;	// Trailing space-line
 	}	
 
+	int menuWidth = 2;
+	int invert = 0;
+
 	if (!posX){
 		if (menuType > 1){
 			// RightMenu
-			posX = maxX;
+			posX = maxX - menuWidth;
 		}
 		else{
 			// LeftMenu
@@ -1387,14 +1691,16 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	if (menuType > 1){
 		// RightMenu
 		menuType = 2;
+		invert = 1;
 	}
 	else{
 		// LeftMenu
 		menuType = 1;
 	}
 	
+
 	TUIclearSmallInverted(menuDef->pos1st);
-	int renderWidth = PreCalcSubMenu(posX, posY, menuType, 0, 0, menuDef, menuDef->pos1st, deskDef, minX, maxX, posX, posY, 0);
+	int renderWidth = PreCalcSubMenu(posX, posY, menuType, menuWidth, invert, menuDef, menuDef->pos1st, deskDef, minX, maxX, posX, posY, menuWidth);
 
 	/*
 	printf("%s",menuDef->pos1st->caption);
@@ -1404,10 +1710,16 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	*/
 
 	if (renderWidth){
-		TUIrenderSubMenu(posX, posY, menuType, 0, 0, menuDef, menuDef->pos1st, deskDef, minX, minY, maxX, maxY);
+		TUIrenderSubMenu(posX, posY, menuType, menuWidth, invert, menuDef, menuDef->pos1st, deskDef, minX, minY, maxX, maxY);
 		return renderWidth;
 	}
 	else{
+		ResFBU();
+		SetFg16(fgRed);
+		TxtBold(1);
+		printf("!! Can't Render Vert-Menu !!\n");
+		TxtBold(0);
+		ResFBU();
 		return 0;
 	}
 }
