@@ -384,7 +384,7 @@ int PreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int minX
 		}
 	}
 		
-	// Set the valid one
+	// Set the valid ones
 	int mainSet = 0;
 	int subSet = 0;
 	switch (main_sub[0][0]){
@@ -408,6 +408,7 @@ int PreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int minX
 		// too big to render
 		if (SetSubSmall(menuPos)){
 			PreRenderSub(posX, width, menuPos, minX, maxX);
+			return 1;
 		}
 		else{
 			// we can't go smaller - too big to render
@@ -556,8 +557,6 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, s
 	
 	selectedPos = NULL;
 
-//fflush(stdout);
-
 	while (menuPos){
 		if (posY >= minY && posY <= maxY){
 			Locate(posX, posY);
@@ -572,11 +571,11 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, s
 		menuPos = menuPos->nextPos;		
 	}
 
-//fflush(stdout);
-
 	if (selectedPos){
 		RenderSub(nextPosX, selected, newWidth, selectedPos, menuDef, 0, downUp, minX, minY, maxX, maxY);
 	}
+
+	return 1;
 	
 }
 
@@ -1134,13 +1133,8 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 				posY++;
 			}
 			
-
-			//if (PreCalcSubMenu(subXs, posY, menuType, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, minX, maxX, subXs, posY, subXw)){
-				//TUIrenderSubMenu(subXs, posY, menuType, subXw, 0, menuDef, selectedMenu->pos1st, deskDef, minX, minY, maxX, maxY);
-			//}
-
+			subXw++;
 			if (PreRenderSub(subXs, subXw, selectedMenu->pos1st, minX, maxX)){
-				//fflush(stdout);
 				RenderSub(subXs, posY, subXw, selectedMenu->pos1st, menuDef, 1, menuType, minX, minY, maxX, maxY);
 			}
 		}
@@ -1174,13 +1168,10 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		maxY--;	// Trailing space-line
 	}	
 
-	int menuWidth = 0;
-	int invert = 0;
-
 	if (!posX){
-		if (menuType > 1){
+		if (menuType){
 			// RightMenu
-			posX = maxX - menuWidth;
+			posX = maxX - 2;
 		}
 		else{
 			// LeftMenu
@@ -1191,33 +1182,10 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		posY = minY;
 	}
 	
-	if (menuType > 1){
-		// RightMenu
-		menuType = 0;
-		invert = 1;
-	}
-	else{
-		// LeftMenu
-		menuType = 1;
-	}
-	
-
 	TUIclearSmallInverted(menuDef->pos1st);
 
-	//int renderWidth = PreCalcSubMenu(posX, posY, menuType, menuWidth, invert, menuDef, menuDef->pos1st, deskDef, minX, maxX, posX, posY, menuWidth);
-	int renderWidth = PreRenderSub(posX, menuWidth, menuDef->pos1st, minX, maxX);
-
-	/*
-	printf("%s",menuDef->pos1st->caption);
-	printf("renderWidth: %d\n", renderWidth);
-	printf("posX: %d\n", posX);
-	printf("posY: %d\n", posY);
-	*/
-
-	if (renderWidth){
-		//TUIrenderSubMenu(posX, posY, menuType, menuWidth, invert, menuDef, menuDef->pos1st, deskDef, minX, minY, maxX, maxY);
-		RenderSub(posX, posY, renderWidth, menuDef->pos1st, menuDef, 1, 0, minX, minY, maxX, maxY);
-		return renderWidth;
+	if (PreRenderSub(posX, 3, menuDef->pos1st, minX, maxX)){
+		return RenderSub(posX, posY, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY, maxX, maxY);
 	}
 	else{
 		ResFBU();
@@ -1229,8 +1197,8 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		return 0;
 	}
 }
-#define TUIrenderLeftMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 1, menuDef, deskDef, minX, minY, maxX, maxY)
-#define TUIrenderRightMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 2, menuDef, deskDef, minX, minY, maxX, maxY)
+#define TUIrenderLeftMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 0, menuDef, deskDef, minX, minY, maxX, maxY)
+#define TUIrenderRightMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 1, menuDef, deskDef, minX, minY, maxX, maxY)
 
 int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 

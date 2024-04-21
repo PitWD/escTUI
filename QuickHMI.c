@@ -103,9 +103,11 @@ int main() {
 
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 
+		printf("         1         2         3         4         5         6         7         8\n");
+		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
 		ResFBU();
-		printf("\n");
 		TermClearScreen(0);
+
 		for (size_t i = 0; i < userTopMenuCnt; i++){
 
 			//userTopMenus[i].pos1st->selected = 1;
@@ -116,7 +118,7 @@ int main() {
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
 			TUIrenderRightMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 10, 0, 0);
-			TUIrenderLeftMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 25, 0, 0);
+			TUIrenderLeftMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 23, 0, 0);
 			TUIrenderTopMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 0, 0, 0, 0);
 			TUIrenderBottomMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 0, 0, 0, 0);
 			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
