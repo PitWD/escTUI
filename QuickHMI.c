@@ -24,7 +24,7 @@ void UserSecondChanged(void){
 	static int i = 0;
 	i++;
 	TERM_RunCoreLoop = 0;
-	if (i < 100){
+	if (i < 15){
 		//printf("Second\n");
 		TERM_RunCoreLoop = 1;
 	}
@@ -104,9 +104,11 @@ int main() {
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 
 		printf("         1         2         3         4         5         6         7         8\n");
+		fflush(stdout);
 		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
 		ResFBU();
 		TermClearScreen(0);
+		fflush(stdout);
 
 		for (size_t i = 0; i < userTopMenuCnt; i++){
 

@@ -326,29 +326,29 @@ void Locate(int x, int y) {
 	printf("\x1B[%d;%dH", y, x);
 	TERM_CursorPosY = y;
 	TERM_CursorPosX = x;
-	ESCfixCursorPosX;
-	ESCfixCursorPosY;
+	ESCfixCursorPosX();
+	ESCfixCursorPosY();
 }
 void LocateX(int x) {
 	printf("\x1B[%dG", x);
 	TERM_CursorPosX = x;
-	ESCfixCursorPosX;
+	ESCfixCursorPosX();
 }
 void CursorUp(int y) {
 	printf("\x1B[%dA", y);
 	TERM_CursorPosY -= y;
-	ESCfixCursorPosY;
+	ESCfixCursorPosY();
 }
 void CursorUp1st(int y) {
 	printf("\x1B[%dF", y);
 	TERM_CursorPosY -= y;
-	ESCfixCursorPosY;
+	ESCfixCursorPosY();
 	TERM_CursorPosX = 1;
 }
 void CursorDown(int y) {
 	printf("\x1B[%dB", y);
 	TERM_CursorPosY += y;
-	ESCfixCursorPosY;
+	ESCfixCursorPosY();
 }
 void CursorMoveY(int y){
 	if (y < 0){
@@ -364,17 +364,17 @@ void CursorDown1st(int y) {
 	printf("\x1B[%dE", y);
 	TERM_CursorPosX = 1;
 	TERM_CursorPosY += y;
-	ESCfixCursorPosY;
+	ESCfixCursorPosY();
 }
 void CursorRight(int x) {
 	printf("\x1B[%dC", x);
 	TERM_CursorPosX += x;
-	ESCfixCursorPosX;
+	ESCfixCursorPosX();
 }
 void CursorLeft(int x) {
 	printf("\x1B[%dD", x);
 	TERM_CursorPosX -= x;
-	ESCfixCursorPosX;
+	ESCfixCursorPosX();
 }
 void CursorMoveX(int x){
 	if (x < 0){

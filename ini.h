@@ -103,85 +103,6 @@ char *IniStrToMem(const char *strIN, int reset) {
     return NULL;
 }
 
-
-char *IniStrToMemOLD(const char *strIN, int reset){
-	// Add strIN to strArray
-	// return pointer on embedded strIN
-
-	static char **strArray = NULL;
-	static int cnt = 0;
-	
-	if (reset){
-		// free memory		
-		if (strArray){
-			for (size_t i = 0; i < cnt; i++){
-				free(strArray[i]);
-				strArray[i] = NULL;
-			}
-			free(strArray);
-			strArray = NULL;
-		}
-        cnt = 0;
-	}
-	else{
-		// Put string to memory
-
-if (cnt > 126){
-printf("pre search: %s: %d\n",strIN, cnt);
-}
-
-		if (cnt){
-			// look, if the string already exist...
-			for (size_t i = 0; i < cnt; i++){
-if (cnt == 128){
-    printf("i: %d  %d\n", i, strArray[i]);
-}
-				
-                if (!strncmp(strIN, strArray[i], strlen(strIN))){
-					// exist
-					return strArray[i];
-				}
-			}
-		}
-		
-
-		cnt++;
-if (cnt > 126){
-printf("pre realloc: %d\n", cnt);
-}
-//        char **newStrArray = (char**)realloc(strArray, (cnt) * sizeof(char*));
-
-        char **newStrArray = (char**)malloc(cnt * sizeof(char*));
-        if (cnt > 1){
-            memcpy(newStrArray, strArray, (cnt - 1) * sizeof(char*));
-            free(strArray);
-        }
-        
-        char **strArray = (char**)malloc(cnt * sizeof(char*));
-
-        if (cnt > 1){
-            memcpy(strArray, newStrArray, cnt * sizeof(char*));
-        }
-
-        free(newStrArray);
-
-        
-if (cnt > 126){
-printf("pre malloc: %d\n", cnt);
-}
-		strArray[cnt - 1] = (char*)malloc((strlen(strIN)+1) * sizeof(char));
-if (cnt > 126){
-printf("after malloc: %d\n", cnt);
-}
-		strcpy(strArray[cnt-1], strIN);
-		return strArray[cnt-1];
-
-	}
-
-	return NULL;
-}
-
-
 void IniTrimRemark (char *strIN){
     // Remove all trailing text after
     // the first non "" encapsulated #
@@ -350,7 +271,7 @@ int IniGetTokens(char *strIN, char **tokens){
     while (token != NULL){
 
         // Size actual Token Length + "[.]" 
-        tokens[count] = malloc(strlen(token) + 4 + count);
+        tokens[count] = malloc(strlen(token) + 5 + count);
         tokens[count][0] = '[';
         tokens[count][1] = '\0';
 

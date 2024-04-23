@@ -103,7 +103,7 @@ int GetSubLen(struct TuiMenuPosSTRUCT *menuPos, int all, int fullLen){
 	int loopLen = 0;
 	int smallLen = 3;	// Key + 2 spaces
 
-	struct PoorTuiMenuPosSTRUCT *selectedPos = NULL;
+	struct TuiMenuPosSTRUCT *selectedPos = NULL;
 
 	int isSmall = menuPos->printSmall;
 
@@ -445,8 +445,8 @@ int RenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos, s
 
 	int maxHeight = maxY - minY + 1;	
 
-	struct PoorTuiMenuPosSTRUCT *selectedPos = NULL;
-	struct PoorTuiMenuPosSTRUCT *menuPos1st = menuPos;
+	struct TuiMenuPosSTRUCT *selectedPos = NULL;
+	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 	
 	while (menuPos){
 		height++;
@@ -1264,10 +1264,11 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	int posReturn = cnt;	// save for return
 	int lastPos = 0;
 
+	int j = 0;
 
 	for (int i = 0; i < positions; i++){
 		
-		int j = i + 1;	// User to Memory indexing
+		j = i + 1;	// User to Memory indexing
 
 		// Add mem for new position
 		cnt++;
@@ -1394,7 +1395,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	}
 
 //printf("pre Restore...\n");
-	int j = 0;
+	j = 0;
 	for (size_t i = 0; i < cnt; i++){
 		// restore valid pointers from IDs
 		if (menuPos[i].prevID || (j && (i == j))){
@@ -1417,8 +1418,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	}
 //printf("after Restore...\n");
 	if (testMe){
-		for (size_t i = 0; i < cnt; i++){
-			printf("pos: %d @: %d pos1st: %d parentPos: %d nextPos: %d prevPos: %d\n", i, &menuPos[i], menuPos[i].pos1st, menuPos[i].parentPos, menuPos[i].nextPos, menuPos[i].prevPos);
+		for (int i = 0; i < cnt; i++){
+			printf("pos: %d @: %p pos1st: %p parentPos: %p nextPos: %p prevPos: %p\n", i, &menuPos[i], menuPos[i].pos1st, menuPos[i].parentPos, menuPos[i].nextPos, menuPos[i].prevPos);
 			//printf("pos: %d @: %s pos1st: %s nextPos: %s prevPos: %s\n\n", i, menuPos[i].caption, menuPos[i].pos1st->caption, menuPos[i].nextPos->caption, menuPos[i].prevPos->caption);
 			printf("pos: %d @: %s pos1st: ", i, menuPos[i].caption);
 			
