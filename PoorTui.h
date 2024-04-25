@@ -894,7 +894,7 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 #define TUIrenderTopMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 0, menuDef, deskDef, minX, minY, maxX, maxY)
 #define TUIrenderBottomMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 3, menuDef, deskDef, minX, minY, maxX, maxY)
 
-int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
+int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 	
 	if (!minX){
 		minX = 1;
@@ -930,26 +930,37 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	if (TUIpreRenderSub(posX, 3, menuDef->pos1st, minX, maxX)){
 		
 		// Leading Line
-		int len = TUIgetSubLen(menuDef->pos1st, 0, 0);
+		int len = 0;
 		int lineX = posX;
-		if (menuType){
-			// RightMenu - fix X for leading and trailing line
-			lineX -= len - 3;
+		if (doLead || doTrail){
+			len = TUIgetSubLen(menuDef->pos1st, 0, 0);
+			if (menuType){
+				// RightMenu - fix X for leading and trailing line
+				lineX -= len - 3;
+			}
 		}
-		Locate(lineX, posY);
-		SetColorStyle(&userColors[menuDef->txtColor], 1);
-		SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
-		StrPrintSpaces(len);
 		
-		posY = TUIrenderSub(posX, posY + 1, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY + 1, maxX, maxY - 1);
+		if (doLead){
+			// Leading Line
+			Locate(lineX, posY);
+			SetColorStyle(&userColors[menuDef->txtColor], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+			StrPrintSpaces(len);
+		}
+		
+		int startY = posY + doLead;
+		posY = TUIrenderSub(posX, startY, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY + doLead, maxX, maxY - doTrail);
 
-		// Trailing Line
-		Locate(lineX, posY);
-		SetColorStyle(&userColors[menuDef->txtColor], 1);
-		SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
-		StrPrintSpaces(len);
+		if (doTrail){
+			// Trailing Line
+			Locate(lineX, posY);
+			SetColorStyle(&userColors[menuDef->txtColor], 1);
+			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
+			StrPrintSpaces(len);
+			posY++;
+		}
 
-		return 1;
+		return posY - startY + 1; // Height of 1st level 
 
 	}
 	else{
@@ -962,8 +973,8 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		return 0;
 	}
 }
-#define TUIrenderLeftMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 0, menuDef, deskDef, minX, minY, maxX, maxY)
-#define TUIrenderRightMenu(menuDef, deskDef, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 1, menuDef, deskDef, minX, minY, maxX, maxY)
+#define TUIrenderLeftMenu(menuDef, deskDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 0, doLead, doTrail, menuDef, deskDef, minX, minY, maxX, maxY)
+#define TUIrenderRightMenu(menuDef, deskDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, 1, doLead, doTrail, menuDef, deskDef, minX, minY, maxX, maxY)
 
 int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 

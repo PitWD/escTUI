@@ -119,8 +119,8 @@ int main() {
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
-			TUIrenderRightMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 10, 0, 0);
-			TUIrenderLeftMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 23, 0, 0);
+			TUIrenderRightMenu(&userTopMenus[i], &userDesktopDefs[0], 1, 0, 0, 10, 0, 0);
+			TUIrenderLeftMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 1, 0, 23, 0, 0);
 			TUIrenderTopMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 0, 0, 0, 0);
 			TUIrenderBottomMenu(&userTopMenus[i], &userDesktopDefs[0], 0, 0, 0, 0, 0);
 			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
