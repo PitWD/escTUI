@@ -763,14 +763,11 @@ void TUIclearSmallInverted(struct TuiMenuPosSTRUCT *menuPos){
 	}
 }
 
-void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int justRefresh, int minX, int minY, int maxX, int maxY){
+int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 
-	int renderRealTime = 0;
-	int renderRunTime = 0;
 	int renderSmall = 0;	// just the key + 2 spaces
 	int renderSelect = 0;	// "just the key" + selected key in full width 
-	int renderLen = 0;		// full size len of menu positions 
-	int dontRender = 0;		// even too small to render shortcuts
+	int renderLen = 0;		// full size len of menu positions (gets the final length, too)
 
 	int renderStyle = 0;	// 0 = full; 1 = small, but full selected; 2 = small
 
@@ -806,12 +803,7 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 			posY = minY - 1;
 		}
 	}
-	
-	if (menuType){
-		// BottomMenu
-		menuType = 3;
-	}
-	
+		
 	// renderWidth - respecting posX
 	int renderWidth = maxX - posX + 1;	
 
@@ -831,240 +823,76 @@ void TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *
 		menuPos = menuPos->nextPos;
 	}
 
-	if (menuDef->printRealTime){
-		renderLen += 20;	// 01.01.2023 09:09:21  (+ trailing space)
-		renderSmall += 20;
-		renderRealTime = 1;
-	}
-	if (menuDef->printRunTime){
-		renderLen += 16;	// 00000d 00:00:00 (+ leading space))
-		renderSmall += 16;
-		renderRunTime = 1;
-	}
-
 	renderSelect += renderSmall;
 
 	if (renderLen > renderWidth){
-		// menu doesn't fit - f*ck
-		if (renderRunTime){
-			renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
-			renderRunTime = 0;
-			if (renderLen > renderWidth){
-				// still too small...
-				if (renderRealTime){
-					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-					renderRealTime = 0;
-					if (renderLen > renderWidth){
-						// we're finally f*cked
-						renderStyle = 1;
-					}
-				}
-				else{
-					// we're finally f*cked
-					renderStyle = 1;
-				}
-			}
-		}
-		else if (renderRealTime){
-			renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-			renderRealTime = 0;
-			if (renderLen > renderWidth){
-				// we're finally f*cked
-				renderStyle = 1;
-			}
-		}
-		else{
-			// too long without time(s)
-			renderStyle = 1;
-		}
+		// full menu doesn't fit
+		renderStyle = 1;
+		renderLen = renderSelect;
 
-		if (renderStyle && renderSelect > renderSmall){
-			// check if small menu, but full selected, fits...
-			renderLen = renderSelect;
-			renderRealTime = menuDef->printRealTime;
-			renderRunTime = menuDef->printRunTime;
-			if (renderLen > renderWidth){
-				if (renderRunTime){
-					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
-					renderRunTime = 0;
-					if (renderLen > renderWidth){
-						// still too small...
-						if (renderRealTime){
-							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-							renderRealTime = 0;
-							if (renderLen > renderWidth){
-								// we're finally f*cked
-								renderStyle = 2;
-							}
-						}
-						else{
-							// we're finally f*cked
-							renderStyle = 2;
-						}
-					}
-				}
-				else if (renderRealTime){
-					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-					renderRealTime = 0;
-					if (renderLen > renderWidth){
-						// we're finally f*cked
-						renderStyle = 2;
-					}
-				}
-				else{
-					// too long without time(s)
-					renderStyle = 2;
-				}
-			}
-		}
-		else if(renderStyle){
-			// no key selected
+		if (renderLen > renderWidth){
+			// small, but full selected, doesn't fits
 			renderStyle = 2;
-		}
-
-		if (renderStyle == 2){
-			// check if small menu, fits...
 			renderLen = renderSmall;
-			renderRealTime = menuDef->printRealTime;
-			renderRunTime = menuDef->printRunTime;
+
 			if (renderLen > renderWidth){
-				if (renderRunTime){
-					renderLen -= 16;	// 00000d 00:00:00 (+ leading space)
-					renderRunTime = 0;
-					if (renderLen > renderWidth){
-						// still too small...
-						if (renderRealTime){
-							renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-							renderRealTime = 0;
-							if (renderLen > renderWidth){
-								// we're finally f*cked
-								dontRender = 1;
-							}
-						}
-						else{
-							// we're finally f*cked
-							dontRender = 1;
-						}
-					}
-				}
-				else if (renderRealTime){
-					renderLen -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
-					renderRealTime = 0;
-					if (renderLen > renderWidth){
-						// we're finally f*cked
-						dontRender = 1;
-					}
-				}
-				else{
-					// too long without time(s)
-					dontRender = 1;
-				}
+				// impossible to render
+				return 0;
 			}
 		}
 	}
-	else{
-		// full menu fits
-	}
 
-	if (!dontRender){
-		// Where to render
-		if (posX && posY){
-			Locate(posX, posY);
+	// Where to render
+	Locate(posX, posY);
+		
+	menuPos = menuDef->pos1st;
+	while (menuPos){
+		if (renderStyle){
+			// we can't fully render this menu
+			menuPos->printSmall = 3;
 		}
-		else if (posX){
-			LocateX(posX);
-		}
-		subXs = posX;
-
-		if (!justRefresh){
-			
-			struct TuiMenuPosSTRUCT *menuPos = menuDef->pos1st;
-			while (menuPos){
-				if (renderStyle){
-					// we can't fully render this menu
-					menuPos->printSmall = 3;
-				}
-				if (menuPos->selected && menuPos->enabled){
-					// selected - start of selected pos
-					subXs = posX;
-					if (renderStyle == 1){
-						// but the selected pos is in full width
-						menuPos->printSmall = 0;
-					}
-				}
-				posX += TUIprintMenuPos(posX, posY, 0, TUIgetPosLen(menuPos), menuPos, menuDef);
-				if (menuPos->selected && menuPos->enabled){
-					// selected - length of selected pos
-					subXw = posX - subXs - 1;
-				}
-				menuPos = menuPos->nextPos;
+		if (menuPos->selected && menuPos->enabled){
+			// selected - start of selected pos
+			subXs = posX;
+			if (renderStyle == 1){
+				// but the selected pos is in full width
+				menuPos->printSmall = 0;
 			}
-			
-			// Fill line with right colored spaces
-			SetColorStyle(&userColors[menuDef->txtColor], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
-			StrPrintSpaces(renderWidth - renderLen);
-			
+		}
+		posX += TUIprintMenuPos(posX, posY, 0, TUIgetPosLen(menuPos), menuPos, menuDef);
+		if (menuPos->selected && menuPos->enabled){
+			// selected - length of selected pos
+			subXw = posX - subXs;
+		}
+		menuPos = menuPos->nextPos;
+	}
+	
+	// Fill line with right colored spaces
+	SetColorStyle(&userColors[menuDef->txtColor], 1);
+	SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+	StrPrintSpaces(renderWidth - renderLen);
+		
+	if (selectedMenu && selectedMenu->pos1st){
+		if (menuType){
+			// BottomMenu
+			posY--;
+			menuType = 3;
 		}
 		else{
-			// we just refresh time(s)
-			CursorRight(renderWidth);
-		}
-
-		if (renderRealTime || renderRunTime){
-			// Set style & color of times
-			SetColorStyle(&userColors[menuDef->timeColor], 1);
-			SetTxtStyle(&userStyles[menuDef->timeStyle], 1);
+			// TopMenu
+			posY++;
 		}
 		
-		// Do we print the Realtime (all time right alignment)
-		if (renderRealTime){
-			// 01.01.2023 00:00:00
-			CursorLeft(19);
-			printf("%s %s", gStrDate, gStrTime);
-			CursorRight(1);
+		if (TUIpreRenderSub(subXs, subXw, selectedMenu->pos1st, minX, maxX)){
+			TUIrenderSub(subXs, posY, subXw, selectedMenu->pos1st, menuDef, 1, menuType, minX, minY, maxX, maxY);
 		}
-		// Do we print the RunTime
-		if (renderRunTime){
-			// 00000d 00:00:00
-			if (renderRealTime){
-				// left of RealTime 
-				CursorLeft(36);
-			}
-			else{
-				// right alignment
-				CursorLeft(15);
-			}
-			printf("%s", gStrRunTime);
-		}	
+	}
 
-		if (selectedMenu && selectedMenu->pos1st){
-			if (menuType){
-				// BottomMenu
-				posY--;
-			}
-			else{
-				// TopMenu
-				posY++;
-			}
-			
-			subXw++;
-			if (TUIpreRenderSub(subXs, subXw, selectedMenu->pos1st, minX, maxX)){
-				TUIrenderSub(subXs, posY, subXw, selectedMenu->pos1st, menuDef, 1, menuType, minX, minY, maxX, maxY);
-			}
-		}
-	}
-	else{
-		ResFBU();
-		SetFg16(fgRed);
-		TxtBold(1);
-		printf("!! Can't Render Horz-Menu !!\n");
-		TxtBold(0);
-		ResFBU();
-	}
+	return renderWidth;
+
 }
-#define TUIrenderTopMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 0, menuDef, deskDef, justRefresh, minX, minY, maxX, maxY)
-#define TUIrenderBottomMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 3, menuDef, deskDef, justRefresh, minX, minY, maxX, maxY)
+#define TUIrenderTopMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 0, menuDef, deskDef, minX, minY, maxX, maxY)
+#define TUIrenderBottomMenu(menuDef, deskDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, 3, menuDef, deskDef, minX, minY, maxX, maxY)
 
 int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 	
@@ -1106,7 +934,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		int lineX = posX;
 		if (menuType){
 			// RightMenu - fix X for leading and trailing line
-			lineX = posX - len + 3;
+			lineX -= len - 3;
 		}
 		Locate(lineX, posY);
 		SetColorStyle(&userColors[menuDef->txtColor], 1);
