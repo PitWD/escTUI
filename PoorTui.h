@@ -587,7 +587,7 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 		TUIrenderSub(nextPosX, selected, newWidth, selectedPos, menuDef, 0, downUp, minX, minY, maxX, maxY);
 	}
 
-	return 1;
+	return posY;
 	
 }
 
@@ -1100,7 +1100,29 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	TUIclearSmallInverted(menuDef->pos1st);
 
 	if (TUIpreRenderSub(posX, 3, menuDef->pos1st, minX, maxX)){
-		return TUIrenderSub(posX, posY, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY, maxX, maxY);
+		
+		// Leading Line
+		int len = TUIgetSubLen(menuDef->pos1st, 0, 0);
+		int lineX = posX;
+		if (menuType){
+			// RightMenu - fix X for leading and trailing line
+			lineX = posX - len + 3;
+		}
+		Locate(lineX, posY);
+		SetColorStyle(&userColors[menuDef->txtColor], 1);
+		SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
+		StrPrintSpaces(len);
+		
+		posY = TUIrenderSub(posX, posY + 1, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY + 1, maxX, maxY - 1);
+
+		// Trailing Line
+		Locate(lineX, posY);
+		SetColorStyle(&userColors[menuDef->txtColor], 1);
+		SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
+		StrPrintSpaces(len);
+
+		return 1;
+
 	}
 	else{
 		ResFBU();
