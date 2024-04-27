@@ -15,7 +15,6 @@ char *IniStrToMem(const char *strIN, int reset) {
 
     static char **strArray = NULL;  // Array of pointers to strings
     static int cnt = 0;             // Number of strings in the array
-    static int capacity = 0;        // Current capacity of the array
 
 
     if (reset) {
@@ -30,7 +29,6 @@ char *IniStrToMem(const char *strIN, int reset) {
             strArray = NULL;
         }
         cnt = 0;
-        capacity = 0;
 
     }
     else{
@@ -331,7 +329,6 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     char *strTokens[STR_SMALL_SIZE] = {NULL};  
     int cntTokens = IniGetTokens(strSearch, strTokens) - 1;
     int actToken = 0;
-    int isToken = 0;
 
     int insertLine = 0;
     int allowIncrease = 1;
@@ -364,7 +361,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
             }         
         }
 
-        int i = strlen(strTokens[actToken]);
+        size_t i = strlen(strTokens[actToken]);
 
         // Check if line starts with actual token
         if(strncasecmp(strIN, strTokens[actToken], i) == 0){
@@ -504,7 +501,6 @@ int IniSetTypeToValue(char *strValue, const int valType){
     char *pEnd;
 
     long lNum = 0;
-    double dNum = 0;
     #define hNum lNum
     #define bNum lNum
 
@@ -526,6 +522,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
         if(StrNormFloatString(strValue)){
             r = INI_TYPE_Float;
         }
+        break;
     case INI_TYPE_Hex:
         // as hex
         if(strncasecmp(strValue, "&h", 2) == 0){
@@ -1033,7 +1030,6 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
 
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
-    char *pEnd;
 
     if (defBool){
         sprintf(strValue, "true");
