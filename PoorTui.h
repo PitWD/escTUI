@@ -370,10 +370,11 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 
 	else{
 		// render full line
-		for (size_t i = 0; i < strlen(menuPos->caption); i++){
+		int len = (int)strlen(menuPos->caption);
+		for (int i = 0; i < len; i++){
 			if (menuPos->enabled && menuPos->selected){
 				// enabled - selected
-				if (i && ((int)i == menuPos->keyCode)){
+				if (i && (i == menuPos->keyCode)){
 					// is key
 					SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
 					SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
@@ -385,7 +386,7 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 			}
 			else if (menuPos->enabled){
 				// enabled
-				if (i && ((int)i == menuPos->keyCode)){
+				if (i && (i == menuPos->keyCode)){
 					// is key
 					SetColorStyle(&userColors[menuDef->keyColor], 1);
 					SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
@@ -1246,7 +1247,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 
 		int k = 0;
 		int keyCodeFound = 0;
-		for (size_t l = 0; l < strlen(strPos1); l++){
+		int len = (int)strlen(strPos1);
+		for (int l = 0; l < len; l++){
 			if (strPos1[l] == '(' && !keyCodeFound){
 				keyCodeFound = 1;
 				menuPos[pos1].keyCode = k;

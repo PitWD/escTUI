@@ -64,26 +64,26 @@ int main() {
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
 		// get your colors from INI-file
-		size_t userColorsCnt = ESCinitColors("desktops.ini", &userColors);
+		int userColorsCnt = ESCinitColors("desktops.ini", &userColors);
 		if (!userColorsCnt){
 			TermExit();
 			return -1;
 		}
 		/*
-		for (size_t i = 0; i < userColorsCnt; i++){
+		for (int i = 0; i < userColorsCnt; i++){
 			SetColorStyle(&userColors[i], 1);
 			printf("%04d. %s.%s\n",i, userColors[i].groupName, userColors[i].colorName);
 		}
 		*/
 		
 		// get your styles from INI-file
-		size_t userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
+		int userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
 		if (!userStylesCnt){
 			TermExit();
 			return -1;
 		}
 		/*
-		for (size_t i = 0; i < userStylesCnt; i++){
+		for (int i = 0; i < userStylesCnt; i++){
 			SetTxtStyle(&userStyles[i], 1);
 			printf("%04d. %s_%s\n", i, userStyles[i].fontName, userStyles[i].styleName );
 			SetTxtStyle(&userStyles[i], 0);
@@ -92,20 +92,20 @@ int main() {
 		fflush(stdout);
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
-		size_t userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
-		for (size_t i = 0; i < userHeadersCnt; i++){
+		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
+		for (int i = 0; i < userHeadersCnt; i++){
 			TUIrenderHeader(0,0,0,i,0);
 			printf("\n");
 		}
-		size_t userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
-		for (size_t i = 0; i < userFootersCnt; i++){
+		int userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
+		for (int i = 0; i < userFootersCnt; i++){
 			TUIrenderFooter(0,0,0,i,0);
 			printf("\n");
 		}
 
-		size_t userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
+		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
 
-		size_t userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
+		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
 		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
 		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
@@ -117,7 +117,7 @@ int main() {
 		TermClearScreen(0);
 		fflush(stdout);
 
-		for (size_t i = 0; i < userTopMenuCnt; i++){ //userTopMenuCnt; i++){
+		for (int i = 0; i < userTopMenuCnt; i++){ //userTopMenuCnt; i++){
 
 			//userTopMenus[i].pos1st->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->selected = 1;

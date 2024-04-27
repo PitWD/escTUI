@@ -361,12 +361,12 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
             }         
         }
 
-        size_t i = strlen(strTokens[actToken]);
+        int i = (int)strlen(strTokens[actToken]);
 
         // Check if line starts with actual token
         if(strncasecmp(strIN, strTokens[actToken], i) == 0){
             // Prevent that Token in File is longer (3rd case is just for [Main]-Level)
-            if ((strIN[i] == ' ')  || (strIN[i] == '=') || (strlen(strIN)-1 == i)){
+            if ((strIN[i] == ' ')  || (strIN[i] == '=') || ((int)strlen(strIN)-1 == i)){
                 // Token has the right length
 
                 if (actToken == cntTokens){

@@ -24,7 +24,7 @@ void StrTrimWhiteSpacesLR(char *strIN, const int l, const int r){
 
     // Traverse string from both ends until a non-space character is found
     if (l){
-        while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t') || *pLeft == '\n' || *pLeft == '\r')
+        while (pRight > pLeft && (*pLeft == ' ' || *pLeft == '\t' || *pLeft == '\n' || *pLeft == '\r'))
             pLeft++;
     }
     
@@ -138,7 +138,7 @@ int StrCommaToDot(char *strIN){
 
 void StrTrimNonNumeric(char *strIN){
     // Trim on 1st non-numeric position
-    for (int i = 0; i < strlen(strIN); i++){
+    for (int i = 0; i < (int)strlen(strIN); i++){
         if ((strIN[i] < '0' || strIN[i] > '9') && strIN[i] != '.' && strIN[i] != '-'){
             strIN[i] = '\0';
         }
@@ -176,7 +176,7 @@ int StrNormFloatString(char *strIN){
 void StrUcaseLen(char *strIN, const int len) { 
    // Convert 1st len chars to upper case
 
-    if (len <= strlen(strIN)){
+    if (len <= (int)strlen(strIN)){
         for (int c = 0; c < len; c++){
             strIN[c] = toupper(strIN[c]);
         }        
@@ -188,7 +188,7 @@ void StrLcaseLen(char *strIN, const int len) {
    
    // Convert 1st len chars to lower case
 
-    if (len <= strlen(strIN)){
+    if (len <= (int)strlen(strIN)){
         for (int c = 0; c < len; c++){
             strIN[c] = tolower(strIN[c]);
         }        
