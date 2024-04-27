@@ -3,11 +3,8 @@
 #include <ctype.h>
 #include "mathe.h"
 
-#define STR_XS_SIZE 128
-#define STR_SMALL_SIZE 256
-#define STR_MID_SIZE 512
-#define STR_LARGE_SIZE 1024
-#define STR_XL_SIZE 2048
+#define STR_SMALL_SIZE 255
+#define STR_MID_SIZE 1024
 
 #if __WIN32__ || _MSC_VER || __WIN64__
     #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
