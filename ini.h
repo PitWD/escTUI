@@ -15,7 +15,7 @@ char *IniStrToMem(const char *strIN, int reset) {
 
     static char **strArray = NULL;  // Array of pointers to strings
     static int cnt = 0;             // Number of strings in the array
-
+    static int total = 1;           // Total memory allocated
 
     if (reset) {
         // Free memory
@@ -36,33 +36,36 @@ char *IniStrToMem(const char *strIN, int reset) {
         
         if (!strArray) {
             // Allocate initial memory
-            strArray = malloc(sizeof(char *));
+            strArray = malloc(sizeof(char*) * 256);
             if (!strArray) {
                 // Memory allocation failed
                 return NULL;
             }
         }
-        else{
-            // Need to resize the array
-            printf("pre search\n");
-            fflush(stdout);
-            for (int i = 0; i < cnt - 1; i++) {
-                /*
-                if (cnt >= 131){
-                    printf("strArray[%d] = %s\n", i, strArray[i]);
-                    fflush(stdout);
-                }
-                */
-                // search for clone
-                if (strcmp(strIN, strArray[i]) == 0) {
-                    // exists
-                    printf("pre return\n");
-                    return strArray[i];
-                }
+
+        printf("pre search\n");
+        fflush(stdout);
+        for (int i = 0; i < cnt - 1; i++) {
+            /*
+            if (cnt >= 131){
+                printf("strArray[%d] = %s\n", i, strArray[i]);
+                fflush(stdout);
             }
+            */
+            // search for clone
+            if (strcmp(strIN, strArray[i]) == 0) {
+                // exists
+                printf("pre return\n");
+                return strArray[i];
+            }
+        }
+            
+        if(cnt > 255){
+            // Need to resize the array
+
             printf("pre realloc %d\n", cnt);
             fflush(stdout);
-            strArray = realloc(strArray, (cnt + 1) * sizeof(char *));
+            strArray = realloc(strArray, cnt * sizeof(char *));
             if (!strArray) {
                 // Memory allocation failed
                 printf("realloc failed\n");
