@@ -14,6 +14,7 @@
 char *IniStrToMem(const char *strIN, int reset) {
 
     static char **strArray = NULL;  // Array of pointers to strings
+    char **strHLP = NULL;           // Helper for realloc
     static int cnt = 0;             // Number of strings in the array
     static int total = 0;           // Total memory allocated
 
@@ -44,16 +45,8 @@ char *IniStrToMem(const char *strIN, int reset) {
             }
         }
 
-        printf("pre search\n");
-        fflush(stdout);
+        // Check if string already exists
         for (int i = 0; i < cnt - 1; i++) {
-            /*
-            if (cnt >= 131){
-                printf("strArray[%d] = %s\n", i, strArray[i]);
-                fflush(stdout);
-            }
-            */
-            // search for clone
             if (strcmp(strIN, strArray[i]) == 0) {
                 // exists
                 printf("pre return\n");
@@ -63,30 +56,15 @@ char *IniStrToMem(const char *strIN, int reset) {
             
         if(cnt >= total){
             // Need to resize the array - double memory
-
-            printf("pre realloc %d\n", cnt);
-            fflush(stdout);
-
-            char **strHLP = malloc(total * sizeof(char *));
+            strHLP = malloc(total * sizeof(char *));
             memcpy(strHLP, strArray, total * sizeof(char *));
             free(strArray);
             strArray = malloc(total * 2 * sizeof(char *));
             memcpy(strArray, strHLP, total * sizeof(char *));
             free(strHLP);
             total *= 2;
-
-            //strArray = realloc(strArray, cnt * sizeof(char *));
-            if (!strArray) {
-                // Memory allocation failed
-                printf("realloc failed\n");
-                fflush(stdout);
-                return NULL;
-            }
         }
 
-
-        printf("pre str malloc\n");
-        fflush(stdout);
         strArray[cnt] = malloc((strlen(strIN) + 1) * sizeof(char));
         if (!strArray[cnt]) {
             // Memory allocation failed
