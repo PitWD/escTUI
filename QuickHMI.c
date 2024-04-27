@@ -64,7 +64,7 @@ int main() {
 		TermMouseClicks[TERM_Event_MouseDblClick] = UserDblClick;
 
 		// get your colors from INI-file
-		int userColorsCnt = ESCinitColors("desktops.ini", &userColors);
+		size_t userColorsCnt = ESCinitColors("desktops.ini", &userColors);
 		if (!userColorsCnt){
 			TermExit();
 			return -1;
@@ -77,7 +77,7 @@ int main() {
 		*/
 		
 		// get your styles from INI-file
-		int userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
+		size_t userStylesCnt = ESCinitTxtStyles("desktops.ini", &userStyles);
 		if (!userStylesCnt){
 			TermExit();
 			return -1;
@@ -92,20 +92,20 @@ int main() {
 		fflush(stdout);
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
-		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
+		size_t userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
 		for (size_t i = 0; i < userHeadersCnt; i++){
 			TUIrenderHeader(0,0,0,i,0);
 			printf("\n");
 		}
-		int userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
+		size_t userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
 		for (size_t i = 0; i < userFootersCnt; i++){
 			TUIrenderFooter(0,0,0,i,0);
 			printf("\n");
 		}
 
-		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
+		size_t userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
 
-		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
+		size_t userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
 		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
 		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
 		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
@@ -117,7 +117,7 @@ int main() {
 		TermClearScreen(0);
 		fflush(stdout);
 
-		for (size_t i = 0; i < 0; i++){ //userTopMenuCnt; i++){
+		for (size_t i = 0; i < userTopMenuCnt; i++){ //userTopMenuCnt; i++){
 
 			//userTopMenus[i].pos1st->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->selected = 1;
@@ -135,11 +135,11 @@ int main() {
 			TUIrenderBottomMenu(&userTopMenus[i], 0, 0, 0, 0, 0);
 			
 			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
+			ResFBU();
+			printf("\n");
+			TermClearScreen(0);
 		}
 		
-		ResFBU();
-		printf("\n");
-		TermClearScreen(0);
 
 
 
