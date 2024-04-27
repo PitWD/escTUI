@@ -123,9 +123,9 @@ int main() {
 			//userTopMenus[i].pos1st->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->nextPos->selected = 1;
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = 1;
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = 1;
+			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = -1;
+			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
+			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
 			TUIrenderRightMenu(&userTopMenus[i], 1, 0, 0, 10, 0, 0);
 			TUIclearSmallInverted(userTopMenus[i].pos1st);
 			TUIrenderLeftMenu(&userTopMenus[i], 0, 1, 0, 23, 0, 0);

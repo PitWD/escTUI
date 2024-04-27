@@ -228,7 +228,7 @@ int TUIsetSubSmall(struct TuiMenuPosSTRUCT *menuPos){
 	while (menuPos){
 
 		if (!menuPos->printSmall){
-			menuPos->printSmall = 1;
+			menuPos->printSmall = -1;
 			return 1;
 		}
 		
@@ -501,16 +501,16 @@ int TUIpreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int m
 		break;
 	case 2:
 		// main regular - subs to the left
-		subSet = 1;
+		subSet = -1;
 		break;
 	case 3:
 		// main inverted - subs to the right
-		mainSet = 1;
+		mainSet = -1;
 		break;
 	case 4:
 		// main inverted - subs to the left
-		mainSet = 1;
-		subSet = 1;
+		mainSet = -1;
+		subSet = -1;
 		break;
 	default:
 		// too big to render
@@ -519,7 +519,7 @@ int TUIpreRenderSub(int posX, int width, struct TuiMenuPosSTRUCT *menuPos, int m
 			return 1;
 		}
 		else{
-			// we can't go smaller - too big to render
+			// we can't go smaller - finally too big to render
 			return 0;
 		}
 	}
@@ -920,7 +920,7 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	while (menuPos){
 		if (renderStyle){
 			// we can't fully render this menu
-			menuPos->printSmall = 1;
+			menuPos->printSmall = -1;
 		}
 		if (menuPos->selected && menuPos->enabled){
 			// selected - start of selected pos
@@ -1089,7 +1089,7 @@ void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int ma
 		if (selectedMenu == TUI_MENU_LEFT){
 			if (rightLen && (fullLen > maxWidth)){
 				// make unselected small
-				rightMenu->pos1st->printSmall = 1;
+				rightMenu->pos1st->printSmall = -1;
 				rightLen = TUIgetSubLen(rightMenu->pos1st, 0, 0);
 			}
 			TUIpreRenderSub(minX, 3, leftMenu->pos1st, minX, maxX - rightLen);
@@ -1098,7 +1098,7 @@ void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int ma
 		else if (selectedMenu == TUI_MENU_RIGHT){
 			if (leftLen && (fullLen > maxWidth)){
 				// make unselected small
-				leftMenu->pos1st->printSmall = 1;
+				leftMenu->pos1st->printSmall = -1;
 				leftLen = TUIgetSubLen(leftMenu->pos1st, 0, 0);
 			}			
 			TUIpreRenderSub(maxX - 2, 3, rightMenu->pos1st, minX + leftLen, maxX);
@@ -1264,7 +1264,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		strHLP[k] = '\0';
 		if (strHLP[0] == '-'){
 			// indicates a spacer
-			menuPos[pos1].isSpacer = 1;
+			menuPos[pos1].isSpacer = -1;
 		}
 		else{
 			menuPos[pos1].isSpacer = 0;
