@@ -25,8 +25,8 @@ struct TuiHeadersSTRUCT{
 	int txtStyle;
 	int timeColor;
 	int timeStyle;
-	uint8_t printRunTime :1;
-	uint8_t printRealTime :1;
+	int printRunTime :1;
+	int printRealTime :1;
 };
 // global access on headers 
 struct TuiHeadersSTRUCT *userHeaders = NULL;
@@ -51,8 +51,8 @@ struct TuiMenusSTRUCT{
 	int posCnt;	
 	int renderLen;					// count of sub-positions
 	struct TuiMenuPosSTRUCT *pos1st;		
-	uint8_t printRunTime :1;
-	uint8_t printRealTime :1;
+	int printRunTime :1;
+	int printRealTime :1;
 };
 // global access on Menu Definitions
 struct TuiMenusSTRUCT *userTopMenus = NULL;
@@ -136,7 +136,7 @@ int TUIfindSelectedMenu(struct TuiDesktopsSTRUCT *deskDef, struct TuiMenuPosSTRU
 	menuID[3] = deskDef->bottomMenu;
 
 	for (int i = 0; i < 4; i++){
-		menuPos = TUIgetSelectedPos(&userTopMenus[menuID[i]].pos1st);
+		menuPos = TUIgetSelectedPos(userTopMenus[menuID[i]].pos1st);
 		if (menuPos){
 			return i + 1;
 		}
@@ -247,6 +247,20 @@ int TUIsetSubSmall(struct TuiMenuPosSTRUCT *menuPos){
 	}
 
 	return 0;
+}
+
+void TUIclearSmallInverted(struct TuiMenuPosSTRUCT *menuPos){
+	while (menuPos){
+		menuPos->printSmall = 0;
+		menuPos->printInverted = 0;
+		if (menuPos->selected && menuPos->enabled){
+			// SubMenu found
+			menuPos = menuPos->pos1st;
+			menuPos->printSmall = 0;
+			menuPos->printInverted = 0;
+		}				
+		menuPos = menuPos->nextPos;
+	}
 }
 
 int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct TuiMenuPosSTRUCT *menuPos, struct TuiMenusSTRUCT *menuDef){
@@ -663,7 +677,7 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 	
 }
 
-void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefresh){
+void TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT *headerDef, int justRefresh){
 	
 	int renderLen = 0;
 	int renderWidth = 0;
@@ -677,17 +691,19 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 
 	char strHLP[STR_MID_SIZE];
 
+	//struct TuiHeadersSTRUCT *headerDef = &userHeaders[headerID];
+
 	// Width - respecting posX
 	width = width - posX + 1;
 	renderWidth = width;
-	strcpy(strHLP, userHeaders[headerID].caption);
+	strcpy(strHLP, headerDef->caption);
 	renderLen = strlen(strHLP);
 	
-	if (userHeaders[headerID].printRealTime){
+	if (headerDef->printRealTime){
 		width -= 20;	// 01.01.2023 09:09:21  (+ trailing space)
 		renderRealTime = 1;
 	}
-	if (userHeaders[headerID].printRunTime){
+	if (headerDef->printRunTime){
 		width -= 16;	// 00000d 00:00:00 (+ leading space)
 		renderRunTime = 1;
 	}
@@ -738,7 +754,7 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 			// cut caption
 			if (width >= 3){
 				/* code */
-				strncpy(strHLP, userHeaders[headerID].caption, width - 3);
+				strncpy(strHLP, headerDef->caption, width - 3);
 				strHLP[width - 3] = '~';
 				strHLP[width - 2] = '\0';
 			}
@@ -765,8 +781,8 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 	
 	if (!justRefresh){
 		// Style & Color
-		SetColorStyle(&userColors[userHeaders[headerID].txtColor - 1], 1);
-		SetTxtStyle(&userStyles[userHeaders[headerID].txtStyle - 1], 1);
+		SetColorStyle(&userColors[headerDef->txtColor - 1], 1);
+		SetTxtStyle(&userStyles[headerDef->txtStyle - 1], 1);
 		if (renderRealTime ^ renderRunTime) {
 			// one time active - center is left of time...
 			StrPrintCentered(strHLP, width);
@@ -788,8 +804,8 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 
 	if (renderRealTime || renderRunTime){
 		// Set style & color of times
-		SetColorStyle(&userColors[userHeaders[headerID].timeColor - 1], 1);
-		SetTxtStyle(&userStyles[userHeaders[headerID].timeStyle - 1], 1);
+		SetColorStyle(&userColors[headerDef->timeColor - 1], 1);
+		SetTxtStyle(&userStyles[headerDef->timeStyle - 1], 1);
 	}
 	
 	// Do we print the Realtime (all time right alignment)
@@ -813,20 +829,8 @@ void TUIrenderHeader(int posX, int posY, int width, int headerID, int justRefres
 		printf("%s", gStrRunTime);
 	}	
 }
-
-void TUIclearSmallInverted(struct TuiMenuPosSTRUCT *menuPos){
-	while (menuPos){
-		menuPos->printSmall = 0;
-		menuPos->printInverted = 0;
-		if (menuPos->selected && menuPos->enabled){
-			// SubMenu found
-			menuPos = menuPos->pos1st;
-			menuPos->printSmall = 0;
-			menuPos->printInverted = 0;
-		}				
-		menuPos = menuPos->nextPos;
-	}
-}
+#define TUIrenderHeader(posX, posY, width, headerID, justRefresh) TUIrenderHeaderFooter(posX, posY, width, &userHeaders[headerID], justRefresh)
+#define TUIrenderFooter(posX, posY, width, footerID, justRefresh) TUIrenderHeaderFooter(posX, posY, width, &userFooters[footerID], justRefresh)
 
 int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, int minX, int minY, int maxX, int maxY){
 
@@ -903,7 +907,7 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	while (menuPos){
 		if (renderStyle){
 			// we can't fully render this menu
-			menuPos->printSmall = 3;
+			menuPos->printSmall = 1;
 		}
 		if (menuPos->selected && menuPos->enabled){
 			// selected - start of selected pos
@@ -1017,7 +1021,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 #define TUIrenderLeftMenu(menuDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, TUI_MENU_LEFT, doLead, doTrail, menuDef, minX, minY, maxX, maxY)
 #define TUIrenderRightMenu(menuDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, TUI_MENU_RIGHT, doLead, doTrail, menuDef, minX, minY, maxX, maxY)
 
-TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
+void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 
 	struct TuiMenuPosSTRUCT *selectedPos = NULL;
 
@@ -1127,7 +1131,7 @@ TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, i
 
 }
 
-int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
+int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT **userHeader){
 
 	// User Header - Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -1135,7 +1139,8 @@ int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 	char strHLP[STR_SMALL_SIZE];
 
 	// count of headers
-	int headersCount = IniGetInt(strFile, "global.header.HeaderCount", 0);
+	sprintf(strSearch, "global.%s.%sCount", strLocation, strLocation);
+	int headersCount = IniGetInt(strFile, strSearch, 0);
 
 	// memory to store all header
 	*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
@@ -1143,36 +1148,36 @@ int TUIinitHeaders(char *strFile, struct TuiHeadersSTRUCT **userHeader){
 	for (int i = 0; i < headersCount; i++){
 		int j = i + 1;	// User index in file is 1-based...
 		// Caption
-		sprintf(strSearch, "global.header.%d.Caption", j);
-		sprintf(strHLP, "Header%d", i + 1);
+		sprintf(strSearch, "global.%s.%d.Caption", strLocation, j);
+		sprintf(strHLP, "Header%d", j);
 		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
 		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
 		// TextColor 
-		sprintf(strSearch, "global.header.%d.TextColor", j);
+		sprintf(strSearch, "global.%s.%d.TextColor", strLocation, j);
 		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
 		// TextStyle 
-		sprintf(strSearch, "global.header.%d.TextStyle", j);
+		sprintf(strSearch, "global.%s.%d.TextStyle", strLocation, j);
 		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
 		// TimeColor 
-		sprintf(strSearch, "global.header.%d.TimeColor", j);
+		sprintf(strSearch, "global.%s.%d.TimeColor", strLocation, j);
 		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
 		// TimeStyle 
-		sprintf(strSearch, "global.header.%d.TimeStyle", j);
+		sprintf(strSearch, "global.%s.%d.TimeStyle", strLocation, j);
 		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
 		// PrintRunTime 
-		sprintf(strSearch, "global.header.%d.PrintRunTime", j);
+		sprintf(strSearch, "global.%s.%d.PrintRunTime", strLocation, j);
 		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
 		// PrintRealTime 
-		sprintf(strSearch, "global.header.%d.PrintRealTime", j);
+		sprintf(strSearch, "global.%s.%d.PrintRealTime", strLocation, j);
 		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
 
 	}
 
-	printf("\n");
-
 	return headersCount;
 	
 }
+#define TUIinitHeaders(strFile, userHeader) TUIinitHeadFoots(strFile, "Header", userHeader)
+#define TUIinitFooters(strFile, userFooter) TUIinitHeadFoots(strFile, "Footer", userFooter)
 
 struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe, int isSub){
 
@@ -1278,7 +1283,9 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		
 		sprintf(strPos1, "%s%s ", strPos1, strHLP);
 
-//printf("pre strToMem...%s...\n", strPos1);
+printf("pre strToMem...%s...\n", strPos1);
+fflush(stdout);
+
 		menuPos[pos1].caption = IniStrToMem(strPos1, 0);
 //printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
 		// already known stuff
@@ -1402,7 +1409,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
 		sprintf(strSearch, "%s.%d.TextColor", strPath, i + 1);
-		menu[i]->txtColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
 //printf("1st\n");
 		sprintf(strSearch, "%s.%d.TextStyle", strPath, i + 1);
 		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
@@ -1457,11 +1464,12 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
 
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
-
+ //*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
 	// Menu Definition Values
 	for (int i = 0; i < desksCnt; i++){
 		int j = i + 1; // User index in file is 1-based...
 
+		/*
 		// Header
 		sprintf(strSearch, "global.desktops.%d.Header", j);
 		desktop[i]->header = IniGetInt(strFile, strSearch, 0);
@@ -1477,9 +1485,29 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 		// RightMenu
 		sprintf(strSearch, "global.desktops.%d.RightMenu", j);
 		desktop[i]->rightMenu = IniGetInt(strFile, strSearch, 0);
-		// Header
+		// Footer
 		sprintf(strSearch, "global.desktops.%d.Footer", j);
 		desktop[i]->footer = IniGetInt(strFile, strSearch, 0);
+		*/
+
+		// Header
+		sprintf(strSearch, "global.desktops.%d.Header", j);
+		(*desktop[i]).header = IniGetInt(strFile, strSearch, 0);
+		// TopMenu
+		sprintf(strSearch, "global.desktops.%d.TopMenu", j);
+		(*desktop[i]).topMenu = IniGetInt(strFile, strSearch, 0);
+		// BottomMenu
+		sprintf(strSearch, "global.desktops.%d.BottomMenu", j);
+		(*desktop[i]).bottomMenu = IniGetInt(strFile, strSearch, 0);
+		// LeftMenu
+		sprintf(strSearch, "global.desktops.%d.LeftMenu", j);
+		(*desktop[i]).leftMenu = IniGetInt(strFile, strSearch, 0);
+		// RightMenu
+		sprintf(strSearch, "global.desktops.%d.RightMenu", j);
+		(*desktop[i]).rightMenu = IniGetInt(strFile, strSearch, 0);
+		// Footer
+		sprintf(strSearch, "global.desktops.%d.Footer", j);
+		(*desktop[i]).footer = IniGetInt(strFile, strSearch, 0);
 	}
 
 	return desksCnt;

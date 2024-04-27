@@ -89,19 +89,26 @@ int main() {
 			SetTxtStyle(&userStyles[i], 0);
 		}
 		*/
-		
+		fflush(stdout);
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
 		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
-		//int userHeadersCnt = TUIinitHeaders("desktops.ini");
 		for (size_t i = 0; i < userHeadersCnt; i++){
 			TUIrenderHeader(0,0,0,i,0);
+			printf("\n");
+		}
+		int userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
+		for (size_t i = 0; i < userFootersCnt; i++){
+			TUIrenderFooter(0,0,0,i,0);
 			printf("\n");
 		}
 
 		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
 
 		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
+		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
+		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
+		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
 
 		printf("         1         2         3         4         5         6         7         8\n");
 		fflush(stdout);
@@ -110,7 +117,7 @@ int main() {
 		TermClearScreen(0);
 		fflush(stdout);
 
-		for (size_t i = 0; i < userTopMenuCnt; i++){
+		for (size_t i = 0; i < 0; i++){ //userTopMenuCnt; i++){
 
 			//userTopMenus[i].pos1st->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->selected = 1;
@@ -132,7 +139,12 @@ int main() {
 		
 		ResFBU();
 		printf("\n");
+		TermClearScreen(0);
 
+
+
+		ResFBU();
+		printf("\n");
 		TermClearScreen(0);
 
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");

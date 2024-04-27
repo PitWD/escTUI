@@ -10,40 +10,6 @@
 #define INI_TYPE_Bool 5
 #define INI_TYPE_Bin 6
 
-char *IniStrToMemFIX(const char *strIN, int reset) {
-    static char *strArray[1000] = { NULL }; // Array of pointers to strings
-    static int cnt = 0; // Number of strings in the array
-
-    if (reset) {
-        // Free memory
-        for (int i = 0; i < cnt; i++) {
-            free(strArray[i]);
-            strArray[i] = NULL;
-        }
-        cnt = 0; // Reset the count
-    } else {
-        // Put string in memory
-        for (int i = 0; i < cnt; i++) {
-            if (strcmp(strIN, strArray[i]) == 0) {
-                // String already exists, return a pointer to it
-                return strArray[i];
-            }
-        }
-
-        if (cnt < 1000) {
-            // Make sure we don't exceed the maximum number of strings
-            strArray[cnt] = (char *)malloc((strlen(strIN) + 1) * sizeof(char));
-            if (strArray[cnt] != NULL) {
-                strcpy(strArray[cnt], strIN);
-                cnt++;
-                return strArray[cnt - 1];
-            }
-        }
-    }
-
-    return NULL;
-}
-
 
 char *IniStrToMem(const char *strIN, int reset) {
 
@@ -66,34 +32,57 @@ char *IniStrToMem(const char *strIN, int reset) {
         cnt = 0;
         capacity = 0;
 
-    } else {
+    }
+    else{
         // Put string in memory
         
         if (!strArray) {
             // Allocate initial memory
-            capacity = 32;
-            strArray = (char**)malloc(capacity * sizeof(char *));
+            strArray = malloc(sizeof(char *));
             if (!strArray) {
                 // Memory allocation failed
                 return NULL;
             }
         }
-
-        if (cnt >= capacity){
+        else{
             // Need to resize the array
-            capacity += 32;
-            char **newStrArray = (char **)realloc(strArray, capacity * sizeof(char *));
-            strArray = newStrArray;
-        }
-
-        for (int i = 0; i < cnt; i++) {
-            if (strcmp(strIN, strArray[i]) == 0) {
-                // exists
-                return strArray[i];
+            printf("pre search\n");
+            fflush(stdout);
+            for (int i = 0; i < cnt - 1; i++) {
+                /*
+                if (cnt >= 131){
+                    printf("strArray[%d] = %s\n", i, strArray[i]);
+                    fflush(stdout);
+                }
+                */
+                // search for clone
+                if (strcmp(strIN, strArray[i]) == 0) {
+                    // exists
+                    printf("pre return\n");
+                    return strArray[i];
+                }
+            }
+            printf("pre realloc %d\n", cnt);
+            fflush(stdout);
+            strArray = realloc(strArray, (cnt + 1) * sizeof(char *));
+            if (!strArray) {
+                // Memory allocation failed
+                printf("realloc failed\n");
+                fflush(stdout);
+                return NULL;
             }
         }
 
-        strArray[cnt] = (char *)malloc((strlen(strIN) + 1) * sizeof(char));
+
+        printf("pre str malloc\n");
+        fflush(stdout);
+        strArray[cnt] = malloc((strlen(strIN) + 1) * sizeof(char));
+        if (!strArray[cnt]) {
+            // Memory allocation failed
+            printf("malloc failed\n");
+            fflush(stdout);
+            return NULL;
+        }
         strcpy(strArray[cnt], strIN);
 
         cnt++;
