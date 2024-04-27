@@ -15,9 +15,9 @@ char *IniStrToMem(const char *strIN, int reset) {
 
     static char **strArray = NULL;  // Array of pointers to strings
     static int cnt = 0;             // Number of strings in the array
-    static int total = 1;           // Total memory allocated
+    static int total = 0;           // Total memory allocated
 
-    if (reset) {
+    if (reset == 1) {
         // Free memory
         
         if (strArray) {
@@ -36,7 +36,8 @@ char *IniStrToMem(const char *strIN, int reset) {
         
         if (!strArray) {
             // Allocate initial memory
-            strArray = malloc(sizeof(char*) * 256);
+            total = 1;
+            strArray = malloc(sizeof(char*) * total);
             if (!strArray) {
                 // Memory allocation failed
                 return NULL;
@@ -60,12 +61,21 @@ char *IniStrToMem(const char *strIN, int reset) {
             }
         }
             
-        if(cnt > 255){
-            // Need to resize the array
+        if(cnt >= total){
+            // Need to resize the array - double memory
 
             printf("pre realloc %d\n", cnt);
             fflush(stdout);
-            strArray = realloc(strArray, cnt * sizeof(char *));
+
+            char **strHLP = malloc(total * sizeof(char *));
+            memcpy(strHLP, strArray, total * sizeof(char *));
+            free(strArray);
+            strArray = malloc(total * 2 * sizeof(char *));
+            memcpy(strArray, strHLP, total * sizeof(char *));
+            free(strHLP);
+            total *= 2;
+
+            //strArray = realloc(strArray, cnt * sizeof(char *));
             if (!strArray) {
                 // Memory allocation failed
                 printf("realloc failed\n");
