@@ -28,25 +28,25 @@ int TERM_RunCoreLoop = 1;
 
 // Dummy_Events to cover events the user hasn't defined
 static void TermDummyEvent(){
-	volatile static int i;
+	static volatile int i;
 }
 static void TermDummyEventChar(char c){
-    volatile static int i;
+    static volatile int i;
 }
 static void TermDummyEventInt(int i){
-    volatile static int a;
+    static volatile int a;
 }
 static void TermDummyEventIntInt(int x, int y){
-    volatile static int a;
+    static volatile int a;
 }
 static void TermDummyEventIntIntInt(int x, int y, int button){
-    volatile static int a;
+    static volatile int a;
 }
 static void TermDummyEventIntIntIntIntInt(int x1, int y1, int x2, int y2, int button){
-    volatile static int a;
+    static volatile int a;
 }
 static void TermDummyEventStr(char *strIN){
-	volatile static int i;
+	static volatile int i;
 }
 
 // Real Events
@@ -1490,6 +1490,7 @@ int TermGetSize(int set){
 			TERM_ScreenHeightPrev = TERM_ScreenHeight;
 			break;
 		}
+		// No break, we need to use the OS-Mode - ESC modes were not successful...
 	case 3:
 		// System
         #if __WIN32__ || _MSC_VER || __WIN64__
@@ -1719,6 +1720,7 @@ int TermGetESC27 (int c){
 						case 108:
 							// Icon label
 							r = 179;
+							break;
 						default:
 							// valid but unknown text
 							r = 180;
@@ -1777,6 +1779,7 @@ int TermGetESC27 (int c){
 							// Shift-TAB
 							TERM_KeyShift = 1;
 							r = 9;
+							break;
 						case 60:
 							// Mouse Trapping Start
 							isMouse = 1;
@@ -1898,7 +1901,7 @@ int TermGetESC27 (int c){
 					// 	CSI 1;7 R  -  AltCtrl
 					// 	CSI 1;8 R  -  ShiftAltCtrl
 					// Previous 7 Combinations Are CursorPositions, too... WTF !
-					if (!(c == 82 && TERM_ScreenSizeInCursorPos || TERM_CursorWaitFor)){
+					if (!(c == 82 && (TERM_ScreenSizeInCursorPos || TERM_CursorWaitFor))){
 						// Not F3 while waiting for CursorPos
 						r = GetESC27_CheckOnF112Key(c + 48, 4);
 					}

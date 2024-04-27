@@ -99,7 +99,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 
 //printf("IN\n");
 
-	if (abs(deltaX) < MATH_TOL_GRADIENT){
+	if (fabs(deltaX) < MATH_TOL_GRADIENT){
 //printf("Vert\n");
 
     	// Vertical line
@@ -126,7 +126,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 			// line right or left out of screen
 			return 0;
 		}
-        if (abs(startY - stopY) > MATH_TOL_GRADIENT){
+        if (fabs(*startY - *stopY) > MATH_TOL_GRADIENT){
             // line inside
             return 2;
         }
@@ -135,7 +135,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
             return 0;
         }
 	}
-	else if (abs(deltaY) < MATH_TOL_GRADIENT){
+	else if (fabs(deltaY) < MATH_TOL_GRADIENT){
 //printf("Horz\n");
 
 		// Horizontal line
@@ -163,7 +163,7 @@ int LineInRect(double *startX, double *startY, double *stopX, double *stopY, dou
 //printf("Horz1\n");
 			return 0;
 		}
-        if (abs(startX - stopX) > MATH_TOL_GRADIENT){
+        if (fabs(*startX - *stopX) > MATH_TOL_GRADIENT){
             // line inside
 //printf("Horz2\n");
             return 1;
