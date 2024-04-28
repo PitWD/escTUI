@@ -105,10 +105,11 @@ int main() {
 
 		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
 
-		int userTopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
-		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
-		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
-		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
+		TUI_TopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
+		TUI_BotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
+		TUI_RightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
+		TUI_LeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
+
 int reduce = (int)IniStrToMem("", 2);
 
 		fflush(stdout);
@@ -121,15 +122,19 @@ int reduce = (int)IniStrToMem("", 2);
 		fflush(stdout);
 		TermClearScreen(0);
 
-		for (int i = 0; i < userTopMenuCnt; i++){ //userTopMenuCnt; i++){
+		for (int i = 0; i < TUI_TopMenuCnt; i++){ //userTopMenuCnt; i++){
 
 			//userTopMenus[i].pos1st->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->selected = 1;
 			//userTopMenus[i].pos1st->nextPos->nextPos->nextPos->selected = 1;
+//printf("i-lead: %d\n", i);
+//fflush(stdout);
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = -1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
 			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
+//printf("i-trail: %d\n", i);
+//fflush(stdout);
 			TUIrenderRightMenu(&userTopMenus[i], 1, 0, 0, 10, 0, 0);
 			TUIclearSmallInverted(userTopMenus[i].pos1st);
 			TUIrenderLeftMenu(&userTopMenus[i], 0, 1, 0, 23, 0, 0);

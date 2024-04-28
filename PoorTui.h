@@ -49,7 +49,7 @@ struct TuiMenusSTRUCT{
 	int timeColor;
 	int timeStyle;
 	int posCnt;	
-	int renderLen;					// count of sub-positions
+	int pos1ID;						// helper for fixing pos1st while reallocating - shifts
 	struct TuiMenuPosSTRUCT *pos1st;		
 	int printRunTime :1;
 	int printRealTime :1;
@@ -60,6 +60,11 @@ struct TuiMenusSTRUCT *userBotMenus = NULL;
 struct TuiMenusSTRUCT *userLeftMenus = NULL;
 struct TuiMenusSTRUCT *userRightMenus = NULL;
 struct TuiMenusSTRUCT *userPopUpMenus = NULL;
+int TUI_TopMenuCnt = 0;
+int TUI_BotMenuCnt = 0;
+int TUI_LeftMenuCnt = 0;
+int TUI_RightMenuCnt = 0;
+int TUI_PopUpMenuCnt = 0;
 #define TUI_MENU_TOP 1
 #define TUI_MENU_LEFT 2
 #define TUI_MENU_RIGHT 3
@@ -67,7 +72,6 @@ struct TuiMenusSTRUCT *userPopUpMenus = NULL;
 
 struct TuiMenuPosSTRUCT{
 	char *caption;
-	struct TuiMenusSTRUCT *definition;
 	int keyCode;
 	int enabled;
 	int posCnt;								// count of sub-positions
@@ -1197,11 +1201,9 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	// *** Is INTED
 
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
-	//static int *nextPos = NULL;
-	//static int *prevPos = NULL;
-	//static int *pos1st = NULL;
 	
 	static int cnt = 0;
+	static int total = 0;
 
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
@@ -1224,6 +1226,21 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		int pos1 = cnt - 1;
 //printf("pre realloc...\n");
 		menuPos = realloc(menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT));
+		/*
+		// Working !! - For the case of realloc is doing a mess (like in IniStrToMem)
+		if (pos1){
+			menuHLP = malloc(cnt * sizeof(struct TuiMenuPosSTRUCT));
+			memcpy(menuHLP, menuPos, cnt * sizeof(struct TuiMenuPosSTRUCT));
+			free(menuPos);
+			menuPos = malloc(cnt * sizeof(struct TuiMenuPosSTRUCT));
+			memcpy(menuPos, menuHLP, cnt * sizeof(struct TuiMenuPosSTRUCT));
+			free(menuHLP);
+		}
+		else{
+			menuPos = malloc(cnt * sizeof(struct TuiMenuPosSTRUCT));
+		}
+		*/
+		
 //printf("after realloc...\n");
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
 		menuPos[pos1].enabled = IniGetBool(strFile, strSearch, 1);
@@ -1305,8 +1322,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 
 		menuPos[pos1].caption = IniStrToMem(strMIDhlp, 0);
 //printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
-		// already known stuff
-		menuPos[pos1].definition = definition;
+
 		// stuff to reset
 		menuPos[pos1].nextPos = NULL;
 		menuPos[pos1].prevPos = NULL;
@@ -1327,6 +1343,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			// save IDs instead of pointers while recursion (realloc moves pointer)
 			menuPos[lastPos].nextID = pos1;
 		}
+
+		
 		menuPos[pos1].prevID = lastPos;
 		lastPos = pos1;
 		
@@ -1355,6 +1373,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		if (menuPos[i].nextID){
 			menuPos[i].nextPos = &menuPos[menuPos[i].nextID];
 			if (!i){
+			//if (!menuPos[i].prevPos){ // Works, too !!
 				// e.g. File  Edit  Settings
 				// keep ID of "Edit" to get/set missing prevPos from "Edit"
 				// see "|| (j && (i == j))" in 1st IF
@@ -1367,6 +1386,24 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 			menuPos[menuPos[i].pos1ID].parentID = i;
 		}
 	}
+	definition->pos1ID = posReturn;
+	// Restore pos1st pointer of all menus
+	for (int i = 0; i < TUI_TopMenuCnt; i++){
+		userTopMenus[i].pos1st = &menuPos[userTopMenus[i].pos1ID];
+	}
+	for (int i = 0; i < TUI_BotMenuCnt; i++){
+		userBotMenus[i].pos1st = &menuPos[userBotMenus[i].pos1ID];
+	}
+	for (int i = 0; i < TUI_LeftMenuCnt; i++){
+		userLeftMenus[i].pos1st = &menuPos[userLeftMenus[i].pos1ID];
+	}
+	for (int i = 0; i < TUI_RightMenuCnt; i++){
+		userRightMenus[i].pos1st = &menuPos[userRightMenus[i].pos1ID];
+	}
+	for (int i = 0; i < TUI_PopUpMenuCnt; i++){
+		userPopUpMenus[i].pos1st = &menuPos[userPopUpMenus[i].pos1ID];
+	}
+
 //printf("after Restore...\n");
 	if (testMe){
 		for (int i = 0; i < cnt; i++){
@@ -1403,7 +1440,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		// return NULL;
 	}
 
-// printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);
+// printf("\n%d: %d\n\n", posReturn, &menuPos[posReturn]);	
 	return &menuPos[posReturn];
 	
 }
@@ -1418,10 +1455,12 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 	int menusCnt = IniGetInt(strFile, strSearch, 0);
 
 //printf("menusCnt: %d\n", menusCnt);
+//fflush(stdout);
 
 	*menu = (struct TuiMenusSTRUCT*)malloc(menusCnt * sizeof(struct TuiMenusSTRUCT));
 
 //printf("after malloc...\n");
+//fflush(stdout);
 
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
@@ -1458,15 +1497,15 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
 		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
 
-		(*menu)[i].renderLen = 0;
 //printf("last\n");
+//fflush(stdout);
 		// Add positions
 		sprintf(strSearch, "%s.%d.", strPath, i + 1);
 		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 0, 0);	
 //printf("after menuPos...\n");
 //printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
 //printf("%s\n", menu[i]->pos1st->caption);	
-
+//fflush(stdout);
 	}
 
 	return menusCnt;
