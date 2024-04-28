@@ -138,13 +138,22 @@ int TUIfindSelectedMenu(struct TuiDesktopsSTRUCT *deskDef, struct TuiMenuPosSTRU
 	menuID[2] = deskDef->rightMenu;
 	menuID[3] = deskDef->bottomMenu;
 
+	struct TuiMenusSTRUCT *menuDef[5];
+	menuDef[0] = userTopMenus;
+	menuDef[1] = userLeftMenus;
+	menuDef[2] = userRightMenus;
+	menuDef[3] = userBotMenus;
+
+
 	for (int i = 0; i < 4; i++){
-		menuPos = TUIgetSelectedPos(userTopMenus[menuID[i]].pos1st);
+		printf("MenuID: %d\n", i);
+		menuPos = TUIgetSelectedPos(menuDef[menuID[i] - 1]->pos1st);
 		if (menuPos){
 			return i + 1;
 		}
 	}
 
+	menuPos = NULL;
 	return 0;
 
 }
@@ -1039,33 +1048,32 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 
 void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
 
-	struct TuiMenuPosSTRUCT *selectedPos = NULL;
+	struct TuiMenuPosSTRUCT selectedPos;
 
 	struct TuiMenusSTRUCT *topMenu = NULL;
 	struct TuiMenusSTRUCT *bottomMenu = NULL;
 	struct TuiMenusSTRUCT *leftMenu = NULL;
 	struct TuiMenusSTRUCT *rightMenu = NULL;
 
-
 	if (deskDef->topMenu){
-		topMenu = &userTopMenus[deskDef->topMenu];
+		topMenu = &userTopMenus[deskDef->topMenu - 1];
 		TUIclearSmallInverted(topMenu->pos1st);
 	}
 	if (deskDef->bottomMenu){
-		bottomMenu = &userBotMenus[deskDef->bottomMenu];
+		bottomMenu = &userBotMenus[deskDef->bottomMenu - 1];
 		TUIclearSmallInverted(bottomMenu->pos1st);
 	}
 	if (deskDef->leftMenu){
-		leftMenu = &userLeftMenus[deskDef->leftMenu];
+		leftMenu = &userLeftMenus[deskDef->leftMenu - 1];
 		TUIclearSmallInverted(leftMenu->pos1st);
 	}
 	if (deskDef->rightMenu){
-		rightMenu = &userRightMenus[deskDef->rightMenu];
+		rightMenu = &userRightMenus[deskDef->rightMenu - 1];
 		TUIclearSmallInverted(rightMenu->pos1st);
 	}
 
 	// Is there a selected Menu
-	int selectedMenu = TUIfindSelectedMenu(deskDef, selectedPos);
+	int selectedMenu = TUIfindSelectedMenu(deskDef, &selectedPos);
 
 	// Take care on 0, 0, 0, 0
 	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);
@@ -1520,6 +1528,9 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 
 	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
 
+printf("desksCnt (IN): %d\n", desksCnt);
+fflush(stdout);
+
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
  
 	int j = 0;
@@ -1547,6 +1558,8 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 		(*desktop[i]).footer = IniGetInt(strFile, strSearch, 0);
 	}
 
+printf("desksCnt (OUT): %d\n", desksCnt);
+fflush(stdout);
 	return desksCnt;
 
 }

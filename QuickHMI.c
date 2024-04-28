@@ -149,7 +149,8 @@ int reduce = (int)IniStrToMem("", 2);
 			TermClearScreen(0);
 		}
 		
-
+	TUIclearSmallInverted(userTopMenus[0].pos1st);
+	TUIbuildMenus(&userDesktopDefs[0], 0, 0, 0, 0);
 
 
 		ResFBU();
