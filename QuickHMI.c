@@ -90,16 +90,16 @@ int main() {
 		}
 		*/
 		fflush(stdout);
+		TermClearScreen(0);
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
 		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
 		for (int i = 0; i < userHeadersCnt; i++){
-			TUIrenderHeader(0,0,0,i,0);
-			printf("\n");
+			TUIrenderHeader(1,i+1,0,i,0);
 		}
 		int userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
 		for (int i = 0; i < userFootersCnt; i++){
-			TUIrenderFooter(0,0,0,i,0);
+			TUIrenderFooter(1,i+3,0,i,0);
 			printf("\n");
 		}
 
@@ -109,13 +109,17 @@ int main() {
 		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
 		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
 		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
+int reduce = IniStrToMem("", 2);
+
+		fflush(stdout);
+		TermClearScreen(0);
 
 		printf("         1         2         3         4         5         6         7         8\n");
 		fflush(stdout);
 		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
 		ResFBU();
-		TermClearScreen(0);
 		fflush(stdout);
+		TermClearScreen(0);
 
 		for (int i = 0; i < userTopMenuCnt; i++){ //userTopMenuCnt; i++){
 
@@ -340,7 +344,8 @@ SetFg16(fgCyan);
 
 TxtBold(0);
 ResFg();
-Locate(1,24);
+Locate(TERM_ScreenWidth,TERM_ScreenHeight);
+printf("\nreduce: %d\n", reduce);
 fflush(stdout);
 //printf("%d", (10 &  ))
 		// Run TUIs event loop - param is your loop if you have to "ever"-loop something...
@@ -350,9 +355,9 @@ fflush(stdout);
 		// Set TUI_RunCoreLoop = 0 to reach this point
 
 		// Free color & font strings
-		#if __APPLE__
+		//#if __APPLE__
 			// NO CLUE WHY freeing is messy
-		#else
+		//#else
 			IniStrToMem("",1);
 			free(userColors);
 			free(userStyles);
@@ -361,7 +366,7 @@ fflush(stdout);
 			free(userBotMenus);
 			free(userRightMenus);
 			free(userLeftMenus);
-		#endif
+		//#endif
 	// *************************************************************
 
 

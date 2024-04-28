@@ -1300,8 +1300,8 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		
 		sprintf(strMIDhlp, "%s%s ", strPos1, strHLP);
 
-printf("pre strToMem...%s...\n", strMIDhlp);
-fflush(stdout);
+//printf("pre strToMem...%s...\n", strMIDhlp);
+//fflush(stdout);
 
 		menuPos[pos1].caption = IniStrToMem(strMIDhlp, 0);
 //printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);

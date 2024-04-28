@@ -24,20 +24,41 @@ char *IniStrToMem(const char *strIN, int reset) {
         if (strArray) {
             for (int i = 0; i < cnt; i++) {
                 free(strArray[i]);
-                strArray[i] = NULL;
             }
             free(strArray);
-            strArray = NULL;
         }
         cnt = 0;
 
     }
+    else if (reset == 2){
+        // close Array and reduce to minimum size
+        if (strArray && (cnt < total)){
+            strHLP = malloc(cnt * sizeof(char*));
+            if (!strHLP) {
+                // Memory allocation failed
+                return NULL;
+            }
+            memcpy(strHLP, strArray, cnt * sizeof(char*));
+            free(strArray);
+            strArray = malloc(cnt * sizeof(char*));
+            if (!strArray) {
+                // Memory allocation failed
+                return NULL;
+            }
+            memcpy(strArray, strHLP, cnt * sizeof(char*));
+            free(strHLP);
+            total = cnt;
+            return cnt;
+        }        
+        return 0;
+    }
+    
     else{
         // Put string in memory
         
         if (!strArray) {
             // Allocate initial memory
-            total = 1;
+            total = 64;
             strArray = malloc(sizeof(char*) * total);
             if (!strArray) {
                 // Memory allocation failed
@@ -48,28 +69,34 @@ char *IniStrToMem(const char *strIN, int reset) {
         // Check if string already exists
         for (int i = 0; i < cnt - 1; i++) {
             if (strcmp(strIN, strArray[i]) == 0) {
-                // exists
-                printf("pre return\n");
+                // already exists
                 return strArray[i];
             }
         }
             
         if(cnt >= total){
-            // Need to resize the array - double memory
+            // Need to resize the array - (double memory)
             strHLP = malloc(total * sizeof(char *));
+            if (!strHLP) {
+                // Memory allocation failed
+                return NULL;
+            }            
             memcpy(strHLP, strArray, total * sizeof(char *));
             free(strArray);
             strArray = malloc(total * 2 * sizeof(char *));
+            if (!strHLP) {
+                // Memory allocation failed
+                return NULL;
+            }            
             memcpy(strArray, strHLP, total * sizeof(char *));
             free(strHLP);
             total *= 2;
         }
 
+        // Allocate memory for the string
         strArray[cnt] = malloc((strlen(strIN) + 1) * sizeof(char));
         if (!strArray[cnt]) {
             // Memory allocation failed
-            printf("malloc failed\n");
-            fflush(stdout);
             return NULL;
         }
         strcpy(strArray[cnt], strIN);
@@ -971,6 +998,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
 }
 #define IniGet(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_AsItIs, strReturn)
 #define IniGetStr(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_Text, strReturn)
+
 long IniGetLong(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
@@ -987,6 +1015,7 @@ long IniGetLong(const char *fileName, const char *strSearch, const long defLong)
     return defLong;
 }
 #define IniGetInt(fileName, strSearch, defInt) (int)IniGetLong(fileName, strSearch, (long)defInt)
+
 double IniGetDouble(const char *fileName, const char *strSearch, const double defDouble){
 
     char strValue[STR_SMALL_SIZE];
@@ -1002,6 +1031,7 @@ double IniGetDouble(const char *fileName, const char *strSearch, const double de
     return defDouble;
 }
 #define IniGetFloat(fileName, strSearch, defFloat) (float)IniGetDouble(fileName, strSearch, (double)defFloat)
+
 long IniGetLongHex(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
@@ -1017,6 +1047,7 @@ long IniGetLongHex(const char *fileName, const char *strSearch, const long defLo
     return defLong;
 }
 #define IniGetHex(fileName, strSearch, defInt) (int)IniGetLongHex(fileName, strSearch, (long)defInt)
+
 int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
 
     char strValue[STR_SMALL_SIZE];
@@ -1040,6 +1071,7 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
         return 0;
     }
 }
+
 long IniGetLongBin(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
@@ -1050,6 +1082,7 @@ long IniGetLongBin(const char *fileName, const char *strSearch, const long defLo
     return StrBin2Long(strReturn);
     
 }
+
 int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
     
     char strValue[STR_SMALL_SIZE];
@@ -1060,6 +1093,7 @@ int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
     return StrBin2Int(strReturn);
     
 }
+
 unsigned char IniGetByteBin(const char *fileName, const char *strSearch, unsigned char defByte){
     
     char strValue[STR_SMALL_SIZE];
@@ -1107,24 +1141,28 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
 }
 #define IniSet(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs)
 #define IniSetStr(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_Text)
+
 int IniSetLong(const char *fileName, const char *strSearch, const long lngValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%ld", lngValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Int);
 }
 #define IniSetInt(fileName, strSearch, intValue) IniSetLong(fileName, strSearch, (long)intValue)
+
 int IniSetDouble(const char *fileName, const char *strSearch, const double dblValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%.8f", dblValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Float);
 }
 #define IniSetFloat(fileName, strSearch, fltValue) IniSetDouble(fileName, strSearch, (double)fltValue)
+
 int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%#lx", hexValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
 }
 #define IniSetHex(fileName, strSearch, hexValue) (int)IniSetLongHex(fileName, strSearch, (long)hexValue)
+
 int IniSetBool(const char *fileName, const char *strSearch, const int boolValue){
     char strValue[STR_SMALL_SIZE];
     if (boolValue){
@@ -1135,16 +1173,19 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
     }
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
 }
+
 int IniSetLongBin(const char *fileName, const char *strSearch, const long lValue){
     char strValue[STR_SMALL_SIZE];
     StrLong2Bin(lValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
+
 int IniSetIntBin(const char *fileName, const char *strSearch, const int iValue){
     char strValue[STR_SMALL_SIZE];
     StrInt2Bin(iValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
+
 int IniSetByteBin(const char *fileName, const char *strSearch, const unsigned char bValue){
     char strValue[STR_SMALL_SIZE];
     StrByte2Bin(bValue, strValue);
