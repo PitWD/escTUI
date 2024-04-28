@@ -80,17 +80,16 @@ struct TuiMenuPosSTRUCT{
 	struct TuiMenuPosSTRUCT *pos1st;		// first on sub level
 	struct TuiMenuPosSTRUCT *parentPos;		// parent on upper level
 	int nextID;					// helper for reallocating
-	int prevID;					// helper for reallocating
-	int pos1ID;					// helper for reallocating
-	int parentID;				// calculated but not used actually
+	int prevID;					//   ""   ""      ""
+	int pos1ID;					//   ""   ""      ""
+	int parentID;				//   ""   ""      ""
 	int selected :1;			// if position is selected
-	int isOption :1;
+	int isOption :1;			// if position is a check or option...
 	int isCheck :1;
-	int	activated :1;			// if position is a check or option...
-	int isSpacer :1;
+	int	activated :1;			
+	int isSpacer :1;			// "-" as caption defines a spacer
 	int printSmall :1;			// force to print small (preCalcSubMenu)
 	int printInverted :1;		// force to print inverted (preCalcSubMenu)
-	int isSubMenu :1;			// if position is a subMenu
 }TuiMenuPosSTRUCT;
 
 struct TuiDesktopsSTRUCT{
@@ -1161,9 +1160,11 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 
 	// memory to store all header
 	*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
-
+	int j = 0;	
 	for (int i = 0; i < headersCount; i++){
-		int j = i + 1;	// User index in file is 1-based...
+		
+		j++; // User index in file is 1-based...
+		
 		// Caption
 		sprintf(strSearch, "global.%s.%d.Caption", strLocation, j);
 		sprintf(strHLP, "Header%d", j);
@@ -1198,8 +1199,6 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 
 struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struct TuiMenusSTRUCT *definition, int positions, int testMe, int isSub){
 
-	// *** Is INTED
-
 	static struct TuiMenuPosSTRUCT *menuPos = NULL;
 	
 	static int cnt = 0;
@@ -1219,7 +1218,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 
 	for (int i = 0; i < positions; i++){
 		
-		j = i + 1;	// User to Memory indexing
+		j++; // User index in file is 1-based...
 
 		// Add mem for new position
 		cnt++;
@@ -1257,8 +1256,6 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		sprintf(strHLP, "%s%d", strPath, j);
 		IniGetStr(strFile, strSearch, strHLP, strPos1);
 		
-		menuPos[pos1].isSubMenu = isSub;
-
 		// Search key and remove brackets
 		menuPos[pos1].keyCode = 0;
 
@@ -1462,45 +1459,49 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 //printf("after malloc...\n");
 //fflush(stdout);
 
+	int j = 0;
 	// Menu Definition Values
 	for (int i = 0; i < menusCnt; i++){
-		sprintf(strSearch, "%s.%d.TextColor", strPath, i + 1);
+		
+		j++; // User index in file is 1-based...
+		
+		sprintf(strSearch, "%s.%d.TextColor", strPath, j);
 		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
 //printf("1st\n");
-		sprintf(strSearch, "%s.%d.TextStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TextStyle", strPath, j);
 		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
 //printf("2nd\n");
-		sprintf(strSearch, "%s.%d.SelectColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectColor", strPath, j);
 		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.SelectStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectStyle", strPath, j);
 		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.SelectKeyColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectKeyColor", strPath, j);
 		(*menu)[i].selectKeyColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.SelectKeyStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.SelectKeyStyle", strPath, j);
 		(*menu)[i].selectKeyStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.DisabledColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.DisabledColor", strPath, j);
 		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, j);
 		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.KeyColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.KeyColor", strPath, j);
 		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.KeyStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.KeyStyle", strPath, j);
 		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.TimeColor", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TimeColor", strPath, j);
 		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.TimeStyle", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.TimeStyle", strPath, j);
 		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, j);
 		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, j);
 		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
-		sprintf(strSearch, "%s.%d.Positions", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.Positions", strPath, j);
 		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
 
 //printf("last\n");
 //fflush(stdout);
 		// Add positions
-		sprintf(strSearch, "%s.%d.", strPath, i + 1);
+		sprintf(strSearch, "%s.%d.", strPath, j);
 		(*menu)[i].pos1st = TUIaddMenuPos(strFile, strSearch, menu[i], (*menu)[i].posCnt, 0, 0);	
 //printf("after menuPos...\n");
 //printf("%s : %d\n", (*menu)[i].pos1st->caption, (*menu)[i].posCnt);	
@@ -1520,31 +1521,11 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
 
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
- //*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
-	// Menu Definition Values
-	for (int i = 0; i < desksCnt; i++){
-		int j = i + 1; // User index in file is 1-based...
-
-		/*
-		// Header
-		sprintf(strSearch, "global.desktops.%d.Header", j);
-		desktop[i]->header = IniGetInt(strFile, strSearch, 0);
-		// TopMenu
-		sprintf(strSearch, "global.desktops.%d.TopMenu", j);
-		desktop[i]->topMenu = IniGetInt(strFile, strSearch, 0);
-		// BottomMenu
-		sprintf(strSearch, "global.desktops.%d.BottomMenu", j);
-		desktop[i]->bottomMenu = IniGetInt(strFile, strSearch, 0);
-		// LeftMenu
-		sprintf(strSearch, "global.desktops.%d.LeftMenu", j);
-		desktop[i]->leftMenu = IniGetInt(strFile, strSearch, 0);
-		// RightMenu
-		sprintf(strSearch, "global.desktops.%d.RightMenu", j);
-		desktop[i]->rightMenu = IniGetInt(strFile, strSearch, 0);
-		// Footer
-		sprintf(strSearch, "global.desktops.%d.Footer", j);
-		desktop[i]->footer = IniGetInt(strFile, strSearch, 0);
-		*/
+ 
+	int j = 0;
+ 	for (int i = 0; i < desksCnt; i++){
+		
+		j++; // User index in file is 1-based...
 
 		// Header
 		sprintf(strSearch, "global.desktops.%d.Header", j);

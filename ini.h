@@ -48,7 +48,7 @@ char *IniStrToMem(const char *strIN, int reset) {
             memcpy(strArray, strHLP, cnt * sizeof(char*));
             free(strHLP);
             total = cnt;
-            return (char*)cnt;
+            return (char*)cnt;  // YES... it is a little dirty...
         }        
         return 0;
     }
