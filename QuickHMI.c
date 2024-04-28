@@ -109,7 +109,7 @@ int main() {
 		//int userBotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
 		//int userRightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
 		//int userLeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
-int reduce = IniStrToMem("", 2);
+int reduce = (int)IniStrToMem("", 2);
 
 		fflush(stdout);
 		TermClearScreen(0);

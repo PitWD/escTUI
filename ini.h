@@ -48,7 +48,7 @@ char *IniStrToMem(const char *strIN, int reset) {
             memcpy(strArray, strHLP, cnt * sizeof(char*));
             free(strHLP);
             total = cnt;
-            return cnt;
+            return (char*)cnt;
         }        
         return 0;
     }
