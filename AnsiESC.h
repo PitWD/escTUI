@@ -1548,19 +1548,43 @@ void SetFBUrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, in
 
 // Set 256 Colors
 void SetFg255(int c) {
-	// ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 2;
+	if (c < 1){
+		// don't touch
+	}
+	else if (c > 255){
+		// Reset
+		ResFg();
+	}
+	else{
+		printf("\x1B[38;5;%dm", c);
+	}	
 	ActTxtColor.fg.Color = c; ActTxtColor.mode = 2;
-	printf("\x1B[38;5;%dm", c);
 }
 void SetBg255(int c) {
-	// ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 2;
+	if (c < 1){
+		// don't touch
+	}
+	else if (c > 255){
+		// Reset
+		ResBg();
+	}
+	else{
+		printf("\x1B[48;5;%dm", c);
+	}	
 	ActTxtColor.bg.Color = c; ActTxtColor.mode = 2;
-	printf("\x1B[48;5;%dm", c);
 }
 void SetUl255(int c) {
-	// ActTxtStyle.pColor->ul.Color = c; ActTxtStyle.pColor->mode = 2;
+	if (c < 1){
+		// don't touch
+	}
+	else if (c > 255){
+		// Reset
+		ResUl();
+	}
+	else{
+		printf("\x1B[58;5;%dm", c);
+	}	
 	ActTxtColor.ul.Color = c; ActTxtColor.mode = 2;
-	printf("\x1B[58;5;%dm", c);
 }
 void SetFB255(int fg, int bg) {
 	SetFg255(fg);
@@ -1579,10 +1603,9 @@ void SetFg16(int c){
 		ResFg();
 	}
 	else{
-		// ActTxtStyle.pColor->fg.Color = c; ActTxtStyle.pColor->mode = 0;
-		ActTxtColor.fg.Color = c; ActTxtColor.mode = 0;
 		printf("\x1B[%dm", c);
 	}	
+	ActTxtColor.fg.Color = c; ActTxtColor.mode = 0;
 }
 void SetBg16(int c) {	
 	// BackGround
@@ -1590,10 +1613,9 @@ void SetBg16(int c) {
 		ResBg();
 	}
 	else{
-		// ActTxtStyle.pColor->bg.Color = c; ActTxtStyle.pColor->mode = 0;
-		ActTxtColor.bg.Color = c; ActTxtColor.mode = 0;
 		printf("\x1B[%dm", c);
 	}
+	ActTxtColor.bg.Color = c; ActTxtColor.mode = 0;
 }
 void SetFB16(int fg, int bg) {
 	SetFg16(fg);

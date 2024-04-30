@@ -138,7 +138,7 @@ int TUIfindSelectedMenu(struct TuiDesktopsSTRUCT *deskDef, struct TuiMenuPosSTRU
 	menuID[2] = deskDef->rightMenu;
 	menuID[3] = deskDef->bottomMenu;
 
-	struct TuiMenusSTRUCT *menuDef[5];
+	struct TuiMenusSTRUCT *menuDef[4];
 	menuDef[0] = userTopMenus;
 	menuDef[1] = userLeftMenus;
 	menuDef[2] = userRightMenus;
@@ -146,11 +146,12 @@ int TUIfindSelectedMenu(struct TuiDesktopsSTRUCT *deskDef, struct TuiMenuPosSTRU
 
 
 	for (int i = 0; i < 4; i++){
-		printf("MenuID: %d\n", i);
-		menuPos = TUIgetSelectedPos(menuDef[menuID[i] - 1]->pos1st);
-		if (menuPos){
-			return i + 1;
-		}
+		if (menuID[i]){
+			menuPos = TUIgetSelectedPos(menuDef[menuID[i] - 1]->pos1st);
+			if (menuPos){
+				return i + 1;
+			}
+		}		
 	}
 
 	menuPos = NULL;
@@ -805,7 +806,7 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 		// Style & Color
 		SetColorStyle(&userColors[headerDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[headerDef->txtStyle - 1], 1);
-		if (renderRealTime ^ renderRunTime) {
+		if (renderRealTime || renderRunTime) {
 			// one time active - center is left of time...
 			StrPrintCentered(strHLP, width);
 			StrPrintSpaces(renderWidth - width);
