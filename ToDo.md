@@ -1,6 +1,6 @@
 **ToDo**
 
-**040. Caption of Header/Footer wrong position if RunTime and RealTime are active**
+**040. ~~Caption of Header/Footer wrong position if RunTime and RealTime are active~~**
 
 **039. Header instead of footer rendered in TUIbuildMenus() - but could be "038." related, too.**
 - ~~NOPE, wrong index on TUIrenderHeader/Footer~~

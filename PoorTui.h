@@ -805,18 +805,18 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 		// Style & Color
 		SetColorStyle(&userColors[headerDef->txtColor - 1], 1);
 		SetTxtStyle(&userStyles[headerDef->txtStyle - 1], 1);
-		if (renderRealTime || renderRunTime) {
+		if (renderRealTime ^ renderRunTime) {
 			// one time active - center is left of time...
 			StrPrintCentered(strHLP, width);
 			StrPrintSpaces(renderWidth - width);
 		}
 		else{
 			// center is center
-			if (renderRealTime && renderRunTime){
+			if (renderRealTime & renderRunTime){
 				// add three spaces, cause runtime is shorter than realtime
 				strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
-			}			
-			StrPrintCentered(strHLP, renderWidth);
+			}
+			StrPrintCentered(strHLP, renderWidth);					
 		}
 	}
 	else{
