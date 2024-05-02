@@ -31,9 +31,8 @@ struct TuiHeadersSTRUCT{
 // global access on headers 
 struct TuiHeadersSTRUCT *userHeaders = NULL;
 struct TuiHeadersSTRUCT *userFooters = NULL;
-
-//struct TuiMenusSTRUCT;
-//struct TuiMenuPosSTRUCT;
+int TUI_HeaderCnt = 0;
+int TUI_FooterCnt = 0;
 
 struct TuiMenusSTRUCT{
 	int txtColor;
@@ -1120,12 +1119,12 @@ void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int ma
 
 	// Header
 	if (deskDef->header){
-		TUIrenderHeader(minX, minY, maxWidth, deskDef->header, 0);
+		TUIrenderHeader(minX, minY, maxWidth, deskDef->header - 1, 0);
 		minY++;
 	}
 	// Footer
 	if (deskDef->footer){
-		TUIrenderHeader(minX, maxY, maxWidth, deskDef->footer, 0);
+		TUIrenderFooter(minX, maxY, maxWidth, deskDef->footer - 1, 0);
 		maxY--;
 	}
 
@@ -1529,8 +1528,6 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 
 	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
 
-printf("desksCnt (IN): %d\n", desksCnt);
-fflush(stdout);
 
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
  
@@ -1559,8 +1556,6 @@ fflush(stdout);
 		(*desktop[i]).footer = IniGetInt(strFile, strSearch, 0);
 	}
 
-printf("desksCnt (OUT): %d\n", desksCnt);
-fflush(stdout);
 	return desksCnt;
 
 }

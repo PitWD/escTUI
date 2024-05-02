@@ -1,8 +1,16 @@
 **ToDo**
 
+**040. Caption of Header/Footer wrong position if RunTime and RealTime are active**
+
+**039. Header instead of footer rendered in TUIbuildMenus() - but could be "038." related, too.**
+- ~~NOPE, wrong index on TUIrenderHeader/Footer~~
+
+**038. Strings of Colors & Styles need pointer-recovery via ID (like menu-string)**
+- ~~NOPE! Return from ESCinitStyle() & ESCinitTxtStyles() were 1 too high...~~
+
 <br>
 
-**037. EventArray with pointers to functions, instead of switch**
+**037. ~~EventArray with pointers to functions, instead of switch~~**
 
 <br>
 

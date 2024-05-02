@@ -69,10 +69,13 @@ int main() {
 			TermExit();
 			return -1;
 		}
+		
 		/*
-		for (int i = 0; i < userColorsCnt; i++){
+		for (int i = 1; i < userColorsCnt +1; i++){
 			SetColorStyle(&userColors[i], 1);
-			printf("%04d. %s.%s\n",i, userColors[i].groupName, userColors[i].colorName);
+			printf("%04d. %s.%s",i, userColors[i].groupName, userColors[i].colorName);
+			SetColorStyle(&userColors[i], 0);
+			printf("\n");
 		}
 		*/
 		
@@ -82,23 +85,25 @@ int main() {
 			TermExit();
 			return -1;
 		}
+		
 		/*
-		for (int i = 0; i < userStylesCnt; i++){
+		for (int i = 1; i < userStylesCnt + 1; i++){
 			SetTxtStyle(&userStyles[i], 1);
 			printf("%04d. %s_%s\n", i, userStyles[i].fontName, userStyles[i].styleName );
 			SetTxtStyle(&userStyles[i], 0);
 		}
 		*/
+	
 		fflush(stdout);
 		TermClearScreen(0);
 		StrTrimWS_R(gStrRunTime);
 		StrTrimWS_R(gStrTime);
-		int userHeadersCnt = TUIinitHeaders("desktops.ini", &userHeaders);
-		for (int i = 0; i < userHeadersCnt; i++){
+		TUI_HeaderCnt = TUIinitHeaders("desktops.ini", &userHeaders);
+		for (int i = 0; i < TUI_HeaderCnt; i++){
 			TUIrenderHeader(1,i+1,0,i,0);
 		}
-		int userFootersCnt = TUIinitFooters("desktops.ini", &userFooters);
-		for (int i = 0; i < userFootersCnt; i++){
+		TUI_FooterCnt = TUIinitFooters("desktops.ini", &userFooters);
+		for (int i = 0; i < TUI_FooterCnt; i++){
 			TUIrenderFooter(1,i+3,0,i,0);
 			printf("\n");
 		}

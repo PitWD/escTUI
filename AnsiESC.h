@@ -151,7 +151,7 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 	*/
 
 	free(colorsCount);
-	return colorsCountSum;
+	return colorsCountSum - 1;
 }
 
 int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
@@ -301,7 +301,7 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 
 	free(stylesCount);
 	
-	return stylesCountSum;
+	return stylesCountSum - 1;
 }
 
 static void ESCfixCursorPosX(){
@@ -2040,7 +2040,7 @@ void SetColorStyle(EscColorSTRUCT *pColor, int set){
 				SetBg255(pColor->bg.Color);
 			}
 			if (pColor->ul.Color != ActTxtColor.ul.Color) {
-				//SetUl255(pColor->ul.Color);
+				SetUl255(pColor->ul.Color);
 			}
 			break;
 		
@@ -2058,7 +2058,7 @@ void SetColorStyle(EscColorSTRUCT *pColor, int set){
 		}
 	}
 	else{
-		memset(&ActTxtColor, 0, sizeof(ActTxtColor));
+		//memset(&ActTxtColor, 0, sizeof(ActTxtColor));
 		ResFBU();
 	}
 }
@@ -2204,8 +2204,10 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 	else {
 		// Reset colors, fonts and styles to their defaults
 		memset(&ActTxtStyle, 0, sizeof(ActTxtStyle));
-		memset(&ActTxtColor, 0, sizeof(ActTxtColor));
-		printf("\x1B[10;0;39;49;59m");
+		//memset(&ActTxtColor, 0, sizeof(ActTxtColor));
+		//printf("\x1B[10;0;39;49;59m");
+		printf("\x1B[10;0m");
+		ResFBU();
 	}
 }
 
