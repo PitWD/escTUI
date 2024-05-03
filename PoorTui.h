@@ -803,8 +803,8 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 	
 	if (!justRefresh){
 		// Style & Color
-		SetColorStyle(&userColors[headerDef->txtColor - 1], 1);
-		SetTxtStyle(&userStyles[headerDef->txtStyle - 1], 1);
+		SetColorStyle(&userColors[headerDef->txtColor], 1);
+		SetTxtStyle(&userStyles[headerDef->txtStyle], 1);
 		if (renderRealTime ^ renderRunTime) {
 			// one time active - center is left of time...
 			StrPrintCentered(strHLP, width);
@@ -826,8 +826,8 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 
 	if (renderRealTime || renderRunTime){
 		// Set style & color of times
-		SetColorStyle(&userColors[headerDef->timeColor - 1], 1);
-		SetTxtStyle(&userStyles[headerDef->timeStyle - 1], 1);
+		SetColorStyle(&userColors[headerDef->timeColor], 1);
+		SetTxtStyle(&userStyles[headerDef->timeStyle], 1);
 	}
 	
 	// Do we print the Realtime (all time right alignment)
