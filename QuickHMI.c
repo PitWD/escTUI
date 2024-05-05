@@ -135,11 +135,12 @@ int reduce = (int)IniStrToMem("", 2);
 			//userTopMenus[i].pos1st->nextPos->nextPos->nextPos->selected = 1;
 //printf("i-lead: %d\n", i);
 //fflush(stdout);
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = -1;
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
-			userTopMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
+			userBotMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->selected = -1;
+			userBotMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
+			userBotMenus[i].pos1st->nextPos->nextPos->nextPos->nextPos->pos1st->nextPos->nextPos->pos1st->nextPos->nextPos->selected = -1;
 //printf("i-trail: %d\n", i);
 //fflush(stdout);
+/*
 			TUIrenderRightMenu(&userTopMenus[i], 1, 0, 0, 10, 0, 0);
 			TUIclearSmallInverted(userTopMenus[i].pos1st);
 			TUIrenderLeftMenu(&userTopMenus[i], 0, 1, 0, 23, 0, 0);
@@ -147,7 +148,7 @@ int reduce = (int)IniStrToMem("", 2);
 			TUIrenderTopMenu(&userTopMenus[i], 0, 0, 0, 0, 0);
 			TUIclearSmallInverted(userTopMenus[i].pos1st);
 			TUIrenderBottomMenu(&userTopMenus[i], 0, 0, 0, 0, 0);
-			
+*/			
 			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
 			ResFBU();
 			printf("\n");
