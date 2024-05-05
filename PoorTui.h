@@ -161,7 +161,6 @@ int TUIfindSelectedMenu(struct TuiDesktopsSTRUCT *deskDef, struct TuiMenuPosSTRU
 void TUIsecureMinMaxXY(int *minX, int *minY, int *maxX, int *maxY){
 
 	// Secure the min/max values for rendering
-
 	if (*minX == 0){
 		*minX = 1;
 	}
@@ -563,8 +562,8 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 	// int ignoreY = 0;
 	int shiftY = posY;
 
-	int maxHeight = maxY - minY + 1;	
-
+	int maxHeight = maxY - minY + 1;
+		
 	struct TuiMenuPosSTRUCT *selectedPos = NULL;
 	struct TuiMenuPosSTRUCT *menuPos1st = menuPos;
 	
@@ -580,33 +579,55 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 	menuPos = menuPos1st;
 
 	int stepY = 1;
+
+	int spaceAboveReg = posY - minY;					// space above regular rendered menu
+	int spaceBelowReg = maxY - (posY + height - 1);		// space below regular rendered menu
 	
-	if (!(menuType == TUI_MENU_BOTTOM)){
+	int spaceAboveInv = (posY - height + 1) - minY;		// space above inverted rendered menu
+	int spaceBelowInv = maxY - posY;					// space below inverted rendered menu	
+	
+	int selPosReg = posY + selected - (selected > 0);	// selected, absolute position regular
+	int selPosInv = posY - selected + (selected > 0);	// selected, absolute position inverted
+
+	if (menuType != TUI_MENU_BOTTOM){
 		// Up -> Down
-		if (posY + height - 1 > maxY){
+		if (spaceBelowReg < 0){
 			// top alignment doesn't fit
-			shiftY = posY - height + 2;
-			if (shiftY < minY){
-				// bottom alignment doesn't fit either
-				if (posY + selected - 1 > maxY){
-					// selected not on screen with top alignment
-					if (shiftY + selected + 2 < minY){
-						// selected not on screen with bottom alignment either
-						// center selected position // int halfHeight = maxHeight / 2 + minY;
-						shiftY = (maxHeight / 2 + minY) - selected - 1;
+			if (spaceAboveInv < 0){
+				// bottom alignment doesn't fit either - move up
+				shiftY = minY;
+				spaceAboveReg = 0;
+				spaceBelowReg = maxY - (shiftY + height - 1);
+				if (spaceBelowReg < 0 && selected){
+					// very top alignment doesn't fit either - take care on position of selection
+					selPosReg = shiftY + selected - (selected > 0);
+					if (selPosReg > maxY){
+						// selection is hidden - lift selection to the bottom
+						shiftY -= (selPosReg - maxY);
+						// re-use spaceAboveReg and spaceBelowReg
+						spaceBelowReg = height - selected;			// cnt of hidden elements below selection
+						spaceAboveReg = maxHeight - 1;				// cnt of visible elements above selection
 					}
 					else{
-						// cut on top while looping - shiftY fits already
+						// selection is visible
+						// re-use spaceAboveReg and spaceBelowReg
+						spaceBelowReg = (height - selected) - (maxY - selPosReg);	// cnt of hidden elements below selection
+						spaceAboveReg = selPosReg - minY;							// cnt of visible elements above selection
 					}
-				}
-				else{
-					// cut on bottom while looping
-					shiftY = posY;
+					if (spaceBelowReg > spaceAboveReg){
+						// more hidden below - move up
+						shiftY -= (spaceAboveReg / 2);
+					}
+					else{
+						// more visible above - move up all invisible
+						shiftY -= spaceBelowReg;
+					}
 				}
 			}
 			else{
-				// cut on top - shiftY fits already
-			}
+				// bottom alignment fits - move up
+				shiftY = posY - height + 1;
+			}			
 		}
 	}
 	else{
@@ -650,7 +671,7 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 			posX -= diff;
 		}
 		endX = posX + subLen;
-		nextPosX  = posX;
+		nextPosX = posX;
 	}
 	else{
 		// next subs (left/right of width)
@@ -677,17 +698,21 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 	
 	selectedPos = NULL;
 
+	int lastValidY = 0;
+
 	while (menuPos){
 		if (posY >= minY && posY <= maxY){
 			Locate(posX, posY);
+			lastValidY = posY;
 			if (menuPos->selected && menuPos->enabled){
 				// selected
 				selectedPos = menuPos->pos1st;
 				selected = posY;
 			}
+			//printf("Pos:Max %d:%d", posY, maxY);
 			TUIprintMenuPos(posX, posY, printSmall, subLen, menuPos, menuDef);
-			posY += stepY;
 		}
+		posY += stepY;
 		menuPos = menuPos->nextPos;		
 	}
 
@@ -695,11 +720,11 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 		TUIrenderSub(nextPosX, selected, newWidth, selectedPos, menuDef, 0, menuType, minX, minY, maxX, maxY);
 	}
 
-	return posY;
+	return lastValidY + stepY;
 	
 }
 
-int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT *headerDef, int justRefresh){
+int TUIrenderHeaderFooter(int posXin, int posYin, int widthIn, struct TuiHeadersSTRUCT *headerDef, int justRefresh){
 	
 	int renderLen = 0;
 	int renderWidth = 0;
@@ -709,6 +734,9 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 	// int dontRender = 0;
 
 	int maxYdummy = 0;
+	int posX = posXin;
+	int posY = posYin;
+	int width = widthIn;
 	TUIsecureMinMaxXY(&posX, &posY, &width, &maxYdummy);
 
 	char strHLP[STR_MID_SIZE];
@@ -857,7 +885,7 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 #define TUIrenderHeader(posX, posY, width, headerID, justRefresh) TUIrenderHeaderFooter(posX, posY, width, &userHeaders[headerID], justRefresh)
 #define TUIrenderFooter(posX, posY, width, footerID, justRefresh) TUIrenderHeaderFooter(posX, posY, width, &userFooters[footerID], justRefresh)
 
-int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, int minX, int minY, int maxX, int maxY){
+int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *menuDef, int minXin, int minYin, int maxXin, int maxYin){
 
 	int renderSmall = 0;	// just the key + 2 spaces
 	int renderSelect = 0;	// "just the key" + selected key in full width 
@@ -870,7 +898,12 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	int subXs = 0;  // subMenu X
 	int subXw = 0;	// subMenu Width	
 	
-	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);	// Take care on 0, 0, 0, 0	
+	// Take care on 0, 0, 0, 0
+	int minX = minXin;
+	int minY = minYin;
+	int maxX = maxXin;
+	int maxY = maxYin;
+	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);
 
 	if (!posX){
 		// Start at 1st Pos
@@ -959,10 +992,12 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 		if (menuType == TUI_MENU_BOTTOM){
 			// BottomMenu
 			posY--;
+			maxY--;
 		}
 		else{
 			// TopMenu
 			posY++;
+			minY++;
 		}
 		
 		if (TUIpreRenderSub(subXs, subXw, selectedMenu->pos1st, minX, maxX)){
@@ -976,9 +1011,14 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 #define TUIrenderTopMenu(menuDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, TUI_MENU_TOP, menuDef, minX, minY, maxX, maxY)
 #define TUIrenderBottomMenu(menuDef, justRefresh, minX, minY, maxX, maxY) TUIrenderHorzMenu(0, 0, TUI_MENU_BOTTOM, menuDef, minX, minY, maxX, maxY)
 
-int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail, struct TuiMenusSTRUCT *menuDef, int minX, int minY, int maxX, int maxY){
+int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail, struct TuiMenusSTRUCT *menuDef, int minXin, int minYin, int maxXin, int maxYin){
 	
-	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);	// Take care on 0, 0, 0, 0
+	// Take care on 0, 0, 0, 0
+	int minX = minXin;
+	int minY = minYin;
+	int maxX = maxXin;
+	int maxY = maxYin;
+	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);
 
 	// Take care on 0, 0
 	if (!posX){
@@ -1019,9 +1059,14 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 			StrPrintSpaces(len);
 		}
 		
-		int startY = posY + doLead;
-		posY = TUIrenderSub(posX, startY, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY + doLead, maxX, maxY - doTrail);
-
+		int startY = posY + (doLead != 0);
+		posY = maxY;
+		//minY += doLead;
+		//maxY -= (doTrail != 0);
+		if (maxY - (doTrail != 0) >= minY + (doLead != 0)){
+			posY = TUIrenderSub(posX, startY, 3, menuDef->pos1st, menuDef, 1, 0, minX, minY + (doLead != 0), maxX, maxY - (doTrail != 0));
+		}
+		
 		if (doTrail){
 			// Trailing Line(s)
 			SetColorStyle(&userColors[menuDef->txtColor], 1);
@@ -1046,7 +1091,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 #define TUIrenderLeftMenu(menuDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, TUI_MENU_LEFT, doLead, doTrail, menuDef, minX, minY, maxX, maxY)
 #define TUIrenderRightMenu(menuDef, doLead, doTrail, minX, minY, maxX, maxY) TUIrenderVertMenu(0, 0, TUI_MENU_RIGHT, doLead, doTrail, menuDef, minX, minY, maxX, maxY)
 
-void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int maxX, int maxY){
+void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minXin, int minYin, int maxXin, int maxYin){
 
 	struct TuiMenuPosSTRUCT selectedPos;
 
@@ -1076,6 +1121,11 @@ void TUIbuildMenus(struct TuiDesktopsSTRUCT *deskDef, int minX, int minY, int ma
 	int selectedMenu = TUIfindSelectedMenu(deskDef, &selectedPos);
 
 	// Take care on 0, 0, 0, 0
+	
+	int minX = minXin;
+	int minY = minYin;
+	int maxX = maxXin;
+	int maxY = maxYin;
 	TUIsecureMinMaxXY(&minX, &minY, &maxX, &maxY);
 
 	int maxWidth = maxX - minX + 1;
