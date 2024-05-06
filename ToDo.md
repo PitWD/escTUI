@@ -1,5 +1,23 @@
 **ToDo**
 
+**044. Print to canvas instead direct...**
+
+**043. How To printf-Debug to 2nd term...**
+
+**042. Collect Hot-Keys after TUIbuildMenus**
+- all time the 1st level of all menus is reachable via Alt-Key
+- while a selection exist
+  - from last selected sub we collect (in that order)
+    1. keys of that sub
+    2. eventually opened submenu
+    3. eventually previous menu
+    - *those positions are reachable via single key*
+  - Arrow Keys - *traveling through menu structure*
+    - "printInverted" of 1st pos of sub... for left/right
+    - bottomMenu vs. "the others" defines if up/down counts pos-list up/down
+    - on 1st level of top- and bottom menu
+
+
 **041. Heights Stress Test**
 - ~~Right/Left Menu Height too high while missing screen height~~
   - ~~draws over footer and bottom-menu, (prob. two too high)~~
