@@ -110,10 +110,10 @@ int main() {
 
 		int userDesktopCnt = TUIinitDesktops("desktops.ini", &userDesktopDefs);
 
-		TUI_TopMenuCnt = TUIinitMenuDefs("desktops.ini", "global.TopMenu", &userTopMenus);
-		TUI_BotMenuCnt = TUIinitMenuDefs("desktops.ini", "global.BottomMenu", &userBotMenus);
-		TUI_RightMenuCnt = TUIinitMenuDefs("desktops.ini", "global.RightMenu", &userRightMenus);
-		TUI_LeftMenuCnt = TUIinitMenuDefs("desktops.ini", "global.LeftMenu", &userLeftMenus);
+		TUI_TopMenuCnt = TUIinitMenuDefs("desktops.ini", "TopMenu", &userTopMenus);
+		TUI_BotMenuCnt = TUIinitMenuDefs("desktops.ini", "BottomMenu", &userBotMenus);
+		TUI_RightMenuCnt = TUIinitMenuDefs("desktops.ini", "RightMenu", &userRightMenus);
+		TUI_LeftMenuCnt = TUIinitMenuDefs("desktops.ini", "LeftMenu", &userLeftMenus);
 
 int reduce = (int)IniStrToMem("", 2);
 

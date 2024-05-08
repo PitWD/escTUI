@@ -1176,7 +1176,7 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 	char strHLP[STR_SMALL_SIZE];
 
 	// count of headers
-	sprintf(strSearch, "global.%s.%sCount", strLocation, strLocation);
+	sprintf(strSearch, "%s.%sCount", strLocation, strLocation);
 	int headersCount = IniGetInt(strFile, strSearch, 0);
 
 	// memory to store all header
@@ -1187,27 +1187,27 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 		j++; // User index in file is 1-based...
 		
 		// Caption
-		sprintf(strSearch, "global.%s.%d.Caption", strLocation, j);
+		sprintf(strSearch, "%s.%d.Caption", strLocation, j);
 		sprintf(strHLP, "Header%d", j);
 		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
 		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
 		// TextColor 
-		sprintf(strSearch, "global.%s.%d.TextColor", strLocation, j);
+		sprintf(strSearch, "%s.%d.TextColor", strLocation, j);
 		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
 		// TextStyle 
-		sprintf(strSearch, "global.%s.%d.TextStyle", strLocation, j);
+		sprintf(strSearch, "%s.%d.TextStyle", strLocation, j);
 		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
 		// TimeColor 
-		sprintf(strSearch, "global.%s.%d.TimeColor", strLocation, j);
+		sprintf(strSearch, "%s.%d.TimeColor", strLocation, j);
 		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
 		// TimeStyle 
-		sprintf(strSearch, "global.%s.%d.TimeStyle", strLocation, j);
+		sprintf(strSearch, "%s.%d.TimeStyle", strLocation, j);
 		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
 		// PrintRunTime 
-		sprintf(strSearch, "global.%s.%d.PrintRunTime", strLocation, j);
+		sprintf(strSearch, "%s.%d.PrintRunTime", strLocation, j);
 		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
 		// PrintRealTime 
-		sprintf(strSearch, "global.%s.%d.PrintRealTime", strLocation, j);
+		sprintf(strSearch, "%s.%d.PrintRealTime", strLocation, j);
 		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
 
 	}
@@ -1463,7 +1463,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 	
 }
 
-// "global.TopMenu."
+// "TopMenu."
 int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 
 	// Helper
@@ -1539,7 +1539,7 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
 
-	int desksCnt = IniGetInt(strFile, "global.desktops.Count", 0);
+	int desksCnt = IniGetInt(strFile, "desktops.Count", 0);
 
 
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
@@ -1550,22 +1550,22 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 		j++; // User index in file is 1-based...
 
 		// Header
-		sprintf(strSearch, "global.desktops.%d.Header", j);
+		sprintf(strSearch, "desktops.%d.Header", j);
 		(*desktop[i]).header = IniGetInt(strFile, strSearch, 0);
 		// TopMenu
-		sprintf(strSearch, "global.desktops.%d.TopMenu", j);
+		sprintf(strSearch, "desktops.%d.TopMenu", j);
 		(*desktop[i]).topMenu = IniGetInt(strFile, strSearch, 0);
 		// BottomMenu
-		sprintf(strSearch, "global.desktops.%d.BottomMenu", j);
+		sprintf(strSearch, "desktops.%d.BottomMenu", j);
 		(*desktop[i]).bottomMenu = IniGetInt(strFile, strSearch, 0);
 		// LeftMenu
-		sprintf(strSearch, "global.desktops.%d.LeftMenu", j);
+		sprintf(strSearch, "desktops.%d.LeftMenu", j);
 		(*desktop[i]).leftMenu = IniGetInt(strFile, strSearch, 0);
 		// RightMenu
-		sprintf(strSearch, "global.desktops.%d.RightMenu", j);
+		sprintf(strSearch, "desktops.%d.RightMenu", j);
 		(*desktop[i]).rightMenu = IniGetInt(strFile, strSearch, 0);
 		// Footer
-		sprintf(strSearch, "global.desktops.%d.Footer", j);
+		sprintf(strSearch, "desktops.%d.Footer", j);
 		(*desktop[i]).footer = IniGetInt(strFile, strSearch, 0);
 	}
 

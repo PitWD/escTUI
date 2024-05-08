@@ -282,12 +282,13 @@ typedef struct {
 EscColorSTRUCT *userColors = NULL;
 EscStyleSTRUCT *userStyles = NULL;
 
-struct CanvasSTRUCT {
+typedef struct {
     EscColorSTRUCT *color;
     EscStyleSTRUCT *style;
     wchar_t c;
     int width;
-}***myCanvas;
+}CanvasSTRUCT;
+CanvasSTRUCT ***myCanvas = NULL;
 int canvasMaxX = 0;
 int canvasMaxY = 0;
 #define canvasMaxZ 4
@@ -887,7 +888,7 @@ int SizeCanvas(int x, int y) {
 			}
 
             for (int j = 0; j < y; j++) {
-				myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(struct CanvasSTRUCT));
+				myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(CanvasSTRUCT));
 				if (!myCanvas[i][j]) {
 					// Handle memory allocation error
 					return 0;
@@ -896,7 +897,7 @@ int SizeCanvas(int x, int y) {
                 // Initialize each element to the defaultCanvas
                 for (int k = 0; k < canvasMaxZ; k++) {
                     //memcpy(&myCanvas[i][j][k], &defaultCanvas, elementSize);
-					memset(&myCanvas[i][j][k], 0, sizeof(struct CanvasSTRUCT));
+					memset(&myCanvas[i][j][k], 0, sizeof(CanvasSTRUCT));
                 }
             }
         }
@@ -912,7 +913,7 @@ int SizeCanvas(int x, int y) {
 
 void resetCanvas(int z) {
     // Set all canvas positions to 0
-    memset(&myCanvas[0][0][z], 0, canvasMaxX * canvasMaxY * sizeof(struct CanvasSTRUCT));
+    memset(&myCanvas[0][0][z], 0, canvasMaxX * canvasMaxY * sizeof(CanvasSTRUCT));
 }
 void resetCanvasAll() {
 	// Set all canvas positions to 0
@@ -985,7 +986,7 @@ int CopyCanvasAll(int source, int destination) {
         return 0;
     }
 
-	int size = (int)sizeof(struct CanvasSTRUCT) * canvasMaxX * canvasMaxY;
+	int size = (int)sizeof(CanvasSTRUCT) * canvasMaxX * canvasMaxY;
     // Use a single memcpy to copy the entire array
     memcpy(&myCanvas[0][0][destination], &myCanvas[0][0][source], size);
 
@@ -1054,7 +1055,6 @@ int CopyCanvasAllDifferent(int source, int destination, int toScreen) {
 	// Copy the content of myCanvas[source] to myCanvas[destination]
 	for (int y = 0; y < canvasMaxY; y++) {
 		for (int x = 0; x < canvasMaxY; x++) {
-			struct CanvasSTRUCT sourceCanvas = myCanvas[x][y][source];
 			if (CompareCanvasPosUnsafe(x, y, source, destination)) {
 				CopyCanvasPosUnsafe(x, y, source, destination);
 			}
