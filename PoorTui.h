@@ -1177,7 +1177,7 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 
 	// count of headers
 	sprintf(strSearch, "%s.%sCount", strLocation, strLocation);
-	int headersCount = IniGetInt(strFile, strSearch, 0);
+	int headersCount = INIgetInt(strFile, strSearch, 0);
 
 	// memory to store all header
 	*userHeader = (struct TuiHeadersSTRUCT*)malloc(headersCount * sizeof(struct TuiHeadersSTRUCT));
@@ -1189,26 +1189,26 @@ int TUIinitHeadFoots(char *strFile, char *strLocation, struct TuiHeadersSTRUCT *
 		// Caption
 		sprintf(strSearch, "%s.%d.Caption", strLocation, j);
 		sprintf(strHLP, "Header%d", j);
-		IniGetStr(strFile, strSearch, strHLP, strHeaderCaption);
-		(*userHeader)[i].caption = IniStrToMem(strHeaderCaption, 0);
+		INIgetStr(strFile, strSearch, strHLP, strHeaderCaption);
+		(*userHeader)[i].caption = INIstrToMem(strHeaderCaption, 0);
 		// TextColor 
 		sprintf(strSearch, "%s.%d.TextColor", strLocation, j);
-		(*userHeader)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		(*userHeader)[i].txtColor = INIgetInt(strFile, strSearch, 0);
 		// TextStyle 
 		sprintf(strSearch, "%s.%d.TextStyle", strLocation, j);
-		(*userHeader)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		(*userHeader)[i].txtStyle = INIgetInt(strFile, strSearch, 0);
 		// TimeColor 
 		sprintf(strSearch, "%s.%d.TimeColor", strLocation, j);
-		(*userHeader)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		(*userHeader)[i].timeColor = INIgetInt(strFile, strSearch, 0);
 		// TimeStyle 
 		sprintf(strSearch, "%s.%d.TimeStyle", strLocation, j);
-		(*userHeader)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		(*userHeader)[i].timeStyle = INIgetInt(strFile, strSearch, 0);
 		// PrintRunTime 
 		sprintf(strSearch, "%s.%d.PrintRunTime", strLocation, j);
-		(*userHeader)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		(*userHeader)[i].printRunTime = INIgetBool(strFile, strSearch, 0);
 		// PrintRealTime 
 		sprintf(strSearch, "%s.%d.PrintRealTime", strLocation, j);
-		(*userHeader)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		(*userHeader)[i].printRealTime = INIgetBool(strFile, strSearch, 0);
 
 	}
 
@@ -1263,19 +1263,19 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 		
 //printf("after realloc...\n");
 		sprintf(strSearch, "%s%d.Enabled", strPath, j);
-		menuPos[pos1].enabled = IniGetBool(strFile, strSearch, 1);
+		menuPos[pos1].enabled = INIgetBool(strFile, strSearch, 1);
 		sprintf(strSearch, "%s%d.isOption", strPath, j);
-		menuPos[pos1].isOption = IniGetBool(strFile, strSearch, 0);
+		menuPos[pos1].isOption = INIgetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s%d.isCheck", strPath, j);
-		menuPos[pos1].isCheck = IniGetBool(strFile, strSearch, 0);
+		menuPos[pos1].isCheck = INIgetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s%d.isActivated", strPath, j);
-		menuPos[pos1].activated = IniGetBool(strFile, strSearch, 0);
+		menuPos[pos1].activated = INIgetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s%d.Positions", strPath, j);
-		menuPos[pos1].posCnt = IniGetInt(strFile, strSearch, 0);
+		menuPos[pos1].posCnt = INIgetInt(strFile, strSearch, 0);
 
 		sprintf(strSearch, "%s%d.Text", strPath, j);
 		sprintf(strHLP, "%s%d", strPath, j);
-		IniGetStr(strFile, strSearch, strHLP, strPos1);
+		INIgetStr(strFile, strSearch, strHLP, strPos1);
 		
 		// Search key and remove brackets
 		menuPos[pos1].keyCode = 0;
@@ -1338,7 +1338,7 @@ struct TuiMenuPosSTRUCT *TUIaddMenuPos(const char *strFile, char *strPath, struc
 //printf("pre strToMem...%s...\n", strMIDhlp);
 //fflush(stdout);
 
-		menuPos[pos1].caption = IniStrToMem(strMIDhlp, 0);
+		menuPos[pos1].caption = INIstrToMem(strMIDhlp, 0);
 //printf("%d: %d: %s\n", pos1, &menuPos[pos1], menuPos[pos1].caption);
 
 		// stuff to reset
@@ -1470,7 +1470,7 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 	char strSearch[STR_SMALL_SIZE];
 
 	sprintf(strSearch, "%s.%s", strPath, "Count");
-	int menusCnt = IniGetInt(strFile, strSearch, 0);
+	int menusCnt = INIgetInt(strFile, strSearch, 0);
 
 //printf("menusCnt: %d\n", menusCnt);
 //fflush(stdout);
@@ -1487,37 +1487,37 @@ int TUIinitMenuDefs(char *strFile, char *strPath, struct TuiMenusSTRUCT **menu){
 		j++; // User index in file is 1-based...
 		
 		sprintf(strSearch, "%s.%d.TextColor", strPath, j);
-		(*menu)[i].txtColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].txtColor = INIgetInt(strFile, strSearch, 0);
 //printf("1st\n");
 		sprintf(strSearch, "%s.%d.TextStyle", strPath, j);
-		(*menu)[i].txtStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].txtStyle = INIgetInt(strFile, strSearch, 0);
 //printf("2nd\n");
 		sprintf(strSearch, "%s.%d.SelectColor", strPath, j);
-		(*menu)[i].selectColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].selectColor = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectStyle", strPath, j);
-		(*menu)[i].selectStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].selectStyle = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectKeyColor", strPath, j);
-		(*menu)[i].selectKeyColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].selectKeyColor = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.SelectKeyStyle", strPath, j);
-		(*menu)[i].selectKeyStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].selectKeyStyle = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledColor", strPath, j);
-		(*menu)[i].disabledColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].disabledColor = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.DisabledStyle", strPath, j);
-		(*menu)[i].disabledStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].disabledStyle = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyColor", strPath, j);
-		(*menu)[i].keyColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].keyColor = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.KeyStyle", strPath, j);
-		(*menu)[i].keyStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].keyStyle = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeColor", strPath, j);
-		(*menu)[i].timeColor = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].timeColor = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.TimeStyle", strPath, j);
-		(*menu)[i].timeStyle = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].timeStyle = INIgetInt(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRunTime", strPath, j);
-		(*menu)[i].printRunTime = IniGetBool(strFile, strSearch, 0);
+		(*menu)[i].printRunTime = INIgetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.PrintRealTime", strPath, j);
-		(*menu)[i].printRealTime = IniGetBool(strFile, strSearch, 0);
+		(*menu)[i].printRealTime = INIgetBool(strFile, strSearch, 0);
 		sprintf(strSearch, "%s.%d.Positions", strPath, j);
-		(*menu)[i].posCnt = IniGetInt(strFile, strSearch, 0);
+		(*menu)[i].posCnt = INIgetInt(strFile, strSearch, 0);
 
 //printf("last\n");
 //fflush(stdout);
@@ -1539,7 +1539,7 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 	// Helper
 	char strSearch[STR_SMALL_SIZE];
 
-	int desksCnt = IniGetInt(strFile, "desktops.Count", 0);
+	int desksCnt = INIgetInt(strFile, "desktops.Count", 0);
 
 
 	*desktop = (struct TuiDesktopsSTRUCT*)malloc(desksCnt * sizeof(struct TuiDesktopsSTRUCT));
@@ -1551,22 +1551,22 @@ int TUIinitDesktops(char *strFile, struct TuiDesktopsSTRUCT **desktop){
 
 		// Header
 		sprintf(strSearch, "desktops.%d.Header", j);
-		(*desktop[i]).header = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).header = INIgetInt(strFile, strSearch, 0);
 		// TopMenu
 		sprintf(strSearch, "desktops.%d.TopMenu", j);
-		(*desktop[i]).topMenu = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).topMenu = INIgetInt(strFile, strSearch, 0);
 		// BottomMenu
 		sprintf(strSearch, "desktops.%d.BottomMenu", j);
-		(*desktop[i]).bottomMenu = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).bottomMenu = INIgetInt(strFile, strSearch, 0);
 		// LeftMenu
 		sprintf(strSearch, "desktops.%d.LeftMenu", j);
-		(*desktop[i]).leftMenu = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).leftMenu = INIgetInt(strFile, strSearch, 0);
 		// RightMenu
 		sprintf(strSearch, "desktops.%d.RightMenu", j);
-		(*desktop[i]).rightMenu = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).rightMenu = INIgetInt(strFile, strSearch, 0);
 		// Footer
 		sprintf(strSearch, "desktops.%d.Footer", j);
-		(*desktop[i]).footer = IniGetInt(strFile, strSearch, 0);
+		(*desktop[i]).footer = INIgetInt(strFile, strSearch, 0);
 	}
 
 	return desksCnt;

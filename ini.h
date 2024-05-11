@@ -11,7 +11,7 @@
 #define INI_TYPE_Bin 6
 
 
-char *IniStrToMem(const char *strIN, int reset) {
+char *INIstrToMem(const char *strIN, int reset) {
 
     static char **strArray = NULL;  // Array of pointers to strings
     char **strHLP = NULL;           // Helper for realloc
@@ -108,7 +108,7 @@ char *IniStrToMem(const char *strIN, int reset) {
     return NULL;
 }
 
-void IniTrimRemark (char *strIN){
+void INItrimRemark (char *strIN){
     // Remove all trailing text after
     // the first non "" encapsulated #
   
@@ -126,7 +126,7 @@ void IniTrimRemark (char *strIN){
     }
 }
 
-int IniGetRemark (char *strIN){  
+int INIgetRemark (char *strIN){  
     // Returns Remark with leading whitespaces
     // "Value = 1234       # MyRemark"
     // results in:
@@ -158,7 +158,7 @@ int IniGetRemark (char *strIN){
     return 0;
 }
 
-int IniCountFrontSpaces (char *strIN){
+int INIcountFrontSpaces (char *strIN){
 
     int l = strlen(strIN);
     int r = 0;
@@ -177,7 +177,7 @@ int IniCountFrontSpaces (char *strIN){
     return r;
 }
 
-void IniCleanBin(char *strIN){
+void INIcleanBin(char *strIN){
 
     // Make all 'i' & 'I' to 1
     // All 'o' and 'O' to 0
@@ -218,7 +218,7 @@ void IniCleanBin(char *strIN){
     }
 }
 
-int IniIsBin(const char *strIN){
+int INIisBin(const char *strIN){
     char c = 0;
     int l = strlen(strIN);
 
@@ -245,7 +245,7 @@ int IniIsBin(const char *strIN){
     return 1;
 }
 
-int IniIsNonNumeric(const char *strIN){
+int INIisNonNumeric(const char *strIN){
     // With the first non "0-9", ".", "," it's non-numeric
 
     char c = 0;
@@ -259,7 +259,7 @@ int IniIsNonNumeric(const char *strIN){
     return 0;
 }
 
-int IniGetTokens(char *strIN, char **tokens){
+int INIgetTokens(char *strIN, char **tokens){
     // Split string like "Main.Sub1.Sub1.Value" into **tokens
     // like:    [Main]
     //          [.Sub1]
@@ -307,7 +307,7 @@ int IniGetTokens(char *strIN, char **tokens){
     return count;
 }
 
-int IniFindValueLineNr(const char *fileName, char *strSearch){
+int INIfindValueLineNr(const char *fileName, char *strSearch){
 
     //  [Global]
     //      [.Sub1]
@@ -345,7 +345,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
 
     // Tokens
     char *strTokens[STR_SMALL_SIZE] = {NULL};  
-    int cntTokens = IniGetTokens(strSearch, strTokens) - 1;
+    int cntTokens = INIgetTokens(strSearch, strTokens) - 1;
     int actToken = 0;
 
     int insertLine = 0;
@@ -420,7 +420,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
     return r;
 } 
 
-int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, const int insert){
+int INIinsertReplaceLine (const char *fileName, char *strIN, const int linePos, const int insert){
     
     // Copies fpRead Line for Line to fpWrite
     // When linePos is reached
@@ -489,10 +489,10 @@ int IniInsertReplaceLine (const char *fileName, char *strIN, const int linePos, 
 
     return actLine;
 }
-#define IniInsertLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 1)
-#define IniReplaceLine(fileName, strIN, linePos) IniInsertReplaceLine(fileName, strIN, linePos, 0)
+#define INIinsertLine(fileName, strIN, linePos) INIinsertReplaceLine(fileName, strIN, linePos, 1)
+#define INIreplaceLine(fileName, strIN, linePos) INIinsertReplaceLine(fileName, strIN, linePos, 0)
 
-int IniSetTypeToValue(char *strValue, const int valType){
+int INIsetTypeToValue(char *strValue, const int valType){
     // Function converts strValue into a value of valType
     // and converts the value than back into a normalized string
     
@@ -561,7 +561,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
         break;
     case INI_TYPE_Bin:
         // as Bin
-        IniCleanBin(strValue);
+        INIcleanBin(strValue);
         lNum = STRbin2Long(strValue);
         STRlong2Bin(lNum, strValue);
         r = INI_TYPE_Bin;
@@ -613,7 +613,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     return r;
 }
 
-int IniGetTypeFromValue(const char *strValue){
+int INIgetTypeFromValue(const char *strValue){
 
     int r = INI_TYPE_AsItIs;
 
@@ -631,11 +631,11 @@ int IniGetTypeFromValue(const char *strValue){
             r = INI_TYPE_Bin;
         }
         else if (strncasecmp(&strValue[strlen(strValue) - 1], "b", 1) == 0){
-            if (IniIsBin(strValue)){
+            if (INIisBin(strValue)){
                 r = INI_TYPE_Bin;
             }
         }
-        else if (IniIsNonNumeric(strValue)){
+        else if (INIisNonNumeric(strValue)){
             // Bad formatted (not "" - embedded text)
         }
         else{
@@ -649,7 +649,7 @@ int IniGetTypeFromValue(const char *strValue){
     return r;   
 }
 
-int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
+int INIchangeValueLine (char *strIN, const char *strValue, const int valType){
 
     // a string like:
 
@@ -679,7 +679,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     // PreValue - part
     char strPreVal[STR_SMALL_SIZE];
     strcpy(strPreVal, strIN);
-    IniTrimRemark(strPreVal);
+    INItrimRemark(strPreVal);
     STRtrimChars_R(strPreVal, '=');
 
     // Copy & Check & Format strValue
@@ -690,12 +690,12 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     #endif
     
     strcpy(strValNew, strValue);
-    r = IniSetTypeToValue(strValNew, valType);
+    r = INIsetTypeToValue(strValNew, valType);
     
     // Remark - part
     char strRemark[STR_SMALL_SIZE];
     strcpy(strRemark, strIN);
-    IniGetRemark(strRemark);
+    INIgetRemark(strRemark);
  
     // Check and (re)place Remark
     if (strlen(strRemark)){
@@ -708,7 +708,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
             // check if the longer value fit's into the leading spaces of strRemark
 
             // Count spaces (respecting tabs)
-            int lenSpaces = IniCountFrontSpaces(strRemark);
+            int lenSpaces = INIcountFrontSpaces(strRemark);
             // Remove all spaces
             STRtrimWS(strRemark);
 
@@ -752,9 +752,9 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
     }
 }
 
-int IniCreateMissingValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue, const int missingToken, int insertLine){
+int INIcreateMissingValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue, const int missingToken, int insertLine){
 
-    // We already know from IniGetValue() or IniSetValue() that
+    // We already know from INIgetValue() or INIsetValue() that
     // strSearch (e.g. "Main.Sub.SubSub.Value") doesn't exist (fully) in file
     // missingToken =   index of missed token (0 = main / 3 = Value)
     // insertLine   =   where the missed stuff need to get inserted
@@ -782,7 +782,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
 
     // Get formatted TokenList
     char *tokens[STR_SMALL_SIZE] = {NULL};
-    int cntToken = IniGetTokens(strWork, tokens);
+    int cntToken = INIgetTokens(strWork, tokens);
 
     // Is the whole token-value-chain missing?
     if (!insertLine){
@@ -797,7 +797,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             insertLine++;
 
             // Remove Remark
-            IniTrimRemark(strWork);
+            INItrimRemark(strWork);
             // Remove white-spaces
             STRtrimWS(strWork);
 
@@ -817,7 +817,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
                 // One trailing space too much.
                 STRtrimCnt_L(strWork, 1);
             }
-            r = IniInsertLine(fileName, strWork, insertLine);
+            r = INIinsertLine(fileName, strWork, insertLine);
             insertLine++;
         }
         
@@ -826,10 +826,10 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             sprintf(strWork, "%*c%s = %s", i * INI_TAB_LEN, ' ', tokens[i], strValue);
             // Check & normalize value
             //printf("work: %s = %s / ", strWork, strValue);
-            r = IniChangeValueLine(strWork, strValue, typValue);
+            r = INIchangeValueLine(strWork, strValue, typValue);
             //printf("%s\n",strWork);
             if (r > -1){
-                IniInsertLine(fileName, strWork, insertLine);
+                INIinsertLine(fileName, strWork, insertLine);
             }
         }
     }
@@ -846,7 +846,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
     return r;
 } 
 
-int IniGetValue(const char *fileName, const char *strSearch, const char *strDefault, const int typValue, char *strReturn){
+int INIgetValue(const char *fileName, const char *strSearch, const char *strDefault, const int typValue, char *strReturn){
 
     // Returns  0 = Value is "as it is"
     //         -1 = File Error.
@@ -869,7 +869,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     // Working string
     strcpy(strReturn, strSearch);
 
-    int cntLine = IniFindValueLineNr(fileName, strReturn);
+    int cntLine = INIfindValueLineNr(fileName, strReturn);
 
     char *pEnd;
     int r = 0;
@@ -878,7 +878,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         // File and Search exist
 
         // Remove remarks
-        IniTrimRemark(strReturn);
+        INItrimRemark(strReturn);
 
         // Remove all chars left of "="
         STRtrimChars_L(strReturn, '=');
@@ -892,7 +892,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         if (typValue){
             // get type of value and normalize value
             
-            r = IniGetTypeFromValue(strReturn);
+            r = INIgetTypeFromValue(strReturn);
             if(r == INI_TYPE_Text){
                 // Remove leading '"'
                 STRtrimCnt_L(strReturn, 1);
@@ -918,7 +918,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
                         dVal = strtod(strReturn, &pEnd);
                         break;
                     case INI_TYPE_Bin:
-                        IniCleanBin(strReturn);
+                        INIcleanBin(strReturn);
                         dVal = (double)STRbin2Long(strReturn);
                         break;
                     case INI_TYPE_Hex:
@@ -960,7 +960,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
             }
             if(typValue != INI_TYPE_Text){
                 // normalize...
-                IniSetTypeToValue(strReturn, typValue);
+                INIsetTypeToValue(strReturn, typValue);
             }
         }  
     }
@@ -978,9 +978,9 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
             imInside = 1;
             char strAutoValue[STR_SMALL_SIZE];
             sprintf(strAutoValue, "%s #!", strDefault);
-            r = IniCreateMissingValue(fileName, strSearch, strAutoValue, typValue, missingToken, insertLine);
+            r = INIcreateMissingValue(fileName, strSearch, strAutoValue, typValue, missingToken, insertLine);
             // ReRead as it's written...
-            r = IniGetValue(fileName, strSearch, strDefault, typValue, strReturn);
+            r = INIgetValue(fileName, strSearch, strDefault, typValue, strReturn);
         }
         else{
             // WTF - kind of a File-Error ?!?!
@@ -996,10 +996,10 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
     imInside = 0;
     return r;     
 }
-#define IniGet(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_AsItIs, strReturn)
-#define IniGetStr(fileName, strSearch, strDefault, strReturn) IniGetValue(fileName, strSearch, strDefault, INI_TYPE_Text, strReturn)
+#define INIget(fileName, strSearch, strDefault, strReturn) INIgetValue(fileName, strSearch, strDefault, INI_TYPE_AsItIs, strReturn)
+#define INIgetStr(fileName, strSearch, strDefault, strReturn) INIgetValue(fileName, strSearch, strDefault, INI_TYPE_Text, strReturn)
 
-long IniGetLong(const char *fileName, const char *strSearch, const long defLong){
+long INIgetLong(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
@@ -1007,48 +1007,48 @@ long IniGetLong(const char *fileName, const char *strSearch, const long defLong)
 
     sprintf(strValue, "%ld", defLong);
 
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Int, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Int, strReturn);
     long valLong = strtol(strReturn, &pEnd, 10);
     if (*pEnd == '\0'){
         return valLong;
     }
     return defLong;
 }
-#define IniGetInt(fileName, strSearch, defInt) (int)IniGetLong(fileName, strSearch, (long)defInt)
+#define INIgetInt(fileName, strSearch, defInt) (int)INIgetLong(fileName, strSearch, (long)defInt)
 
-double IniGetDouble(const char *fileName, const char *strSearch, const double defDouble){
+double INIgetDouble(const char *fileName, const char *strSearch, const double defDouble){
 
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     sprintf(strValue, "%.8f", defDouble);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Float, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Float, strReturn);
     double valDouble = strtod(strReturn, &pEnd);
     if (*pEnd == '\0'){
         return valDouble;
     }
     return defDouble;
 }
-#define IniGetFloat(fileName, strSearch, defFloat) (float)IniGetDouble(fileName, strSearch, (double)defFloat)
+#define INIgetFloat(fileName, strSearch, defFloat) (float)INIgetDouble(fileName, strSearch, (double)defFloat)
 
-long IniGetLongHex(const char *fileName, const char *strSearch, const long defLong){
+long INIgetLongHex(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
     char *pEnd;
 
     sprintf(strValue, "%#lx", defLong);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Hex, strReturn);
     long valLong = strtol(strReturn, &pEnd, 16);
     if (*pEnd == '\0'){
         return valLong;
     }
     return defLong;
 }
-#define IniGetHex(fileName, strSearch, defInt) (int)IniGetLongHex(fileName, strSearch, (long)defInt)
+#define INIgetHex(fileName, strSearch, defInt) (int)INIgetLongHex(fileName, strSearch, (long)defInt)
 
-int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
+int INIgetBool(const char *fileName, const char *strSearch, const int defBool){
 
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
@@ -1061,7 +1061,7 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
     }
     
     
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bool, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Bool, strReturn);
 
     if(strncasecmp(strReturn, "true", 4) == 0){
         // True
@@ -1072,54 +1072,54 @@ int IniGetBool(const char *fileName, const char *strSearch, const int defBool){
     }
 }
 
-long IniGetLongBin(const char *fileName, const char *strSearch, const long defLong){
+long INIgetLongBin(const char *fileName, const char *strSearch, const long defLong){
     
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
     STRlong2Bin(defLong, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
     return STRbin2Long(strReturn);
     
 }
 
-int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
+int INIgetIntBin(const char *fileName, const char *strSearch, const int defInt){
     
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
     STRint2Bin(defInt, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
     return STRbin2Int(strReturn);
     
 }
 
-unsigned char IniGetByteBin(const char *fileName, const char *strSearch, unsigned char defByte){
+unsigned char INIgetByteBin(const char *fileName, const char *strSearch, unsigned char defByte){
     
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
     STRbyte2Bin(defByte, strValue);
-    IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
+    INIgetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
     return STRbin2Byte(strReturn);
     
 }
 
-int IniSetValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue){
+int INIsetValue(const char *fileName, const char *strSearch, const char *strValue, const int typValue){
 
     // Copy for the case of value/token does not exist.
     char strWork[STR_SMALL_SIZE];
     strcpy(strWork, strSearch);
 
-    int cntLine = IniFindValueLineNr(fileName, strWork);
+    int cntLine = INIfindValueLineNr(fileName, strWork);
     int r = cntLine;
     char *pEnd;
 
     if (cntLine > 0){
         // File & Search exist
 
-        IniChangeValueLine(strWork, strValue, typValue);
-        r = IniReplaceLine(fileName, strWork, cntLine);
+        INIchangeValueLine(strWork, strValue, typValue);
+        r = INIreplaceLine(fileName, strWork, cntLine);
     }
     else if (cntLine == 0 || cntLine == -2){
         // Value / Token does not exist
@@ -1131,7 +1131,7 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
         int missingToken = strtol(strWork, &pEnd, 10);
         int insertLine = strtol(strchr(strWork, ':') + 1, &pEnd, 10);
 
-        r = IniCreateMissingValue(fileName, strSearch, strValue, typValue, missingToken, insertLine);
+        r = INIcreateMissingValue(fileName, strSearch, strValue, typValue, missingToken, insertLine);
     }
     else{
         // FileError
@@ -1139,31 +1139,31 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
 
     return r;     
 }
-#define IniSet(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs)
-#define IniSetStr(fileName, strSearch, strValue) IniSetValue(fileName, strSearch, strValue, INI_TYPE_Text)
+#define INIset(fileName, strSearch, strValue) INIsetValue(fileName, strSearch, strValue, INI_TYPE_AsItIs)
+#define INIsetStr(fileName, strSearch, strValue) INIsetValue(fileName, strSearch, strValue, INI_TYPE_Text)
 
-int IniSetLong(const char *fileName, const char *strSearch, const long lngValue){
+int INIsetLong(const char *fileName, const char *strSearch, const long lngValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%ld", lngValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Int);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Int);
 }
-#define IniSetInt(fileName, strSearch, intValue) IniSetLong(fileName, strSearch, (long)intValue)
+#define INIsetInt(fileName, strSearch, intValue) INIsetLong(fileName, strSearch, (long)intValue)
 
-int IniSetDouble(const char *fileName, const char *strSearch, const double dblValue){
+int INIsetDouble(const char *fileName, const char *strSearch, const double dblValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%.8f", dblValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Float);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Float);
 }
-#define IniSetFloat(fileName, strSearch, fltValue) IniSetDouble(fileName, strSearch, (double)fltValue)
+#define INIsetFloat(fileName, strSearch, fltValue) INIsetDouble(fileName, strSearch, (double)fltValue)
 
-int IniSetLongHex(const char *fileName, const char *strSearch, const long hexValue){
+int INIsetLongHex(const char *fileName, const char *strSearch, const long hexValue){
     char strValue[STR_SMALL_SIZE];
     sprintf(strValue, "%#lx", hexValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Hex);
 }
-#define IniSetHex(fileName, strSearch, hexValue) (int)IniSetLongHex(fileName, strSearch, (long)hexValue)
+#define INIsetHex(fileName, strSearch, hexValue) (int)INIsetLongHex(fileName, strSearch, (long)hexValue)
 
-int IniSetBool(const char *fileName, const char *strSearch, const int boolValue){
+int INIsetBool(const char *fileName, const char *strSearch, const int boolValue){
     char strValue[STR_SMALL_SIZE];
     if (boolValue){
         strcpy(strValue, "true");
@@ -1171,24 +1171,24 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
     else{
         strcpy(strValue, "false");
     }
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Bool);
 }
 
-int IniSetLongBin(const char *fileName, const char *strSearch, const long lValue){
+int INIsetLongBin(const char *fileName, const char *strSearch, const long lValue){
     char strValue[STR_SMALL_SIZE];
     STRlong2Bin(lValue, strValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 
-int IniSetIntBin(const char *fileName, const char *strSearch, const int iValue){
+int INIsetIntBin(const char *fileName, const char *strSearch, const int iValue){
     char strValue[STR_SMALL_SIZE];
     STRint2Bin(iValue, strValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 
-int IniSetByteBin(const char *fileName, const char *strSearch, const unsigned char bValue){
+int INIsetByteBin(const char *fileName, const char *strSearch, const unsigned char bValue){
     char strValue[STR_SMALL_SIZE];
     STRbyte2Bin(bValue, strValue);
-    return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
+    return INIsetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 // ::::

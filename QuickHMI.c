@@ -115,7 +115,7 @@ int main() {
 		TUI_RightMenuCnt = TUIinitMenuDefs("desktops.ini", "RightMenu", &userRightMenus);
 		TUI_LeftMenuCnt = TUIinitMenuDefs("desktops.ini", "LeftMenu", &userLeftMenus);
 
-int reduce = (int)IniStrToMem("", 2);
+int reduce = (int)INIstrToMem("", 2);
 
 		fflush(stdout);
 		TermClearScreen(0);
@@ -370,7 +370,7 @@ fflush(stdout);
 		//#if __APPLE__
 			// NO CLUE WHY freeing is messy
 		//#else
-			IniStrToMem("",1);
+			INIstrToMem("",1);
 			free(userColors);
 			free(userStyles);
 			free(userHeaders);
