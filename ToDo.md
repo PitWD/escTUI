@@ -3,7 +3,7 @@
 **044. Print to canvas instead direct...**
 
 **043. How To printf-Debug to 2nd term...**
-- myapp 2>/dev/pts/0815
+- myapp 2>/dev/pts/0815 (get 0815 with 'tty')
 
 **042. Collect Hot-Keys after TUIbuildMenus**
 - all time the 1st level of all menus is reachable via Alt-Key

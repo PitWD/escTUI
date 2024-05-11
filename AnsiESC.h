@@ -491,7 +491,7 @@ void DEClineX(int len){
 	}
 	else{
 		// Left to right
-		StrPrintChars('q', len);
+		STRprintChars('q', len);
 	}
 	
 	DECboxOFF;

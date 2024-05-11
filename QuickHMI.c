@@ -96,8 +96,8 @@ int main() {
 	
 		fflush(stdout);
 		TermClearScreen(0);
-		StrTrimWS_R(gStrRunTime);
-		StrTrimWS_R(gStrTime);
+		STRtrimWS_R(gStrRunTime);
+		STRtrimWS_R(gStrTime);
 		TUI_HeaderCnt = TUIinitHeaders("desktops.ini", &userHeaders);
 		for (int i = 0; i < TUI_HeaderCnt; i++){
 			TUIrenderHeader(1,i+1,0,i,0);

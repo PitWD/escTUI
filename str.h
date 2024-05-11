@@ -9,11 +9,14 @@
 #define STR_LARGE_SIZE 1024
 #define STR_XL_SIZE 2048
 
+FILE *LOG_Errors = NULL;
+FILE *LOG_Debug = NULL;
+
 #if __WIN32__ || _MSC_VER || __WIN64__
     #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
 #endif
 
-void StrTrimWhiteSpacesLR(char *strIN, const int l, const int r){
+void STRtrimWhiteSpacesLR(char *strIN, const int l, const int r){
     
     // L & R are bool to remove whitespaces
     // Left and/or Right
@@ -37,11 +40,11 @@ void StrTrimWhiteSpacesLR(char *strIN, const int l, const int r){
     memmove(strIN, pLeft, pRight - pLeft);
     strIN[pRight - pLeft] = '\0';
 }
-#define StrTrimWS_L(strIN) StrTrimWhiteSpacesLR(strIN,1,0)
-#define StrTrimWS_R(strIN) StrTrimWhiteSpacesLR(strIN,0,1)
-#define StrTrimWS(strIN) StrTrimWhiteSpacesLR(strIN,1,1)
+#define STRtrimWS_L(strIN) STRtrimWhiteSpacesLR(strIN,1,0)
+#define STRtrimWS_R(strIN) STRtrimWhiteSpacesLR(strIN,0,1)
+#define STRtrimWS(strIN) STRtrimWhiteSpacesLR(strIN,1,1)
 
-void StrTrimCharsLR(char *strIN, const char c, const int l, const int r){
+void STRtrimCharsLR(char *strIN, const char c, const int l, const int r){
     
     // L & R are bool to remove all chars, until 1st is != c
     // Left and/or Right
@@ -67,11 +70,11 @@ void StrTrimCharsLR(char *strIN, const char c, const int l, const int r){
     memmove(strIN, pLeft, pRight - pLeft);
     strIN[pRight - pLeft] = '\0';
 }
-#define StrTrimChars_L(strIN, c) StrTrimCharsLR(strIN, c, 1, 0)
-#define StrTrimChars_R(strIN, c) StrTrimCharsLR(strIN, c, 0, 1)
-#define StrTrimChars_LR(strIN, c) StrTrimCharsLR(strIN, c, 1, 1)
+#define STRtrimChars_L(strIN, c) STRtrimCharsLR(strIN, c, 1, 0)
+#define STRtrimChars_R(strIN, c) STRtrimCharsLR(strIN, c, 0, 1)
+#define STRtrimChars_LR(strIN, c) STRtrimCharsLR(strIN, c, 1, 1)
 
-void StrTrimCntLR(char *strIN, const int l, const int r){
+void STRtrimCntLR(char *strIN, const int l, const int r){
     
     // Remove l chars from the left and r from the right
 
@@ -91,11 +94,11 @@ void StrTrimCntLR(char *strIN, const int l, const int r){
     memmove(strIN, pLeft, i);
     strIN[i] = '\0';
 }
-#define StrTrimCnt_L(strIN, count) StrTrimCntLR(strIN, count, 0)
-#define StrTrimCnt_R(strIN, count) StrTrimCntLR(strIN, 0, count)
-#define StrTrimCnt_LR(strIN, left, right) StrTrimCntLR(strIN, left, right)
+#define STRtrimCnt_L(strIN, count) STRtrimCntLR(strIN, count, 0)
+#define STRtrimCnt_R(strIN, count) STRtrimCntLR(strIN, 0, count)
+#define STRtrimCnt_LR(strIN, left, right) STRtrimCntLR(strIN, left, right)
 
-void StrTrimACharLR(char *strIN, const char c, const int l, const int r){
+void STRtrimACharLR(char *strIN, const char c, const int l, const int r){
     
     // L & R are bool to remove all chars, as long they're without a break == c
     // Left and/or Right
@@ -118,11 +121,11 @@ void StrTrimACharLR(char *strIN, const char c, const int l, const int r){
     memmove(strIN, pLeft, pRight - pLeft);
     strIN[pRight - pLeft] = '\0';
 }
-#define StrTrimAChar_L(strIN, c) StrTrimACharLR(strIN, c, 1, 0)
-#define StrTrimAChar_R(strIN, c) StrTrimACharLR(strIN, c, 0, 1)
-#define StrTrimAChar_LR(strIN, c) StrTrimACharLR(strIN, c, 1, 1)
+#define STRtrimAChar_L(strIN, c) STRtrimACharLR(strIN, c, 1, 0)
+#define STRtrimAChar_R(strIN, c) STRtrimACharLR(strIN, c, 0, 1)
+#define STRtrimAChar_LR(strIN, c) STRtrimACharLR(strIN, c, 1, 1)
 
-int StrCommaToDot(char *strIN){
+int STRcommaToDot(char *strIN){
     // Make 1st comma to dot...
     char *pComma = strchr(strIN, ',');
     if (pComma != NULL){
@@ -136,7 +139,7 @@ int StrCommaToDot(char *strIN){
     return 0;
 }
 
-void StrTrimNonNumeric(char *strIN){
+void STRtrimNonNumeric(char *strIN){
     // Trim on 1st non-numeric position
     for (int i = 0; i < (int)strlen(strIN); i++){
         if ((strIN[i] < '0' || strIN[i] > '9') && strIN[i] != '.' && strIN[i] != '-'){
@@ -145,12 +148,12 @@ void StrTrimNonNumeric(char *strIN){
     }
 }
 
-int StrNormFloatString(char *strIN){
+int STRnormFloatString(char *strIN){
 
     char *pEnd;
 
-    StrCommaToDot(strIN);
-    StrTrimNonNumeric(strIN);
+    STRcommaToDot(strIN);
+    STRtrimNonNumeric(strIN);
     
     double dNum = strtod(strIN, &pEnd);
 
@@ -159,7 +162,7 @@ int StrNormFloatString(char *strIN){
         sprintf(strIN, "%.8f", dNum);
 
         // Remove too much trailing zeros
-        StrTrimAChar_R(strIN, '0');
+        STRtrimAChar_R(strIN, '0');
 
         // Keep at least one zero
         int len = strlen(strIN);
@@ -173,7 +176,7 @@ int StrNormFloatString(char *strIN){
     return 0;
 }
 
-void StrUcaseLen(char *strIN, const int len) { 
+void STRucaseLen(char *strIN, const int len) { 
    // Convert 1st len chars to upper case
 
     if (len <= (int)strlen(strIN)){
@@ -182,9 +185,9 @@ void StrUcaseLen(char *strIN, const int len) {
         }        
     }
 }
-#define StrUcase(strIN) StrUcaseLen(strIN, strlen(strIN))
+#define STRucase(strIN) STRucaseLen(strIN, strlen(strIN))
 
-void StrLcaseLen(char *strIN, const int len) {
+void STRlcaseLen(char *strIN, const int len) {
    
    // Convert 1st len chars to lower case
 
@@ -194,9 +197,9 @@ void StrLcaseLen(char *strIN, const int len) {
         }        
     }
 }
-#define StrLcase(strIN) StrLcaseLen(strIN, strlen(strIN))
+#define STRlcase(strIN) STRlcaseLen(strIN, strlen(strIN))
 
-long StrBinToLong(const char *strValue, const int bits){
+long STRbinToLong(const char *strValue, const int bits){
  
     int len = strlen(strValue) - 1;
 
@@ -223,11 +226,11 @@ long StrBinToLong(const char *strValue, const int bits){
 
     return r;
 }
-#define StrBin2Long(strValue) StrBinToLong(strValue, 0)
-#define StrBin2Int(strValue) (int)StrBinToLong(strValue, 8 * sizeof(int))
-#define StrBin2Byte(strValue) (unsigned char)StrBinToLong(strValue, 8)
+#define STRbin2Long(strValue) STRbinToLong(strValue, 0)
+#define STRbin2Int(strValue) (int)STRbinToLong(strValue, 8 * sizeof(int))
+#define STRbin2Byte(strValue) (unsigned char)STRbinToLong(strValue, 8)
 
-void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
+void STRlongToBin(const unsigned long lValue, char *strResult, const int bits){
 
     // MaxBits by OS
     int maxBits = 8 * sizeof(unsigned long) - 1;
@@ -262,22 +265,22 @@ void StrLongToBin(const unsigned long lValue, char *strResult, const int bits){
     strResult[maxBits + 3] = '\0';
 
 }
-#define StrLong2Bin(lValue, strResult) StrLongToBin((unsigned long)lValue, strResult, 0)
-#define StrInt2Bin(iValue, strResult) StrLongToBin((unsigned long)iValue, strResult, 8 * sizeof(int))
-#define StrByte2Bin(bValue, strResult) StrLongToBin((unsigned long)bValue, strResult, 8)
+#define STRlong2Bin(lValue, strResult) STRlongToBin((unsigned long)lValue, strResult, 0)
+#define STRint2Bin(iValue, strResult) STRlongToBin((unsigned long)iValue, strResult, 8 * sizeof(int))
+#define STRbyte2Bin(bValue, strResult) STRlongToBin((unsigned long)bValue, strResult, 8)
 
-void StrPrintChars(char charIN, int count){
+void STRprintChars(char charIN, int count){
     while (count--){
         printf("%c", charIN);
     }
 }
-#define StrPrintSpaces(count) StrPrintChars(' ', count)
+#define STRprintSpaces(count) STRprintChars(' ', count)
 
-void StrPrintCentered(char *strIN, int len){
+void STRprintCentered(char *strIN, int len){
 
     int spaces = (len - strlen(strIN)) / 2;
-    StrPrintSpaces(spaces);
+    STRprintSpaces(spaces);
     printf("%s", strIN);
-    StrPrintSpaces(len - strlen(strIN) - spaces);
+    STRprintSpaces(len - strlen(strIN) - spaces);
 
 }

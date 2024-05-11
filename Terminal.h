@@ -1316,13 +1316,6 @@ int TermSetVT(int set){
 }	
 
 int TermInKey(void){
-/**
- * @brief	Non-Blocking GetChar
- * 
- * @return 	int 
- * 			1-255 	= char 
- * 			0		= there was no char in buffer
- */
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
 

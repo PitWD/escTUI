@@ -334,7 +334,7 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 				DEClineX(4);
 			}
 			else{
-				StrPrintSpaces(4);
+				STRprintSpaces(4);
 			}
 		}
 		else{
@@ -437,7 +437,7 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 			printf(" ");
 		}
 		else{
-			StrPrintSpaces(renderWidth - strlen(menuPos->caption));
+			STRprintSpaces(renderWidth - strlen(menuPos->caption));
 		}
 	}
 
@@ -812,8 +812,8 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 		SetTxtStyle(&userStyles[headerDef->txtStyle], 1);
 		if (renderRealTime ^ renderRunTime) {
 			// one time active - center is left of time...
-			StrPrintCentered(strHLP, width);
-			StrPrintSpaces(renderWidth - width);
+			STRprintCentered(strHLP, width);
+			STRprintSpaces(renderWidth - width);
 		}
 		else{
 			// center is center
@@ -821,7 +821,7 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 				// add three spaces, cause runtime is shorter than realtime
 				strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
 			}
-			StrPrintCentered(strHLP, renderWidth);					
+			STRprintCentered(strHLP, renderWidth);					
 		}
 	}
 	else{
@@ -958,7 +958,7 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	// Fill line with right colored spaces
 	SetColorStyle(&userColors[menuDef->txtColor], 1);
 	SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
-	StrPrintSpaces(renderWidth - renderLen);
+	STRprintSpaces(renderWidth - renderLen);
 		
 	if (selectedMenu && selectedMenu->pos1st){
 		if (menuType == TUI_MENU_BOTTOM){
@@ -1024,7 +1024,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 			Locate(lineX, posY);
 			SetColorStyle(&userColors[menuDef->txtColor], 1);
 			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
-			StrPrintSpaces(len);
+			STRprintSpaces(len);
 		}
 		
 		int startY = posY + (doLead != 0);
@@ -1041,7 +1041,7 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
 			while (posY <= maxY){
 				Locate(lineX, posY);
-				StrPrintSpaces(len);
+				STRprintSpaces(len);
 				posY++;
 				if (doTrail > 0){
 					break;	// just negative fills to the bottom

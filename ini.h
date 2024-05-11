@@ -301,7 +301,7 @@ int IniGetTokens(char *strIN, char **tokens){
 
     // remove "[." and "]" from the Value token
     if(count > 0){
-        StrTrimCnt_LR(tokens[count], count + 1, 1);
+        STRtrimCnt_LR(tokens[count], count + 1, 1);
     }
     count++;
     return count;
@@ -364,7 +364,7 @@ int IniFindValueLineNr(const char *fileName, char *strSearch){
         strcpy(strSearch, strIN);
 
         // Trim Left Whitespaces
-        StrTrimWS_L(strIN);
+        STRtrimWS_L(strIN);
 
         // Check if line is below actual token-level
         if (strIN[0] == '['){
@@ -527,7 +527,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     switch (valType){
     case INI_TYPE_Int:
         // as int
-        StrTrimNonNumeric(strValue);
+        STRtrimNonNumeric(strValue);
         lNum = strtol(strValue, &pEnd, 10);   
         if (*pEnd == '\0'){
             sprintf(strValue, "%ld", lNum);
@@ -537,7 +537,7 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case INI_TYPE_Float:
         // as float
         // Make 1st comma to dot...
-        if(StrNormFloatString(strValue)){
+        if(STRnormFloatString(strValue)){
             r = INI_TYPE_Float;
         }
         break;
@@ -562,8 +562,8 @@ int IniSetTypeToValue(char *strValue, const int valType){
     case INI_TYPE_Bin:
         // as Bin
         IniCleanBin(strValue);
-        lNum = StrBin2Long(strValue);
-        StrLong2Bin(lNum, strValue);
+        lNum = STRbin2Long(strValue);
+        STRlong2Bin(lNum, strValue);
         r = INI_TYPE_Bin;
         break;
     case INI_TYPE_Bool:
@@ -674,13 +674,13 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
 
     int r = 0;
 
-    StrTrimWS_R(strIN);
+    STRtrimWS_R(strIN);
 
     // PreValue - part
     char strPreVal[STR_SMALL_SIZE];
     strcpy(strPreVal, strIN);
     IniTrimRemark(strPreVal);
-    StrTrimChars_R(strPreVal, '=');
+    STRtrimChars_R(strPreVal, '=');
 
     // Copy & Check & Format strValue
     #if __WIN32__ || _MSC_VER || __WIN64__
@@ -710,7 +710,7 @@ int IniChangeValueLine (char *strIN, const char *strValue, const int valType){
             // Count spaces (respecting tabs)
             int lenSpaces = IniCountFrontSpaces(strRemark);
             // Remove all spaces
-            StrTrimWS(strRemark);
+            STRtrimWS(strRemark);
 
             if (lenSpaces < lenDiff){
                 // Missing space in total
@@ -799,7 +799,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             // Remove Remark
             IniTrimRemark(strWork);
             // Remove white-spaces
-            StrTrimWS(strWork);
+            STRtrimWS(strWork);
 
             if (strlen(strWork)){
                 // Line found
@@ -815,7 +815,7 @@ int IniCreateMissingValue(const char *fileName, const char *strSearch, const cha
             sprintf(strWork, "%*c%s", i * INI_TAB_LEN, ' ', tokens[i]);
             if (!i){
                 // One trailing space too much.
-                StrTrimCnt_L(strWork, 1);
+                STRtrimCnt_L(strWork, 1);
             }
             r = IniInsertLine(fileName, strWork, insertLine);
             insertLine++;
@@ -881,13 +881,13 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         IniTrimRemark(strReturn);
 
         // Remove all chars left of "="
-        StrTrimChars_L(strReturn, '=');
+        STRtrimChars_L(strReturn, '=');
 
         // Remove equal
-        StrTrimCnt_L(strReturn, 1);
+        STRtrimCnt_L(strReturn, 1);
 
         // Trim whitespaces
-        StrTrimWS(strReturn);
+        STRtrimWS(strReturn);
 
         if (typValue){
             // get type of value and normalize value
@@ -895,11 +895,11 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
             r = IniGetTypeFromValue(strReturn);
             if(r == INI_TYPE_Text){
                 // Remove leading '"'
-                StrTrimCnt_L(strReturn, 1);
+                STRtrimCnt_L(strReturn, 1);
 
                 if (strReturn[strlen(strReturn) - 1] == '"'){
                     // Text was fully encapsulated
-                    StrTrimCnt_R(strReturn,1);
+                    STRtrimCnt_R(strReturn,1);
                 }
             } 
 
@@ -914,12 +914,12 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
                     // convert str as good as possible into double
                     switch (r){
                     case INI_TYPE_Text:
-                        StrCommaToDot(strReturn);
+                        STRcommaToDot(strReturn);
                         dVal = strtod(strReturn, &pEnd);
                         break;
                     case INI_TYPE_Bin:
                         IniCleanBin(strReturn);
-                        dVal = (double)StrBin2Long(strReturn);
+                        dVal = (double)STRbin2Long(strReturn);
                         break;
                     case INI_TYPE_Hex:
                         dVal = (double)strtol(strReturn, &pEnd, 16);
@@ -936,7 +936,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
                     // convert the double "rough" into expected type
                     switch (typValue){
                     case INI_TYPE_Bin:
-                        StrLong2Bin((long)dVal, strReturn);
+                        STRlong2Bin((long)dVal, strReturn);
                         break;
                     case INI_TYPE_Hex:
                         sprintf(strReturn, "%#lx", (long)dVal);
@@ -970,7 +970,7 @@ int IniGetValue(const char *fileName, const char *strSearch, const char *strDefa
         // strReturn    contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        StrTrimCnt_LR(strReturn, 1, 1);
+        STRtrimCnt_LR(strReturn, 1, 1);
         int missingToken = strtol(strReturn, &pEnd, 10);
         int insertLine = strtol(strchr(strReturn, ':') + 1, &pEnd, 10);
 
@@ -1077,9 +1077,9 @@ long IniGetLongBin(const char *fileName, const char *strSearch, const long defLo
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
-    StrLong2Bin(defLong, strValue);
+    STRlong2Bin(defLong, strValue);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
-    return StrBin2Long(strReturn);
+    return STRbin2Long(strReturn);
     
 }
 
@@ -1088,9 +1088,9 @@ int IniGetIntBin(const char *fileName, const char *strSearch, const int defInt){
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
-    StrInt2Bin(defInt, strValue);
+    STRint2Bin(defInt, strValue);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
-    return StrBin2Int(strReturn);
+    return STRbin2Int(strReturn);
     
 }
 
@@ -1099,9 +1099,9 @@ unsigned char IniGetByteBin(const char *fileName, const char *strSearch, unsigne
     char strValue[STR_SMALL_SIZE];
     char strReturn[STR_SMALL_SIZE];
 
-    StrByte2Bin(defByte, strValue);
+    STRbyte2Bin(defByte, strValue);
     IniGetValue(fileName, strSearch, strValue, INI_TYPE_Bin, strReturn);
-    return StrBin2Byte(strReturn);
+    return STRbin2Byte(strReturn);
     
 }
 
@@ -1127,7 +1127,7 @@ int IniSetValue(const char *fileName, const char *strSearch, const char *strValu
         // strWork  contains (""-embedded and :-separated)
         //              index of 1st missing token
         //              index of broken line in file        
-        StrTrimCnt_LR(strWork, 1, 1);
+        STRtrimCnt_LR(strWork, 1, 1);
         int missingToken = strtol(strWork, &pEnd, 10);
         int insertLine = strtol(strchr(strWork, ':') + 1, &pEnd, 10);
 
@@ -1176,19 +1176,19 @@ int IniSetBool(const char *fileName, const char *strSearch, const int boolValue)
 
 int IniSetLongBin(const char *fileName, const char *strSearch, const long lValue){
     char strValue[STR_SMALL_SIZE];
-    StrLong2Bin(lValue, strValue);
+    STRlong2Bin(lValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 
 int IniSetIntBin(const char *fileName, const char *strSearch, const int iValue){
     char strValue[STR_SMALL_SIZE];
-    StrInt2Bin(iValue, strValue);
+    STRint2Bin(iValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 
 int IniSetByteBin(const char *fileName, const char *strSearch, const unsigned char bValue){
     char strValue[STR_SMALL_SIZE];
-    StrByte2Bin(bValue, strValue);
+    STRbyte2Bin(bValue, strValue);
     return IniSetValue(fileName, strSearch, strValue, INI_TYPE_Bin);
 }
 // ::::
