@@ -14,9 +14,8 @@
 #include <stdlib.h>
 #include "Terminal.h"
 
-//#include <ctype.h>
-//#include <stdint.h>
-//#include <stdlib.h>
+#define EscColorSTRUCT TermColorSTRUCT
+#define EscStyleSTRUCT TermStyleSTRUCT
 
 FILE *LOG_ColorInit = NULL;
 FILE *LOG_StyleInit = NULL;

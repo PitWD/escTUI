@@ -209,7 +209,7 @@ void TermSignalHandler(int sig);
 void TermTrapMouse(int set);
 void TermTrapFocus(int set);
 
-typedef struct {
+typedef struct TermColorSTRUCT{
 	int mode;			// 0 = B/W, 1 = 16, 2 = 255, 3 = RGB
 	char *groupName;
 	char *colorName;
@@ -236,9 +236,9 @@ typedef struct {
 		uint8_t G;
 		uint8_t B;
 	}ul;						// Underline
-} EscColorSTRUCT;
+} TermColorSTRUCT;
 
-typedef struct {
+typedef struct TermStyleSTRUCT{
 	/*		Actual State in [0]
 			Default in [1]
 			[2] - [n] free for user
@@ -278,16 +278,16 @@ typedef struct {
 	uint32_t font				:4;		// CSI10m (Standard = 0) - CSI20m (Fraktur = 10) 
 	uint32_t underline			:4;		// 0 = None, 1 = single, 2 = double, 3 = curl, 4 = dot, 5 = dash 
 											// 6 = dashdot, 7 = dbl_curl, 8 = dbl_dot, 9 = dbl_dash
-	// EscColorSTRUCT *pColor;
-} EscStyleSTRUCT; 
+	// TermColorSTRUCT *pColor;
+} TermStyleSTRUCT; 
 
 // global access on colors and styles
-EscColorSTRUCT *userColors = NULL;
-EscStyleSTRUCT *userStyles = NULL;
+TermColorSTRUCT *userColors = NULL;
+TermStyleSTRUCT *userStyles = NULL;
 
-typedef struct {
-    EscColorSTRUCT *color;
-    EscStyleSTRUCT *style;
+typedef struct CanvasSTRUCT{
+    TermColorSTRUCT *color;
+    TermStyleSTRUCT *style;
     wchar_t c;
     int width;
 }CanvasSTRUCT;
@@ -302,7 +302,7 @@ int canvasMaxY = 0;
 
 
 // *** 3rd Party START ***
-struct width_interval {
+static struct width_interval {
 	// from https://github.com/PitWD/termux_wcwidth
 	// which is a copy of https://github.com/termux/wcwidth
 	// all MIT licensed
@@ -873,9 +873,9 @@ int SizeCanvas(int x, int y) {
     if (x > 0 && y > 0) {
 		
         if (isSized) {
-            myCanvas = (struct CanvasSTRUCT ***)realloc(myCanvas, x * sizeof(struct CanvasSTRUCT **));
+            myCanvas = (CanvasSTRUCT ***)realloc(myCanvas, x * sizeof(CanvasSTRUCT **));
         } else {
-            myCanvas = (struct CanvasSTRUCT ***)malloc(x * sizeof(struct CanvasSTRUCT **));
+            myCanvas = (CanvasSTRUCT ***)malloc(x * sizeof(CanvasSTRUCT **));
         }
         isSized = 0;
 		if (!myCanvas) {
@@ -884,14 +884,14 @@ int SizeCanvas(int x, int y) {
         }
 
         for (int i = 0; i < x; i++) {
-			myCanvas[i] = (struct CanvasSTRUCT **)malloc(y * sizeof(struct CanvasSTRUCT *));
+			myCanvas[i] = (CanvasSTRUCT **)malloc(y * sizeof(CanvasSTRUCT *));
 			if (!myCanvas[i]) {
 				// Handle memory allocation error
 				return 0;
 			}
 
             for (int j = 0; j < y; j++) {
-				myCanvas[i][j] = (struct CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(CanvasSTRUCT));
+				myCanvas[i][j] = (CanvasSTRUCT *)malloc(canvasMaxZ * sizeof(CanvasSTRUCT));
 				if (!myCanvas[i][j]) {
 					// Handle memory allocation error
 					return 0;
