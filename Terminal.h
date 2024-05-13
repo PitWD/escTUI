@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <string.h>
 #include <wchar.h>
+#include "ini.h"
 
 #if __WIN32__ || _MSC_VER || __WIN64__
     #include <conio.h>
@@ -23,6 +24,8 @@
     #include <sys/ioctl.h>
 #endif
 
+FILE *LOG_SysInit = NULL;
+FILE *LOG_SysExit = NULL;
 
 int TERM_RunCoreLoop = 1;
 
@@ -195,7 +198,7 @@ int TERM_SignalInterval = 0;
 int TermSetVT(int set);
 int TermInKey(void);
 void TermFlushInKey(void);
-int TermClearScreen(int set);
+int TermClearScreen(FILE *file, int set);
 int TermGetSize(int set);
 int TermSizeIsChanged(void);
 int TermGetESC27 (int c);
@@ -1087,66 +1090,66 @@ int TermInit(){
 
 	int r = 0;
 
-	printf("\nHello New Project\n\n");
+	fprintf(LOG_SysInit, "\nHello New Project\n\n");
 
-	printf("Initializing Timing... ");
+	fprintf(LOG_SysInit, "Initializing Timing... ");
 	TimeInitTime();
-	printf("OK\n");
-	printf("%s - %s\n\n", gStrDate, gStrTime);
+	fprintf(LOG_SysInit, "OK\n");
+	fprintf(LOG_SysInit, "%s - %s\n\n", gStrDate, gStrTime);
 
-	printf("Try To Enable Video Terminal Mode... ");
+	fprintf(LOG_SysInit, "Try To Enable Video Terminal Mode... ");
 	if (!TermSetVT(1)){
-		printf("ERROR!\n");
-		printf("STOP PROJECT\n");
+		fprintf(LOG_SysInit, "ERROR!\n");
+		fprintf(LOG_SysInit, "STOP PROJECT\n");
 		return 0;
 	}
-	printf("OK\n\n");
+	fprintf(LOG_SysInit, "OK\n\n");
 
-	printf("Try To Clear Screen...\n");
-	r = TermClearScreen(0);
+	fprintf(LOG_SysInit, "Try To Clear Screen...\n");
+	r = TermClearScreen(LOG_SysInit, 0);
 	if (!r){
 		// Can't happen....
-		printf("Clear Screen... ERROR!\n");
-		printf("STOP PROJECT\n");
+		fprintf(LOG_SysInit, "Clear Screen... ERROR!\n");
+		fprintf(LOG_SysInit, "STOP PROJECT\n");
 		return 0;
 	}
-	printf("Clear Screen... OK, CLS-Mode: %d\n\n",r);
+	fprintf(LOG_SysInit, "Clear Screen... OK, CLS-Mode: %d\n\n",r);
 
-	printf("Try To Fetch Terminal Size... ");
+	fprintf(LOG_SysInit, "Try To Fetch Terminal Size... ");
 	r = TermGetSize(0);
 	if (!r){
-		printf("ERROR!\n");
-		printf("STOP PROJECT\n");
+		fprintf(LOG_SysInit, "ERROR!\n");
+		fprintf(LOG_SysInit, "STOP PROJECT\n");
 		return 0;
 	}
-	printf("OK, Size-Mode: %d\n",r);
+	fprintf(LOG_SysInit, "OK, Size-Mode: %d\n",r);
 	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("BillyOS: Screen Size Changes Will Be Polled...Sorry.\n");
+		fprintf(LOG_SysInit, "BillyOS: Screen Size Changes Will Be Polled...Sorry.\n");
 	#else
 		signal(SIGWINCH, TermSignalHandler);
-		printf("PosiX-OS: Screen Size Changes Getting Signaled.\n");
+		fprintf(LOG_SysInit, "PosiX-OS: Screen Size Changes Getting Signaled.\n");
 	#endif
-	printf("Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
+	fprintf(LOG_SysInit, "Width: %d  Height: %d\n\n", TERM_ScreenWidth, TERM_ScreenHeight);
 
-	printf("Synchronize CLS-Mode With Size-Mode...\n");
-	r = TermClearScreen(r);
-	printf("Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n\n",r);
+	fprintf(LOG_SysInit, "Synchronize CLS-Mode With Size-Mode...\n");
+	r = TermClearScreen(LOG_SysInit, r);
+	fprintf(LOG_SysInit, "Synchronized CLS-Mode With Size-Mode... OK, Mode: %d\n\n",r);
 	
-	printf("Enable Trap Mouse Mode... ");
+	fprintf(LOG_SysInit, "Enable Trap Mouse Mode... ");
 	TermTrapMouse(1);
-	printf("(probably) OK\n\n");
+	fprintf(LOG_SysInit, "(probably) OK\n\n");
 
-	printf("Enable Trap Focus Change... ");
+	fprintf(LOG_SysInit, "Enable Trap Focus Change... ");
 	TermTrapFocus(1);
-	printf("(probably) OK\n\n");
+	fprintf(LOG_SysInit, "(probably) OK\n\n");
 
-	printf("Catch Ctrl-C... ");
+	fprintf(LOG_SysInit, "Catch Ctrl-C... ");
 	signal(SIGINT, TermSignalHandler);
-	printf("(probably) OK\n\n");
+	fprintf(LOG_SysInit, "(probably) OK\n\n");
 
 	#if __WIN32__ || _MSC_VER || __WIN64__
-		printf("BillyOS: Check On Real-Time Changes Get Polled...\n");
-		printf("         The whole timer stuff is kind a fixed... Sorry... not.\n\n");
+		fprintf("BillyOS: Check On Real-Time Changes Get Polled...\n");
+		fprintf("         The whole timer stuff is kind a fixed... Sorry... not.\n\n");
 	#else
 		signal(SIGALRM, TermSignalHandler);
 		
@@ -1154,11 +1157,11 @@ int TermInit(){
 		// but (little depending on Time_EventsTime) from one SecondEvent to the next SecondEvent, we're within a mS tolerance!
 		// lower value to raise precision
 		ualarm(333333,333333);
-		printf("PosiX-OS: Check On Real-Time Changes Get Signaled.\n");
+		fprintf(LOG_SysInit, "PosiX-OS: Check On Real-Time Changes Get Signaled.\n");
 
 		// Lower = more "UserLoops" vs. Higher = less CPU-time...
 		TIME_EventsTime = 10000;
-		printf("PosiX-OS: TIME_DoEventsTime is set.\n\n");
+		fprintf(LOG_SysInit, "PosiX-OS: TIME_DoEventsTime is set.\n\n");
 
 	#endif
 
@@ -1169,24 +1172,24 @@ int TermInit(){
 }
 int TermExit(){
 
-	TermClearScreen(0);
-	printf("Disable Trap Mouse Mode... ");
+	TermClearScreen(LOG_SysExit, 0);
+	fprintf(LOG_SysExit, "Disable Trap Mouse Mode... ");
 	TermTrapMouse(0);
-	printf("OK\n\n");
+	fprintf(LOG_SysExit, "OK\n\n");
 
-	printf("Disable Trap Focus Change... ");
+	fprintf(LOG_SysExit, "Disable Trap Focus Change... ");
 	TermTrapFocus(0);
-	printf("OK\n\n");
+	fprintf(LOG_SysExit, "OK\n\n");
 
-	printf("Try To Set Back Terminal From Video Mode... ");
+	fprintf(LOG_SysExit, "Try To Set Back Terminal From Video Mode... ");
 	if (!TermSetVT(0)){
-		printf("ERROR!\n");
+		fprintf(LOG_SysExit, "ERROR!\n");
 		return 0;
 	}
-	printf("OK\n\n");
+	fprintf(LOG_SysExit, "OK\n\n");
 
-	printf("%s - %s\n", gStrDate, gStrTime);
-	printf("Runtime: %s\n\n", gStrRunTime);
+	fprintf(LOG_SysExit, "%s - %s\n", gStrDate, gStrTime);
+	fprintf(LOG_SysExit, "Runtime: %s\n\n", gStrRunTime);
 
 	return 1;
 
@@ -1374,7 +1377,7 @@ void TermFlushInKey(void){
 	#define DoEvents() usleep(TIME_EventsTime);
 #endif 
 
-int TermClearScreen(int set){
+int TermClearScreen(FILE *file, int set){
 /**
  * @brief 	Clear Screen - ESC & OS
  * 
@@ -1390,7 +1393,7 @@ int TermClearScreen(int set){
  * @return	int 1-3 = used way to CLS
  */
 	
-	static int isSet = 3;
+	static int isSet = 2;
 	
 	if (set){
 		if (set < 1 || set > 3){
@@ -1402,8 +1405,8 @@ int TermClearScreen(int set){
 	switch (isSet){
 	case 1:
 	case 2:
-		printf("\x1B[2J");
-		printf("\x1B[1;1H");
+		fprintf(file, "\x1B[2J\x1B[1;1H");
+		//printf("\x1B[1;1H");
 		break;
 	case 3:
 		#if __WIN32__ || _MSC_VER || __WIN64__
@@ -1415,8 +1418,11 @@ int TermClearScreen(int set){
 	default:
 		break;
 	}
-	TERM_CursorPosX = 1;
-	TERM_CursorPosY = 1;
+	if (file == stdout){
+		TERM_CursorPosX = 1;
+		TERM_CursorPosY = 1;
+	}
+	
 	return isSet;
 }
 
@@ -3210,7 +3216,6 @@ void TermCoreLoop(void(*UserLoop)()){
 	// Loop Minimum
 
 }
-
 
 
 /*

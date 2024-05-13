@@ -43,6 +43,12 @@ void UserDblClick(int x, int y, int button){
 
 int main() {
 	
+	LOG_SysInit = stdout;
+	LOG_SysExit = stdout;
+	LOG_ColorInit = stderr;
+	LOG_StyleInit = stderr;
+	LOG_TuiCopy = stdout;
+
 	if (!TermInit()){
 		return -1;
 	}
@@ -95,7 +101,7 @@ int main() {
 		*/
 	
 		fflush(stdout);
-		TermClearScreen(0);
+		TermClearScreen(stdout, 0);
 		STRtrimWS_R(gStrRunTime);
 		STRtrimWS_R(gStrTime);
 		TUI_HeaderCnt = TUIinitHeaders("desktops.ini", &userHeaders);
@@ -118,14 +124,14 @@ int main() {
 int reduce = (int)INIstrToMem("", 2);
 
 		fflush(stdout);
-		TermClearScreen(0);
+		TermClearScreen(stdout, 0);
 
 		printf("         1         2         3         4         5         6         7         8\n");
 		fflush(stdout);
 		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
-		ResFBU();
+		ESCresFBU(stdout);
 		fflush(stdout);
-		TermClearScreen(0);
+		TermClearScreen(stdout, 0);
 
 		for (int i = 0; i < TUI_TopMenuCnt; i++){ //userTopMenuCnt; i++){
 
@@ -150,28 +156,28 @@ int reduce = (int)INIstrToMem("", 2);
 			TUIrenderBottomMenu(&userTopMenus[i], 0, 0, 0, 0, 0);
 */			
 			//TUIrenderTopMenu(1, TERM_ScreenHeight, 0, &userTopMenus[i], &userDesktopDefs[0], 0);
-			ResFBU();
-			printf("\n");
-			TermClearScreen(0);
+			//ResFBU();
+			//printf("\n");
+			//TermClearScreen(0);
 		}
 		
 	TUIclearSmallInverted(userTopMenus[0].pos1st);
 	TUIbuildMenus(&userDesktopDefs[0], 0, 0, 0, 0);
 
 
-		ResFBU();
+		ESCresFBU(stdout);
 		printf("\n");
-		TermClearScreen(0);
+		TermClearScreen(stdout, 0);
 
 		printf("\na b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(0");
 		printf("a b c d e f g h i j k l m n opqrs t u v w x y z\n");
 		printf("\x1B(B");
 
-		ResFBU();
+		ESCresFBU(stdout);
 		printf("\n");
 
-		TermClearScreen(0);
+		TermClearScreen(stdout, 0);
 
 		printf("         1         2         3         4         5         6         7         8\n");
 		printf("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
@@ -221,142 +227,142 @@ int reduce = (int)INIstrToMem("", 2);
 		LINlineXY(39, -4, 39, 50);
 		LINlineXY(41, 50, 41, -4);
 
-		DECmoveTo(50, 5);
-		LINlineTo(55, 5);
-		LINlineTo(55, 10);
-		LINlineTo(50, 10);
+		DECmoveTo(stdout, 50, 5);
+		LINlineTo(stdout, 55, 5);
+		LINlineTo(stdout, 55, 10);
+		LINlineTo(stdout, 50, 10);
 		DECclose;
 
-		DECmoveTo(20,5);
-		LINlineTo(25,10);
-		LINlineTo(20,15);
-		LINlineTo(15,10);
+		DECmoveTo(stdout, 20,5);
+		LINlineTo(stdout, 25,10);
+		LINlineTo(stdout, 20,15);
+		LINlineTo(stdout, 15,10);
 		DECclose;
 */
-SetFg16(fgBlue);
-		LINmoveTo(82-2,5);
-		LINlineTo(82-3,19);
-		LINlineTo(82-5,20);
-		LINlineTo(82-9,9);
-		LINlineTo(82-13,21);
-		LINlineTo(82-14,19);
-		LINlineTo(82-20,18);
-		LINlineTo(82-25,9);
-		LINlineTo(82-30,3);
-		LINlineTo(82-35,4);
-		LINlineTo(82-40,12);
-		LINlineTo(82-43,21);
-		LINlineTo(82-53,6);
-		LINlineTo(82-58,11);
-		LINlineTo(82-53,16);
-		LINlineTo(82-58,21);
-		LINclose;
+ESCsetFg16(stdout, fgBlue);
+		LINmoveTo(stdout, 82-2,5);
+		LINlineTo(stdout, 82-3,19);
+		LINlineTo(stdout, 82-5,20);
+		LINlineTo(stdout, 82-9,9);
+		LINlineTo(stdout, 82-13,21);
+		LINlineTo(stdout, 82-14,19);
+		LINlineTo(stdout, 82-20,18);
+		LINlineTo(stdout, 82-25,9);
+		LINlineTo(stdout, 82-30,3);
+		LINlineTo(stdout, 82-35,4);
+		LINlineTo(stdout, 82-40,12);
+		LINlineTo(stdout, 82-43,21);
+		LINlineTo(stdout, 82-53,6);
+		LINlineTo(stdout, 82-58,11);
+		LINlineTo(stdout, 82-53,16);
+		LINlineTo(stdout, 82-58,21);
+		LINclose(stdout);
 		
-SetFg16(fgGreen);
-		LINmoveTo(2,5);
-		LINlineTo(3,19);
-		LINlineTo(5,20);
-		LINlineTo(9,9);
-		LINlineTo(13,21);
-		LINlineTo(14,19);
-		LINlineTo(20,18);
-		LINlineTo(25,9);
-		LINlineTo(30,3);
-		LINlineTo(35,4);
-		LINlineTo(40,12);
-		LINlineTo(43,21);
-		LINlineTo(53,6);
-		LINlineTo(58,11);
-		LINlineTo(53,16);
-		LINlineTo(58,21);
-		LINclose;
+ESCsetFg16(stdout, fgGreen);
+		LINmoveTo(stdout, 2,5);
+		LINlineTo(stdout, 3,19);
+		LINlineTo(stdout, 5,20);
+		LINlineTo(stdout, 9,9);
+		LINlineTo(stdout, 13,21);
+		LINlineTo(stdout, 14,19);
+		LINlineTo(stdout, 20,18);
+		LINlineTo(stdout, 25,9);
+		LINlineTo(stdout, 30,3);
+		LINlineTo(stdout, 35,4);
+		LINlineTo(stdout, 40,12);
+		LINlineTo(stdout, 43,21);
+		LINlineTo(stdout, 53,6);
+		LINlineTo(stdout, 58,11);
+		LINlineTo(stdout, 53,16);
+		LINlineTo(stdout, 58,21);
+		LINclose(stdout);
 
-SetFg16(fgRed);
-		LINmoveTo(23,5);
-		LINlineTo(60,9);
-		LINlineTo(5,12);
-		LINlineTo(55,18);
-		LINlineTo(13,21);
-		LINclose;
-SetFg16(fgYellow);
+ESCsetFg16(stdout, fgRed);
+		LINmoveTo(stdout, 23,5);
+		LINlineTo(stdout, 60,9);
+		LINlineTo(stdout, 5,12);
+		LINlineTo(stdout, 55,18);
+		LINlineTo(stdout, 13,21);
+		LINclose(stdout);
+ESCsetFg16(stdout, fgYellow);
 /*
-		LINmoveTo(82-23,3);
-		LINlineTo(82-70,11);
-		LINlineTo(82-5,12);
-		LINlineTo(82-55,18);
-		LINlineTo(82-13,21);
+		LINmoveTo(stdout, 82-23,3);
+		LINlineTo(stdout, 82-70,11);
+		LINlineTo(stdout, 82-5,12);
+		LINlineTo(stdout, 82-55,18);
+		LINlineTo(stdout, 82-13,21);
 		LINclose;
 */
-		DECmoveTo(82-23,3);
-		DEClineTo(82-70,11);
-		DEClineTo(82-5,12);
-		DEClineTo(82-55,18);
-		DEClineTo(82-13,21);
-		DECclose;
+		DECmoveTo(stdout, 82-23,3);
+		DEClineTo(stdout, 82-70,11);
+		DEClineTo(stdout, 82-5,12);
+		DEClineTo(stdout, 82-55,18);
+		DEClineTo(stdout, 82-13,21);
+		DECclose(stdout);
 
 /*
-		LINmoveTo(20,5);
-		LINlineTo(25,10);
-		LINlineTo(20,15);
-		LINlineTo(15,10);
+		LINmoveTo(stdout, 20,5);
+		LINlineTo(stdout, 25,10);
+		LINlineTo(stdout, 20,15);
+		LINlineTo(stdout, 15,10);
 		LINclose;
 
-		DECmoveTo(20,5);
-		DEClineTo(25,10);
-		DEClineTo(20,15);
-		DEClineTo(15,10);
+		DECmoveTo(stdout, 20,5);
+		DEClineTo(stdout, 25,10);
+		DEClineTo(stdout, 20,15);
+		DEClineTo(stdout, 15,10);
 		DECclose;
 */
 
-TxtBold(1);
-SetFg16(fgWhite);
-		CHRmoveTo(9,3, '*');
-		CHRlineTo(14,8);
-		CHRlineTo(9,13);
-		CHRlineTo(4,8);
-		CHRclose;
+ESCtxtBold(stdout, 1);
+ESCsetFg16(stdout, fgWhite);
+		CHRmoveTo(stdout, 9,3, '*');
+		CHRlineTo(stdout, 14,8);
+		CHRlineTo(stdout, 9,13);
+		CHRlineTo(stdout, 4,8);
+		CHRclose(stdout);
 
-		DECmoveTo(21,3);
-		DEClineTo(26,8);
-		DEClineTo(21,13);
-		DEClineTo(16,8);
-		DECclose;
+		DECmoveTo(stdout, 21,3);
+		DEClineTo(stdout, 26,8);
+		DEClineTo(stdout, 21,13);
+		DEClineTo(stdout, 16,8);
+		DECclose(stdout);
 
-		DECmoveTo(33,3);
-		DEClineTo(38,8);
-		DEClineTo(33,13);
-		DEClineTo(28,8);
-		DECclose;
+		DECmoveTo(stdout, 33,3);
+		DEClineTo(stdout, 38,8);
+		DEClineTo(stdout, 33,13);
+		DEClineTo(stdout, 28,8);
+		DECclose(stdout);
 
-SetFg16(fgCyan);
-		LINmoveTo(33,3);
-		LINlineTo(28,8);
-		LINlineTo(33,13);
-		LINlineTo(38,8);
-		LINclose;
+ESCsetFg16(stdout, fgCyan);
+		LINmoveTo(stdout, 33,3);
+		LINlineTo(stdout, 28,8);
+		LINlineTo(stdout, 33,13);
+		LINlineTo(stdout, 38,8);
+		LINclose(stdout);
 
-		DECmoveTo(45,3);
-		DEClineTo(40,8);
-		DEClineTo(45,13);
-		DEClineTo(50,8);
-		DECclose;
+		DECmoveTo(stdout, 45,3);
+		DEClineTo(stdout, 40,8);
+		DEClineTo(stdout, 45,13);
+		DEClineTo(stdout, 50,8);
+		DECclose(stdout);
 
-		LINmoveTo2(57,3);
-		LINlineTo2(52,8);
-		LINlineTo2(57,13);
-		LINlineTo2(62,8);
-		LINclose2;
+		LINmoveTo2(stdout, 57,3);
+		LINlineTo2(stdout, 52,8);
+		LINlineTo2(stdout, 57,13);
+		LINlineTo2(stdout, 62,8);
+		LINclose2(stdout);
 
-		LINmoveTo2(9,14);
-		LINlineTo2(14,19);
-		LINlineTo2(9,24);
-		LINlineTo2(4,19);
-		LINclose2;
+		LINmoveTo2(stdout, 9,14);
+		LINlineTo2(stdout, 14,19);
+		LINlineTo2(stdout, 9,24);
+		LINlineTo2(stdout, 4,19);
+		LINclose2(stdout);
 
 
-TxtBold(0);
-ResFg();
-Locate(TERM_ScreenWidth,TERM_ScreenHeight);
+ESCtxtBold(stdout, 0);
+ESCresFg(stdout);
+ESClocate(stdout, TERM_ScreenWidth,TERM_ScreenHeight);
 printf("\nreduce: %d\n", reduce);
 fflush(stdout);
 //printf("%d", (10 &  ))

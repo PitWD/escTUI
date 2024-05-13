@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "mathe.h"
 
 #define STR_XS_SIZE 128
@@ -15,6 +17,24 @@ FILE *LOG_Debug = NULL;
 #if __WIN32__ || _MSC_VER || __WIN64__
     #define strncasecmp(str1, str2, len) _strnicmp(str1, str2, len)
 #endif
+
+void STRprintf(const char *format, ...){
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
+
+void STRfprintf(FILE *file, const char *format, ...){
+    if (file){
+        va_list args;
+        va_start(args, format);
+        vfprintf(file, format, args);
+        va_end(args);
+    }    
+}
+#define fprintf(file, ...) STRfprintf(file, __VA_ARGS__)
+//#define fprintf(file, ...) STRfprintf((file), ##__VA_ARGS__)
 
 void STRtrimWhiteSpacesLR(char *strIN, const int l, const int r){
     
@@ -269,18 +289,18 @@ void STRlongToBin(const unsigned long lValue, char *strResult, const int bits){
 #define STRint2Bin(iValue, strResult) STRlongToBin((unsigned long)iValue, strResult, 8 * sizeof(int))
 #define STRbyte2Bin(bValue, strResult) STRlongToBin((unsigned long)bValue, strResult, 8)
 
-void STRprintChars(char charIN, int count){
+void STRprintChars(FILE *file, char charIN, int count){
     while (count--){
-        printf("%c", charIN);
+        fprintf(file, "%c", charIN);
     }
 }
-#define STRprintSpaces(count) STRprintChars(' ', count)
+#define STRprintSpaces(file, count) STRprintChars(file, ' ', count)
 
-void STRprintCentered(char *strIN, int len){
+void STRprintCentered(FILE *file, char *strIN, int len){
 
     int spaces = (len - strlen(strIN)) / 2;
-    STRprintSpaces(spaces);
+    STRprintSpaces(file, spaces);
     printf("%s", strIN);
-    STRprintSpaces(len - strlen(strIN) - spaces);
+    STRprintSpaces(file, len - strlen(strIN) - spaces);
 
 }

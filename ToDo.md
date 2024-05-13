@@ -1,5 +1,21 @@
 **ToDo**
 
+**046. Missing while fprintf changes...**
+- fflush
+- SetColorStyle
+- SetTxtStyle
+- resFBU
+- Locate (all)
+- TxtDblTop
+- TxtDblBot
+- TxtDblWidth
+- DEClineX / DeclineY can be better... all that and similar stuff must be on absolute coordinates (prevents the last collumn thing, too)
+
+- **A Debug Version of fprintf() with fflush**
+
+
+**045. INIgetByteBin - probably dumb...**
+
 **044. Print to canvas instead direct...**
 
 **043. How To printf-Debug to 2nd term...**

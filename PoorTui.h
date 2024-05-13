@@ -17,7 +17,13 @@
 */
 
 //#include "Terminal.h"
+//#include "esc.h"
+
 #include "AnsiESC.h"
+
+FILE *LOG_TuiCopy = NULL;
+
+#define TUIsetColorStyle(file, color, style) ESCsetColorStyle(file, &userColors[color], 1); ESCsetTxtStyle(file, &userStyles[style], 1)
 
 struct TuiHeadersSTRUCT{
 	char *caption;
@@ -278,10 +284,10 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 
 	// Where to render
 	if (posX && posY){
-		Locate(posX, posY);
+		ESClocate(LOG_TuiCopy, posX, posY);
 	}
 	else if (posX){
-		LocateX(posX);
+		ESClocateX(LOG_TuiCopy, posX);
 	}
 	
 
@@ -293,48 +299,45 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 		// render just the keys (+ eventually check/option brackets)
 		if (menuPos->selected && menuPos->enabled){
 			// enabled & selected
-			SetColorStyle(&userColors[menuDef->selectColor], 1);
-			SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->selectColor, menuDef->selectStyle);
 		}
 		else if (menuPos->enabled){
 			// enabled
-			SetColorStyle(&userColors[menuDef->txtColor], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
 		}
 		else{
 			// disabled
-			SetColorStyle(&userColors[menuDef->disabledColor], 1);
-			SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->disabledColor, menuDef->disabledStyle);
 		}
-		printf(" ");	// Leading Space
+		fprintf(LOG_TuiCopy, " ");	// Leading Space
 		if (menuPos->isCheck){
 			// is a check
-			printf("[");
+			fprintf(LOG_TuiCopy, "[");
 			if (menuPos->activated){
-				printf("x");
+				fprintf(LOG_TuiCopy, "x");
 			}
 			else{
-				printf(" ");
+				fprintf(LOG_TuiCopy, " ");
 			}
-			printf("] ");
+			fprintf(LOG_TuiCopy, "] ");
 		}
 		else if (menuPos->isOption){
 			// is an option
-			printf("(");
+			fprintf(LOG_TuiCopy, "(");
 			if (menuPos->activated){
-				printf("x");
+				fprintf(LOG_TuiCopy, "x");
 			}
 			else{
-				printf(" ");
+				fprintf(LOG_TuiCopy, " ");
 			}
-			printf(") ");
+			fprintf(LOG_TuiCopy, ") ");
 		}
 		else if (printSmall == 7){
 			if (menuPos->isSpacer){
-				DEClineX(4);
+				DEClineX(LOG_TuiCopy, 4);
 			}
 			else{
-				STRprintSpaces(4);
+				STRprintSpaces(LOG_TuiCopy, 4);
 			}
 		}
 		else{
@@ -342,40 +345,35 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 		}
 		
 		if (menuPos->selected && menuPos->enabled){
-			SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
-			SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->selectKeyColor, menuDef->selectKeyStyle);
 		}
 		else if (menuPos->enabled && !menuPos->isSpacer){
 			// Key in keyColor and keyStyle
-			SetColorStyle(&userColors[menuDef->keyColor], 1);
-			SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->keyColor, menuDef->keyStyle);
 		}
 		else{
 			// Color & Style is fine
 		}
 		if (menuPos->isSpacer){
-			DEClineX(1);
+			DEClineX(LOG_TuiCopy, 1);
 		}
 		else{
-			printf("%c", menuPos->caption[menuPos->keyCode]);
+			fprintf(LOG_TuiCopy, "%c", menuPos->caption[menuPos->keyCode]);
 		}
 
 		if (menuPos->selected && menuPos->enabled){
 			// enabled & selected
-			SetColorStyle(&userColors[menuDef->selectColor], 1);
-			SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->selectColor, menuDef->selectStyle);
 		}
 		else if (menuPos->enabled){
 			// enabled
-			SetColorStyle(&userColors[menuDef->txtColor], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
 		}
 		else{
 			// disabled
-			SetColorStyle(&userColors[menuDef->disabledColor], 1);
-			SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->disabledColor, menuDef->disabledStyle);
 		}
-		printf(" ");	// Trailing Space
+		fprintf(LOG_TuiCopy, " ");	// Trailing Space
 		
 	}
 
@@ -387,38 +385,33 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 				// enabled - selected
 				if (i && (i == menuPos->keyCode)){
 					// is key
-					SetTxtStyle(&userStyles[menuDef->selectKeyStyle], 1);
-					SetColorStyle(&userColors[menuDef->selectKeyColor], 1);
+					TUIsetColorStyle(LOG_TuiCopy, menuDef->selectKeyColor, menuDef->selectKeyStyle);
 				}
 				else{
-					SetTxtStyle(&userStyles[menuDef->selectStyle], 1);
-					SetColorStyle(&userColors[menuDef->selectColor], 1);
+					TUIsetColorStyle(LOG_TuiCopy, menuDef->selectColor, menuDef->selectStyle);
 				}
 			}
 			else if (menuPos->enabled){
 				// enabled
 				if (i && (i == menuPos->keyCode)){
 					// is key
-					SetColorStyle(&userColors[menuDef->keyColor], 1);
-					SetTxtStyle(&userStyles[menuDef->keyStyle], 1);
+					TUIsetColorStyle(LOG_TuiCopy, menuDef->keyColor, menuDef->keyStyle);
 				}
 				else{
-					SetColorStyle(&userColors[menuDef->txtColor], 1);
-					SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
+					TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
 				}
 			}
 			else{
 				// disabled
-				SetColorStyle(&userColors[menuDef->disabledColor], 1);
-				SetTxtStyle(&userStyles[menuDef->disabledStyle], 1);
+				TUIsetColorStyle(LOG_TuiCopy, menuDef->disabledColor, menuDef->disabledStyle);
 			}
 			if (i == 2 && (menuPos->isCheck || menuPos->isOption)){
 				// Set Value of check/option
 				if (menuPos->activated){
-					printf("x");
+					fprintf(LOG_TuiCopy, "x");
 				}
 				else{
-					printf(" ");
+					fprintf(LOG_TuiCopy, " ");
 				}
 			}
 			else{
@@ -426,18 +419,18 @@ int TUIprintMenuPos(int posX, int posY, int printSmall, int renderWidth, struct 
 					/* code */
 				}
 				else{
-					printf("%c", menuPos->caption[i]);
+					fprintf(LOG_TuiCopy, "%c", menuPos->caption[i]);
 				}
 			}
 		}
 
 		if (menuPos->isSpacer){
-			printf(" ");
-			DEClineX(renderWidth - 2);
-			printf(" ");
+			fprintf(LOG_TuiCopy, " ");
+			DEClineX(LOG_TuiCopy, renderWidth - 2);
+			fprintf(LOG_TuiCopy, " ");
 		}
 		else{
-			STRprintSpaces(renderWidth - strlen(menuPos->caption));
+			STRprintSpaces(LOG_TuiCopy, renderWidth - strlen(menuPos->caption));
 		}
 	}
 
@@ -681,7 +674,7 @@ int TUIrenderSub(int posX, int posY, int width, struct TuiMenuPosSTRUCT *menuPos
 
 	while (menuPos){
 		if (posY >= minY && posY <= maxY){
-			Locate(posX, posY);
+			ESClocate(LOG_TuiCopy, posX, posY);
 			lastValidY = posY;
 			if (menuPos->selected && menuPos->enabled){
 				// selected
@@ -800,20 +793,19 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 	
 	// Where to render
 	if (posX && posY){
-		Locate(posX, posY);
+		ESClocate(LOG_TuiCopy, posX, posY);
 	}
 	else if (posX){
-		LocateX(posX);
+		ESClocateX(LOG_TuiCopy, posX);
 	}
 	
 	if (!justRefresh){
 		// Style & Color
-		SetColorStyle(&userColors[headerDef->txtColor], 1);
-		SetTxtStyle(&userStyles[headerDef->txtStyle], 1);
+		TUIsetColorStyle(LOG_TuiCopy, headerDef->txtColor, headerDef->txtStyle);
 		if (renderRealTime ^ renderRunTime) {
 			// one time active - center is left of time...
-			STRprintCentered(strHLP, width);
-			STRprintSpaces(renderWidth - width);
+			STRprintCentered(LOG_TuiCopy, strHLP, width);
+			STRprintSpaces(LOG_TuiCopy, renderWidth - width);
 		}
 		else{
 			// center is center
@@ -821,39 +813,38 @@ int TUIrenderHeaderFooter(int posX, int posY, int width, struct TuiHeadersSTRUCT
 				// add three spaces, cause runtime is shorter than realtime
 				strHLP[renderLen - 3] = ' '; strHLP[renderLen - 2] = ' '; strHLP[renderLen - 1] = ' '; strHLP[renderLen] = '\0';
 			}
-			STRprintCentered(strHLP, renderWidth);					
+			STRprintCentered(LOG_TuiCopy, strHLP, renderWidth);					
 		}
 	}
 	else{
 		// we just refresh time(s)
-		CursorRight(renderWidth);
+		ESCcursorRight(LOG_TuiCopy, renderWidth);
 	}
 
 	if (renderRealTime || renderRunTime){
 		// Set style & color of times
-		SetColorStyle(&userColors[headerDef->timeColor], 1);
-		SetTxtStyle(&userStyles[headerDef->timeStyle], 1);
+		TUIsetColorStyle(LOG_TuiCopy, headerDef->timeColor, headerDef->timeStyle);
 	}
 	
 	// Do we print the Realtime (all time right alignment)
 	if (renderRealTime){
 		// 01.01.2023 00:00:00
-		CursorLeft(19);
-		printf("%s %s", gStrDate, gStrTime);
-		CursorRight(1);
+		ESCcursorLeft(LOG_TuiCopy, 19);
+		fprintf(LOG_TuiCopy, "%s %s", gStrDate, gStrTime);
+		ESCcursorRight(LOG_TuiCopy, 1);
 	}
 	// Do we print the RunTime
 	if (renderRunTime){
 		// 00000d 00:00:00
 		if (renderRealTime){
 			// left alignment, cause RealTime already exist
-			CursorLeft(renderWidth - 2);
+			ESCcursorLeft(LOG_TuiCopy, renderWidth - 2);
 		}
 		else{
 			// right alignment
-			CursorLeft(15);
+			ESCcursorLeft(LOG_TuiCopy, 15);
 		}
-		printf("%s", gStrRunTime);
+		fprintf(LOG_TuiCopy, "%s", gStrRunTime);
 	}	
 
 	return 1;
@@ -931,7 +922,7 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	}
 
 	// Where to render
-	Locate(posX, posY);
+	ESClocate(LOG_TuiCopy, posX, posY);
 		
 	menuPos = menuDef->pos1st;
 	while (menuPos){
@@ -956,9 +947,9 @@ int TUIrenderHorzMenu(int posX, int posY, int menuType, struct TuiMenusSTRUCT *m
 	}
 	
 	// Fill line with right colored spaces
-	SetColorStyle(&userColors[menuDef->txtColor], 1);
-	SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
-	STRprintSpaces(renderWidth - renderLen);
+	TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
+
+	STRprintSpaces(LOG_TuiCopy, renderWidth - renderLen);
 		
 	if (selectedMenu && selectedMenu->pos1st){
 		if (menuType == TUI_MENU_BOTTOM){
@@ -1021,10 +1012,9 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 		
 		if (doLead){
 			// Leading Line
-			Locate(lineX, posY);
-			SetColorStyle(&userColors[menuDef->txtColor], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);
-			STRprintSpaces(len);
+			ESClocate(LOG_TuiCopy, lineX, posY);
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
+			STRprintSpaces(LOG_TuiCopy, len);
 		}
 		
 		int startY = posY + (doLead != 0);
@@ -1037,11 +1027,10 @@ int TUIrenderVertMenu(int posX, int posY, int menuType, int doLead, int doTrail,
 		
 		if (doTrail){
 			// Trailing Line(s)
-			SetColorStyle(&userColors[menuDef->txtColor], 1);
-			SetTxtStyle(&userStyles[menuDef->txtStyle], 1);		
+			TUIsetColorStyle(LOG_TuiCopy, menuDef->txtColor, menuDef->txtStyle);
 			while (posY <= maxY){
-				Locate(lineX, posY);
-				STRprintSpaces(len);
+				ESClocate(LOG_TuiCopy, lineX, posY);
+				STRprintSpaces(LOG_TuiCopy, len);
 				posY++;
 				if (doTrail > 0){
 					break;	// just negative fills to the bottom

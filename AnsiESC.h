@@ -4,16 +4,22 @@
 //				  (see related declarations/functions and at the EOF)
 // This is a  ! p_o_o_r !  Header by (c) Pit Demmer. (PIT-Licensed 01.04.2022 -           )
 
+#ifndef _AnsiESC_H
+#define _ANSIESC_H
+
 #define AnsiESCVersion "1.00pa"
 
 // WIN & Linux
-#include "Terminal.h"
-#include <ctype.h>
-#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include "ini.h"
+#include "Terminal.h"
 
+//#include <ctype.h>
+//#include <stdint.h>
+//#include <stdlib.h>
 
+FILE *LOG_ColorInit = NULL;
+FILE *LOG_StyleInit = NULL;
 
 // Collector for all strings of EscColor and EscStyle
 
@@ -21,20 +27,9 @@
 char RUL[] = "24";				// 'ResetUnderLine' alternativ: "4:0" 
 
 // Actual Settings / States
-static EscStyleSTRUCT ActTxtStyle;
-static EscColorSTRUCT ActTxtColor;
+static EscStyleSTRUCT ESC_ActTxtStyle;
+static EscColorSTRUCT ESC_ActTxtColor;
 
-
-
-void ResFBU(void);
-void SetColorStyle(EscColorSTRUCT *pColor, int set);
-void SetTxtStyle(EscStyleSTRUCT *pStyle, int set);
-void LocateX(int x);
-void SetFg255(int c);
-void SetBg255(int c);
-void TxtDblWidth(int set);
-void TxtDblTop(int set);
-void TxtDblBot(int set);
 
 // 'VGA'16-Pallet - colors
 enum {
@@ -53,6 +48,113 @@ enum {
 // 256 Grey's White -> Black 
 int ESC_Grey[27];		// initialization in InitColors
 
+void ESCinit(void);
+int ESCinitColors(char *strFile, EscColorSTRUCT **userColor);
+int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles);
+void ESClocate(FILE *file, int x, int y);
+void ESClocateX(FILE *file, int x);
+void ESCcursorUp(FILE *file, int y);
+void ESCcursorUp1st(FILE *file, int y);
+void ESCcursorDown(FILE *file, int y);
+void ESCursorDown1st(FILE *file, int y);
+void ESCcursorRight(FILE *file, int x);
+void ESCcursorLeft(FILE *file, int x);
+void ESCcursorMoveX(FILE *file, int x);
+void ESCcursorMoveY(FILE *file, int y);
+#define ESCcursorMoveXY(file, x, y) ESCcursorMoveX(file, x); ESCcursorMoveY(file, y)
+void ESCgetCursorPos(FILE *file);
+void ESCcursorSave(FILE *file);
+void ESCcursorRestore(FILE *file);
+void DECboxMode(FILE *file, int set);
+#define DECboxON(file) DECboxMode(file, 1)
+#define DECboxOFF(file) DECboxMode(file, 0)
+void DEClineX(FILE *file, int len);
+void DEClineY(FILE *file, int len);
+void CHRline(FILE *file, int spX, int spY, int epX, int epY, int newLine, char c);
+#define CHRlineXY(file, startX, startY, stopX, stopY, c) CHRline(file, startX, startY, stopX, stopY, 2, c)
+#define CHRmoveTo(file, x, y, c) CHRline(file, x, y, 0, 0, 1, c)
+#define CHRlineTo(file, x, y) CHRline(file, 0, 0, x, y, 0, 0)
+#define CHRclose(file) CHRline(file, 0, 0, 0, 0, 3, 0)
+void LINline(FILE *file, int spX, int spY, int epX, int epY, int newLine);
+#define LINlineXY(file, startX, startY, stopX, stopY) LINline(file, startX, startY, stopX, stopY, 2)
+#define LINmoveTo(file, x, y) LINline(file, x, y, 0, 0, 1)
+#define LINlineTo(file, x, y) LINline(file, 0, 0, x, y, 0)
+#define LINclose(file) LINline(file, 0, 0, 0, 0, 3)
+void LINline2(FILE *file, int spX, int spY, int epX, int epY, int newLine);
+#define LINlineXY2(file, startX, startY, stopX, stopY) LINline2(file, startX, startY, stopX, stopY, 2)
+#define LINmoveTo2(file, x, y) LINline2(file, x, y, 0, 0, 1)
+#define LINlineTo2(file, x, y) LINline2(file,0, 0, x, y, 0)
+#define LINclose2(file) LINline2(file, 0, 0, 0, 0, 3)
+void DECline(FILE *file, int spX, int spY, int epX, int epY, int newLine);
+#define DEClineXY(file, startX, startY, stopX, stopY) DECline(file, startX, startY, stopX, stopY, 2)
+#define DECmoveTo(file, x, y) DECline(file, x, y, 0, 0, 1)
+#define DEClineTo(file, x, y) DECline(file, 0, 0, x, y, 0)
+#define DECclose(file) DECline(file, 0, 0, 0, 0, 3)
+void ESCclrLineA(FILE *file, int xS, int xE);
+void ESCclrLine(FILE *file);
+void ESCclrLineL(FILE *file);
+void ESCclrLineR(FILE *file);
+void ESCclrScrA(FILE *file, int xS, int yS, int xE, int yE);
+void ESCclrScrL(FILE *file);
+void ESCclrScrR(FILE *file);
+void ESCresFg(FILE *file);
+void ESCresBg(FILE *file);
+void ESCresUl(FILE *file);
+void ESCresFB(FILE *file);
+void ESCresFBU(FILE *file);
+void ESCsetFgRGB(FILE *file, int r, int g, int b);
+void ESCsetBgRGB(FILE *file, int r, int g, int b);
+void ESCsetUlRGB(FILE *file, int r, int g, int b);
+void ESCsetFBrgb(FILE *file, int fgR, int fgG, int fgB, int bgR, int bgG, int bgB);
+void ESCsetFBUrgb(FILE *file, int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, int ulG, int ulB);
+void ESCsetFg255(FILE *file, int c);
+void ESCsetBg255(FILE *file, int c);
+void ESCsetUl255(FILE *file, int c);
+void ESCsetFB255(FILE *file, int fg, int bg);
+void ESCsetFBU255(FILE *file, int fg, int bg, int ul);
+void ESCsetFg16(FILE *file, int c);
+void ESCsetBg16(FILE *file, int c);
+void ESCsetFB16(FILE *file, int fg, int bg);
+void ESCtxtBold(FILE *file, int set);
+void ESCtxtFaint(FILE *file, int set);
+void ESCtxtItalic(FILE *file, int set);
+void ESCtxtUnder(FILE *file, int set);
+void ESCtxtDblUnder(FILE *file, int set);
+void ESCtxtCurlUnder(FILE *file, int set);
+void ESCtxtDotUnder(FILE *file, int set);
+void ESCtxtDashUnder(FILE *file, int set);
+void ESCtxtDashDotUnder(FILE *file, int set);
+void ESCtxtDblCurlUnder(FILE *file, int set);
+void ESCtxtDblDotUnder(FILE *file, int set);
+void ESCtxtDblDashUnder(FILE *file, int set);
+void ESCtxtResetBlink(FILE *file);
+void ESCtxtBlink(FILE *file, int set);
+void ESCtxtFastBlink(FILE *file, int set);
+void ESCtxtReverse(FILE *file, int set);
+void ESCtxtInvisible(FILE *file, int set);
+void ESCtxtStrike(FILE *file, int set);
+void ESCtxtResetScript(FILE *file);
+void ESCtxtSuperscript(FILE *file, int set);
+void ESCtxtSubscript(FILE *file, int set);
+void ESCtxtProportional(FILE *file, int set);
+void ESCtxtFramed(FILE *file, int set);
+void ESCtxtEncircled(FILE *file, int set);
+void ESCtxtOverline(FILE *file, int set);
+void ESCtxtResetIdeo(FILE *file);
+void ESCtxtIdeoRight(FILE *file, int set);
+void ESCtxtIdeoDblRight(FILE *file, int set);
+void ESCtxtIdeoLeft(FILE *file, int set);
+void ESCtxtIdeoDblLeft(FILE *file, int set);
+void ESCtxtIdeoStress(FILE *file, int set);
+void ESCtxtResetDblTBW(FILE *file);
+void ESCtxtDblTop(FILE *file, int set);
+void ESCtxtDblBot(FILE *file, int set);
+void ESCtxtDblWidth(FILE *file, int set);
+void ESCtxtFont(FILE *file, int fnt);
+void ESCsetColorStyle(FILE *file, EscColorSTRUCT *pColor, int set);
+void ESCsetTxtStyle(FILE *file, EscStyleSTRUCT *pTxtStyle, int set);
+
+
 void ESCinit(void) {
 
 	// The 24 Greys (+ Black/White) from 256 Palette	
@@ -64,7 +166,7 @@ void ESCinit(void) {
 	}
 
 	// Default ColorStyle
-	// ActTxtStyle.pColor = &ActTxtColor;
+	// ESC_ActTxtStyle.pColor = &ESC_ActTxtColor;
 }
 
 int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
@@ -98,6 +200,8 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 
 	colorsCountSum = 1;
 
+	TermClearScreen(LOG_ColorInit,0);
+
 	for (int i = 0; i < colorsGroupsCount; i++){
 		sprintf(strSearch, "colors.group%d.Name", i + 1);
 		sprintf(strHLP, "Group%d", i + 1);
@@ -123,23 +227,23 @@ int ESCinitColors(char *strFile, EscColorSTRUCT **userColor){
 			(*userColor)[colorsCountSum].mode = colorsModel;
 			
 			// printf("%04d. %s_%s:\n",colorsCountSum + 1, strGroupName, strColorName);
-			printf("%04d. %s_%s: ", colorsCountSum , (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
+			fprintf(LOG_ColorInit, "%04d. %s_%s: ", colorsCountSum , (*userColor)[colorsCountSum].groupName, (*userColor)[colorsCountSum].colorName);
 
-			LocateX(36);
-			SetColorStyle(&(*userColor)[colorsCountSum], 1);
+			ESClocateX(LOG_ColorInit, 36);
+			ESCsetColorStyle(LOG_ColorInit, &(*userColor)[colorsCountSum], 1);
 			//printf("Res - Done\n");
 			//return;
-			printf("->   (%03d:%03d)   <-", (*userColor)[colorsCountSum].fg.Color, (*userColor)[colorsCountSum].bg.Color);
-			fflush(stdout);
-			ResFBU();
-			printf("\n");
-			fflush(stdout);
+			fprintf(LOG_ColorInit, "->   (%03d:%03d)   <-", (*userColor)[colorsCountSum].fg.Color, (*userColor)[colorsCountSum].bg.Color);
+			fflush(LOG_ColorInit);
+			ESCresFBU(LOG_ColorInit);
+			fprintf(LOG_ColorInit, "\n");
+			fflush(LOG_ColorInit);
 
 			colorsCountSum++;
 
 		}
-		printf("\n");
-		fflush(stdout);		
+		fprintf(LOG_ColorInit, "\n");
+		fflush(LOG_ColorInit);		
 	}
 
 	/*
@@ -179,6 +283,8 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 	*userTxtStyles = (EscStyleSTRUCT*)malloc((stylesCountSum +1) * sizeof(EscStyleSTRUCT));
 	
 	stylesCountSum = 1;
+
+	TermClearScreen(LOG_StyleInit,0);
 
 	for (int i = 0; i < stylesGroupsCount; i++){
 		sprintf(strSearch, "txtStyles.group%d.Name", i + 1);
@@ -266,37 +372,38 @@ int ESCinitTxtStyles(char *strFile, EscStyleSTRUCT **userTxtStyles){
 			sprintf(strSearch, "txtStyles.group%d.%d.underline", i + 1, j + 1);
 			(*userTxtStyles)[stylesCountSum].underline = INIgetInt(strFile, strSearch, 0);
 
-		    // *userTxtStyles)[stylesCountSum].pColor = &ActTxtColor;
+		    // *userTxtStyles)[stylesCountSum].pColor = &ESC_ActTxtColor;
 
-			printf("%04d. %s_%s: ", stylesCountSum, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
+			char strTest[] = "->   ( TEST )   <-";
+			fprintf(LOG_StyleInit, "%04d. %s_%s: ", stylesCountSum, (*userTxtStyles)[stylesCountSum].fontName, (*userTxtStyles)[stylesCountSum].styleName);
 
-			LocateX(45);
-			SetTxtStyle(&(*userTxtStyles)[stylesCountSum], 1);
+			ESClocateX(LOG_StyleInit, 45);
+			ESCsetTxtStyle(LOG_StyleInit, &(*userTxtStyles)[stylesCountSum], 1);
 			if ((*userTxtStyles)[stylesCountSum].dbl_height){
-				printf("\n");
-				TxtDblTop(1);
-				printf("->   ( TEST )   <-\n");
-				TxtDblBot(1);
-				printf("->   ( TEST )   <-");
+				fprintf(LOG_StyleInit, "\n");
+				ESCtxtDblTop(LOG_StyleInit, 1);
+				fprintf(LOG_StyleInit, "%s\n", strTest);
+				ESCtxtDblBot(LOG_StyleInit, 1);
+				fprintf(LOG_StyleInit, strTest);
 			}
 			else if ((*userTxtStyles)[stylesCountSum].dbl_width){
-				printf("\n");
-				TxtDblWidth(1);
-				printf("->   ( TEST )   <-");				
+				fprintf(LOG_StyleInit, "\n");
+				ESCtxtDblWidth(LOG_StyleInit, 1);
+				fprintf(LOG_StyleInit, strTest);				
 			}
 			else{
-				printf("->   ( TEST )   <-");
+				fprintf(LOG_StyleInit, strTest);
 			}					
-			fflush(stdout);
-			SetTxtStyle(&(*userTxtStyles)[stylesCountSum], 0);
-			printf("\n");
-			fflush(stdout);
+			fflush(LOG_StyleInit);
+			ESCsetTxtStyle(LOG_StyleInit, &(*userTxtStyles)[stylesCountSum], 0);
+			fprintf(LOG_StyleInit, "\n");
+			fflush(LOG_StyleInit);
 
 			stylesCountSum++;
 
 		}
-		printf("\n");
-		fflush(stdout);		
+		fprintf(LOG_StyleInit, "\n");
+		fflush(LOG_StyleInit);		
 	}
 
 	free(stylesCount);
@@ -321,87 +428,105 @@ static void ESCfixCursorPosY(){
 	}
 }
 // Cursor Positions
-void Locate(int x, int y) {
+void ESClocate(FILE *file, int x, int y) {
 	// printf("%c[%d;%df", 0x01b, y, x);		//('f' instead 'H') is working, at least on WIN, too. (more... see wikipedia 'ANSI-ESC') 
-	printf("\x1B[%d;%dH", y, x);
-	TERM_CursorPosY = y;
-	TERM_CursorPosX = x;
-	ESCfixCursorPosX();
-	ESCfixCursorPosY();
+	fprintf(file, "\x1B[%d;%dH", y, x);
+	if (file == stdout){
+		TERM_CursorPosY = y;
+		TERM_CursorPosX = x;
+		ESCfixCursorPosX();
+		ESCfixCursorPosY();
+	}
 }
-void LocateX(int x) {
-	printf("\x1B[%dG", x);
-	TERM_CursorPosX = x;
-	ESCfixCursorPosX();
+void ESClocateX(FILE *file, int x) {
+	fprintf(file, "\x1B[%dG", x);
+	if (file == stdout){
+		TERM_CursorPosX = x;
+		ESCfixCursorPosX();
+	}	
 }
-void CursorUp(int y) {
-	printf("\x1B[%dA", y);
-	TERM_CursorPosY -= y;
-	ESCfixCursorPosY();
+void ESCcursorUp(FILE *file, int y) {
+	fprintf(file, "\x1B[%dA", y);
+	if (file == stdout){
+		TERM_CursorPosY -= y;
+		ESCfixCursorPosY();
+	}	
 }
-void CursorUp1st(int y) {
-	printf("\x1B[%dF", y);
-	TERM_CursorPosY -= y;
-	ESCfixCursorPosY();
-	TERM_CursorPosX = 1;
+void ESCcursorUp1st(FILE *file, int y) {
+	fprintf(file, "\x1B[%dF", y);
+	if (file == stdout){
+		TERM_CursorPosY -= y;
+		ESCfixCursorPosY();
+		TERM_CursorPosX = 1;
+	}	
 }
-void CursorDown(int y) {
-	printf("\x1B[%dB", y);
-	TERM_CursorPosY += y;
-	ESCfixCursorPosY();
+void ESCcursorDown(FILE *file, int y) {
+	fprintf(file, "\x1B[%dB", y);
+	if (file == stdout){
+		TERM_CursorPosY += y;
+		ESCfixCursorPosY();
+	}
 }
-void CursorMoveY(int y){
+void ESCcursorMoveY(FILE *file, int y){
 	if (y < 0){
 		// Down
-		CursorDown(y * -1);
+		ESCcursorDown(file, y * -1);
 	}
 	else if (y > 0){
 		// Up
-		CursorUp(y);
+		ESCcursorUp(file, y);
 	}
 }
-void CursorDown1st(int y) {
-	printf("\x1B[%dE", y);
-	TERM_CursorPosX = 1;
-	TERM_CursorPosY += y;
-	ESCfixCursorPosY();
+void ESCursorDown1st(FILE *file, int y) {
+	fprintf(file, "\x1B[%dE", y);
+	if (file == stdout){
+		TERM_CursorPosY += y;
+		ESCfixCursorPosY();
+		TERM_CursorPosX = 1;
+	}
 }
-void CursorRight(int x) {
-	printf("\x1B[%dC", x);
-	TERM_CursorPosX += x;
-	ESCfixCursorPosX();
+void ESCcursorRight(FILE *file, int x) {
+	fprintf(file, "\x1B[%dC", x);
+	if (file == stdout){
+		TERM_CursorPosX += x;
+		ESCfixCursorPosX();
+	}	
 }
-void CursorLeft(int x) {
-	printf("\x1B[%dD", x);
-	TERM_CursorPosX -= x;
-	ESCfixCursorPosX();
+void ESCcursorLeft(FILE *file, int x) {
+	fprintf(file, "\x1B[%dD", x);
+	if (file == stdout){
+		TERM_CursorPosX -= x;
+		ESCfixCursorPosX();
+	}
 }
-void CursorMoveX(int x){
+void ESCcursorMoveX(FILE *file, int x){
 	if (x < 0){
 		// Left
-		CursorLeft(x * -1);
+		ESCcursorLeft(file, x * -1);
 	}
 	else if (x > 0){
 		// Right
-		CursorRight(x);
+		ESCcursorRight(file, x);
 	}
 }
-void GetAnsiCursorPos(void){
+void ESCgetCursorPos(FILE *file){
 	TERM_CursorWaitFor = 1;
-	printf("\x1B[6n");
+	fprintf(file, "\x1B[6n");
 }
-void CursorSave(){
-  printf("\0337");
-  TERM_CursorPosXsave = TERM_CursorPosX;
-  TERM_CursorPosYsave = TERM_CursorPosY;
+void ESCcursorSave(FILE *file){
+  fprintf(file, "\0337");
+  if (file == stdout){
+	TERM_CursorPosXsave = TERM_CursorPosX;
+	TERM_CursorPosYsave = TERM_CursorPosY;
+  }  
 }
-void CursorRestore(){
-  printf("\0338");
-  TERM_CursorPosX = TERM_CursorPosXsave;
-  TERM_CursorPosY = TERM_CursorPosYsave;
+void ESCcursorRestore(FILE *file){
+  fprintf(file, "\0338");
+	if (file == stdout){
+		TERM_CursorPosX = TERM_CursorPosXsave;
+		TERM_CursorPosY = TERM_CursorPosYsave;
+	}	
 }
-
-#define CursorMoveXY(x, y) CursorMoveX(x); CursorMoveY(y)
 
 // DEC BoxDraw
 /*
@@ -435,31 +560,23 @@ right char for displaying the crossing point right.
 (14) ┬ = Bottom-Left-Right
 (15) ┼ = Top-Right-Bottom-Left
 
-static char TuiDecBoxDraw[16] = {' ', ' ', ' ', '*', ' ', '*',
-									'*', '*', ' ', '*', '*', '*',
-									'*', '*', '*', '*' };
-
-static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
-									'l', 't', ' ', 'j', 'k', 'u',
-									'q', 'v', 'w', 'n' };
-
 */
+
 static char TuiDecBoxDraw[16] = {' ', ' ', ' ', 'x', ' ', 'm',
 									'l', 't', ' ', 'j', 'k', 'u',
 									'q', 'v', 'w', 'n' };
 
-void DECboxMode(int set){
+void DECboxMode(FILE *file, int set){
 	if (set){
-		printf("\x1B(0"); // enable BoxDraw Mode
+		fprintf(file, "\x1B(0"); // enable BoxDraw Mode
 	}
 	else{
-		printf("\x1B(B"); // disable BoxDraw Mode
+		fprintf(file, "\x1B(B"); // disable BoxDraw Mode
 	}
-	fflush(stdout);
+	fflush(file);
 }
-#define DECboxON DECboxMode(1)
-#define DECboxOFF DECboxMode(0)
-void DEClineX(int len){
+
+void DEClineX(FILE *file, int len){
 
 	int isLastLine = 0;
 
@@ -474,32 +591,32 @@ void DEClineX(int len){
 		}		
 	#endif
 
-	DECboxON;
+	DECboxON(file);
 
 	if (len < 0){
 		// Right to left
 		for (int i = 0; i > len; i--){
-			printf("q");
+			fprintf(file, "q");
 			if (!isLastLine){
-				CursorLeft(2);
+				ESCcursorLeft(file, 2);
 			}
 			else{
-				CursorLeft(1);
+				ESCcursorLeft(file, 1);
 				isLastLine = 0;
 			}			
 		}
 	}
 	else{
 		// Left to right
-		STRprintChars('q', len);
+		STRprintChars(file, 'q', len);
 	}
 	
-	DECboxOFF;
+	DECboxOFF(file);
 
 }
-void DEClineY(int len){
+void DEClineY(FILE *file, int len){
 	
-	DECboxON;
+	DECboxON(file);
 
 	int isLastLine = 0;
 
@@ -517,29 +634,29 @@ void DEClineY(int len){
 	if (len < 0){
 		// bottom to top
 		for (int i = 0; i > len; i--){
-			printf("x");
+			fprintf(file, "x");
 			if (!isLastLine){
-				CursorLeft(1);
+				ESCcursorLeft(file, 1);
 			}
-			CursorUp(1);
+			ESCcursorUp(file, 1);
 		}
 	}
 	else{
 		// top to bottom
 		while (len--){
-			printf("x");
+			fprintf(file, "x");
 			if (!isLastLine){
-				CursorLeft(1);
+				ESCcursorLeft(file, 1);
 			}
-			CursorDown(1);
+			ESCcursorDown(file, 1);
 		}
 	}
 	
-	DECboxOFF;
+	DECboxOFF(file);
 		
 }
 
-void CHRline(int spX, int spY, int epX, int epY, int newLine, char c) {
+void CHRline(FILE *file, int spX, int spY, int epX, int epY, int newLine, char c) {
     
 	static int lastX;
 	static int lastY;
@@ -611,14 +728,14 @@ void CHRline(int spX, int spY, int epX, int epY, int newLine, char c) {
 	char nextHorz = 0;
 
     while (1) {
-		Locate(spX, spY);
+		ESClocate(file, spX, spY);
 
-		printf("%c", myChar);
+		fprintf(file, "%c", myChar);
 		
         if (spX == epX && spY == epY) {
 			lastX = spX;
 			lastY = spY;
-			fflush(stdout);
+			fflush(file);
 			break;
         }
 
@@ -635,12 +752,8 @@ void CHRline(int spX, int spY, int epX, int epY, int newLine, char c) {
         }
     }
 }
-#define CHRlineXY(startX, startY, stopX, stopY, c) CHRline(startX, startY, stopX, stopY, 2, c)
-#define CHRmoveTo(x, y, c) CHRline(x, y, 0, 0, 1, c)
-#define CHRlineTo(x, y) CHRline(0, 0, x, y, 0, 0)
-#define CHRclose CHRline(0, 0, 0, 0, 3, 0)
 
-void LINline(int spX, int spY, int epX, int epY, int newLine) {
+void LINline(FILE *file, int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
 	static int lastY;
@@ -706,36 +819,36 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
 	char nextHorz = 0;
 
     while (1) {
-		Locate(spX, spY);
+		ESClocate(file, spX, spY);
 
 		if (nextHorz){
 			// we're on a Y-jump of a more horizontal line....
-			printf("%c", nextHorz);
+			fprintf(file, "%c", nextHorz);
 			nextHorz = 0;
-			DECboxOFF;
+			DECboxOFF(file);
 		}
 		else if (dx > dy){
 			// more horizontal
-			printf("-");
+			fprintf(file, "-");
 		}
 		else if (dx < dy){
 			// more vertical
-	        printf("|");
+	        fprintf(file, "|");
 		}
 		else{
 			// 45°
 			if (sx == sy ){
-		        printf("\\");
+		        fprintf(file, "\\");
 			}
 			else{
-		        printf("/");
+		        fprintf(file, "/");
 			}			
 		}
 		
         if (spX == epX && spY == epY) {
 			lastX = spX;
 			lastY = spY;
-			fflush(stdout);
+			fflush(file);
 			break;
         }
 
@@ -749,12 +862,12 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
             spX += sx;
 			if (dx < dy){
 				// more vertical - is a jump
-				Locate(lastX, lastY);
+				ESClocate(file, lastX, lastY);
 				if (sx == sy){
-					printf("\\");
+					fprintf(file, "\\");
 				}
 				else{
-					printf("/");
+					fprintf(file, "/");
 				}
 			}
         }
@@ -764,26 +877,22 @@ void LINline(int spX, int spY, int epX, int epY, int newLine) {
             spY += sy;
 			if (dx > dy){
 				// more horizontal - is a jump
-				Locate(lastX, lastY);
-				DECboxON;
+				ESClocate(file, lastX, lastY);
+				DECboxON(file);
 				if (sy == 1){
-					printf("s");
+					fprintf(file, "s");
 					nextHorz = 'o';
 				}
 				else{
-					printf("o");
+					fprintf(file, "o");
 					nextHorz = 's';
 				}				
 			}
         }
     }
 }
-#define LINlineXY(startX, startY, stopX, stopY) LINline(startX, startY, stopX, stopY, 2)
-#define LINmoveTo(x, y) LINline(x, y, 0, 0, 1)
-#define LINlineTo(x, y) LINline(0, 0, x, y, 0)
-#define LINclose LINline(0, 0, 0, 0, 3)
 
-void LINline2(int spX, int spY, int epX, int epY, int newLine) {
+void LINline2(FILE *file, int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
 	static int lastY;
@@ -880,45 +989,45 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 	doInterStart = firstLine;
 
     while (1) {
-		Locate(spX, spY);
+		ESClocate(file, spX, spY);
 
 		actChar = 0;
 
 		if (nextHorz){
 			// we're on a Y-jump of a more horizontal line....
-			printf("%c", nextHorz);
+			fprintf(file, "%c", nextHorz);
 			nextHorz = 0;
-			DECboxOFF;
+			DECboxOFF(file);
 		}
 		else if (dx > dy){
 			// more horizontal
-			printf("-");
+			fprintf(file, "-");
 		}
 		else if (dx < dy){
 			// more vertical
-	        printf("|");
+	        fprintf(file, "|");
 		}
 		else{
 			// 45°
 			if (sx == sy ){
-		        printf("\\");
+		        fprintf(file, "\\");
 				actChar = '\\';
 			}
 			else{
-		        printf("/");
+		        fprintf(file, "/");
 				actChar = '/';
 			}			
 		}
 		
         if (spX == epX && spY == epY){
 			if (doInterStop){
-				Locate(spX, spY);
+				ESClocate(file, spX, spY);
 				actChar += polyStartChar;
 				if (polyStartDir != actDir && actChar == SBS){
-					printf("-");
+					fprintf(file, "-");
 				}
 				else if(actChar == SBS){
-					printf("|");
+					fprintf(file, "|");
 				}
 			}
 
@@ -930,7 +1039,7 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 			lastY = spY;
 			lastChar = actChar;
 			lastDir = actDir;
-			fflush(stdout);
+			fflush(file);
 			firstLine = 1;
 			break;
         }
@@ -945,13 +1054,13 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
             spX += sx;
 			if (dx < dy){
 				// more vertical - is a jump
-				Locate(lastX, lastY);
+				ESClocate(file, lastX, lastY);
 				if (sx == sy){
-					printf("\\");
+					fprintf(file, "\\");
 					actChar = '\\';
 				}
 				else{
-					printf("/");
+					fprintf(file, "/");
 					actChar = '/';
 				}
 			}
@@ -962,28 +1071,28 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
             spY += sy;
 			if (dx > dy){
 				// more horizontal - is a jump
-				Locate(lastX, lastY);
-				DECboxON;
+				ESClocate(file, lastX, lastY);
+				DECboxON(file);
 				if (sy == 1){
-					printf("s");
+					fprintf(file, "s");
 					nextHorz = 'o';
 				}
 				else{
-					printf("o");
+					fprintf(file, "o");
 					nextHorz = 's';
 				}				
 			}
         }
 
 		if (doInterStart){
-			Locate(lastX, lastY);
+			ESClocate(file, lastX, lastY);
 			lastChar += actChar;
 
 			if (lastDir != actDir && lastChar == SBS){
-				printf("-");
+				fprintf(file, "-");
 			}
 			else if(lastChar == SBS){
-				printf("|");
+				fprintf(file, "|");
 			}
 
 			doInterStart = 0;
@@ -993,12 +1102,8 @@ void LINline2(int spX, int spY, int epX, int epY, int newLine) {
 		lastDir = actDir;
     }
 }
-#define LINlineXY2(startX, startY, stopX, stopY) LINline2(startX, startY, stopX, stopY, 2)
-#define LINmoveTo2(x, y) LINline2(x, y, 0, 0, 1)
-#define LINlineTo2(x, y) LINline2(0, 0, x, y, 0)
-#define LINclose2 LINline2(0, 0, 0, 0, 3)
 
-void DECline(int spX, int spY, int epX, int epY, int newLine) {
+void DECline(FILE *file, int spX, int spY, int epX, int epY, int newLine) {
     
 	static int lastX;
 	static int lastY;
@@ -1082,9 +1187,9 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 
 	doInterStart = firstLine;
 
-	DECboxON;
+	DECboxON(file);
     while (1) {
-		Locate(spX, spY);
+		ESClocate(file, spX, spY);
 
 		if (dx > dy){
 			// more horizontal
@@ -1098,7 +1203,7 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				fromDir = 4;		// Right (East)
 				toDir = 8;
 			}
-			printf("q");
+			fprintf(file, "q");
 		}
 		else if (dx < dy){
 			// more vertical
@@ -1112,7 +1217,7 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				fromDir = 2;		// Down (South)
 				toDir = 1;
 			}
-			printf("x");
+			fprintf(file, "x");
 		}
 		else{
 			// 45°
@@ -1121,15 +1226,15 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				// Backslash - TopLeft - BottomRight
 		        if (sy == 1){
 					// Top -> Bottom └┐
-					printf("m");
+					fprintf(file, "m");
 					char2nd= 'k';			// └┐
 					fromDir = 1;		// Top (North)
 					toDir = 4;
 				}
 				else{
 					// Bottom -> Top └┐
-					printf("k");			// ┐
-					Locate(spX - 1, spY);
+					fprintf(file, "k");			// ┐
+					ESClocate(file, spX - 1, spY);
 					char2nd = 'm';			// └
 					fromDir = 2;		// Down (South)
 					toDir = 8;
@@ -1139,22 +1244,22 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 				// Slash - TopRight - BottomLeft
 		        if (sy == 1){
 					// Top -> Bottom ┌┘
-					printf("j");			// ┘
-					Locate(spX - 1, spY);
+					fprintf(file, "j");			// ┘
+					ESClocate(file, spX - 1, spY);
 					char2nd = 'l';			// ┌
 					fromDir = 1;		// Top (North)
 					toDir = 8;
 				}
 				else{
 					// Bottom -> Top ┌┘
-					printf("l");			// ┌┘
+					fprintf(file, "l");			// ┌┘
 					fromDir = 2;		// Down (South)
 					toDir = 4;
 					char2nd = 'j';
 				}
 			}			
 			if (!(spX == epX && spY == epY)){
-				printf("%c", char2nd);
+				fprintf(file, "%c", char2nd);
 			}
 		}
 
@@ -1162,22 +1267,22 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 		lastY = spY;
         if (spX == epX && spY == epY) {
 			if (doInterStop){
-				Locate(spX, spY);
+				ESClocate(file, spX, spY);
 				if (((fromDir + toDir) == 3 && (polyFromDir + polyToDir) == 12) || ((fromDir + toDir) == 12 && (polyFromDir + polyToDir) == 3)){
 					// Vert meets Horz
-					printf("%c", TuiDecBoxDraw[polyToDir + fromDir]);
+					fprintf(file, "%c", TuiDecBoxDraw[polyToDir + fromDir]);
 				}
 				else{
 					// no 90°
-					printf("%c", TuiDecBoxDraw[(fromDir + toDir) | (polyFromDir + polyToDir)]);
+					fprintf(file, "%c", TuiDecBoxDraw[(fromDir + toDir) | (polyFromDir + polyToDir)]);
 				}
 			}
 			if (!firstLine){
 				polyFromDir = fromDir;
 				polyToDir = toDir;
 			}
-			DECboxOFF;
-			fflush(stdout);
+			DECboxOFF(file);
+			fflush(file);
 			firstLine = 1;
 			break;
         }
@@ -1189,20 +1294,20 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
             spX += sx;
 			if (dx < dy){
 				// more vertical - is a jump
-				Locate(lastX, lastY);
+				ESClocate(file, lastX, lastY);
 				if (sx == sy){
 					// Backslash - TopLeft - BottomRight
 					if (sy == 1){
 						// Top -> Bottom └┐
-						printf("mk");			// └┐
+						fprintf(file, "mk");			// └┐
 						fromDir = 1;
 						toDir = 4;
 					}
 					else{
 						// Bottom -> Top └┐
-						printf("k");			// ┐
-						Locate(lastX - 1, lastY);
-						printf("m");			// └
+						fprintf(file, "k");			// ┐
+						ESClocate(file, lastX - 1, lastY);
+						fprintf(file, "m");			// └
 						fromDir = 2;
 						toDir = 8;
 					}
@@ -1211,15 +1316,15 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 					// Slash - TopRight - BottomLeft
 					if (sy == 1){
 						// Top -> Bottom ┌┘
-						printf("j");			// ┘
-						Locate(lastX - 1, lastY);
-						printf("l");
+						fprintf(file, "j");			// ┘
+						ESClocate(file, lastX - 1, lastY);
+						fprintf(file, "l");
 						fromDir = 1;
 						toDir = 8;			// ┌
 					}
 					else{
 						// Bottom -> Top ┌┘
-						printf("lj");			// ┌┘
+						fprintf(file, "lj");			// ┌┘
 						fromDir = 2;
 						toDir = 4;
 					}
@@ -1232,24 +1337,24 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
             spY += sy;
 			if (dx > dy){
 				// more horizontal - is a jump
-				Locate(lastX, lastY);
+				ESClocate(file, lastX, lastY);
 				if (sx == sy){
 					// Backslash - TopLeft - BottomRight
 					if (sx == 1){
 						// Left -> Right ┐
 						//               └ Top -> Down
-						printf("k");
-						Locate(lastX, lastY + 1);
-						printf("m");
+						fprintf(file, "k");
+						ESClocate(file, lastX, lastY + 1);
+						fprintf(file, "m");
 						fromDir = 8;
 						toDir= 2;
 					}
 					else{
 						// Left <- Right ┐
 						//               └ Up <- Down
-						printf("m");
-						Locate(lastX, lastY - 1);
-						printf("k");
+						fprintf(file, "m");
+						ESClocate(file, lastX, lastY - 1);
+						fprintf(file, "k");
 						fromDir = 4;
 						toDir = 1;
 					}
@@ -1259,18 +1364,18 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 					if (sx == 1){
 						//             ┌ Left -> Right
 						// Down -> Top ┘
-						printf("j");
-						Locate(lastX, lastY - 1);
-						printf("l");
+						fprintf(file, "j");
+						ESClocate(file, lastX, lastY - 1);
+						fprintf(file, "l");
 						fromDir = 8;
 						toDir = 1;
 					}
 					else{
 						//             ┌ Left <- Right
 						// Down <- Top ┘
-						printf("l");
-						Locate(lastX, lastY + 1);
-						printf("j");
+						fprintf(file, "l");
+						ESClocate(file, lastX, lastY + 1);
+						fprintf(file, "j");
 						fromDir = 4;
 						toDir = 2;
 					}
@@ -1278,14 +1383,14 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 			}
         }
 		if (doInterStart){
-			Locate(lastX, lastY);
+			ESClocate(file, lastX, lastY);
 			if (((fromDir + toDir) == 3 && (fromDirLast + toDirLast) == 12) || ((fromDir + toDir) == 12 && (fromDirLast + toDirLast) == 3)){
 				// Vert meets Horz
-				printf("%c", TuiDecBoxDraw[fromDirLast + toDir]);
+				fprintf(file, "%c", TuiDecBoxDraw[fromDirLast + toDir]);
 			}
 			else{
 				// no 90°
-				printf("%c", TuiDecBoxDraw[(fromDir + toDir) | (fromDirLast + toDirLast)]);
+				fprintf(file, "%c", TuiDecBoxDraw[(fromDir + toDir) | (fromDirLast + toDirLast)]);
 			}
 			doInterStart = 0;
 		}
@@ -1293,12 +1398,8 @@ void DECline(int spX, int spY, int epX, int epY, int newLine) {
 		toDirLast = toDir;
 	}
 }
-#define DEClineXY(startX, startY, stopX, stopY) DECline(startX, startY, stopX, stopY, 2)
-#define DECmoveTo(x, y) DECline(x, y, 0, 0, 1)
-#define DEClineTo(x, y) DECline(0, 0, x, y, 0)
-#define DECclose DECline(0, 0, 0, 0, 3)
 
-void DECrect(int startX, int startY, int stopX, int stopY){
+void DECrect(FILE *file, int startX, int startY, int stopX, int stopY){
 	
 	// normalize rect
 
@@ -1316,25 +1417,25 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 
 	if (PointInRect(startX, startY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight) && PointInRect(stopX, stopY, 1, 1, TERM_ScreenWidth, TERM_ScreenHeight)){
 		// rect is fully on screen - simplified creation
-		Locate(startX, startY);
-		DECboxON;
-		printf("l");					// top-left edge
-		DEClineX(stopX - startX - 1);
-		DECboxON;
-		printf("k");
+		ESClocate(file, startX, startY);
+		DECboxON(file);
+		fprintf(file, "l");					// top-left edge
+		DEClineX(file, stopX - startX - 1);
+		DECboxON(file);
+		fprintf(file, "k");
 		
-		Locate(stopX, startY + 1);
-		DEClineY(stopY - startY - 1);
-		DECboxON;
-		printf("j");					// bottom-right edge
+		ESClocate(file, stopX, startY + 1);
+		DEClineY(file, stopY - startY - 1);
+		DECboxON(file);
+		fprintf(file, "j");					// bottom-right edge
 				
-		Locate(stopX - 1, stopY);
-		DEClineX(startX - stopX + 1);
-		DECboxON;
-		printf("m");					// bottom-left edge
+		ESClocate(file, stopX - 1, stopY);
+		DEClineX(file, startX - stopX + 1);
+		DECboxON(file);
+		fprintf(file, "m");					// bottom-left edge
 				
-		Locate(startX, stopY - 1);
-		DEClineY(startY - stopY + 1);
+		ESClocate(file, startX, stopY - 1);
+		DEClineY(file, startY - stopY + 1);
 	}
 	else{
 		// (parts of) the rect are out of screen
@@ -1374,50 +1475,50 @@ void DECrect(int startX, int startY, int stopX, int stopY){
 
 		// Draw valid lines
 		if (horzTop){
-			Locate(spX1, spY1);
-			DEClineX(epX1 - spX1 + 2);
+			ESClocate(file, spX1, spY1);
+			DEClineX(file, epX1 - spX1 + 2);
 		}
 		if (vertRight){
-			Locate(spX2, spY2);
-			DEClineY(epY2 - spY2 + 2);
+			ESClocate(file, spX2, spY2);
+			DEClineY(file, epY2 - spY2 + 2);
 		}
 		if (horzBot){
-			Locate(spX3, spY3);
-			DEClineX(epX3 - spX3);
+			ESClocate(file, spX3, spY3);
+			DEClineX(file, epX3 - spX3);
 		}
 		if (vertLeft){
-			Locate(spX4, spY4);
-			DEClineY(epY4 - spY4 - 1);
+			ESClocate(file, spX4, spY4);
+			DEClineY(file, epY4 - spY4 - 1);
 		}
 
 		// draw valid edges
-		DECboxON;
+		DECboxON(file);
 		if (horzTop && vertLeft && (int)spX1 == startX && (int)spY1 == startY){
 			// top-left edge
-			Locate(startX, startY);
-			printf("l");
+			ESClocate(file, startX, startY);
+			fprintf(file, "l");
 		}
 		if (horzTop && vertRight && (int)epX1 == stopX && (int)epY1 == startY){
 			// top-right edge
-			Locate(stopX, startY);
-			printf("k");
+			ESClocate(file, stopX, startY);
+			fprintf(file, "k");
 		}
 		if (horzBot && vertRight && (int)spX3 == stopX && (int)spY3 == stopY){
 			// bottom-right edge
-			Locate(stopX, stopY);
-			printf("j");
+			ESClocate(file, stopX, stopY);
+			fprintf(file, "j");
 		}
 		if (horzBot && vertLeft && (int)spX4 == startX && (int)spY4 == stopY){
 			// bottom left edge
-			Locate(startX, stopY);
-			printf("m");
+			ESClocate(file, startX, stopY);
+			fprintf(file, "m");
 		}
-		DECboxOFF;
+		DECboxOFF(file);
 	}
 }
 
 // Clear Lines
-void ClrLineA(int xS, int xE){
+void ESCclrLineA(FILE *file, int xS, int xE){
 	// ClearLine from Start(xS) to End(xE)
 
 	int x = 0;
@@ -1431,32 +1532,32 @@ void ClrLineA(int xS, int xE){
 	// Line Width
 	x = xE - xS + 1;
 
-	ResFBU();
-	LocateX(xS);
-	printf("%*s", x, "");
+	ESCresFBU(file);
+	ESClocateX(file, xS);
+	fprintf(file, "%*s", x, "");
 }
-void ClrLine(void) {
+void ESCclrLine(FILE *file) {
 	// ClearLine
-	printf("\x1B[2K");
+	fprintf(file, "\x1B[2K");
 }
-void ClrLineL(void) {
+void ESCclrLineL(FILE *file) {
 	// ClearLine from cursor to Left
-	printf("\x1B[1K");
+	fprintf(file, "\x1B[1K");
 }
-void ClrLineR(void) {
+void ESCclrLineR(FILE *file) {
 	// ClearLine from cursor to Right
-	printf("\x1B[K");
+	fprintf(file, "\x1B[K");
 	// printf("%s0K", CSI);	// The '0' isn't needed.
 }
 
 // Clear Screens
-void ClrScrA(int xS, int yS, int xE, int yE){
+void ESCclrScrA(FILE *file, int xS, int yS, int xE, int yE){
 	// Area CLS from Start(xS/Ys) to End(xE/yE)
 	
 	if (yS == yE){
 		// just one Line
-		Locate(xS, yS);
-		ClrLineA(xS, xE);
+		ESClocate(file, xS, yS);
+		ESCclrLineA(file, xS, xE);
 	}
 	else{
 		int x = 0;
@@ -1479,518 +1580,517 @@ void ClrScrA(int xS, int yS, int xE, int yE){
 		y = yE - yS + 1;
 
 		// Reset all colors
-		ResFBU();
+		ESCresFBU(file);
 
 		for (i = 0; i < y; i++){
-			Locate(xS, yS + i);
-			printf("%*s", x, "");
+			ESClocate(file, xS, yS + i);
+			fprintf(file, "%*s", x, "");
 		}
 	}
 }
-void ClrScrL(void) {
+void ESCclrScrL(FILE *file) {
 	// Cls from cursor to Upper Left
-	printf("\x1B[1J");
+	fprintf(file, "\x1B[1J");
 }
-void ClrScrR(void) {
+void ESCclrScrR(FILE *file) {
 	// Cls from cursor to LowerRight
-	printf("\x1B[J");
+	fprintf(file, "\x1B[J");
 	// printf("%s0J", CSI);	// The '0' isn't needed.
 }
 
 // Reset To Default Colors
-void ResFg(void) {
-	ActTxtColor.fg.Color = 39; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
-	printf("\x1B[39m");
+void ESCresFg(FILE *file) {
+	ESC_ActTxtColor.fg.Color = 39; ESC_ActTxtColor.mode = 1; // ESC_ActTxtStyle.pColor = &ESC_ActTxtColor;
+	fprintf(file, "\x1B[39m");
 }
-void ResBg(void) {
-	ActTxtColor.bg.Color = 49; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
-	printf("\x1B[49m");
+void ESCresBg(FILE *file) {
+	ESC_ActTxtColor.bg.Color = 49; ESC_ActTxtColor.mode = 1; // ESC_ActTxtStyle.pColor = &ESC_ActTxtColor;
+	fprintf(file, "\x1B[49m");
 }
-void ResUl(void) {
-	ActTxtColor.ul.Color = 59; ActTxtColor.mode = 1; // ActTxtStyle.pColor = &ActTxtColor;
-	printf("\x1B[59m");
+void ESCresUl(FILE *file) {
+	ESC_ActTxtColor.ul.Color = 59; ESC_ActTxtColor.mode = 1; // ESC_ActTxtStyle.pColor = &ESC_ActTxtColor;
+	fprintf(file, "\x1B[59m");
 }
-void ResFB(void) {
-	ResFg();
-	ResBg();
+void ESCresFB(FILE *file) {
+	ESCresFg(file);
+	ESCresBg(file);
 }
-void ResFBU(void) {
-	ResFg();
-	ResBg();
-	ResUl();
+void ESCresFBU(FILE *file) {
+	ESCresFB(file);
+	ESCresUl(file);
 }
 
 // Set 24 bit Color
-void SetFgRGB(int r, int g, int b) {
-	// ActTxtStyle.pColor->fg.R = r; ActTxtStyle.pColor->fg.G = g; ActTxtStyle.pColor->fg.B = b; ActTxtStyle.pColor->mode = 3;
-	ActTxtColor.fg.R = r; ActTxtColor.fg.G = g; ActTxtColor.fg.B = b;  ActTxtColor.mode = 3;
-	printf("\x1B[38;2;%d;%d;%dm", r, g, b);
+void ESCsetFgRGB(FILE *file, int r, int g, int b) {
+	// ESC_ActTxtStyle.pColor->fg.R = r; ESC_ActTxtStyle.pColor->fg.G = g; ESC_ActTxtStyle.pColor->fg.B = b; ESC_ActTxtStyle.pColor->mode = 3;
+	ESC_ActTxtColor.fg.R = r; ESC_ActTxtColor.fg.G = g; ESC_ActTxtColor.fg.B = b;  ESC_ActTxtColor.mode = 3;
+	fprintf(file, "\x1B[38;2;%d;%d;%dm", r, g, b);
 }
-void SetBgRGB(int r, int g, int b) {
-	// ActTxtStyle.pColor->bg.R = r; ActTxtStyle.pColor->bg.G = g; ActTxtStyle.pColor->bg.B = b; ActTxtStyle.pColor->mode = 3;
-	ActTxtColor.bg.R = r; ActTxtColor.bg.G = g; ActTxtColor.bg.B = b;  ActTxtColor.mode = 3;
-	printf("\x1B[48;2;%d;%d;%dm", r, g, b);
+void ESCsetBgRGB(FILE *file, int r, int g, int b) {
+	// ESC_ActTxtStyle.pColor->bg.R = r; ESC_ActTxtStyle.pColor->bg.G = g; ESC_ActTxtStyle.pColor->bg.B = b; ESC_ActTxtStyle.pColor->mode = 3;
+	ESC_ActTxtColor.bg.R = r; ESC_ActTxtColor.bg.G = g; ESC_ActTxtColor.bg.B = b;  ESC_ActTxtColor.mode = 3;
+	fprintf(file, "\x1B[48;2;%d;%d;%dm", r, g, b);
 }
-void SetUlRGB(int r, int g, int b) {
-	// ActTxtStyle.pColor->ul.R = r; ActTxtStyle.pColor->ul.G = g; ActTxtStyle.pColor->ul.B = b; ActTxtStyle.pColor->mode = 3;
-	ActTxtColor.ul.R = r; ActTxtColor.ul.G = g; ActTxtColor.ul.B = b; ActTxtColor.mode = 3;
-	printf("\x1B[58;2;%d;%d;%dm", r, g, b);
+void ESCsetUlRGB(FILE *file, int r, int g, int b) {
+	// ESC_ActTxtStyle.pColor->ul.R = r; ESC_ActTxtStyle.pColor->ul.G = g; ESC_ActTxtStyle.pColor->ul.B = b; ESC_ActTxtStyle.pColor->mode = 3;
+	ESC_ActTxtColor.ul.R = r; ESC_ActTxtColor.ul.G = g; ESC_ActTxtColor.ul.B = b; ESC_ActTxtColor.mode = 3;
+	fprintf(file, "\x1B[58;2;%d;%d;%dm", r, g, b);
 }
-void SetFBrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB) {
-	SetFgRGB(fgR, fgG, fgB);
-	SetBgRGB(bgR, bgG, bgB);
+void ESCsetFBrgb(FILE *file, int fgR, int fgG, int fgB, int bgR, int bgG, int bgB) {
+	ESCsetFgRGB(file, fgR, fgG, fgB);
+	ESCsetBgRGB(file, bgR, bgG, bgB);
 }
-void SetFBUrgb(int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, int ulG, int ulB) {
-	SetFgRGB(fgR, fgG, fgB);
-	SetBgRGB(bgR, bgG, bgB);
-	SetUlRGB(ulR, ulG, ulB);
+void ESCsetFBUrgb(FILE *file, int fgR, int fgG, int fgB, int bgR, int bgG, int bgB, int ulR, int ulG, int ulB) {
+	ESCsetFgRGB(file, fgR, fgG, fgB);
+	ESCsetBgRGB(file, bgR, bgG, bgB);
+	ESCsetUlRGB(file, ulR, ulG, ulB);
 }
 
 // Set 256 Colors
-void SetFg255(int c) {
+void ESCsetFg255(FILE *file, int c) {
 	if (c < 1){
 		// don't touch
 	}
 	else if (c > 255){
 		// Reset
-		ResFg();
+		ESCresFg(file);
 	}
 	else{
-		printf("\x1B[38;5;%dm", c);
+		fprintf(file, "\x1B[38;5;%dm", c);
 	}	
-	ActTxtColor.fg.Color = c; ActTxtColor.mode = 2;
+	ESC_ActTxtColor.fg.Color = c; ESC_ActTxtColor.mode = 2;
 }
-void SetBg255(int c) {
+void ESCsetBg255(FILE *file, int c) {
 	if (c < 1){
 		// don't touch
 	}
 	else if (c > 255){
 		// Reset
-		ResBg();
+		ESCresBg(file);
 	}
 	else{
-		printf("\x1B[48;5;%dm", c);
+		fprintf(file, "\x1B[48;5;%dm", c);
 	}	
-	ActTxtColor.bg.Color = c; ActTxtColor.mode = 2;
+	ESC_ActTxtColor.bg.Color = c; ESC_ActTxtColor.mode = 2;
 }
-void SetUl255(int c) {
+void ESCsetUl255(FILE *file, int c) {
 	if (c < 1){
 		// don't touch
 	}
 	else if (c > 255){
 		// Reset
-		ResUl();
+		ESCresUl(file);
 	}
 	else{
-		printf("\x1B[58;5;%dm", c);
+		fprintf(file, "\x1B[58;5;%dm", c);
 	}	
-	ActTxtColor.ul.Color = c; ActTxtColor.mode = 2;
+	ESC_ActTxtColor.ul.Color = c; ESC_ActTxtColor.mode = 2;
 }
-void SetFB255(int fg, int bg) {
-	SetFg255(fg);
-	SetBg255(bg);
+void ESCsetFB255(FILE *file, int fg, int bg) {
+	ESCsetFg255(file, fg);
+	ESCsetBg255(file, bg);
 }
-void SetFBU255(int fg, int bg, int ul) {
-	SetFg255(fg);
-	SetBg255(bg);
-	SetUl255(ul);
+void ESCsetFBU255(FILE *file, int fg, int bg, int ul) {
+	ESCsetFg255(file, fg);
+	ESCsetBg255(file, bg);
+	ESCsetUl255(file, ul);
 }
 
 //Set 16 Colors
-void SetFg16(int c){
+void ESCsetFg16(FILE *file, int c){
 	// ForeGround	
 	if (!((c > 29 && c < 38) || (c > 89 && c < 98))){
-		ResFg();
+		ESCresFg(file);
 	}
 	else{
-		printf("\x1B[%dm", c);
+		fprintf(file, "\x1B[%dm", c);
 	}	
-	ActTxtColor.fg.Color = c; ActTxtColor.mode = 0;
+	ESC_ActTxtColor.fg.Color = c; ESC_ActTxtColor.mode = 0;
 }
-void SetBg16(int c) {	
+void ESCsetBg16(FILE *file, int c) {	
 	// BackGround
 	if (!((c > 39 && c < 48) || (c > 99 && c < 108))){
-		ResBg();
+		ESCresBg(file);
 	}
 	else{
-		printf("\x1B[%dm", c);
+		fprintf(file, "\x1B[%dm", c);
 	}
-	ActTxtColor.bg.Color = c; ActTxtColor.mode = 0;
+	ESC_ActTxtColor.bg.Color = c; ESC_ActTxtColor.mode = 0;
 }
-void SetFB16(int fg, int bg) {
-	SetFg16(fg);
-	SetBg16(bg);
+void ESCsetFB16(FILE *file, int fg, int bg) {
+	ESCsetFg16(file, fg);
+	ESCsetBg16(file, bg);
 }
 
 // TXT Styles - single commands
-void TxtBold(int set) {
-	ActTxtStyle.bold = set;
-	ActTxtStyle.faint = 0;
+void ESCtxtBold(FILE *file, int set) {
+	ESC_ActTxtStyle.bold = set;
+	ESC_ActTxtStyle.faint = 0;
 	if (set) {
 		// Set
-		printf("\x1B[1m");
+		fprintf(file, "\x1B[1m");
 	}
 	else {
 		// Reset
-		printf("\x1B[22m");
+		fprintf(file, "\x1B[22m");
 	}
 }
-void TxtFaint(int set) {
-	ActTxtStyle.faint = set;
-	ActTxtStyle.bold = 0;
+void ESCtxtFaint(FILE *file, int set) {
+	ESC_ActTxtStyle.faint = set;
+	ESC_ActTxtStyle.bold = 0;
 	if (set) {
 		// Set
-		printf("\x1B[2m");
+		fprintf(file, "\x1B[2m");
 	}
 	else {
 		// Reset
-		printf("\x1B[22m");
+		fprintf(file, "\x1B[22m");
 	}
 }
-void TxtItalic(int set) {
-	ActTxtStyle.italic = set;
+void ESCtxtItalic(FILE *file, int set) {
+	ESC_ActTxtStyle.italic = set;
 	if (set) {
 		// Set
-		printf("\x1B[3m");
+		fprintf(file, "\x1B[3m");
 	}
 	else {
 		// Reset
-		printf("\x1B[23m");
+		fprintf(file, "\x1B[23m");
 	}
 }
-void TxtUnder(int set) {
-	ActTxtStyle.underline = set;
+void ESCtxtUnder(FILE *file, int set) {
+	ESC_ActTxtStyle.underline = set;
 	if (set) {
 		// Set
-		printf("\x1B[4m");
+		fprintf(file, "\x1B[4m");
 	}
 	else {
 		// Reset
-		printf("\x1B[%sm", RUL);
+		fprintf(file, "\x1B[%sm", RUL);
 	}
 }
-void TxtDblUnder(int set) {
+void ESCtxtDblUnder(FILE *file, int set) {
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 2;
-		printf("\x1B[21m");
+		ESC_ActTxtStyle.underline = 2;
+		fprintf(file, "\x1B[21m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtCurlUnder(int set) {
+void ESCtxtCurlUnder(FILE *file, int set) {
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 3;
-		printf("\x1B[4:3m");
+		ESC_ActTxtStyle.underline = 3;
+		fprintf(file, "\x1B[4:3m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDotUnder(int set) {
+void ESCtxtDotUnder(FILE *file, int set) {
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 4;
-		printf("\x1B[4:4m");
+		ESC_ActTxtStyle.underline = 4;
+		fprintf(file, "\x1B[4:4m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDashUnder(int set) {
+void ESCtxtDashUnder(FILE *file, int set) {
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 5;
-		printf("\x1B[4:5m");
+		ESC_ActTxtStyle.underline = 5;
+		fprintf(file, "\x1B[4:5m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDashDotUnder(int set) {
+void ESCtxtDashDotUnder(FILE *file, int set) {
 	// Undocumented DashDot - just a prognosis
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 6;
-		printf("\x1B[4:6m");
+		ESC_ActTxtStyle.underline = 6;
+		fprintf(file, "\x1B[4:6m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDblCurlUnder(int set) {
+void ESCtxtDblCurlUnder(FILE *file, int set) {
 	// Undocumented DoubleCurl - just a prognosis
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 7;
-		printf("\x1B[4:7m");
+		ESC_ActTxtStyle.underline = 7;
+		fprintf(file, "\x1B[4:7m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDblDotUnder(int set) {
+void ESCtxtDblDotUnder(FILE *file, int set) {
 	// Undocumented DoubleDotted - just a prognosis
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 8;
-		printf("\x1B[4:8m");
+		ESC_ActTxtStyle.underline = 8;
+		fprintf(file, "\x1B[4:8m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
-void TxtDblDashUnder(int set) {
+void ESCtxtDblDashUnder(FILE *file, int set) {
 	// Undocumented DoubleDashed - just a prognosis
 	if (set) {
 		// Set
-		ActTxtStyle.underline = 9;
-		printf("\x1B[4:9m");
+		ESC_ActTxtStyle.underline = 9;
+		fprintf(file, "\x1B[4:9m");
 	}
 	else {
 		// Reset
-		TxtUnder(0);
+		ESCtxtUnder(file, 0);
 	}
 }
 
-void TxtResetBlink(void){
-	printf("\x1B[25m");
+void ESCtxtResetBlink(FILE *file){
+	fprintf(file, "\x1B[25m");
 }
-void TxtBlink(int set) {
-	ActTxtStyle.blink = set;
-	ActTxtStyle.fast = 0;
+void ESCtxtBlink(FILE *file, int set) {
+	ESC_ActTxtStyle.blink = set;
+	ESC_ActTxtStyle.fast = 0;
 	if (set) {
 		// Set
-		printf("\x1B[5m");
+		fprintf(file, "\x1B[5m");
 	}
 	else {
 		// Reset
-		TxtResetBlink();
+		ESCtxtResetBlink(file);
 	}
 }
-void TxtFastBlink(int set) {
-	ActTxtStyle.fast = set;
-	ActTxtStyle.blink = 0;
+void ESCtxtFastBlink(FILE *file, int set) {
+	ESC_ActTxtStyle.fast = set;
+	ESC_ActTxtStyle.blink = 0;
 	if (set) {
 		// Set
-		printf("\x1B[6m");
+		fprintf(file, "\x1B[6m");
 	}
 	else {
 		// Reset
-		TxtResetBlink();
+		ESCtxtResetBlink(file);
 	}
 }
-void TxtReverse(int set) {
-	ActTxtStyle.reverse = set;
+void ESCtxtReverse(FILE *file, int set) {
+	ESC_ActTxtStyle.reverse = set;
 	if (set) {
 		// Set
-		printf("\x1B[7m");
+		fprintf(file, "\x1B[7m");
 	}
 	else {
 		// Reset
-		printf("\x1B[27m");
+		fprintf(file, "\x1B[27m");
 	}
 }
-void TxtInvisible(int set) {
-	ActTxtStyle.invisible = set;
+void ESCtxtInvisible(FILE *file, int set) {
+	ESC_ActTxtStyle.invisible = set;
 	if (set) {
 		// Set
-		printf("\x1B[8m");
+		fprintf(file, "\x1B[8m");
 	}
 	else {
 		// Reset
-		printf("\x1B[28m");
+		fprintf(file, "\x1B[28m");
 	}
 }
-void TxtStrike(int set) {
-	ActTxtStyle.strike = set;
+void ESCtxtStrike(FILE *file, int set) {
+	ESC_ActTxtStyle.strike = set;
 	if (set) {
 		// Set
-		printf("\x1B[9m");
+		fprintf(file, "\x1B[9m");
 	}
 	else {
 		// Reset
-		printf("\x1B[29m");
+		fprintf(file, "\x1B[29m");
 	}
 }
-void TxtResetScript(void){
-	printf("\x1B[75m");
+void ESCtxtResetScript(FILE *file){
+	fprintf(file, "\x1B[75m");
 }
-void TxtSuperscript(int set) {
-	ActTxtStyle.superscript = set;
-	ActTxtStyle.subscript = 0;
+void ESCtxtSuperscript(FILE *file, int set) {
+	ESC_ActTxtStyle.superscript = set;
+	ESC_ActTxtStyle.subscript = 0;
 	if (set) {
 		// Set
-		printf("\x1B[73m");
+		fprintf(file, "\x1B[73m");
 	}
 	else {
 		// Reset
-		TxtResetScript();
+		ESCtxtResetScript(file);
 	}
 }
-void TxtSubscript(int set) {
-	ActTxtStyle.subscript = set;
-	ActTxtStyle.superscript = 0;
+void ESCtxtSubscript(FILE *file, int set) {
+	ESC_ActTxtStyle.subscript = set;
+	ESC_ActTxtStyle.superscript = 0;
 	if (set) {
 		// Set
-		printf("\x1B[74m");
+		fprintf(file, "\x1B[74m");
 	}
 	else {
 		// Reset
-		TxtResetScript();
+		ESCtxtResetScript(file);
 	}
 }
-void TxtProportional(int set){
-	ActTxtStyle.proportional = set;
+void ESCtxtProportional(FILE *file, int set){
+	ESC_ActTxtStyle.proportional = set;
 	if (set) {
 		// Set
-		printf("\x1B[26m");
+		fprintf(file, "\x1B[26m");
 	}
 	else {
 		// Reset
-		printf("\x1B[50m");
+		fprintf(file, "\x1B[50m");
 	}
 }
-void TxtFramed(int set) {
-	ActTxtStyle.framed = set;
-	ActTxtStyle.encircled = 0;
+void ESCtxtFramed(FILE *file, int set) {
+	ESC_ActTxtStyle.framed = set;
+	ESC_ActTxtStyle.encircled = 0;
 	if (set) {
 		// Set
-		printf("\x1B[51m");
+		fprintf(file, "\x1B[51m");
 	}
 	else {
 		// Reset
-		printf("\x1B[54m");
+		fprintf(file, "\x1B[54m");
 	}
 }
-void TxtEncircled(int set) {
-	ActTxtStyle.encircled = set;
-	ActTxtStyle.framed = 0;
+void ESCtxtEncircled(FILE *file, int set) {
+	ESC_ActTxtStyle.encircled = set;
+	ESC_ActTxtStyle.framed = 0;
 	if (set) {
 		// Set
-		printf("\x1B[52m");
+		fprintf(file, "\x1B[52m");
 	}
 	else {
 		// Reset
-		printf("\x1B[54m");
+		fprintf(file, "\x1B[54m");
 	}
 }
-void TxtOverline(int set) {
-	ActTxtStyle.overline = set;
+void ESCtxtOverline(FILE *file, int set) {
+	ESC_ActTxtStyle.overline = set;
 	if (set) {
 		// Set
-		printf("\x1B[53m");
+		fprintf(file, "\x1B[53m");
 	}
 	else {
 		// Reset
-		printf("\x1B[55m");
+		fprintf(file, "\x1B[55m");
 	}
 }
 
-void TxtResetIdeo(void) {
-	ActTxtStyle.ideo_right = 0; ActTxtStyle.ideo_dbl_right = 0;
-	ActTxtStyle.ideo_left = 0; ActTxtStyle.ideo_dbl_left = 0;
-	ActTxtStyle.ideo_stress = 0;
-	printf("\x1B[65m");
+void ESCtxtResetIdeo(FILE *file) {
+	ESC_ActTxtStyle.ideo_right = 0; ESC_ActTxtStyle.ideo_dbl_right = 0;
+	ESC_ActTxtStyle.ideo_left = 0; ESC_ActTxtStyle.ideo_dbl_left = 0;
+	ESC_ActTxtStyle.ideo_stress = 0;
+	fprintf(file, "\x1B[65m");
 }
-void TxtIdeoRight(int set) {
+void ESCtxtIdeoRight(FILE *file, int set) {
 	if (set){
-		ActTxtStyle.ideo_right = 1;
-		printf("\x1B[60m");
+		ESC_ActTxtStyle.ideo_right = 1;
+		fprintf(file, "\x1B[60m");
 	}
 	else{
-		TxtResetIdeo();
+		ESCtxtResetIdeo(file);
 	}
 }
-void TxtIdeoDblRight(int set) {
+void ESCtxtIdeoDblRight(FILE *file, int set) {
 	if (set){
-		ActTxtStyle.ideo_dbl_right = 1;
-		printf("\x1B[61m");
+		ESC_ActTxtStyle.ideo_dbl_right = 1;
+		fprintf(file, "\x1B[61m");
 	}
 	else{
-		TxtResetIdeo();
+		ESCtxtResetIdeo(file);
 	}
 }
-void TxtIdeoLeft(int set) {
+void ESCtxtIdeoLeft(FILE *file, int set) {
 	if (set){
-		ActTxtStyle.ideo_left = 1;
-		printf("\x1B[62m");
+		ESC_ActTxtStyle.ideo_left = 1;
+		fprintf(file, "\x1B[62m");
 	}
 	else{
-		TxtResetIdeo();
+		ESCtxtResetIdeo(file);
 	}
 }
-void TxtIdeoDblLeft(int set) {
+void ESCtxtIdeoDblLeft(FILE *file, int set) {
 	if (set){
-		ActTxtStyle.ideo_dbl_left = 1;
-		printf("\x1B[63m");
+		ESC_ActTxtStyle.ideo_dbl_left = 1;
+		fprintf(file, "\x1B[63m");
 	}
 	else{
-		TxtResetIdeo();
+		ESCtxtResetIdeo(file);
 	}
 }
-void TxtIdeoStress(int set) {
+void ESCtxtIdeoStress(FILE *file, int set) {
 	if (set){
-		ActTxtStyle.ideo_stress = 1;
-		printf("\x1B[64m");
+		ESC_ActTxtStyle.ideo_stress = 1;
+		fprintf(file, "\x1B[64m");
 	}
 	else{
-		TxtResetIdeo();
+		ESCtxtResetIdeo(file);
 	}
 }
 
-void TxtResetDblTBW(void){
-	ActTxtStyle.dbl_width = 0;
-	ActTxtStyle.dbl_height = 0;
-	printf("\x1B#5");
+void ESCtxtResetDblTBW(FILE *file){
+	ESC_ActTxtStyle.dbl_width = 0;
+	ESC_ActTxtStyle.dbl_height = 0;
+	fprintf(file, "\x1B#5");
 }
-void TxtDblTop(int set) {
+void ESCtxtDblTop(FILE *file, int set) {
 	// DoubleHeight + DoubleWidth Top-Part
-	ActTxtStyle.dbl_height = set;
+	ESC_ActTxtStyle.dbl_height = set;
 	if (set) {
 		// Set
-		printf("\x1B#3");
+		fprintf(file, "\x1B#3");
 	}
 	else {
 		// Reset
-		TxtResetDblTBW();
+		ESCtxtResetDblTBW(file);
 	}
 }
-void TxtDblBot(int set) {
+void ESCtxtDblBot(FILE *file, int set) {
 	// DoubleHeight + DoubleWidth Bottom-Part
-	ActTxtStyle.dbl_height = set;
+	ESC_ActTxtStyle.dbl_height = set;
 	if (set) {
 		// Set
-		printf("\x1B#4");
+		fprintf(file, "\x1B#4");
 	}
 	else {
 		// Reset
-		TxtResetDblTBW();
+		ESCtxtResetDblTBW(file);
 	}
 }
-void TxtDblWidth(int set) {
+void ESCtxtDblWidth(FILE *file, int set) {
 	// DoubleWidth 
-	ActTxtStyle.dbl_width = set;
+	ESC_ActTxtStyle.dbl_width = set;
 	if (set) {
 		// Set
-		printf("\x1B#6");
+		fprintf(file, "\x1B#6");
 	}
 	else {
 		// Reset
-		TxtResetDblTBW();
+		ESCtxtResetDblTBW(file);
 	}
 }
 
-void TxtFont(int fnt) {
+void ESCtxtFont(FILE *file, int fnt) {
 
 	// 10 = Default Font
 	// 11 - 19 User Fonts @INVESTIGATE@
@@ -2003,173 +2103,173 @@ void TxtFont(int fnt) {
 		fnt = 0;
 	}
 	
-	ActTxtStyle.font = fnt;
-	printf("\x1B[%dm", fnt + 10);
+	ESC_ActTxtStyle.font = fnt;
+	fprintf(file, "\x1B[%dm", fnt + 10);
 }
 
-void SetColorStyle(EscColorSTRUCT *pColor, int set){
+void ESCsetColorStyle(FILE *file, EscColorSTRUCT *pColor, int set){
 
 	if (set){
 		switch (pColor->mode) {
 		case 1:		// 16 (has no UnderLineColor)
-			if (pColor->fg.Color != ActTxtColor.fg.Color) {
+			if (pColor->fg.Color != ESC_ActTxtColor.fg.Color) {
 				if (!((pColor->fg.Color > 29 && pColor->fg.Color < 38) || (pColor->fg.Color > 89 && pColor->fg.Color < 98))){
 					pColor->fg.Color = 39;
-					ResFg();
+					ESCresFg(file);
 				}
 				else{
-					SetFg16(pColor->fg.Color);
+					ESCsetFg16(file, pColor->fg.Color);
 				}
 			}
-			if (pColor->bg.Color != ActTxtColor.bg.Color) {
+			if (pColor->bg.Color != ESC_ActTxtColor.bg.Color) {
 				if (!((pColor->bg.Color > 39 && pColor->bg.Color < 48) || (pColor->bg.Color > 99 && pColor->bg.Color < 108))){
 					pColor->bg.Color = 49;
-					ResBg();
+					ESCresBg(file);
 				}
 				else{
-					SetBg16(pColor->bg.Color);
+					ESCsetBg16(file, pColor->bg.Color);
 				}
 			}
 			break;
 		
 		case 2:		// 255
-			if (pColor->fg.Color != ActTxtColor.fg.Color) {
-				SetFg255(pColor->fg.Color);
+			if (pColor->fg.Color != ESC_ActTxtColor.fg.Color) {
+				ESCsetFg255(file, pColor->fg.Color);
 			}
-			if (pColor->bg.Color != ActTxtColor.bg.Color) {
-				SetBg255(pColor->bg.Color);
+			if (pColor->bg.Color != ESC_ActTxtColor.bg.Color) {
+				ESCsetBg255(file, pColor->bg.Color);
 			}
-			if (pColor->ul.Color != ActTxtColor.ul.Color) {
-				SetUl255(pColor->ul.Color);
+			if (pColor->ul.Color != ESC_ActTxtColor.ul.Color) {
+				ESCsetUl255(file, pColor->ul.Color);
 			}
 			break;
 		
 		case 3:		// RGB
-			if (pColor->fg.Color != ActTxtColor.fg.Color) {
-				SetFgRGB(pColor->fg.R, pColor->fg.G, pColor->fg.B);
+			if (pColor->fg.Color != ESC_ActTxtColor.fg.Color) {
+				ESCsetFgRGB(file, pColor->fg.R, pColor->fg.G, pColor->fg.B);
 			}
-			if (pColor->bg.Color != ActTxtColor.bg.Color) {
-				SetBgRGB(pColor->bg.R, pColor->bg.G, pColor->bg.B);
+			if (pColor->bg.Color != ESC_ActTxtColor.bg.Color) {
+				ESCsetBgRGB(file, pColor->bg.R, pColor->bg.G, pColor->bg.B);
 			}
-			if (pColor->ul.Color != ActTxtColor.ul.Color) {
-				SetUlRGB(pColor->ul.R, pColor->ul.G, pColor->ul.B);
+			if (pColor->ul.Color != ESC_ActTxtColor.ul.Color) {
+				ESCsetUlRGB(file, pColor->ul.R, pColor->ul.G, pColor->ul.B);
 			}
 			break;
 		}
 	}
 	else{
-		//memset(&ActTxtColor, 0, sizeof(ActTxtColor));
-		ResFBU();
+		//memset(&ESC_ActTxtColor, 0, sizeof(ESC_ActTxtColor));
+		ESCresFBU(file);
 	}
 }
 
 // TXT Style - combined from Structure
-void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
+void ESCsetTxtStyle(FILE *file, EscStyleSTRUCT *pTxtStyle, int set) {
 
 	// set == False -> Reset all to default
 
 	if (set) {
-		if (pTxtStyle->bold != ActTxtStyle.bold) {
-			TxtBold(pTxtStyle->bold);
+		if (pTxtStyle->bold != ESC_ActTxtStyle.bold) {
+			ESCtxtBold(file, pTxtStyle->bold);
 		}
-		if (pTxtStyle->faint != ActTxtStyle.faint) {
-			TxtFaint(pTxtStyle->faint);
+		if (pTxtStyle->faint != ESC_ActTxtStyle.faint) {
+			ESCtxtFaint(file, pTxtStyle->faint);
 		}
-		if (pTxtStyle->italic != ActTxtStyle.italic) {
-			TxtItalic(pTxtStyle->italic);
+		if (pTxtStyle->italic != ESC_ActTxtStyle.italic) {
+			ESCtxtItalic(file, pTxtStyle->italic);
 		}
-		if (pTxtStyle->underline != ActTxtStyle.underline) {
-			ActTxtStyle.underline = pTxtStyle->underline;
+		if (pTxtStyle->underline != ESC_ActTxtStyle.underline) {
+			ESC_ActTxtStyle.underline = pTxtStyle->underline;
 			switch (pTxtStyle->underline) {
 			case 0: // None
 			case 1: // Single
-				TxtUnder(pTxtStyle->underline);
+				ESCtxtUnder(file, pTxtStyle->underline);
 				break;
 			case 2: // Double
-				TxtDblUnder(1);
+				ESCtxtDblUnder(file, 1);
 				break;
 			case 3: // Curly
-				TxtCurlUnder(1);
+				ESCtxtCurlUnder(file, 1);
 				break;
 			case 4: // Dot
-				TxtUnder(1);
+				ESCtxtUnder(file, 1);
 				break;
 			case 5: // Dash
-				TxtDashUnder(1);
+				ESCtxtDashUnder(file, 1);
 				break;
 			case 6: // DashDot
-				TxtDashDotUnder(1);
+				ESCtxtDashDotUnder(file, 1);
 				break;
 			case 7: // Double Curly
-				TxtDblCurlUnder(1);
+				ESCtxtDblCurlUnder(file, 1);
 				break;
 			case 8: // Double Dot
-				TxtDblDotUnder(1);
+				ESCtxtDblDotUnder(file, 1);
 				break;
 			case 9: // Double Dash
-				TxtDblDashUnder(1);
+				ESCtxtDblDashUnder(file, 1);
 				break;
 			default:
 				// This would be an error !!
 				pTxtStyle->underline = 0;
-				TxtUnder(0);
+				ESCtxtUnder(file, 0);
 				break;
 			}
 		}
 
-		if (pTxtStyle->blink != ActTxtStyle.blink) {
+		if (pTxtStyle->blink != ESC_ActTxtStyle.blink) {
 			if (!pTxtStyle->fast){
-				TxtBlink(pTxtStyle->blink);
+				ESCtxtBlink(file, pTxtStyle->blink);
 			}			
 		}
-		if (pTxtStyle->fast != ActTxtStyle.fast) {
-			TxtFastBlink(pTxtStyle->fast);
+		if (pTxtStyle->fast != ESC_ActTxtStyle.fast) {
+			ESCtxtFastBlink(file, pTxtStyle->fast);
 		}
 
-		if (pTxtStyle->reverse != ActTxtStyle.reverse) {
-			TxtReverse(pTxtStyle->reverse);
+		if (pTxtStyle->reverse != ESC_ActTxtStyle.reverse) {
+			ESCtxtReverse(file, pTxtStyle->reverse);
 		}
 		
-		if (pTxtStyle->invisible != ActTxtStyle.invisible) {
-			TxtInvisible(pTxtStyle->invisible);
+		if (pTxtStyle->invisible != ESC_ActTxtStyle.invisible) {
+			ESCtxtInvisible(file, pTxtStyle->invisible);
 		}
 
-		if (pTxtStyle->strike != ActTxtStyle.strike) {
-			TxtStrike(pTxtStyle->strike);
+		if (pTxtStyle->strike != ESC_ActTxtStyle.strike) {
+			ESCtxtStrike(file, pTxtStyle->strike);
 		}
 
-		if (pTxtStyle->superscript != ActTxtStyle.superscript) {
+		if (pTxtStyle->superscript != ESC_ActTxtStyle.superscript) {
 			if (!pTxtStyle->subscript){
-				TxtSuperscript(pTxtStyle->superscript);
+				ESCtxtSuperscript(file, pTxtStyle->superscript);
 			}			
 		}
-		if (pTxtStyle->subscript != ActTxtStyle.subscript) {
-			TxtSubscript(pTxtStyle->subscript);
+		if (pTxtStyle->subscript != ESC_ActTxtStyle.subscript) {
+			ESCtxtSubscript(file, pTxtStyle->subscript);
 		}
 
-		if (pTxtStyle->proportional != ActTxtStyle.proportional) {
-			TxtProportional(pTxtStyle->proportional);
+		if (pTxtStyle->proportional != ESC_ActTxtStyle.proportional) {
+			ESCtxtProportional(file, pTxtStyle->proportional);
 		}
 
-		if (pTxtStyle->framed != ActTxtStyle.framed) {
+		if (pTxtStyle->framed != ESC_ActTxtStyle.framed) {
 			if (!pTxtStyle->encircled){
-				TxtFramed(pTxtStyle->framed);
+				ESCtxtFramed(file, pTxtStyle->framed);
 			}			
 		}
-		if (pTxtStyle->encircled != ActTxtStyle.encircled) {
-			TxtEncircled(pTxtStyle->encircled);
+		if (pTxtStyle->encircled != ESC_ActTxtStyle.encircled) {
+			ESCtxtEncircled(file, pTxtStyle->encircled);
 		}
 
-		if (pTxtStyle->overline != ActTxtStyle.overline) {
-			TxtOverline(pTxtStyle->overline);
+		if (pTxtStyle->overline != ESC_ActTxtStyle.overline) {
+			ESCtxtOverline(file, pTxtStyle->overline);
 		}
 
 		/*
-		if ((pTxtStyle->ideo_right != ActTxtStyle.ideo_right) ||
-			(pTxtStyle->ideo_dbl_right != ActTxtStyle.ideo_dbl_right) ||
-			(pTxtStyle->ideo_left != ActTxtStyle.ideo_left) ||
-			(pTxtStyle->ideo_dbl_left != ActTxtStyle.ideo_dbl_left) ||
-			(pTxtStyle->ideo_stress != ActTxtStyle.ideo_stress)) {
+		if ((pTxtStyle->ideo_right != ESC_ActTxtStyle.ideo_right) ||
+			(pTxtStyle->ideo_dbl_right != ESC_ActTxtStyle.ideo_dbl_right) ||
+			(pTxtStyle->ideo_left != ESC_ActTxtStyle.ideo_left) ||
+			(pTxtStyle->ideo_dbl_left != ESC_ActTxtStyle.ideo_dbl_left) ||
+			(pTxtStyle->ideo_stress != ESC_ActTxtStyle.ideo_stress)) {
 
 			TxtResetIdeo();		// 1st... Reset them all...
 
@@ -2191,11 +2291,11 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 		}
 		*/
 
-		if (pTxtStyle->font != ActTxtStyle.font) {
+		if (pTxtStyle->font != ESC_ActTxtStyle.font) {
 			if (pTxtStyle->font > 10) {
 				pTxtStyle->font = 10;
 			}
-			TxtFont(pTxtStyle->font);
+			ESCtxtFont(file, pTxtStyle->font);
 		}
 
 		// SetColorStyle(pTxtStyle->pColor, 1);
@@ -2203,14 +2303,15 @@ void SetTxtStyle(EscStyleSTRUCT *pTxtStyle, int set) {
 	}
 	else {
 		// Reset colors, fonts and styles to their defaults
-		memset(&ActTxtStyle, 0, sizeof(ActTxtStyle));
-		//memset(&ActTxtColor, 0, sizeof(ActTxtColor));
+		memset(&ESC_ActTxtStyle, 0, sizeof(ESC_ActTxtStyle));
+		//memset(&ESC_ActTxtColor, 0, sizeof(ESC_ActTxtColor));
 		//printf("\x1B[10;0;39;49;59m");
-		printf("\x1B[10;0m");
-		ResFBU();
+		fprintf(file, "\x1B[10;0m");
+		ESCresFBU(file);
 	}
 }
 
+#endif
 /*
 										EOF - Detailed Description
 
